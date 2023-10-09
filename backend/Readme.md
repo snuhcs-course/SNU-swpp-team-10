@@ -1,3 +1,9 @@
+## 환경 설정
+    (선행조건) node js 설치 
+    1. backend folder로 이동 후 package.json에 설정된 라이브러리들 다운로드 
+    > npm i
+    2. 서버 실행 (package)
+
 ## 디렉토리 구조
 
 일단 제가 임의로 정해놓았습니다
@@ -35,11 +41,11 @@ package.josn : 프로젝트 정보와 사용하는 패키지 정보
 - express-session : 세션 관련
 - bcrypt: password 해싱
 
-2. 사용할 수 있어보이는 패키지
+2. 사용할 거 같은 패키지
 - jest : unit test 에 사용
 - supertest : integration test에 사용
 - winston: 로깅 관련, morgan이랑 같이 써도 될듯
-- passport : 로그인 인증 관련 모듈 (사용안해도 무방)
+- passport : 로그인 인증 관련 모듈 (사용안해도 로그인 구현에는 문제 없음)
 - passport-local, passport- jwt, passport-kakao, passport-google : 위에 거랑 연동해서 소셜 연동 로그인 등 다양한 방식 로그인 구현 가능
 - prettier : js code formatter
 - pm2 : 프로세스 매니저
