@@ -3,6 +3,7 @@ package com.example.calendy.data
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.util.Date
 
 // TODO: Name의 역할 알아보기
 @Entity(tableName = "todo")
@@ -12,16 +13,14 @@ data class Todo(
         val uuid: String,
         @ColumnInfo(name = "title")
         val title: String,
-        @ColumnInfo(name = "due_year")
-        val dueYear: Int,
-        @ColumnInfo(name = "due_month")
-        val dueMonth: Int,
-        @ColumnInfo(name = "due_day")
-        val dueDay: Int,
-        @ColumnInfo(name = "due_hour")
-        val dueHour: Int,
-        @ColumnInfo(name = "due_minute")
-        val dueMinute: Int,
+        @ColumnInfo(name = "due_time")
+        val dueTime: Date,
+        @ColumnInfo(name = "yearly")
+        val yearly: Boolean,
+        @ColumnInfo(name = "monthly")
+        val monthly: Boolean,
+        @ColumnInfo(name = "daily")
+        val daily: Boolean,
         @ColumnInfo(name = "complete")
         val complete: Boolean,
         @ColumnInfo(name = "memo")
