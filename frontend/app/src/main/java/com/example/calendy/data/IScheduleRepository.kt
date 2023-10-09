@@ -1,14 +1,15 @@
 package com.example.calendy.data
 
 import kotlinx.coroutines.flow.Flow
+import java.util.Date
 
 interface IScheduleRepository {
 
-    fun getSchedulesStream(): Flow<List<Schedule>>
 
     suspend fun insertSchedule(schedule: Schedule)
 
     suspend fun deleteSchedule(schedule: Schedule)
 
     suspend fun updateSchedule(schedule: Schedule)
+    fun getSchedulesStream(startTime: Date, endTime: Date): Flow<List<Schedule>>
 }

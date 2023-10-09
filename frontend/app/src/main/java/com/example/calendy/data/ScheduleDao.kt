@@ -5,6 +5,8 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import kotlinx.coroutines.flow.Flow
+import java.util.Date
 
 @Dao
 interface ScheduleDao {
@@ -16,6 +18,10 @@ interface ScheduleDao {
     suspend fun delete(schedule: Schedule)
 
     //todo add queries
+    @Query("SELECT * FROM schedule WHERE start_time < :endTime OR end_time > :startTime")
+    fun getScheduleByTime(startTime: Date, endTime: Date): Flow<List<Schedule>>
+
+
 
 
 }
