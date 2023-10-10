@@ -5,8 +5,8 @@ import android.util.Log
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.example.calendy.data.CalendyDatabase
 import com.example.calendy.data.Todo
-import com.example.calendy.data.TodoDatabase
 import com.example.calendy.data.TodoLocalDataSource
 import com.example.calendy.data.TodoRepository
 import kotlinx.coroutines.flow.first
@@ -23,7 +23,7 @@ import java.util.Date
 @RunWith(AndroidJUnit4::class)
 class TodoRepositoryTest {
     private lateinit var todoRepository: TodoRepository
-    private lateinit var todoDatabase: TodoDatabase
+    private lateinit var todoDatabase: CalendyDatabase
 
     @Before
     fun createRepository() {
@@ -33,7 +33,7 @@ class TodoRepositoryTest {
         // process is killed.
         Log.d("GUN", "After Context")
 
-        todoDatabase = Room.inMemoryDatabaseBuilder(context, TodoDatabase::class.java)
+        todoDatabase = Room.inMemoryDatabaseBuilder(context, CalendyDatabase::class.java)
                 // Allowing main thread queries, just for testing.
                 .allowMainThreadQueries()
                 .build()

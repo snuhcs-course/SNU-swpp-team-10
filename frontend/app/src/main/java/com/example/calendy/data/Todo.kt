@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.util.Date
 
-// TODO: Name의 역할 알아보기
+// table name `todo` in 'calendy_database.db'
 @Entity(tableName = "todo")
 data class Todo(
         @PrimaryKey

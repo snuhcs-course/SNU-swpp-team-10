@@ -4,10 +4,10 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.calendy.data.ScheduleDao
-import com.example.calendy.data.ScheduleDatabase
 import org.junit.Before
 import org.junit.runner.RunWith
 import androidx.room.Room
+import com.example.calendy.data.CalendyDatabase
 import org.junit.After
 import java.io.IOException
 import com.example.calendy.data.Schedule
@@ -23,13 +23,13 @@ import java.util.Date
 @RunWith(AndroidJUnit4::class)
 class ScheduleDaoTest {
     private lateinit var scheduleDao: ScheduleDao
-    private lateinit var scheduleDatabase: ScheduleDatabase
+    private lateinit var scheduleDatabase: CalendyDatabase
     private lateinit var scheduleLocalDataSource: ScheduleLocalDataSource
     private lateinit var scheduleRepository: ScheduleRepository
     @Before
     fun createDb() {
         val context: Context = ApplicationProvider.getApplicationContext()
-        scheduleDatabase = Room.inMemoryDatabaseBuilder(context, ScheduleDatabase::class.java)
+        scheduleDatabase = Room.inMemoryDatabaseBuilder(context, CalendyDatabase::class.java)
                 .allowMainThreadQueries()
                 .build()
         scheduleDao = scheduleDatabase.scheduleDao()
