@@ -10,15 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import java.util.Date
 
 @Dao
-interface TodoDao {
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insert(todo: Todo)
-
-    @Update
-    suspend fun update(todo: Todo)
-
-    @Delete
-    suspend fun delete(todo: Todo)
+interface TodoDao : BaseDao<Todo> {
 
     // startTime, endTime inclusive
     @Query("SELECT * FROM todo WHERE due_time BETWEEN :startTime AND :endTime")
