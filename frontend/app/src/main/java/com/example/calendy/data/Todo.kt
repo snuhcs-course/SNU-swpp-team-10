@@ -8,9 +8,9 @@ import java.util.Date
 // table name `todo` in 'calendy_database.db'
 @Entity(tableName = "todo")
 data class Todo(
-        @PrimaryKey
-        @ColumnInfo(name = "uuid")
-        val uuid: String,
+        @PrimaryKey(autoGenerate = true)
+        @ColumnInfo(name = "id")
+        val id: Int = 0,
         @ColumnInfo(name = "title")
         val title: String,
         @ColumnInfo(name = "due_time")

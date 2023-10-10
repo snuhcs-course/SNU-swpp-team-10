@@ -7,9 +7,9 @@ import java.util.Date
 
 @Entity(tableName = "schedule")
 data class Schedule(
-        @PrimaryKey
-        @ColumnInfo(name = "uuid")
-        var uuid: String,
+        @PrimaryKey(autoGenerate = true)
+        @ColumnInfo(name = "id")
+        var id: Int = 0,
         @ColumnInfo(name = "title")
         var title: String,
         @ColumnInfo(name = "start_time")
