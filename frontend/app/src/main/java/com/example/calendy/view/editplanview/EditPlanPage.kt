@@ -44,11 +44,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.calendy.data.AppViewModelProvider
 import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditPlanPage(editPlanViewModel: EditPlanViewModel = viewModel()) {
+fun EditPlanPage(editPlanViewModel: EditPlanViewModel = viewModel(factory = AppViewModelProvider.Factory)) {
     val editPlanUiState by editPlanViewModel.uiState.collectAsState()
     var selectedButton by remember { mutableStateOf("일정") }
     Column(
@@ -73,8 +74,9 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel = viewModel()) {
         Spacer(modifier = Modifier.height(32.dp))
 
         TextField(
-            value = "Todo 제목",
-            onValueChange = { /* TODO: Handle text input */ },
+            value = editPlanUiState.titleField,
+            placeholder = {Text("제목")},
+            onValueChange = { value -> editPlanViewModel.setTitle(value)},
             colors = Color.Transparent.let {
                 TextFieldDefaults.colors(
                     focusedContainerColor = it,
@@ -106,7 +108,7 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel = viewModel()) {
         // Category
         StarRating()
 
-        TextField(value = "메모", onValueChange = { /* TODO: Handle text input */ })
+        TextField(value = editPlanUiState.memoField, onValueChange = { value -> editPlanViewModel.setMemo(value) }, placeholder = {Text("내용")})
 
         Spacer(modifier = Modifier.height(20.dp))
 

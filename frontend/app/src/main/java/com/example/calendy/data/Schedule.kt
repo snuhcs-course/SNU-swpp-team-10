@@ -16,10 +16,13 @@ data class Schedule(
         var startTime: Date,
         @ColumnInfo(name = "end_time")
         var endTime: Date,
+        @ColumnInfo(name = "memo")
+        var memo : String,
         @ColumnInfo(name = "repeat_group_id")
         var repeatGroupId: Int,
         @ColumnInfo(name = "category_id")
         var categoryId: Int,
         @ColumnInfo(name = "priority")
         var priority: Int
+
 )
