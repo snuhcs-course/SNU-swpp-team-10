@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
-@Database(entities = [Schedule::class], version = 1, exportSchema = false)
+@Database(entities = [Schedule::class, Todo::class], version = 1, exportSchema = false)
 @TypeConverters(RoomConverters::class)
 abstract class CalendyDatabase: RoomDatabase() {
     abstract fun scheduleDao(): ScheduleDao

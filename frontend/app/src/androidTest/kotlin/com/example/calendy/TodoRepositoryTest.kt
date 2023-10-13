@@ -63,8 +63,7 @@ class TodoRepositoryTest {
     }
 
     private var todo1 = Todo(
-            uuid = "ABCD",
-            "Be happy",
+            id= 1, "Be happy",
             dueTime = makeDate(2023, 10, 9, 20, 30),
             yearly = false,
             monthly = false,
