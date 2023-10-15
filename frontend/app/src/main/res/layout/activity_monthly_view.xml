@@ -9,8 +9,17 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="monthlyview"
+        android:text="monthly view"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <com.prolificinteractive.materialcalendarview.MaterialCalendarView
+        android:id="@+id/materialMonthlyView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:mcv_showOtherDates="all"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:mcv_selectionColor="#d2d2d2" />
 </androidx.constraintlayout.widget.ConstraintLayout>

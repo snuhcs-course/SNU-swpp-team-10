@@ -75,5 +75,7 @@ dependencies {
     ksp("androidx.room:room-compiler:${rootProject.extra["room_version"]}")
     implementation("androidx.room:room-ktx:${rootProject.extra["room_version"]}")
 
+    //monthly calendar
+    implementation("com.github.prolificinteractive:material-calendarview:1.6.0")
 
 }
