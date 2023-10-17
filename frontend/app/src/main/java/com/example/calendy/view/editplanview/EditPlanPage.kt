@@ -9,22 +9,27 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DatePickerState
-import androidx.compose.material3.DateRangePicker
 import androidx.compose.material3.DateRangePickerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberDateRangePickerState
@@ -43,9 +48,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.calendy.data.AppViewModelProvider
+import com.example.calendy.data.DummyScheduleRepository
+import com.example.calendy.data.DummyTodoRepository
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,8 +86,8 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel = viewModel(factory = AppV
 
         TextField(
             value = editPlanUiState.titleField,
-            placeholder = {Text("제목")},
-            onValueChange = { value -> editPlanViewModel.setTitle(value)},
+            placeholder = { Text("제목") },
+            onValueChange = { value -> editPlanViewModel.setTitle(value) },
             colors = Color.Transparent.let {
                 TextFieldDefaults.colors(
                     focusedContainerColor = it,
@@ -108,7 +119,10 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel = viewModel(factory = AppV
         // Category
         StarRating()
 
-        TextField(value = editPlanUiState.memoField, onValueChange = { value -> editPlanViewModel.setMemo(value) }, placeholder = {Text("내용")})
+        TextField(
+            value = editPlanUiState.memoField,
+            onValueChange = { value -> editPlanViewModel.setMemo(value) },
+            placeholder = { Text("내용") })
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -154,6 +168,7 @@ fun DateSelector(modifier: Modifier = Modifier) {
 
     val calendar = Calendar.getInstance()
     var isDialogOpen by remember { mutableStateOf(false) }
+    var isTimePickerOpen by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState(initialSelectedDateMillis = calendar.timeInMillis)
     val dateRangePickerState = rememberDateRangePickerState()
     val timePickerState = rememberTimePickerState(0, 0, false)
@@ -162,8 +177,20 @@ fun DateSelector(modifier: Modifier = Modifier) {
         datePickerState = datePickerState,
         dateRangePickerState = dateRangePickerState,
         timePickerState = timePickerState,
-        isDialogOpen = isDialogOpen
-    ) { isDialogOpen = false }
+        isDialogOpen = isDialogOpen,
+        isTimePickerOpen = isTimePickerOpen,
+        onDismissRequest = {
+            isDialogOpen = false
+            isTimePickerOpen = false
+        },
+        onConfirmDate = {
+            isTimePickerOpen = true
+        },
+        onConfirmTime = {
+            isDialogOpen = false
+            isTimePickerOpen = false
+        }
+    )
 
     Column(modifier = modifier) {
         Row(modifier = Modifier.align(alignment = Alignment.CenterHorizontally)) {
@@ -180,7 +207,15 @@ fun DateSelector(modifier: Modifier = Modifier) {
             }
         }
         Button(onClick = { isDialogOpen = true }) {
-            Text(text = "2023년 10월 19일 (목) 오전 9:00")
+            val formatter = SimpleDateFormat("yyyy.MM.dd HH:mm", Locale.getDefault())
+            val textString = datePickerState.selectedDateMillis?.let {
+                calendar.timeInMillis = it
+                calendar.set(Calendar.HOUR_OF_DAY, timePickerState.hour)
+                calendar.set(Calendar.MINUTE, timePickerState.minute)
+                formatter.format(calendar.time)
+            } ?: "Not Selected"
+            Text(text = "${textString}")
+
         }
     }
 }
@@ -193,27 +228,58 @@ private fun DateTimePickerDialog(
     dateRangePickerState: DateRangePickerState,
     timePickerState: TimePickerState,
     isDialogOpen: Boolean,
+    isTimePickerOpen: Boolean,
     onDismissRequest: () -> Unit,
+    onConfirmDate: () -> Unit,
+    onConfirmTime: () -> Unit
 ) {
-    if (isDialogOpen) {
+    if (isDialogOpen && !isTimePickerOpen) {
         DatePickerDialog(
             onDismissRequest = onDismissRequest,
             dismissButton = {
-                Button(onClick = { onDismissRequest() }) {
-                    Text(text = "Cancel")
-                }
             },
             confirmButton = {
-                Button(onClick = { onDismissRequest() }) {
-                    Text(text = "Confirm")
+                IconButton(
+                    onClick = { onConfirmDate() },
+                    modifier = Modifier.padding(end = 16.dp)
+                ) {
+                    Icon(imageVector = Icons.Filled.CheckCircle, contentDescription = "Confirm", modifier = Modifier.size(40.dp))
                 }
             }) {
-            DateRangePicker(state = dateRangePickerState)
-//            DatePicker(
-//                state = datePickerState,
-//                showModeToggle = false
-//            )
-//            TimePicker(state = timePickerState, layoutType = TimePickerLayoutType.Horizontal)
+            DatePicker(
+                state = datePickerState,
+                showModeToggle = false
+            )
+        }
+    } else if (isDialogOpen && isTimePickerOpen) {
+        Dialog(
+            onDismissRequest = { onDismissRequest() },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Surface(
+                modifier = Modifier
+                    .width(320.dp)
+                    .height(480.dp),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    TimePicker(
+                        state = timePickerState
+                    )
+                    IconButton(
+                        onClick = { onConfirmTime() },
+                        modifier = Modifier
+                            .align(Alignment.End)
+                            .padding(end = 16.dp)
+                    ) {
+                        Icon(imageVector = Icons.Filled.CheckCircle, contentDescription = "Confirm", modifier = Modifier.size(40.dp))
+                    }
+                }
+
+            }
         }
     }
 }
@@ -225,6 +291,7 @@ fun DateTimePickerDialogPreview() {
     val calendar = Calendar.getInstance()
 
     var isDialogOpen by remember { mutableStateOf(true) }
+    var isTimePickerOpen by remember { mutableStateOf(true) }
     val datePickerState =
         rememberDatePickerState(initialSelectedDateMillis = calendar.timeInMillis)
     val dateRangePickerState = rememberDateRangePickerState()
@@ -234,8 +301,12 @@ fun DateTimePickerDialogPreview() {
         datePickerState = datePickerState,
         dateRangePickerState = dateRangePickerState,
         timePickerState = timePickerState,
-        isDialogOpen = isDialogOpen
-    ) { isDialogOpen = false }
+        isDialogOpen = isDialogOpen,
+        isTimePickerOpen = isTimePickerOpen,
+        onDismissRequest = { },
+        onConfirmDate = { },
+        onConfirmTime = { }
+    )
 }
 
 @Composable
@@ -257,6 +328,11 @@ fun StarRating() {
 @Preview(showBackground = true, name = "Todo Screen Preview")
 @Composable
 fun TodoScreenPreview() {
-    EditPlanPage()
+    EditPlanPage(
+        editPlanViewModel = EditPlanViewModel(
+            scheduleRepository = DummyScheduleRepository(),
+            todoRepository = DummyTodoRepository()
+        )
+    )
 }
 
