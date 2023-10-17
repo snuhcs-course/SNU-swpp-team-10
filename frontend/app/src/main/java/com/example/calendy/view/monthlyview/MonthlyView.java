@@ -1,8 +1,6 @@
 package com.example.calendy.view.monthlyview;
 
 import androidx.activity.ComponentActivity;
-import androidx.annotation.NonNull;
-
 import android.os.Bundle;
 
 import com.example.calendy.R;
@@ -12,35 +10,38 @@ import com.example.calendy.view.monthlyview.decorator.SundayDecorator;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.CalendarMode;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
+import com.prolificinteractive.materialcalendarview.format.ArrayWeekDayFormatter;
+import com.prolificinteractive.materialcalendarview.format.MonthArrayTitleFormatter;
 
 import java.util.Calendar;
-import java.util.List;
 
 public class MonthlyView extends ComponentActivity {
+    private final String TAG = this.getClass().getSimpleName();
 
-    MaterialCalendarView materialCalendarView;
+    MaterialCalendarView calendarView;
     private final OneDayDecorator oneDayDecorator = new OneDayDecorator();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_monthly_view);
-        materialCalendarView = findViewById(R.id.materialMonthlyView);
+        calendarView = findViewById(R.id.materialMonthlyView);
+
+        calendarView.setTitleFormatter(new MonthArrayTitleFormatter(getResources().getTextArray(R.array.custom_months)));
+        calendarView.setWeekDayFormatter(new ArrayWeekDayFormatter(getResources().getTextArray(R.array.custom_weekdays)));
 
 
-
-
-        materialCalendarView.state().edit()
+        calendarView.state().edit()
                 .setFirstDayOfWeek(Calendar.SUNDAY)
                 .setMinimumDate(CalendarDay.from(2017, 0, 1))
                 .setMaximumDate(CalendarDay.from(2030, 11, 31))
                 .setCalendarDisplayMode(CalendarMode.MONTHS)
                 .commit();
 
-        materialCalendarView.addDecorators(
+        calendarView.addDecorators(
                 new SundayDecorator(),
                 new SaturdayDecorator(),
                 oneDayDecorator);
     }
-
-
 }
+
