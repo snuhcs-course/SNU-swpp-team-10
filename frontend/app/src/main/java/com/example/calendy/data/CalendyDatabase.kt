@@ -5,6 +5,10 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.example.calendy.data.schedule.Schedule
+import com.example.calendy.data.schedule.ScheduleDao
+import com.example.calendy.data.todo.Todo
+import com.example.calendy.data.todo.TodoDao
 
 @Database(entities = [Schedule::class, Todo::class], version = 1, exportSchema = false)
 @TypeConverters(RoomConverters::class)

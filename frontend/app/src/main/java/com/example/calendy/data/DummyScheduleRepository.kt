@@ -1,5 +1,6 @@
 package com.example.calendy.data
 
+import com.example.calendy.data.schedule.Schedule
 import kotlinx.coroutines.flow.Flow
 import java.util.Date
 

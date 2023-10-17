@@ -5,10 +5,10 @@ import android.content.Context
 import com.example.calendy.data.CalendyDatabase
 import com.example.calendy.data.IScheduleRepository
 import com.example.calendy.data.ITodoRepository
-import com.example.calendy.data.ScheduleLocalDataSource
-import com.example.calendy.data.ScheduleRepository
-import com.example.calendy.data.TodoLocalDataSource
-import com.example.calendy.data.TodoRepository
+import com.example.calendy.data.schedule.ScheduleLocalDataSource
+import com.example.calendy.data.schedule.ScheduleRepository
+import com.example.calendy.data.todo.TodoLocalDataSource
+import com.example.calendy.data.todo.TodoRepository
 
 class CalendyApplication : Application() {
     lateinit var container: IAppContainer

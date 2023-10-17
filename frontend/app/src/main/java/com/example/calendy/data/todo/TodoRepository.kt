@@ -1,5 +1,6 @@
-package com.example.calendy.data
+package com.example.calendy.data.todo
 
+import com.example.calendy.data.ITodoRepository
 import kotlinx.coroutines.flow.Flow
 import java.util.Date
 
@@ -15,4 +16,5 @@ class TodoRepository(private val todoLocalDataSource: TodoLocalDataSource) : ITo
     override fun getYearlyTodosStream(year: Int): Flow<List<Todo>> = todoLocalDataSource.getYearlyTodosStream(year)
     override fun getMonthlyTodosStream(year: Int, month: Int): Flow<List<Todo>> = todoLocalDataSource.getMonthlyTodosStream(year, month)
     override fun getDailyTodosStream(year: Int, month: Int, day: Int): Flow<List<Todo>> = todoLocalDataSource.getDailyTodosStream(year, month, day)
+    fun getTodoById(id: Int): Flow<Todo> = todoLocalDataSource.getTodoById(id)
 }

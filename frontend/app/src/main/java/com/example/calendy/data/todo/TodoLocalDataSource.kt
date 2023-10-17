@@ -1,4 +1,4 @@
-package com.example.calendy.data
+package com.example.calendy.data.todo
 
 import com.example.calendy.utils.DateHelper
 import kotlinx.coroutines.flow.Flow
@@ -22,4 +22,6 @@ class TodoLocalDataSource(private val todoDao: TodoDao) {
     // date == Date(year, month, day, 23, 59) && isDaily
     fun getDailyTodosStream(year: Int, month: Int, day: Int): Flow<List<Todo>> =
             todoDao.getSpecialTodosStream(DateHelper.getDailyDueTime(year, month, day), daily = true)
+    fun getTodoById(id: Int): Flow<Todo> = todoDao.getTodoById(id)
+
 }

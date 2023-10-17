@@ -1,11 +1,8 @@
-package com.example.calendy.data
+package com.example.calendy.data.todo
 
 import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Update
+import com.example.calendy.data.BaseDao
 import kotlinx.coroutines.flow.Flow
 import java.util.Date
 
@@ -19,4 +16,6 @@ interface TodoDao : BaseDao<Todo> {
     // end_time > query_start && start_time < query_end
     @Query("SELECT * FROM todo WHERE due_time == :dueTime AND yearly == :yearly AND monthly == :monthly AND daily == :daily")
     fun getSpecialTodosStream(dueTime: Date, yearly: Boolean = false, monthly: Boolean = false, daily: Boolean = false): Flow<List<Todo>>
+    @Query("SELECT * FROM todo WHERE id = :id")
+    fun getTodoById(id: Int): Flow<Todo>
 }

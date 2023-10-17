@@ -1,10 +1,9 @@
-package com.example.calendy.data
+package com.example.calendy
 
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.calendy.CalendyApplication
 import com.example.calendy.view.editplanview.EditPlanViewModel
 
 object AppViewModelProvider {

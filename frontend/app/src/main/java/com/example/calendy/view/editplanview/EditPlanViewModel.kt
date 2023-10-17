@@ -9,12 +9,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import androidx.lifecycle.viewModelScope
 import com.example.calendy.data.IScheduleRepository
 import com.example.calendy.data.ITodoRepository
-import com.example.calendy.data.Schedule
+import com.example.calendy.data.schedule.Schedule
 import kotlinx.coroutines.flow.update
 
-import com.example.calendy.data.Todo
+import com.example.calendy.data.todo.Todo
 import kotlinx.coroutines.launch
-import java.security.KeyStore.Entry
 
 
 class EditPlanViewModel(private val scheduleRepository: IScheduleRepository, private val todoRepository: ITodoRepository) : ViewModel() {
@@ -66,34 +65,34 @@ class EditPlanViewModel(private val scheduleRepository: IScheduleRepository, pri
         val currentState = _uiState.value
         when (currentState.entryType) {
             is EntryType.Schedule -> {
-                val newSchedule: Schedule = Schedule(
-                        title = currentState.titleField,
-                        startTime = currentState.startTime ?: Date(),
-                        endTime = currentState.endTime ?: Date(),
-                        memo = currentState.memoField,
-                        repeatGroupId = 0,  // You might need a way to set this from the UI or some logic
-                        categoryId = currentState.categoryID,
-                        priority = currentState.priority,
-                )
-                viewModelScope.launch { scheduleRepository.insertSchedule(newSchedule) }
+//                val newSchedule: Schedule = Schedule(
+//                        title = currentState.titleField,
+//                        startTime = currentState.startTime ?: Date(),
+//                        endTime = currentState.endTime ?: Date(),
+//                        memo = currentState.memoField,
+//                        repeatGroupId = 0,  // You might need a way to set this from the UI or some logic
+//                        categoryId = currentState.categoryID,
+//                        priority = currentState.priority,
+//                )
+//                viewModelScope.launch { scheduleRepository.insertSchedule(newSchedule) }
 
 
             }
 
             is EntryType.Todo -> {
-                val newTodo: Todo = Todo(
-                        title = currentState.titleField,
-                        dueTime = currentState.endTime,
-                        yearly = false,
-                        monthly = false,
-                        daily = false,
-                        memo = currentState.memoField,
-                        complete = false,
-                        repeatGroupId = 0,
-                        categoryId = currentState.categoryID,
-                        priority = currentState.priority,
-                )
-                viewModelScope.launch { todoRepository.insertTodo(newTodo) }
+//                val newTodo: Todo = Todo(
+//                        title = currentState.titleField,
+//                        dueTime = currentState.endTime,
+//                        yearly = false,
+//                        monthly = false,
+//                        daily = false,
+//                        memo = currentState.memoField,
+//                        complete = false,
+//                        repeatGroupId = 0,
+//                        categoryId = currentState.categoryID,
+//                        priority = currentState.priority,
+//                )
+//                viewModelScope.launch { todoRepository.insertTodo(newTodo) }
 
             }
         }
