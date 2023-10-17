@@ -21,5 +21,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:mcv_selectionColor="#d2d2d2" />
+        app:mcv_selectionColor="#ffffff"
+        app:mcv_dateTextAppearance="@color/black"
+
+        />
 </androidx.constraintlayout.widget.ConstraintLayout>
