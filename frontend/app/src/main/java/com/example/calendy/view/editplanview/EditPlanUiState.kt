@@ -3,9 +3,14 @@ package com.example.calendy.view.editplanview
 import com.example.calendy.utils.DateHelper
 import java.util.Date
 
-sealed class EntryType {
-    object Schedule : EntryType()
-    object Todo : EntryType()
+abstract sealed class EntryType {
+    abstract val text: String
+    object Schedule : EntryType() {
+        override val text = "일정"
+    }
+    object Todo : EntryType() {
+        override val text = "Todo"
+    }
 }
 data class EditPlanUiState(
         val entryType : EntryType = EntryType.Schedule,

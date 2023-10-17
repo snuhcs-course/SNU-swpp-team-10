@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.update
 
 import com.example.calendy.data.Todo
 import kotlinx.coroutines.launch
+import java.security.KeyStore.Entry
 
 
 class EditPlanViewModel(private val scheduleRepository: IScheduleRepository, private val todoRepository: ITodoRepository) : ViewModel() {
@@ -22,11 +23,8 @@ class EditPlanViewModel(private val scheduleRepository: IScheduleRepository, pri
     private val _uiState = MutableStateFlow(EditPlanUiState())
     val uiState: StateFlow<EditPlanUiState> = _uiState.asStateFlow()
 
-    fun setType(selectedType: String) {
-        when (selectedType) {
-            "일정" -> _uiState.update { currentState -> currentState.copy(entryType = EntryType.Schedule) }
-            "TODO" -> _uiState.update { currentState -> currentState.copy(entryType = EntryType.Todo) }
-        }
+    fun setType(selectedType: EntryType) {
+        _uiState.update { currentState -> currentState.copy(entryType = selectedType) }
     }
 
     fun setTitle(userInput: String) {

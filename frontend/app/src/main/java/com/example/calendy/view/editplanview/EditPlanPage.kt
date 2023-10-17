@@ -1,14 +1,16 @@
 package com.example.calendy.view.editplanview
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -42,7 +44,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -62,28 +66,35 @@ import java.util.Locale
 @Composable
 fun EditPlanPage(editPlanViewModel: EditPlanViewModel = viewModel(factory = AppViewModelProvider.Factory)) {
     val editPlanUiState by editPlanViewModel.uiState.collectAsState()
-    var selectedButton by remember { mutableStateOf("일정") }
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         // Top Bar
         TopAppBar()
 
-        // Type Buttons
+        //region Type Buttons
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            TypeButton(text = "일정", isSelected = false)
-            TypeButton(text = "TODO", isSelected = true)
+            listOf(EntryType.Schedule, EntryType.Todo).forEach {
+                TypeButton(
+                    text = it.text,
+                    isSelected = (editPlanUiState.entryType == it),
+                    onClick = {
+                        editPlanViewModel.setType(it)
+                    }
+                )
+            }
         }
+        //endregion
 
-        Spacer(modifier = Modifier.height(32.dp))
-
+        //region Title Text Field
         TextField(
             value = editPlanUiState.titleField,
             placeholder = { Text("제목") },
@@ -94,37 +105,48 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel = viewModel(factory = AppV
                     unfocusedContainerColor = it,
                     disabledContainerColor = it,
                     errorContainerColor = it,
-                    focusedIndicatorColor = it,
-                    unfocusedIndicatorColor = it,
-                    disabledIndicatorColor = it,
-                    errorIndicatorColor = it
+                    focusedIndicatorColor = Color.Black,
+                    unfocusedIndicatorColor = Color.Black,
+                    disabledIndicatorColor = Color.Black,
+                    errorIndicatorColor = Color.Black
                 )
             },
+            modifier = Modifier.fillMaxWidth(),
             textStyle = TextStyle(fontSize = 32.sp, fontWeight = FontWeight.Bold)
         )
-
-        Spacer(modifier = Modifier.height(20.dp))
+        //endregion
 
         // Date Selector
         DateSelector(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
 
         TextField(value = "반복안함", onValueChange = { /* TODO: Handle text input */ })
 
-        Spacer(modifier = Modifier.height(20.dp))
-
+        // Category
         TextField(value = "category", onValueChange = { /* TODO: Handle text input */ })
 
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // Category
         StarRating()
 
+        //region Memo Text Field
         TextField(
             value = editPlanUiState.memoField,
+            placeholder = { Text("메모") },
             onValueChange = { value -> editPlanViewModel.setMemo(value) },
-            placeholder = { Text("내용") })
-
-        Spacer(modifier = Modifier.height(20.dp))
+            colors = Color.Transparent.let {
+                TextFieldDefaults.colors(
+                    focusedContainerColor = it,
+                    unfocusedContainerColor = it,
+                    disabledContainerColor = it,
+                    errorContainerColor = it,
+                    focusedIndicatorColor = Color.Black,
+                    unfocusedIndicatorColor = Color.Black,
+                    disabledIndicatorColor = Color.Black,
+                    errorIndicatorColor = Color.Black
+                )
+            },
+            modifier = Modifier.fillMaxWidth(),
+            textStyle = TextStyle(fontSize = 20.sp)
+        )
+        //endregion
 
         // Submit Button
         Button(onClick = { /* TODO: Handle on submit */ }) {
@@ -134,9 +156,9 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel = viewModel(factory = AppV
 }
 
 @Composable
-fun TypeButton(text: String, isSelected: Boolean) {
+fun TypeButton(text: String, isSelected: Boolean, onClick: () -> Unit) {
     Button(
-        onClick = { /* todo */ },
+        onClick = { onClick() },
         colors = ButtonDefaults.buttonColors(if (isSelected) Color(0xFF7986CB) else Color.Gray),
         border = BorderStroke(2.dp, if (isSelected) Color.Black else Color.Black),
         shape = RoundedCornerShape(20),
@@ -165,6 +187,9 @@ fun TopAppBar() {
 fun DateSelector(modifier: Modifier = Modifier) {
     var selectedIndex by remember { mutableStateOf(-1) }
     val options = listOf("Yearly", "Monthly", "Daily")
+    val isYearly = selectedIndex == 0
+    val isMonthly = selectedIndex == 1
+    val isDaily = selectedIndex == 2
 
     val calendar = Calendar.getInstance()
     var isDialogOpen by remember { mutableStateOf(false) }
@@ -173,49 +198,103 @@ fun DateSelector(modifier: Modifier = Modifier) {
     val dateRangePickerState = rememberDateRangePickerState()
     val timePickerState = rememberTimePickerState(0, 0, false)
 
-    DateTimePickerDialog(
-        datePickerState = datePickerState,
-        dateRangePickerState = dateRangePickerState,
-        timePickerState = timePickerState,
-        isDialogOpen = isDialogOpen,
-        isTimePickerOpen = isTimePickerOpen,
-        onDismissRequest = {
-            isDialogOpen = false
-            isTimePickerOpen = false
-        },
-        onConfirmDate = {
-            isTimePickerOpen = true
-        },
-        onConfirmTime = {
-            isDialogOpen = false
-            isTimePickerOpen = false
-        }
-    )
-
-    Column(modifier = modifier) {
-        Row(modifier = Modifier.align(alignment = Alignment.CenterHorizontally)) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        val shape = RoundedCornerShape(8.dp)
+        Row(
+            modifier = Modifier
+                .height(32.dp)
+                .clip(shape = shape)
+                .border(width = 1.dp, color = Color.Black, shape = shape)
+        ) {
             options.forEachIndexed { index, label ->
                 Button(
                     onClick = { selectedIndex = if (selectedIndex == index) -1 else index },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (selectedIndex == index) Color(0xFF7986CB) else Color.Transparent,
                         contentColor = Color.Black
-                    )
+                    ),
+                    shape = RectangleShape
                 ) {
                     Text(text = label)
                 }
             }
         }
-        Button(onClick = { isDialogOpen = true }) {
-            val formatter = SimpleDateFormat("yyyy.MM.dd HH:mm", Locale.getDefault())
-            val textString = datePickerState.selectedDateMillis?.let {
-                calendar.timeInMillis = it
-                calendar.set(Calendar.HOUR_OF_DAY, timePickerState.hour)
-                calendar.set(Calendar.MINUTE, timePickerState.minute)
-                formatter.format(calendar.time)
-            } ?: "Not Selected"
-            Text(text = "${textString}")
 
+        Box(modifier = Modifier.requiredHeight(48.dp)) {
+            if (isYearly) {
+                Text("Year", modifier = Modifier.align(Alignment.BottomCenter))
+            } else if (isMonthly) {
+                Text("Year : Month", modifier = Modifier.align(Alignment.BottomCenter))
+            } else if (isDaily) {
+                Button(
+                    onClick = { isDialogOpen = true },
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = Color.Black
+                    ),
+                ) {
+                    val formatter = SimpleDateFormat("yyyy.MM.dd", Locale.getDefault())
+                    val textString = datePickerState.selectedDateMillis?.let {
+                        calendar.timeInMillis = it
+                        formatter.format(calendar.time)
+                    } ?: "Not Selected"
+                    Text(text = textString, style = TextStyle(fontSize = 20.sp))
+                }
+
+                DateTimePickerDialog(
+                    datePickerState = datePickerState,
+                    dateRangePickerState = dateRangePickerState,
+                    timePickerState = timePickerState,
+                    isDialogOpen = isDialogOpen,
+                    isTimePickerOpen = isTimePickerOpen,
+                    onDismissRequest = {
+                        isDialogOpen = false
+                        isTimePickerOpen = false
+                    },
+                    onConfirmDate = {
+                        isDialogOpen = false
+                    },
+                    onConfirmTime = { }
+                )
+            } else {
+                Button(
+                    onClick = { isDialogOpen = true },
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = Color.Black
+                    ),
+                ) {
+                    val formatter = SimpleDateFormat("yyyy.MM.dd HH:mm", Locale.getDefault())
+                    val textString = datePickerState.selectedDateMillis?.let {
+                        calendar.timeInMillis = it
+                        calendar.set(Calendar.HOUR_OF_DAY, timePickerState.hour)
+                        calendar.set(Calendar.MINUTE, timePickerState.minute)
+                        formatter.format(calendar.time)
+                    } ?: "Not Selected"
+                    Text(text = textString, style = TextStyle(fontSize = 20.sp))
+                }
+
+                DateTimePickerDialog(
+                    datePickerState = datePickerState,
+                    dateRangePickerState = dateRangePickerState,
+                    timePickerState = timePickerState,
+                    isDialogOpen = isDialogOpen,
+                    isTimePickerOpen = isTimePickerOpen,
+                    onDismissRequest = {
+                        isDialogOpen = false
+                        isTimePickerOpen = false
+                    },
+                    onConfirmDate = {
+                        isTimePickerOpen = true
+                    },
+                    onConfirmTime = {
+                        isDialogOpen = false
+                        isTimePickerOpen = false
+                    }
+                )
+            }
         }
     }
 }
@@ -243,7 +322,11 @@ private fun DateTimePickerDialog(
                     onClick = { onConfirmDate() },
                     modifier = Modifier.padding(end = 16.dp)
                 ) {
-                    Icon(imageVector = Icons.Filled.CheckCircle, contentDescription = "Confirm", modifier = Modifier.size(40.dp))
+                    Icon(
+                        imageVector = Icons.Filled.CheckCircle,
+                        contentDescription = "Confirm",
+                        modifier = Modifier.size(40.dp)
+                    )
                 }
             }) {
             DatePicker(
@@ -275,38 +358,17 @@ private fun DateTimePickerDialog(
                             .align(Alignment.End)
                             .padding(end = 16.dp)
                     ) {
-                        Icon(imageVector = Icons.Filled.CheckCircle, contentDescription = "Confirm", modifier = Modifier.size(40.dp))
+                        Icon(
+                            imageVector = Icons.Filled.CheckCircle,
+                            contentDescription = "Confirm",
+                            modifier = Modifier.size(40.dp)
+                        )
                     }
                 }
 
             }
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview(widthDp = 600)
-@Composable
-fun DateTimePickerDialogPreview() {
-    val calendar = Calendar.getInstance()
-
-    var isDialogOpen by remember { mutableStateOf(true) }
-    var isTimePickerOpen by remember { mutableStateOf(true) }
-    val datePickerState =
-        rememberDatePickerState(initialSelectedDateMillis = calendar.timeInMillis)
-    val dateRangePickerState = rememberDateRangePickerState()
-    val timePickerState = rememberTimePickerState()
-
-    DateTimePickerDialog(
-        datePickerState = datePickerState,
-        dateRangePickerState = dateRangePickerState,
-        timePickerState = timePickerState,
-        isDialogOpen = isDialogOpen,
-        isTimePickerOpen = isTimePickerOpen,
-        onDismissRequest = { },
-        onConfirmDate = { },
-        onConfirmTime = { }
-    )
 }
 
 @Composable
