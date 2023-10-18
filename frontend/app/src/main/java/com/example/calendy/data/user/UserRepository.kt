@@ -1,8 +1,6 @@
 package com.example.calendy.data.user
 
-import com.example.calendy.data.BaseRepository
-
-class UserRepository : BaseRepository<User> {
+class UserRepository : IUserRepository {
     override suspend fun insert(entity: User) {
         TODO("Not yet implemented")
     }

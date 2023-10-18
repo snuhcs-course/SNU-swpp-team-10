@@ -1,4 +1,4 @@
-package com.example.calendy.data
+package com.example.calendy.data.todo
 
 import com.example.calendy.data.todo.Todo
 import kotlinx.coroutines.flow.Flow
@@ -13,4 +13,5 @@ interface ITodoRepository {
     fun getYearlyTodosStream(year: Int): Flow<List<Todo>>
     fun getMonthlyTodosStream(year: Int, month: Int): Flow<List<Todo>>
     fun getDailyTodosStream(year: Int, month: Int, day: Int): Flow<List<Todo>>
+    fun getTodoById(id: Int): Flow<Todo>
 }

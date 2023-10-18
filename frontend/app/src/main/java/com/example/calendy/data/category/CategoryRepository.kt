@@ -1,8 +1,7 @@
 package com.example.calendy.data.category
-import com.example.calendy.data.BaseRepository
 import kotlinx.coroutines.flow.Flow
 
-class CategoryRepository(private val categoryLocalDataSource: CategoryLocalDataSource) : BaseRepository<Category> {
+class CategoryRepository(private val categoryLocalDataSource: CategoryLocalDataSource) : ICategoryRepository {
     override suspend fun insert(category: Category) {
         categoryLocalDataSource.insert(category)
     }
@@ -12,10 +11,10 @@ class CategoryRepository(private val categoryLocalDataSource: CategoryLocalDataS
     override suspend fun update(category: Category) {
         categoryLocalDataSource.update(category)
     }
-    fun getCategoriesStream(): Flow<List<Category>> {
+    override fun getCategoriesStream(): Flow<List<Category>> {
         return categoryLocalDataSource.getCategoriesStream()
     }
-    fun getCategoryById(id: Int): Flow<Category> {
+    override fun getCategoryById(id: Int): Flow<Category> {
         return categoryLocalDataSource.getCategoryById(id)
     }
 }

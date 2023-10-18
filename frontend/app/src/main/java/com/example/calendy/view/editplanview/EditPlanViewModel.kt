@@ -6,14 +6,9 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import androidx.lifecycle.viewModelScope
-import com.example.calendy.data.IScheduleRepository
-import com.example.calendy.data.ITodoRepository
-import com.example.calendy.data.schedule.Schedule
+import com.example.calendy.data.schedule.IScheduleRepository
+import com.example.calendy.data.todo.ITodoRepository
 import kotlinx.coroutines.flow.update
-
-import com.example.calendy.data.todo.Todo
-import kotlinx.coroutines.launch
 
 
 class EditPlanViewModel(private val scheduleRepository: IScheduleRepository, private val todoRepository: ITodoRepository) : ViewModel() {
