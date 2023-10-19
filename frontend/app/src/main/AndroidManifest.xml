@@ -13,16 +13,26 @@
         android:theme="@style/Theme.Calendy"
         tools:targetApi="31">
         <activity
+            android:name=".view.weeklyview.WeeklyView"
+            android:exported="true" >
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Calendy">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
+        <activity
+            android:name=".view.weeklyview.MonthlyDayPopup"
+            android:theme="@android:style/Theme.Holo.Dialog"
+        />
+
     </application>
 
 </manifest>
