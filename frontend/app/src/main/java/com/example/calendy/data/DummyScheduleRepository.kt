@@ -1,7 +1,7 @@
 package com.example.calendy.data
 
-import com.example.calendy.data.schedule.IScheduleRepository
-import com.example.calendy.data.schedule.Schedule
+import com.example.calendy.data.plan.Schedule
+import com.example.calendy.data.plan.schedule.IScheduleRepository
 import kotlinx.coroutines.flow.Flow
 import java.util.Date
 

@@ -1,7 +1,7 @@
 package com.example.calendy.data
 
-import com.example.calendy.data.todo.ITodoRepository
-import com.example.calendy.data.todo.Todo
+import com.example.calendy.data.plan.Todo
+import com.example.calendy.data.plan.todo.ITodoRepository
 import kotlinx.coroutines.flow.Flow
 import java.util.Date
 

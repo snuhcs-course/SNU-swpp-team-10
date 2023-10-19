@@ -10,13 +10,13 @@ import com.example.calendy.data.category.ICategoryRepository
 import com.example.calendy.data.message.IMessageRepository
 import com.example.calendy.data.message.MessageLocalDataSource
 import com.example.calendy.data.message.MessageRepository
-import com.example.calendy.data.schedule.IScheduleRepository
-import com.example.calendy.data.schedule.ScheduleLocalDataSource
-import com.example.calendy.data.schedule.ScheduleRemoteDataSource
-import com.example.calendy.data.schedule.ScheduleRepository
-import com.example.calendy.data.todo.ITodoRepository
-import com.example.calendy.data.todo.TodoLocalDataSource
-import com.example.calendy.data.todo.TodoRepository
+import com.example.calendy.data.plan.schedule.IScheduleRepository
+import com.example.calendy.data.plan.schedule.ScheduleLocalDataSource
+import com.example.calendy.data.plan.schedule.ScheduleRemoteDataSource
+import com.example.calendy.data.plan.schedule.ScheduleRepository
+import com.example.calendy.data.plan.todo.ITodoRepository
+import com.example.calendy.data.plan.todo.TodoLocalDataSource
+import com.example.calendy.data.plan.todo.TodoRepository
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 

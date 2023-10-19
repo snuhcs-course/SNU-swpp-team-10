@@ -9,10 +9,10 @@ import com.example.calendy.data.category.Category
 import com.example.calendy.data.category.CategoryDao
 import com.example.calendy.data.message.Message
 import com.example.calendy.data.message.MessageDao
-import com.example.calendy.data.schedule.Schedule
-import com.example.calendy.data.schedule.ScheduleDao
-import com.example.calendy.data.todo.Todo
-import com.example.calendy.data.todo.TodoDao
+import com.example.calendy.data.plan.Schedule
+import com.example.calendy.data.plan.Todo
+import com.example.calendy.data.plan.schedule.ScheduleDao
+import com.example.calendy.data.plan.todo.TodoDao
 
 @Database(entities = [Schedule::class, Todo::class, Category::class, Message::class], version = 1, exportSchema = false)
 @TypeConverters(RoomConverters::class)

@@ -1,8 +1,9 @@
-package com.example.calendy.data.todo
+package com.example.calendy.data.plan.todo
 
 import androidx.room.Dao
 import androidx.room.Query
 import com.example.calendy.data.BaseDao
+import com.example.calendy.data.plan.Todo
 import kotlinx.coroutines.flow.Flow
 import java.util.Date
 

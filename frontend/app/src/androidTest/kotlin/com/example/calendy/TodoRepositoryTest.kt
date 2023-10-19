@@ -6,9 +6,9 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.calendy.data.CalendyDatabase
-import com.example.calendy.data.todo.Todo
-import com.example.calendy.data.todo.TodoLocalDataSource
-import com.example.calendy.data.todo.TodoRepository
+import com.example.calendy.data.plan.Todo
+import com.example.calendy.data.plan.todo.TodoLocalDataSource
+import com.example.calendy.data.plan.todo.TodoRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After

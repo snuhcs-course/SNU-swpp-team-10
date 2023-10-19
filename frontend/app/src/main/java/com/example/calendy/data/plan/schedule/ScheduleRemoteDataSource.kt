@@ -1,4 +1,4 @@
-package com.example.calendy.data.schedule
+package com.example.calendy.data.plan.schedule
 
 import com.example.calendy.data.CalendyApi
 

@@ -1,5 +1,6 @@
-package com.example.calendy.data.todo
+package com.example.calendy.data.plan.todo
 
+import com.example.calendy.data.plan.Todo
 import com.example.calendy.utils.DateHelper
 import kotlinx.coroutines.flow.Flow
 import java.util.Date

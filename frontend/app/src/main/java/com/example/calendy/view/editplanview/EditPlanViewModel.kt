@@ -3,8 +3,8 @@ package com.example.calendy.view.editplanview
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.calendy.data.category.ICategoryRepository
-import com.example.calendy.data.schedule.IScheduleRepository
-import com.example.calendy.data.todo.ITodoRepository
+import com.example.calendy.data.plan.schedule.IScheduleRepository
+import com.example.calendy.data.plan.todo.ITodoRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
