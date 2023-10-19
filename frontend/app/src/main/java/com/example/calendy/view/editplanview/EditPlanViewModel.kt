@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.update
 import com.example.calendy.data.Todo
 import kotlinx.coroutines.launch
 import java.security.KeyStore.Entry
+import kotlin.math.max
+import kotlin.math.min
 
 
 class EditPlanViewModel(private val scheduleRepository: IScheduleRepository, private val todoRepository: ITodoRepository) : ViewModel() {
@@ -45,8 +47,9 @@ class EditPlanViewModel(private val scheduleRepository: IScheduleRepository, pri
     fun setCategory() {
         _uiState.update { currentState -> currentState.copy() }
     }
-    fun setPriority() {
-        _uiState.update { currentState -> currentState.copy() }
+    fun setPriority(input: Int) {
+        val priority = max(1, min(5, input))
+        _uiState.update { currentState -> currentState.copy(priority = priority) }
     }
 
 
