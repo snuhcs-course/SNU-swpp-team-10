@@ -3,7 +3,7 @@ package com.example.calendy.data.schedule
 import kotlinx.coroutines.flow.Flow
 import java.util.Date
 
-class ScheduleRepository(private val scheduleLocalDataSource: ScheduleLocalDataSource) :
+class ScheduleRepository(private val scheduleLocalDataSource: ScheduleLocalDataSource, private val scheduleRemoteDataSource: ScheduleRemoteDataSource) :
     IScheduleRepository {
     override suspend fun insertSchedule(schedule: Schedule) {
         scheduleLocalDataSource.insertSchedule(schedule)
@@ -19,5 +19,13 @@ class ScheduleRepository(private val scheduleLocalDataSource: ScheduleLocalDataS
     }
     override fun getScheduleById(id: Int): Flow<Schedule> {
         return scheduleLocalDataSource.getScheduleById(id)
+    }
+
+    suspend fun postSchedule(schedule: Schedule) {
+        scheduleRemoteDataSource.postSchedule()
+    }
+
+    suspend fun getSchedule() {
+        return scheduleRemoteDataSource.getSchedule()
     }
 }

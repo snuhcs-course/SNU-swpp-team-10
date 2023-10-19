@@ -9,6 +9,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import com.example.calendy.data.schedule.IScheduleRepository
 import com.example.calendy.data.todo.ITodoRepository
 import kotlinx.coroutines.flow.update
+<<<<<<< Updated upstream
+=======
+import com.example.calendy.data.tod
+import kotlinx.coroutines.launch
+import java.security.KeyStore.Entry
+>>>>>>> Stashed changes
 import kotlin.math.max
 import kotlin.math.min
 
@@ -56,6 +62,8 @@ class EditPlanViewModel(private val scheduleRepository: IScheduleRepository, pri
             is EntryType.Todo -> {
                // todoRepository.deleteTodo()
             }
+
+            else -> {}
         }
     }
 
@@ -93,6 +101,8 @@ class EditPlanViewModel(private val scheduleRepository: IScheduleRepository, pri
 //                viewModelScope.launch { todoRepository.insertTodo(newTodo) }
 
             }
+
+            else -> {}
         }
 
     }
