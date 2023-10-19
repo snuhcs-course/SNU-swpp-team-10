@@ -9,9 +9,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import com.example.calendy.data.schedule.IScheduleRepository
 import com.example.calendy.data.todo.ITodoRepository
 import kotlinx.coroutines.flow.update
-import com.example.calendy.data.Todo
-import kotlinx.coroutines.launch
-import java.security.KeyStore.Entry
 import kotlin.math.max
 import kotlin.math.min
 
