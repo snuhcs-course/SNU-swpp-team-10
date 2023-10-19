@@ -83,4 +83,6 @@ dependencies {
     implementation("com.github.zj565061763:compose-wheel-picker:1.0.0-alpha01")
     // rating-bar
     implementation("com.github.a914-gowtham:compose-ratingbar:1.2.3")
+    // Bottom Sheet Dialog
+    implementation("com.holix.android:bottomsheetdialog-compose:1.3.0")
 }

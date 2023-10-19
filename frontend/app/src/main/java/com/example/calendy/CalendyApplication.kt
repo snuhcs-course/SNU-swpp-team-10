@@ -11,15 +11,14 @@ import com.example.calendy.data.message.IMessageRepository
 import com.example.calendy.data.message.MessageLocalDataSource
 import com.example.calendy.data.message.MessageRepository
 import com.example.calendy.data.schedule.IScheduleRepository
-import com.example.calendy.data.todo.ITodoRepository
 import com.example.calendy.data.schedule.ScheduleLocalDataSource
 import com.example.calendy.data.schedule.ScheduleRemoteDataSource
 import com.example.calendy.data.schedule.ScheduleRepository
+import com.example.calendy.data.todo.ITodoRepository
 import com.example.calendy.data.todo.TodoLocalDataSource
 import com.example.calendy.data.todo.TodoRepository
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.create
 
 class CalendyApplication : Application() {
     lateinit var container: IAppContainer
@@ -38,26 +37,31 @@ interface IAppContainer {
 
 class AppContainer(private val context: Context) : IAppContainer {
     override val scheduleRepository: IScheduleRepository by lazy {
-        ScheduleRepository(ScheduleLocalDataSource(CalendyDatabase.getDatabase(context)
-                .scheduleDao()), ScheduleRemoteDataSource(serviceApi))
+        ScheduleRepository(
+                ScheduleLocalDataSource(
+                        CalendyDatabase.getDatabase(context).scheduleDao()
+                ), ScheduleRemoteDataSource(serviceApi)
+        )
     }
     override val todoRepository: ITodoRepository by lazy {
         TodoRepository(TodoLocalDataSource(CalendyDatabase.getDatabase(context).todoDao()))
     }
     override val categoryRepository: ICategoryRepository by lazy {
-        CategoryRepository(CategoryLocalDataSource(CalendyDatabase.getDatabase(context)
-                .categoryDao()))
+        CategoryRepository(
+                CategoryLocalDataSource(
+                        CalendyDatabase.getDatabase(context).categoryDao()
+                )
+        )
     }
     override val messageRepository: IMessageRepository by lazy {
         MessageRepository(MessageLocalDataSource(CalendyDatabase.getDatabase(context).messageDao()))
     }
 
-    private val baseUrl = ""
-    private val retrofit = Retrofit.Builder()
-            .baseUrl(baseUrl)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    private val serviceApi : CalendyApi by lazy {
+    private val baseUrl = "https://10.0.0.2"
+    private val retrofit =
+            Retrofit.Builder().baseUrl(baseUrl).addConverterFactory(GsonConverterFactory.create())
+                    .build()
+    private val serviceApi: CalendyApi by lazy {
         retrofit.create(CalendyApi::class.java)
     }
 

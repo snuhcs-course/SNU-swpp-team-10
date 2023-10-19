@@ -36,12 +36,14 @@ import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberDateRangePickerState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,8 +63,10 @@ import com.example.calendy.data.DummyScheduleRepository
 import com.example.calendy.data.DummyTodoRepository
 import com.gowtham.ratingbar.RatingBar
 import com.gowtham.ratingbar.RatingBarConfig
+import com.holix.android.bottomsheetdialog.compose.BottomSheetDialog
 import com.sd.lib.compose.wheel_picker.FVerticalWheelPicker
 import com.sd.lib.compose.wheel_picker.rememberFWheelPickerState
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -131,7 +135,7 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel = viewModel(factory = AppV
         TextField(value = "반복안함", onValueChange = { /* TODO: Handle text input */ })
 
         // Category
-        TextField(value = "category", onValueChange = { /* TODO: Handle text input */ })
+        Category()
 
         // Priority
         RatingBar(
@@ -398,6 +402,35 @@ private fun DateTimePickerDialog(
                     }
                 }
 
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun Category() {
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+    var showBottomSheet by remember { mutableStateOf(false) }
+
+    Button(onClick = { showBottomSheet = true }) {
+        Text(text = "Current Category")
+    }
+
+    if (showBottomSheet) {
+        BottomSheetDialog(onDismissRequest = {
+            showBottomSheet = false
+        }) {
+            // Sheet content
+            Button(onClick = {
+                scope.launch { sheetState.hide() }.invokeOnCompletion {
+                    if (!sheetState.isVisible) {
+                        showBottomSheet = false
+                    }
+                }
+            }) {
+                Text("Hide bottom sheet")
             }
         }
     }
