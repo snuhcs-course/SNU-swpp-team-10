@@ -30,7 +30,8 @@ class EditPlanViewModel(
             initialValue = emptyList(),
             started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000)
     )
-
+    
+    // TODO: EntryType 대신 PlanType 사용하기
     fun setType(selectedType: EntryType) {
         _uiState.update { currentState -> currentState.copy(entryType = selectedType) }
     }

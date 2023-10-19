@@ -9,4 +9,9 @@ sealed interface Plan {
     val priority: Int
     val showInMonthlyView: Boolean
     val isOverridden: Boolean
+
+    sealed class PlanType {
+        object Schedule : PlanType()
+        object Todo: PlanType()
+    }
 }
