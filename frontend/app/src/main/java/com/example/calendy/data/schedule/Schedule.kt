@@ -4,18 +4,13 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import com.example.calendy.data.category.Category
-import com.example.calendy.data.user.User
 import com.google.gson.annotations.SerializedName
 import java.util.Date
 
 
 @Entity(tableName = "schedule",
         foreignKeys =
-        [ForeignKey(entity = User::class,
-                    parentColumns = ["id"],
-                    childColumns = ["user_id"],
-                    onDelete = ForeignKey.CASCADE),
-            ForeignKey(entity = Category::class,
+        [ForeignKey(entity = Category::class,
                     parentColumns = ["id"],
                     childColumns = ["category_id"],
                     onDelete = ForeignKey.SET_DEFAULT ) ])
@@ -24,9 +19,6 @@ data class Schedule(
         @ColumnInfo(name = "id")
         @SerializedName("id")
         var id: Int = 0,
-        @ColumnInfo(name = "user_id")
-        @SerializedName("user_id")
-        var userId: Int,
         @ColumnInfo(name = "title")
         @SerializedName("title")
         var title: String,

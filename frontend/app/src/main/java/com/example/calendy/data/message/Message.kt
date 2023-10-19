@@ -4,24 +4,15 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
-import com.example.calendy.data.user.User
 import com.google.gson.annotations.SerializedName
 import java.util.Date
 
-@Entity(tableName = "message",
-        foreignKeys =
-        [ForeignKey(entity = User::class,
-                parentColumns = ["id"],
-                childColumns = ["user_id"],
-                onDelete = ForeignKey.CASCADE)])
+@Entity(tableName = "message")
 data class Message(
         @PrimaryKey(autoGenerate = true)
         @ColumnInfo(name = "id")
         @SerializedName("id")
         var id: Int = 0,
-        @ColumnInfo(name = "user_id")
-        @SerializedName("user_id")
-        var userId: Int,
         @ColumnInfo(name = "sent_time")
         @SerializedName("sent_time")
         var sentTime: Date,
