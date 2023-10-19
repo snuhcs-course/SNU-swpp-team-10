@@ -14,7 +14,7 @@ import java.util.Date
         [ForeignKey(entity = Category::class,
                     parentColumns = ["id"],
                     childColumns = ["category_id"],
-                    onDelete = ForeignKey.SET_DEFAULT) ])
+                    onDelete = ForeignKey.SET_NULL) ])
 data class Todo(
         @PrimaryKey(autoGenerate = true)
         @ColumnInfo(name = "id")
@@ -46,7 +46,7 @@ data class Todo(
         val repeatGroupId: Int,
         @ColumnInfo(name = "category_id")
         @SerializedName("category_id")
-        val categoryId: Int = 0,
+        val categoryId: Int? = null,
         @ColumnInfo(name = "priority")
         @SerializedName("priority")
         val priority: Int,

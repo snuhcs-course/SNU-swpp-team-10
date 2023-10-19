@@ -20,9 +20,9 @@ class DummyCategoryRepository : ICategoryRepository {
 
     override fun getCategoriesStream(): Flow<List<Category>> = listOf(
             listOf(
-                    Category(userId = 2, title = "One", defaultPriority = 3),
-                    Category(userId = 2, title = "Two", defaultPriority = 3),
-                    Category(userId = 2, title = "Three", defaultPriority = 3),
+                    Category(title = "One", defaultPriority = 3),
+                    Category(title = "Two", defaultPriority = 3),
+                    Category(title = "Three", defaultPriority = 3),
             )
     ).asFlow()
 

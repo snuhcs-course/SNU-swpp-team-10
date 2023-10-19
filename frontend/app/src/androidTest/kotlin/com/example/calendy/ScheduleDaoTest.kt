@@ -51,8 +51,28 @@ class ScheduleDaoTest {
         set(Calendar.MILLISECOND, millisecond)
         time
     }
-    private var schedule1 = Schedule(1,0,"first", makeDate(2023, 10, 9), makeDate(2023, 10, 11), "",1, 1, 1 , false,false)
-    private var schedule2 = Schedule(2,1,"second", makeDate(2023, 10, 13, 12, 30), makeDate(2023,11,1),"",2,2,2, false, false)
+    private var schedule1 = Schedule(
+            id = 1,
+            title = "first",
+            startTime = makeDate(2023, 10, 9),
+            endTime = makeDate(2023, 10, 11),
+            memo = "",
+            repeatGroupId = 1,
+            priority = 1,
+            showInMonthlyView = false,
+            isOverridden = false
+    )
+    private var schedule2 = Schedule(
+            id = 2,
+            title = "second",
+            startTime = makeDate(2023, 10, 13, 12, 30),
+            endTime = makeDate(2023,11,1),
+            memo = "",
+            repeatGroupId = 2,
+            priority = 2,
+            showInMonthlyView = false,
+            isOverridden = false
+    )
 
     private suspend fun addTwoItemToDb() {
         scheduleRepository.insertSchedule(schedule1)

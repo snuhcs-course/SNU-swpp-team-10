@@ -36,7 +36,7 @@ data class Schedule(
         var repeatGroupId: Int,
         @ColumnInfo(name = "category_id")
         @SerializedName("category_id")
-        var categoryId: Int = 0,
+        var categoryId: Int? = null,
         @ColumnInfo(name = "priority")
         @SerializedName("priority")
         var priority: Int,

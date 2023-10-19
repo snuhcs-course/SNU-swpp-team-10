@@ -68,6 +68,7 @@ import com.example.calendy.data.DummyCategoryRepository
 import com.example.calendy.data.DummyScheduleRepository
 import com.example.calendy.data.DummyTodoRepository
 import com.example.calendy.data.category.Category
+import com.example.calendy.data.schedule.ScheduleRepository
 import com.gowtham.ratingbar.RatingBar
 import com.gowtham.ratingbar.RatingBarConfig
 import com.holix.android.bottomsheetdialog.compose.BottomSheetDialog
@@ -80,8 +81,8 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditPlanPage(editPlanViewModel: EditPlanViewModel = viewModel(factory = AppViewModelProvider.Factory)) {
-    val editPlanUiState by editPlanViewModel.uiState.collectAsState()
-    val categoryList by editPlanViewModel.categoryListState.collectAsState()
+    val editPlanUiState: EditPlanUiState by editPlanViewModel.uiState.collectAsState()
+    val categoryList: List<Category> by editPlanViewModel.categoryListState.collectAsState()
     val verticalScrollState = rememberScrollState(initial = 0)
 
     Column(

@@ -35,8 +35,7 @@ class TodoRepositoryTest {
 
         todoDatabase = Room.inMemoryDatabaseBuilder(context, CalendyDatabase::class.java)
                 // Allowing main thread queries, just for testing.
-                .allowMainThreadQueries()
-                .build()
+                .allowMainThreadQueries().build()
         Log.d("GUN", "DB Builder")
         Log.d("GUN", todoDatabase.isOpen.toString())
         val todoDao = todoDatabase.todoDao()
@@ -51,7 +50,15 @@ class TodoRepositoryTest {
         todoDatabase.close()
     }
 
-    fun makeDate(year: Int, month: Int, day: Int, hour: Int = 0, minute: Int = 0, second: Int = 0, millisecond: Int = 0): Date = with(Calendar.getInstance()) {
+    fun makeDate(
+            year: Int,
+            month: Int,
+            day: Int,
+            hour: Int = 0,
+            minute: Int = 0,
+            second: Int = 0,
+            millisecond: Int = 0
+    ): Date = with(Calendar.getInstance()) {
         set(Calendar.YEAR, year)
         set(Calendar.MONTH, month)
         set(Calendar.DATE, day)
@@ -63,7 +70,7 @@ class TodoRepositoryTest {
     }
 
     private var todo1 = Todo(
-            id= 1, userId = 0, title = "Be happy",
+            id = 1, title = "Be happy",
             dueTime = makeDate(2023, 10, 9, 20, 30),
             yearly = false,
             monthly = false,
@@ -71,7 +78,6 @@ class TodoRepositoryTest {
             complete = false,
             memo = "Realy",
             repeatGroupId = 0,
-            categoryId = 0,
             priority = 0,
             showInMonthlyView = false,
             isOverridden = false,
@@ -84,8 +90,8 @@ class TodoRepositoryTest {
     @Test
     @Throws(Exception::class)
     fun repositoryQuery_emptyDB() = runBlocking {
-        val todoList: List<Todo> = todoRepository.getTodosStream(makeDate(2023, 10, 5), makeDate(2023, 10, 12))
-                .first()
+        val todoList: List<Todo> =
+                todoRepository.getTodosStream(makeDate(2023, 10, 5), makeDate(2023, 10, 12)).first()
         assertEquals(todoList.size, 0)
     }
 
@@ -93,8 +99,8 @@ class TodoRepositoryTest {
     @Throws(Exception::class)
     fun repositoryInsert_insertTodoAndFind() = runBlocking {
         addOneTodo()
-        val todoList: List<Todo> = todoRepository.getTodosStream(makeDate(2023, 10, 5), makeDate(2023, 10, 12))
-                .first()
+        val todoList: List<Todo> =
+                todoRepository.getTodosStream(makeDate(2023, 10, 5), makeDate(2023, 10, 12)).first()
         assertEquals(todoList.size, 1)
         assertEquals(todoList.first(), todo1)
     }
