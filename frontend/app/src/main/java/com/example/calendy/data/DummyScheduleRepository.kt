@@ -1,5 +1,7 @@
 package com.example.calendy.data
 
+import com.example.calendy.data.schedule.IScheduleRepository
+import com.example.calendy.data.schedule.Schedule
 import kotlinx.coroutines.flow.Flow
 import java.util.Date
 
@@ -17,6 +19,10 @@ class DummyScheduleRepository: IScheduleRepository {
     }
 
     override fun getSchedulesStream(startTime: Date, endTime: Date): Flow<List<Schedule>> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getScheduleById(id: Int): Flow<Schedule> {
         TODO("Not yet implemented")
     }
 

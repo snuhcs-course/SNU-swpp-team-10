@@ -1,5 +1,7 @@
 package com.example.calendy.data
 
+import com.example.calendy.data.todo.ITodoRepository
+import com.example.calendy.data.todo.Todo
 import kotlinx.coroutines.flow.Flow
 import java.util.Date
 
@@ -29,6 +31,10 @@ class DummyTodoRepository: ITodoRepository {
     }
 
     override fun getDailyTodosStream(year: Int, month: Int, day: Int): Flow<List<Todo>> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getTodoById(id: Int): Flow<Todo> {
         TODO("Not yet implemented")
     }
 }

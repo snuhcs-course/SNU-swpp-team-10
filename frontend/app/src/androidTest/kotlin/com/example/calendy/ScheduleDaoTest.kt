@@ -3,16 +3,16 @@ package com.example.calendy
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.example.calendy.data.ScheduleDao
+import com.example.calendy.data.schedule.ScheduleDao
 import org.junit.Before
 import org.junit.runner.RunWith
 import androidx.room.Room
 import com.example.calendy.data.CalendyDatabase
 import org.junit.After
 import java.io.IOException
-import com.example.calendy.data.Schedule
-import com.example.calendy.data.ScheduleLocalDataSource
-import com.example.calendy.data.ScheduleRepository
+import com.example.calendy.data.schedule.Schedule
+import com.example.calendy.data.schedule.ScheduleLocalDataSource
+import com.example.calendy.data.schedule.ScheduleRepository
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -53,21 +53,22 @@ class ScheduleDaoTest {
         set(Calendar.MILLISECOND, millisecond)
         time
     }
-    private var schedule1 = Schedule(1,"first", makeDate(2023, 10, 9), makeDate(2023, 10, 11), "",1, 1, 1 )
-    private var schedule2 = Schedule(2,"second", makeDate(2023, 10, 10, 12, 30), makeDate(2023,11,1),"",2,2,2 )
+    private var schedule1 = Schedule(1,0,"first", makeDate(2023, 10, 9), makeDate(2023, 10, 11), "",1, 1, 1 , false,false)
+    private var schedule2 = Schedule(2,1,"second", makeDate(2023, 10, 13, 12, 30), makeDate(2023,11,1),"",2,2,2, false, false)
 
-    private suspend fun addOneItemToDb() {
+    private suspend fun addTwoItemToDb() {
         scheduleRepository.insertSchedule(schedule1)
+        scheduleRepository.insertSchedule(schedule2)
     }
-    private suspend fun addTwoItemsToTb() {
 
-    }
 
     @Test
     @Throws(Exception::class)
     fun daoInsert_test() = runBlocking {
-        addOneItemToDb()
+        addTwoItemToDb()
         var allSchedules = scheduleRepository.getSchedulesStream(makeDate(2023,10,9,12),makeDate(2023, 10,10)).first()
         assertEquals(allSchedules[0], schedule1)
+        var scheduleId1 = scheduleRepository.getScheduleById(1)
+        assertEquals(scheduleId1.first(), schedule1)
     }
 }

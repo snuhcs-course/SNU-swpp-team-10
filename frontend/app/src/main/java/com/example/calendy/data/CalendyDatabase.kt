@@ -5,12 +5,23 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.example.calendy.data.category.Category
+import com.example.calendy.data.category.CategoryDao
+import com.example.calendy.data.message.Message
+import com.example.calendy.data.message.MessageDao
+import com.example.calendy.data.schedule.Schedule
+import com.example.calendy.data.schedule.ScheduleDao
+import com.example.calendy.data.todo.Todo
+import com.example.calendy.data.todo.TodoDao
+import com.example.calendy.data.user.User
 
-@Database(entities = [Schedule::class, Todo::class], version = 1, exportSchema = false)
+@Database(entities = [Schedule::class, Todo::class, Category::class, Message::class, User::class], version = 1, exportSchema = false)
 @TypeConverters(RoomConverters::class)
 abstract class CalendyDatabase: RoomDatabase() {
     abstract fun scheduleDao(): ScheduleDao
     abstract fun todoDao(): TodoDao
+    abstract fun categoryDao(): CategoryDao
+    abstract fun messageDao(): MessageDao
 
     companion object {
         @Volatile

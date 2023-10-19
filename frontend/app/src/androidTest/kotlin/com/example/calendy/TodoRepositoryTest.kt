@@ -6,9 +6,9 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.calendy.data.CalendyDatabase
-import com.example.calendy.data.Todo
-import com.example.calendy.data.TodoLocalDataSource
-import com.example.calendy.data.TodoRepository
+import com.example.calendy.data.todo.Todo
+import com.example.calendy.data.todo.TodoLocalDataSource
+import com.example.calendy.data.todo.TodoRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -63,7 +63,7 @@ class TodoRepositoryTest {
     }
 
     private var todo1 = Todo(
-            id= 1, "Be happy",
+            id= 1, userId = 0, title = "Be happy",
             dueTime = makeDate(2023, 10, 9, 20, 30),
             yearly = false,
             monthly = false,
@@ -72,7 +72,9 @@ class TodoRepositoryTest {
             memo = "Realy",
             repeatGroupId = 0,
             categoryId = 0,
-            priority = 0
+            priority = 0,
+            showInMonthlyView = false,
+            isOverridden = false,
     )
 
     private suspend fun addOneTodo() {

@@ -55,7 +55,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.calendy.data.AppViewModelProvider
+import com.example.calendy.AppViewModelProvider
 import com.example.calendy.data.DummyScheduleRepository
 import com.example.calendy.data.DummyTodoRepository
 import java.text.SimpleDateFormat
