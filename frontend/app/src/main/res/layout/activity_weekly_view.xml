@@ -17,13 +17,14 @@
         android:id="@+id/materialWeeklyView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:mcv_calendarMode="week"
-        app:mcv_showOtherDates="none"
+        android:layout_marginTop="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:mcv_selectionColor="#ffffff"
+        app:mcv_calendarMode="week"
         app:mcv_dateTextAppearance="@color/black"
+        app:mcv_selectionColor="@android:color/white"
+        app:mcv_showOtherDates="none"
 
         />
 </androidx.constraintlayout.widget.ConstraintLayout>
