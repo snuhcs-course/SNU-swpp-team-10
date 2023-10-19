@@ -1,6 +1,7 @@
 package com.example.calendy.view.monthlyview;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -8,7 +9,12 @@ import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.calendy.R;
+
+import java.util.ArrayList;
 
 public class MonthlyDayPopup extends Activity {
 
@@ -25,11 +31,20 @@ public class MonthlyDayPopup extends Activity {
 
         //UI 객체생성
 //        txtText = (TextView)findViewById(R.id.txtText);
+        RecyclerView recyclerView = findViewById(R.id.monthlyDayPlanListRecycler);
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager((Context) this);
+        recyclerView.setLayoutManager(linearLayoutManager);  // LayoutManager 설정
+
 
         //데이터 가져오기
         Intent intent = getIntent();
-        String data = intent.getStringExtra("data");
+        ArrayList<String> scheduleTitles = intent.getStringArrayListExtra("list");
 //        txtText.setText(data);
+
+
+        MonthlyDayPlanListAdaptor customAdapter = new MonthlyDayPlanListAdaptor(scheduleTitles);
+        recyclerView.setAdapter(customAdapter); // 어댑터 설정
     }
 
     //확인 버튼 클릭

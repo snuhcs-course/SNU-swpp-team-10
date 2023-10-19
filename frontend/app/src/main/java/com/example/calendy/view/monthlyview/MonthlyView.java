@@ -31,6 +31,7 @@ import com.prolificinteractive.materialcalendarview.OnMonthChangedListener;
 import com.prolificinteractive.materialcalendarview.format.ArrayWeekDayFormatter;
 import com.prolificinteractive.materialcalendarview.format.MonthArrayTitleFormatter;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -50,7 +51,7 @@ public class MonthlyView extends ComponentActivity {
     private Hashtable<CalendarDay, List<Schedule>> schedulesOfMonth;
     private SelectedDayDecorator selectedDayDecorator;
     private DotDecorator dotDecorator;
-
+    private ArrayList<Schedule> dummyDaySchedules;
 
     ActivityResultLauncher<Intent> startActivityResult;
 
@@ -58,7 +59,7 @@ public class MonthlyView extends ComponentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_monthly_view);
-//        model = new ViewModelProvider(this).get(MonthlyViewModel.class);
+        model = new ViewModelProvider(this).get(MonthlyViewModel.class);
 
         selectedDate=CalendarDay.today();
 
@@ -78,8 +79,18 @@ public class MonthlyView extends ComponentActivity {
         selectedDayDecorator = new SelectedDayDecorator(CalendarDay.today(),MonthlyView.this);
         //temp dummy code
         schedulesOfMonth = new Hashtable<>();
-        List<Schedule> daySchedule=new ArrayList<>();
-        daySchedule.add(new Schedule("123","test", new Date(2023,9,11,18,00),new Date(2023,9,11,20,00),123,1,2));
+        //set dummy
+        dummyDaySchedules = new ArrayList<>();
+        dummyDaySchedules.add(new Schedule("1231","test1", new Date(2023,9,11,18,00),new Date(2023,9,11,20,00),1232,1,2));
+        dummyDaySchedules.add(new Schedule("1232","test2", new Date(2023,9,11,8,00),new Date(2023,9,11,10,00),1234,1,2));
+        dummyDaySchedules.add(new Schedule("1233","test3", new Date(2023,9,11,8,00),new Date(2023,9,11,10,00),1234,1,2));
+        dummyDaySchedules.add(new Schedule("1234","test4", new Date(2023,9,11,8,00),new Date(2023,9,11,10,00),1234,1,2));
+        dummyDaySchedules.add(new Schedule("1235","test5", new Date(2023,9,11,8,00),new Date(2023,9,11,10,00),1234,1,2));
+        dummyDaySchedules.add(new Schedule("1236","test6", new Date(2023,9,11,8,00),new Date(2023,9,11,10,00),1234,1,2));
+        dummyDaySchedules.add(new Schedule("1237","test7", new Date(2023,9,11,8,00),new Date(2023,9,11,10,00),1234,1,2));
+        dummyDaySchedules.add(new Schedule("1238","test8", new Date(2023,9,11,8,00),new Date(2023,9,11,10,00),1234,1,2));
+        dummyDaySchedules.add(new Schedule("1239","test9", new Date(2023,9,11,8,00),new Date(2023,9,11,10,00),1234,1,2));
+        List<Schedule> daySchedule=dummyDaySchedules;
         schedulesOfMonth.put(CalendarDay.from(2023,9,11),daySchedule);
 
         dotDecorator = new DotDecorator(schedulesOfMonth);
@@ -130,7 +141,17 @@ public class MonthlyView extends ComponentActivity {
 
     private void moveSubActivity() {
         Intent intent = new Intent(MonthlyView.this, MonthlyDayPopup.class);
-        startActivityResult.launch(intent);
+        //need data serialization
+        //temp
+            if(!selectedDate.equals(CalendarDay.from(2023,9,11))) return;
+            ArrayList<String> titles = new ArrayList<>();
+            List<Schedule> schedules= dummyDaySchedules;
+            for (Schedule sch : schedules){
+                titles.add(sch.getTitle());
+            }
+
+            intent.putExtra("list",titles);
+            startActivityResult.launch(intent);
     }
 
 

@@ -20,8 +20,8 @@ class MonthlyViewModel : ViewModel() {
     // rearrange schedules/todos by calendar day
     // calendar day use year, month, day for equal operation
     // !! need to check if hash key exists after deleting all plans in a day
-    val scheduleListByDay : Hashtable<CalendarDay, StateFlow<List<Schedule>>> = TODO()
-    val todoListByDay : Hashtable<CalendarDay,StateFlow<List<Todo>>> = TODO()
+    val scheduleListByDay : Hashtable<CalendarDay, StateFlow<List<Schedule>>> = Hashtable()
+    val todoListByDay : Hashtable<CalendarDay,StateFlow<List<Todo>>> = Hashtable()
 
     fun getScheduleOfDay(day:CalendarDay): StateFlow<List<Schedule>>? {
         return scheduleListByDay.getOrDefault(day,null)
