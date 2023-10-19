@@ -9,10 +9,15 @@ import com.example.calendy.view.editplanview.EditPlanViewModel
 object AppViewModelProvider {
     val Factory = viewModelFactory {
         initializer {
-            EditPlanViewModel(calendyApplication().container.scheduleRepository,calendyApplication().container.todoRepository)
+            EditPlanViewModel(
+                    calendyApplication().container.scheduleRepository,
+                    calendyApplication().container.todoRepository,
+                    calendyApplication().container.categoryRepository
+            )
         }
     }
 
 }
-fun CreationExtras.calendyApplication() : CalendyApplication =
+
+fun CreationExtras.calendyApplication(): CalendyApplication =
         (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as CalendyApplication)

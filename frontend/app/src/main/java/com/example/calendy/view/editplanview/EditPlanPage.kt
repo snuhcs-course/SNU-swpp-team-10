@@ -1,6 +1,7 @@
 package com.example.calendy.view.editplanview
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,6 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -21,6 +24,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DatePickerState
@@ -28,6 +32,7 @@ import androidx.compose.material3.DateRangePickerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -59,14 +64,15 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.calendy.AppViewModelProvider
+import com.example.calendy.data.DummyCategoryRepository
 import com.example.calendy.data.DummyScheduleRepository
 import com.example.calendy.data.DummyTodoRepository
+import com.example.calendy.data.category.Category
 import com.gowtham.ratingbar.RatingBar
 import com.gowtham.ratingbar.RatingBarConfig
 import com.holix.android.bottomsheetdialog.compose.BottomSheetDialog
 import com.sd.lib.compose.wheel_picker.FVerticalWheelPicker
 import com.sd.lib.compose.wheel_picker.rememberFWheelPickerState
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -75,7 +81,9 @@ import java.util.Locale
 @Composable
 fun EditPlanPage(editPlanViewModel: EditPlanViewModel = viewModel(factory = AppViewModelProvider.Factory)) {
     val editPlanUiState by editPlanViewModel.uiState.collectAsState()
+    val categoryList by editPlanViewModel.categoryListState.collectAsState()
     val verticalScrollState = rememberScrollState(initial = 0)
+
     Column(
             modifier = Modifier
                     .verticalScroll(verticalScrollState)
@@ -94,7 +102,8 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel = viewModel(factory = AppV
                 horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             listOf(EntryType.Schedule, EntryType.Todo).forEach {
-                TypeButton(text = it.text,
+                TypeButton(
+                        text = it.text,
                         isSelected = (editPlanUiState.entryType == it),
                         onClick = {
                             editPlanViewModel.setType(it)
@@ -135,7 +144,7 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel = viewModel(factory = AppV
         TextField(value = "반복안함", onValueChange = { /* TODO: Handle text input */ })
 
         // Category
-        Category()
+        Category(categoryList = categoryList)
 
         // Priority
         RatingBar(
@@ -409,7 +418,7 @@ private fun DateTimePickerDialog(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Category() {
+fun Category(categoryList: List<Category>) {
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -422,15 +431,16 @@ fun Category() {
         BottomSheetDialog(onDismissRequest = {
             showBottomSheet = false
         }) {
-            // Sheet content
-            Button(onClick = {
-                scope.launch { sheetState.hide() }.invokeOnCompletion {
-                    if (!sheetState.isVisible) {
-                        showBottomSheet = false
+            Card(
+                    modifier = Modifier
+                            .fillMaxSize()
+                            .background(color = MaterialTheme.colorScheme.secondaryContainer)
+            ) {
+                LazyColumn {
+                    this.items<Category>(items = categoryList) { category ->
+                        Text(category.title)
                     }
                 }
-            }) {
-                Text("Hide bottom sheet")
             }
         }
     }
@@ -442,7 +452,8 @@ fun TodoScreenPreview() {
     EditPlanPage(
             editPlanViewModel = EditPlanViewModel(
                     scheduleRepository = DummyScheduleRepository(),
-                    todoRepository = DummyTodoRepository()
+                    todoRepository = DummyTodoRepository(),
+                    categoryRepository = DummyCategoryRepository()
             )
     )
 }

@@ -40,7 +40,7 @@ class AppContainer(private val context: Context) : IAppContainer {
         ScheduleRepository(
                 ScheduleLocalDataSource(
                         CalendyDatabase.getDatabase(context).scheduleDao()
-                ), ScheduleRemoteDataSource(serviceApi)
+                )
         )
     }
     override val todoRepository: ITodoRepository by lazy {

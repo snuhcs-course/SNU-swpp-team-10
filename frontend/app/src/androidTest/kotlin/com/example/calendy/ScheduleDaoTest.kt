@@ -35,8 +35,6 @@ class ScheduleDaoTest {
         scheduleDao = scheduleDatabase.scheduleDao()
         scheduleLocalDataSource = ScheduleLocalDataSource(scheduleDao)
         scheduleRepository = ScheduleRepository(scheduleLocalDataSource)
-
-
     }
     @After
     @Throws(IOException::class)
