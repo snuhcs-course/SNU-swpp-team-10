@@ -52,6 +52,7 @@ public class MonthlyView extends ComponentActivity {
     private DotDecorator dotDecorator;
 
 
+    ActivityResultLauncher<Intent> startActivityResult;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,6 +95,8 @@ public class MonthlyView extends ComponentActivity {
             // selected date changed
               @Override
               public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
+                if(selectedDate.equals(date))
+                    moveSubActivity();
                 calendarView.removeDecorator(selectedDayDecorator);
                 selectedDate=calendarView.getSelectedDate();
                 selectedDayDecorator = new SelectedDayDecorator(selectedDate,MonthlyView.this);
@@ -110,9 +113,25 @@ public class MonthlyView extends ComponentActivity {
             }
         });
 
+        //for modal view setting
+        startActivityResult = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+            public void onActivityResult(ActivityResult result) {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    Log.d(TAG, "MainActivity로 돌아왔다. ");
+                }
+            }
+        });
+
 
     }
 
+    private void moveSubActivity() {
+        Intent intent = new Intent(MonthlyView.this, MonthlyDayPopup.class);
+        startActivityResult.launch(intent);
+    }
 
 
 }

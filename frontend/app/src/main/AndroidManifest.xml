@@ -28,6 +28,11 @@
             android:theme="@style/Theme.Calendy">
 
         </activity>
+        <activity
+            android:name=".view.monthlyview.MonthlyDayPopup"
+            android:theme="@android:style/Theme.Holo.Dialog"
+        />
+
     </application>
 
 </manifest>

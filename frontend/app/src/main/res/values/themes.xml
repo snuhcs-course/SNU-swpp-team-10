@@ -2,4 +2,8 @@
 <resources>
 
     <style name="Theme.Calendy" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="RoundCornerModalStyle" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@drawable/white_round</item>
+    </style>
+
 </resources>
