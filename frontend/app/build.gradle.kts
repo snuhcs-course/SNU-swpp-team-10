@@ -73,9 +73,14 @@ dependencies {
     implementation("androidx.room:room-runtime:${rootProject.extra["room_version"]}")
     ksp("androidx.room:room-compiler:${rootProject.extra["room_version"]}")
     implementation("androidx.room:room-ktx:${rootProject.extra["room_version"]}")
+    
     //remote DB connect
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("com.squareup.retrofit2:converter-gson:2.4.0")
 
+    // wheel-picker
+    implementation("com.github.zj565061763:compose-wheel-picker:1.0.0-alpha01")
+    // rating-bar
+    implementation("com.github.a914-gowtham:compose-ratingbar:1.2.3")
 }
