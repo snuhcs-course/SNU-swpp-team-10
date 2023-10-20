@@ -57,7 +57,6 @@ class ScheduleDaoTest {
             startTime = makeDate(2023, 10, 9),
             endTime = makeDate(2023, 10, 11),
             memo = "",
-            repeatGroupId = 1,
             priority = 1,
             showInMonthlyView = false,
             isOverridden = false
@@ -68,7 +67,6 @@ class ScheduleDaoTest {
             startTime = makeDate(2023, 10, 13, 12, 30),
             endTime = makeDate(2023,11,1),
             memo = "",
-            repeatGroupId = 2,
             priority = 2,
             showInMonthlyView = false,
             isOverridden = false

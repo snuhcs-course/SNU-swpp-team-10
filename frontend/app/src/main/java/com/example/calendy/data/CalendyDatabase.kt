@@ -16,9 +16,13 @@ import com.example.calendy.data.plan.todo.TodoDao
 import com.example.calendy.data.repeatgroup.RepeatGroup
 import com.example.calendy.data.repeatgroup.RepeatGroupDao
 
-@Database(entities = [Schedule::class, Todo::class, Category::class, Message::class, RepeatGroup::class], version = 1, exportSchema = false)
+@Database(
+    entities = [Schedule::class, Todo::class, Category::class, Message::class, RepeatGroup::class],
+    version = 2,
+    exportSchema = false
+)
 @TypeConverters(RoomConverters::class)
-abstract class CalendyDatabase: RoomDatabase() {
+abstract class CalendyDatabase : RoomDatabase() {
     abstract fun scheduleDao(): ScheduleDao
     abstract fun todoDao(): TodoDao
     abstract fun categoryDao(): CategoryDao
@@ -31,10 +35,11 @@ abstract class CalendyDatabase: RoomDatabase() {
         fun getDatabase(context: Context): CalendyDatabase {
             return Instance ?: synchronized(this) {
                 // name: The name of the database file.
-                Room.databaseBuilder(context = context, klass = CalendyDatabase::class.java, name = "calendy_database")
-                        .fallbackToDestructiveMigration()
-                        .build()
-                        .also { Instance = it }
+                Room.databaseBuilder(
+                    context = context,
+                    klass = CalendyDatabase::class.java,
+                    name = "calendy_database"
+                ).fallbackToDestructiveMigration().build().also { Instance = it }
             }
         }
     }

@@ -1,8 +1,12 @@
 package com.example.calendy.view.editplanview
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.calendy.data.category.Category
 import com.example.calendy.data.category.ICategoryRepository
+import com.example.calendy.data.plan.Plan
+import com.example.calendy.data.plan.Plan.PlanType
 import com.example.calendy.data.plan.schedule.IScheduleRepository
 import com.example.calendy.data.plan.todo.ITodoRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,28 +15,29 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.util.Date
 import kotlin.math.max
 import kotlin.math.min
 
 
 class EditPlanViewModel(
-        private val scheduleRepository: IScheduleRepository,
-        private val todoRepository: ITodoRepository,
-        private val categoryRepository: ICategoryRepository
+    private val scheduleRepository: IScheduleRepository,
+    private val todoRepository: ITodoRepository,
+    private val categoryRepository: ICategoryRepository
 ) : ViewModel() {
 
     // ViewModel 내에서만 uiState 수정 가능하도록 설정
     private val _uiState = MutableStateFlow(EditPlanUiState())
     val uiState: StateFlow<EditPlanUiState> = _uiState.asStateFlow()
     val categoryListState = (categoryRepository.getCategoriesStream()).stateIn(
-            scope = viewModelScope,
-            initialValue = emptyList(),
-            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000)
+        scope = viewModelScope,
+        initialValue = emptyList(),
+        started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000)
     )
-    
+
     // TODO: EntryType 대신 PlanType 사용하기
-    fun setType(selectedType: EntryType) {
+    fun setType(selectedType: PlanType) {
         _uiState.update { currentState -> currentState.copy(entryType = selectedType) }
     }
 
@@ -52,8 +57,8 @@ class EditPlanViewModel(
         _uiState.update { currentState -> currentState.copy(endTime = inputDate) }
     }
 
-    fun setCategory() {
-        _uiState.update { currentState -> currentState.copy() }
+    fun setCategory(category: Category?) {
+        _uiState.update { currentState -> currentState.copy(category = category) }
     }
 
     fun setPriority(input: Int) {
@@ -61,25 +66,44 @@ class EditPlanViewModel(
         _uiState.update { currentState -> currentState.copy(priority = priority) }
     }
 
+    fun addCategory(title: String, defaultPriority: Int) {
+        Log.d("GUN", "$title $defaultPriority");
+        viewModelScope.launch {
+            categoryRepository.insert(Category(title = title, defaultPriority = defaultPriority))
+        }
+    }
+
+    fun setIsComplete(isComplete: Boolean) {
+        _uiState.update {
+            currentState -> currentState.copy(isComplete = isComplete)
+        }
+    }
+
+    fun setShowInMonthlyView(showInMonthlyView: Boolean) {
+        _uiState.update {
+                currentState -> currentState.copy(showInMonthlyView = showInMonthlyView)
+        }
+    }
+
 
     fun deletePlan() {
         when (_uiState.value.entryType) {
-            is EntryType.Schedule -> {
+            is PlanType.Schedule -> {
                 // scheduleRepository.deleteSchedule()
             }
 
-            is EntryType.Todo -> {
+            is PlanType.Todo     -> {
                 // todoRepository.deleteTodo()
             }
 
-            else -> {}
+            else                  -> {}
         }
     }
 
     fun editPlan() {
         val currentState = _uiState.value
         when (currentState.entryType) {
-            is EntryType.Schedule -> {
+            is PlanType.Schedule -> {
 //                val newSchedule: Schedule = Schedule(
 //                        title = currentState.titleField,
 //                        startTime = currentState.startTime ?: Date(),
@@ -94,7 +118,7 @@ class EditPlanViewModel(
 
             }
 
-            is EntryType.Todo -> {
+            is PlanType.Todo     -> {
 //                val newTodo: Todo = Todo(
 //                        title = currentState.titleField,
 //                        dueTime = currentState.endTime,
@@ -111,7 +135,7 @@ class EditPlanViewModel(
 
             }
 
-            else -> {}
+            else                  -> {}
         }
 
     }
