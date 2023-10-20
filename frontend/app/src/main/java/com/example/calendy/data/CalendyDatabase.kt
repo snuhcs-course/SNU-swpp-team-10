@@ -13,14 +13,17 @@ import com.example.calendy.data.plan.Schedule
 import com.example.calendy.data.plan.Todo
 import com.example.calendy.data.plan.schedule.ScheduleDao
 import com.example.calendy.data.plan.todo.TodoDao
+import com.example.calendy.data.repeatgroup.RepeatGroup
+import com.example.calendy.data.repeatgroup.RepeatGroupDao
 
-@Database(entities = [Schedule::class, Todo::class, Category::class, Message::class], version = 1, exportSchema = false)
+@Database(entities = [Schedule::class, Todo::class, Category::class, Message::class, RepeatGroup::class], version = 1, exportSchema = false)
 @TypeConverters(RoomConverters::class)
 abstract class CalendyDatabase: RoomDatabase() {
     abstract fun scheduleDao(): ScheduleDao
     abstract fun todoDao(): TodoDao
     abstract fun categoryDao(): CategoryDao
     abstract fun messageDao(): MessageDao
+    abstract fun repeatGroupDad(): RepeatGroupDao
 
     companion object {
         @Volatile

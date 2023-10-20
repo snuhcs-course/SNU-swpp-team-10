@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import com.example.calendy.data.category.Category
+import com.example.calendy.data.repeatgroup.RepeatGroup
 import com.google.gson.annotations.SerializedName
 import java.util.Date
 
@@ -15,6 +16,11 @@ import java.util.Date
         parentColumns = ["id"],
         childColumns = ["category_id"],
         onDelete = ForeignKey.SET_NULL
+    ), ForeignKey(
+        entity = RepeatGroup::class,
+        parentColumns = ["id"],
+        childColumns = ["repeat_group_id"],
+        onDelete = ForeignKey.CASCADE
     )]
 )
 data class Todo(
