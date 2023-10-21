@@ -175,13 +175,7 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel = viewModel(factory = AppV
         DateSelector(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
 
         //region Repeat
-        FieldWithLeadingText(leadingText = "반복") {
-            TextField(
-                value = "반복안함",
-                onValueChange = { /* TODO: Handle text input */ },
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
+        SetRepeat(editPlanUiState)
         //endregion
 
         //region Category

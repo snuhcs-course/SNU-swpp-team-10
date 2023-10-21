@@ -4,4 +4,5 @@
     <string name="text_monthly_view">Month</string>
     <string name="text_todo_view">Todo</string>
     <string name="text_manager_view">AI Manager</string>
+    <string name="setting_view">Setting</string>
 </resources>

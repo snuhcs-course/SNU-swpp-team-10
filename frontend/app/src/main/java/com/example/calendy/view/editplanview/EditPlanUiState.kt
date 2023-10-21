@@ -2,6 +2,7 @@ package com.example.calendy.view.editplanview
 
 import com.example.calendy.data.category.Category
 import com.example.calendy.data.plan.Plan.PlanType
+import com.example.calendy.data.repeatgroup.RepeatGroup
 import java.util.Date
 
 data class EditPlanUiState(
@@ -9,6 +10,7 @@ data class EditPlanUiState(
     val titleField: String = "",
     val memoField: String = "",
     val category: Category? = null,
+    val repeatGroup: RepeatGroup? = null,
     val priority: Int = 1,
     val startTime: Date = Date(),// schedule일 경우 필요
     val endTime: Date = Date(), //schedule 과  todo에 모두 필요

@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -45,7 +47,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background
                 ) {
-                    EditPlanPage()
+                    MainScreenView()
                 }
             }
         }
@@ -53,7 +55,6 @@ class MainActivity : ComponentActivity() {
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreenView() {
     val navController = rememberNavController()
@@ -72,7 +73,8 @@ fun BottomNavigation(navController: NavHostController) {
             BottomNavItem.Week,
             BottomNavItem.Month,
             BottomNavItem.Todo,
-            BottomNavItem.AiManager
+            BottomNavItem.AiManager,
+            BottomNavItem.Setting
     )
 
     NavigationBar(
@@ -89,8 +91,8 @@ fun BottomNavigation(navController: NavHostController) {
                                 painter = painterResource(id = item.icon),
                                 contentDescription = stringResource(id = item.title),
                                 modifier = Modifier
-                                        .width(26.dp)
-                                        .height(26.dp)
+                                    .width(26.dp)
+                                    .height(26.dp)
                         )
                     },
                     label = { Text(stringResource(id = item.title), fontSize = 9.sp) },
@@ -118,7 +120,9 @@ sealed class BottomNavItem(
     object Month : BottomNavItem(title = R.string.text_monthly_view, icon = R.drawable.ic_android_black_24dp, screenRoute = "Month")
     object Todo : BottomNavItem(title = R.string.text_todo_view, icon = R.drawable.ic_android_black_24dp, screenRoute = "Todo")
     object AiManager : BottomNavItem(title = R.string.text_manager_view, icon = R.drawable.ic_android_black_24dp, screenRoute = "AiManager")
+    object Setting : BottomNavItem(title = R.string.setting_view, icon = R.drawable.ic_android_black_24dp, screenRoute = "Setting")
 }
+
 
 @Composable
 fun NavigationGraph(navController: NavHostController) {
@@ -134,6 +138,9 @@ fun NavigationGraph(navController: NavHostController) {
         }
         composable(BottomNavItem.AiManager.screenRoute) {
             ManagerPage()
+        }
+        composable(BottomNavItem.Setting.screenRoute) {
+            SettingPage()
         }
     }
 }
