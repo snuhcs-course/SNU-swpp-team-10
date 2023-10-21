@@ -4,17 +4,14 @@ import androidx.activity.ComponentActivity;
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 
 import com.example.calendy.R;
 import com.example.calendy.data.Schedule;
@@ -31,16 +28,13 @@ import com.prolificinteractive.materialcalendarview.OnMonthChangedListener;
 import com.prolificinteractive.materialcalendarview.format.ArrayWeekDayFormatter;
 import com.prolificinteractive.materialcalendarview.format.MonthArrayTitleFormatter;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 
-import kotlinx.coroutines.flow.StateFlow;
-
-public class MonthlyView extends ComponentActivity {
+public class MonthlyPage extends ComponentActivity {
     private final String TAG = this.getClass().getSimpleName();
     private  CalendarDay selectedDate = CalendarDay.today();
     MaterialCalendarView calendarView;
@@ -58,7 +52,7 @@ public class MonthlyView extends ComponentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_monthly_view);
+        setContentView(R.layout.activity_monthly_page);
         model = new ViewModelProvider(this).get(MonthlyViewModel.class);
 
         selectedDate=CalendarDay.today();
@@ -76,7 +70,7 @@ public class MonthlyView extends ComponentActivity {
                 .commit();
 
         // selected day decorator initialization
-        selectedDayDecorator = new SelectedDayDecorator(CalendarDay.today(),MonthlyView.this);
+        selectedDayDecorator = new SelectedDayDecorator(CalendarDay.today(), MonthlyPage.this);
         //temp dummy code
         schedulesOfMonth = new Hashtable<>();
         //set dummy
@@ -110,7 +104,7 @@ public class MonthlyView extends ComponentActivity {
                     moveSubActivity();
                 calendarView.removeDecorator(selectedDayDecorator);
                 selectedDate=calendarView.getSelectedDate();
-                selectedDayDecorator = new SelectedDayDecorator(selectedDate,MonthlyView.this);
+                selectedDayDecorator = new SelectedDayDecorator(selectedDate, MonthlyPage.this);
                 calendarView.addDecorators(selectedDayDecorator);
 
               }
@@ -140,7 +134,7 @@ public class MonthlyView extends ComponentActivity {
     }
 
     private void moveSubActivity() {
-        Intent intent = new Intent(MonthlyView.this, MonthlyDayPopup.class);
+        Intent intent = new Intent(MonthlyPage.this, MonthlyDayPopup.class);
         //need data serialization
         //temp
             if(!selectedDate.equals(CalendarDay.from(2023,9,11))) return;
