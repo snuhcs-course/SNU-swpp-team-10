@@ -14,7 +14,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.example.calendy.R;
-import com.example.calendy.data.Schedule;
+import com.example.calendy.data.plan.Schedule;
 import com.example.calendy.view.monthlyview.decorator.DotDecorator;
 import com.example.calendy.view.monthlyview.decorator.OneDayDecorator;
 import com.example.calendy.view.monthlyview.decorator.SaturdayDecorator;
@@ -75,15 +75,14 @@ public class MonthlyPage extends ComponentActivity {
         schedulesOfMonth = new Hashtable<>();
         //set dummy
         dummyDaySchedules = new ArrayList<>();
-        dummyDaySchedules.add(new Schedule("1231","test1", new Date(2023,9,11,18,00),new Date(2023,9,11,20,00),1232,1,2));
-        dummyDaySchedules.add(new Schedule("1232","test2", new Date(2023,9,11,8,00),new Date(2023,9,11,10,00),1234,1,2));
-        dummyDaySchedules.add(new Schedule("1233","test3", new Date(2023,9,11,8,00),new Date(2023,9,11,10,00),1234,1,2));
-        dummyDaySchedules.add(new Schedule("1234","test4", new Date(2023,9,11,8,00),new Date(2023,9,11,10,00),1234,1,2));
-        dummyDaySchedules.add(new Schedule("1235","test5", new Date(2023,9,11,8,00),new Date(2023,9,11,10,00),1234,1,2));
-        dummyDaySchedules.add(new Schedule("1236","test6", new Date(2023,9,11,8,00),new Date(2023,9,11,10,00),1234,1,2));
-        dummyDaySchedules.add(new Schedule("1237","test7", new Date(2023,9,11,8,00),new Date(2023,9,11,10,00),1234,1,2));
-        dummyDaySchedules.add(new Schedule("1238","test8", new Date(2023,9,11,8,00),new Date(2023,9,11,10,00),1234,1,2));
-        dummyDaySchedules.add(new Schedule("1239","test9", new Date(2023,9,11,8,00),new Date(2023,9,11,10,00),1234,1,2));
+        dummyDaySchedules.add(new Schedule(1231,"test1", new Date(2023,9,11,18,00),new Date(2023,9,11,20,00),"memomemo",1232,1,2,true,false));
+        dummyDaySchedules.add(new Schedule(1232,"test2", new Date(2023,9,11,18,00),new Date(2023,9,11,20,00),"memomemo",1232,1,2,true,false));
+        dummyDaySchedules.add(new Schedule(1233,"test3", new Date(2023,9,11,18,00),new Date(2023,9,11,20,00),"memomemo",1232,1,2,true,false));
+        dummyDaySchedules.add(new Schedule(1234,"test4", new Date(2023,9,11,18,00),new Date(2023,9,11,20,00),"memomemo",1232,1,2,true,false));
+        dummyDaySchedules.add(new Schedule(1235,"test5", new Date(2023,9,11,18,00),new Date(2023,9,11,20,00),"memomemo",1232,1,2,true,false));
+        dummyDaySchedules.add(new Schedule(1236,"test6", new Date(2023,9,11,18,00),new Date(2023,9,11,20,00),"memomemo",1232,1,2,true,false));
+        dummyDaySchedules.add(new Schedule(1237,"test7", new Date(2023,9,11,18,00),new Date(2023,9,11,20,00),"memomemo",1232,1,2,true,false));
+
         List<Schedule> daySchedule=dummyDaySchedules;
         schedulesOfMonth.put(CalendarDay.from(2023,9,11),daySchedule);
 

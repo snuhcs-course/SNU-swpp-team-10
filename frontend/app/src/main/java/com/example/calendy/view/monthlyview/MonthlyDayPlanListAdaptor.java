@@ -9,7 +9,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.calendy.R;
-import com.example.calendy.data.Schedule;
 
 import java.util.ArrayList;
 
@@ -41,7 +40,7 @@ public class MonthlyDayPlanListAdaptor extends RecyclerView.Adapter<MonthlyDayPl
     @Override   // ViewHolder 객체를 생성하여 리턴한다.
     public MonthlyDayPlanListAdaptor.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.monthly_popup_plans_item, parent, false);
+                .inflate(R.layout.monthly_select_list_item_schedule, parent, false);
         MonthlyDayPlanListAdaptor.ViewHolder viewHolder = new MonthlyDayPlanListAdaptor.ViewHolder(view);
 
         return viewHolder;

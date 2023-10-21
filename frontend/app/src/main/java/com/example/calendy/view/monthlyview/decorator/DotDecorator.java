@@ -6,7 +6,7 @@ import android.graphics.drawable.Drawable;
 
 //import com.project.sample_calendar.R;
 import com.example.calendy.R;
-import com.example.calendy.data.Schedule;
+import com.example.calendy.data.plan.Schedule;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.DayViewDecorator;
 import com.prolificinteractive.materialcalendarview.DayViewFacade;
