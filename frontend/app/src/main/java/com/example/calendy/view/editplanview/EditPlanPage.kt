@@ -197,18 +197,18 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel = viewModel(factory = AppV
         //endregion
 
         //region Category
-        FieldWithLeadingText(leadingText = "분류", content = {
+        FieldWithLeadingText(leadingText = "분류") {
             Category(
                 currentCategory = editPlanUiState.category,
                 categoryList = categoryList,
                 onAddCategory = editPlanViewModel::addCategory,
                 onSelectCategory = editPlanViewModel::setCategory
             )
-        }, alignment = Alignment.Top)
+        }
         //endregion
 
         //region Priority
-        FieldWithLeadingText(leadingText = "중요도", content = {
+        FieldWithLeadingText(leadingText = "중요도") {
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 RatingBar(
                     value = editPlanUiState.priority.toFloat(),
@@ -217,7 +217,7 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel = viewModel(factory = AppV
                     config = RatingBarConfig().size(40.dp)
                 )
             }
-        }, alignment = Alignment.Top)
+        }
         //endregion
 
         //region Memo Text Field
