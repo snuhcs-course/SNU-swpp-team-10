@@ -5,10 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.calendy.data.category.Category
 import com.example.calendy.data.category.ICategoryRepository
-import com.example.calendy.data.plan.Plan
 import com.example.calendy.data.plan.Plan.PlanType
 import com.example.calendy.data.plan.schedule.IScheduleRepository
 import com.example.calendy.data.plan.todo.ITodoRepository
+import com.example.calendy.utils.DateHelper.extract
+import com.example.calendy.utils.DateHelper.getDate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -36,7 +37,7 @@ class EditPlanViewModel(
         started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000)
     )
 
-    // TODO: EntryType 대신 PlanType 사용하기
+    // Style: functions' order is aligned with UI
     fun setType(selectedType: PlanType) {
         _uiState.update { currentState -> currentState.copy(entryType = selectedType) }
     }
@@ -45,8 +46,10 @@ class EditPlanViewModel(
         _uiState.update { currentState -> currentState.copy(titleField = userInput) }
     }
 
-    fun setMemo(userInput: String) {
-        _uiState.update { currentState -> currentState.copy(memoField = userInput) }
+    fun setIsComplete(isComplete: Boolean) {
+        _uiState.update { currentState ->
+            currentState.copy(isComplete = isComplete)
+        }
     }
 
     fun setStartTime(inputDate: Date) {
@@ -57,8 +60,107 @@ class EditPlanViewModel(
         _uiState.update { currentState -> currentState.copy(endTime = inputDate) }
     }
 
+    fun toggleIsYearly() {
+        if (uiState.value.isYearly) {
+            _uiState.update { currentState ->
+                currentState.copy(
+                    isYearly = false,
+                    isMonthly = false,
+                    isDaily = false
+                )
+            }
+        } else {
+            _uiState.update { currentState ->
+                currentState.copy(
+                    isYearly = true,
+                    isMonthly = false,
+                    isDaily = false
+                )
+            }
+        }
+    }
+
+    fun toggleIsMonthly() {
+        if (uiState.value.isMonthly) {
+            _uiState.update { currentState ->
+                currentState.copy(
+                    isYearly = false,
+                    isMonthly = false,
+                    isDaily = false
+                )
+            }
+        } else {
+            _uiState.update { currentState ->
+                currentState.copy(
+                    isYearly = false,
+                    isMonthly = true,
+                    isDaily = false
+                )
+            }
+        }
+    }
+
+    fun toggleIsDaily() {
+        if (uiState.value.isDaily) {
+            _uiState.update { currentState ->
+                currentState.copy(
+                    isYearly = false,
+                    isMonthly = false,
+                    isDaily = false
+                )
+            }
+        } else {
+            _uiState.update { currentState ->
+                currentState.copy(
+                    isYearly = false,
+                    isMonthly = false,
+                    isDaily = true
+                )
+            }
+        }
+    }
+
+    fun setDueYear(newYear: Int) {
+        val (_, monthZeroIndexed, day, hour, minute) = uiState.value.dueTime.extract()
+        setDueTime(
+            getDate(
+                year = newYear,
+                monthZeroIndexed = monthZeroIndexed,
+                day = day,
+                hourOfDay = hour,
+                minute = minute,
+                assertValueIsValid = false
+            )
+        )
+    }
+
+    fun setDueMonth(newYear: Int, newMonthZeroIndexed: Int) {
+        val (_, _, day, hour, minute) = uiState.value.dueTime.extract()
+        setDueTime(
+            getDate(
+                year = newYear,
+                monthZeroIndexed = newMonthZeroIndexed,
+                day = day,
+                hourOfDay = hour,
+                minute = minute,
+                assertValueIsValid = false
+            )
+        )
+    }
+
+    fun setDueTime(inputDate: Date) {
+        Log.d("GUN", inputDate.toString())
+        _uiState.update { currentState -> currentState.copy(dueTime = inputDate) }
+    }
+
     fun setCategory(category: Category?) {
         _uiState.update { currentState -> currentState.copy(category = category) }
+    }
+
+    fun addCategory(title: String, defaultPriority: Int) {
+        viewModelScope.launch {
+            categoryRepository.insert(Category(title = title, defaultPriority = defaultPriority))
+        }
     }
 
     fun setPriority(input: Int) {
@@ -66,22 +168,13 @@ class EditPlanViewModel(
         _uiState.update { currentState -> currentState.copy(priority = priority) }
     }
 
-    fun addCategory(title: String, defaultPriority: Int) {
-        Log.d("GUN", "$title $defaultPriority");
-        viewModelScope.launch {
-            categoryRepository.insert(Category(title = title, defaultPriority = defaultPriority))
-        }
-    }
-
-    fun setIsComplete(isComplete: Boolean) {
-        _uiState.update {
-            currentState -> currentState.copy(isComplete = isComplete)
-        }
+    fun setMemo(userInput: String) {
+        _uiState.update { currentState -> currentState.copy(memoField = userInput) }
     }
 
     fun setShowInMonthlyView(showInMonthlyView: Boolean) {
-        _uiState.update {
-                currentState -> currentState.copy(showInMonthlyView = showInMonthlyView)
+        _uiState.update { currentState ->
+            currentState.copy(showInMonthlyView = showInMonthlyView)
         }
     }
 
@@ -96,7 +189,7 @@ class EditPlanViewModel(
                 // todoRepository.deleteTodo()
             }
 
-            else                  -> {}
+            else                 -> {}
         }
     }
 
@@ -118,6 +211,7 @@ class EditPlanViewModel(
 
             }
 
+            // NOTE: isMonthly 검사하고, endOf(dueTime) 을 사용해야 한다.
             is PlanType.Todo     -> {
 //                val newTodo: Todo = Todo(
 //                        title = currentState.titleField,
@@ -135,7 +229,7 @@ class EditPlanViewModel(
 
             }
 
-            else                  -> {}
+            else                 -> {}
         }
 
     }
