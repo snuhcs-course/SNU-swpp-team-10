@@ -99,8 +99,8 @@ public class MonthlyPage extends ComponentActivity {
             // selected date changed
               @Override
               public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
-                if(selectedDate.equals(date))
-                    moveSubActivity();
+                if(selectedDate.equals(date) && schedulesOfMonth.containsKey(date))
+                    openDayPlanListPopup();
                 calendarView.removeDecorator(selectedDayDecorator);
                 selectedDate=calendarView.getSelectedDate();
                 selectedDayDecorator = new SelectedDayDecorator(selectedDate, MonthlyPage.this);
@@ -132,19 +132,13 @@ public class MonthlyPage extends ComponentActivity {
 
     }
 
-    private void moveSubActivity() {
-        Intent intent = new Intent(MonthlyPage.this, MonthlyDayPopup.class);
-        //need data serialization
-        //temp
-            if(!selectedDate.equals(CalendarDay.from(2023,9,11))) return;
-            ArrayList<String> titles = new ArrayList<>();
-            List<Schedule> schedules= dummyDaySchedules;
-            for (Schedule sch : schedules){
-                titles.add(sch.getTitle());
-            }
+    private void openDayPlanListPopup() {
 
-            intent.putExtra("list",titles);
-            startActivityResult.launch(intent);
+        Intent intent = new Intent(MonthlyPage.this, MonthlyDayPlanListPopup.class);
+        intent.putExtra("year",selectedDate.getYear());
+        intent.putExtra("month",selectedDate.getMonth());
+        intent.putExtra("day",selectedDate.getDay());
+        startActivityResult.launch(intent);
     }
 
 

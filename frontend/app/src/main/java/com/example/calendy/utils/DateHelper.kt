@@ -1,7 +1,14 @@
 package com.example.calendy.utils
 
+import com.prolificinteractive.materialcalendarview.CalendarDay
+import com.prolificinteractive.materialcalendarview.format.ArrayWeekDayFormatter
+import java.time.LocalDate
+import com.example.calendy.R
+import android.content.Context
+import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 
 object DateHelper {
     /**
@@ -65,4 +72,20 @@ object DateHelper {
      * @param month 0 ~ 11 based
      */
     fun getDailyDueTime(year: Int, month: Int, day: Int): Date = endOf(year, month, day)
+
+    /**
+     * String formatter for date
+     */
+    fun getDayOfWeek(date: Date): String {
+        val sdf = SimpleDateFormat("EEEE", Locale.getDefault())
+        return sdf.format(date)
+    }
 }
+
+// extension for CalendarDay  and Date
+
+fun CalendarDay.toDate() : Date = Date(year,month,day)
+fun CalendarDay.toStartTime() : Date = Date(year,month,day,0,0)
+fun CalendarDay.toEndTime() : Date = Date(year,month,day,23,59)
+fun CalendarDay.getWeekDay() : String = DateHelper.getDayOfWeek(toDate())
+
