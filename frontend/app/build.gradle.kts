@@ -92,4 +92,7 @@ dependencies {
     implementation("com.github.a914-gowtham:compose-ratingbar:1.2.3")
     // Bottom Sheet Dialog
     implementation("com.holix.android:bottomsheetdialog-compose:1.3.0")
+
+    //navigation
+    implementation("androidx.navigation:navigation-compose:2.5.3")
 }
