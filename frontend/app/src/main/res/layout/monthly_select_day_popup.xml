@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/monthlySelectDayPopup"
+    android:layout_width="300dp"
+    android:layout_height="400dp"
+    android:background="@drawable/white_round"
+    android:orientation="vertical">
+
+    <!-- 타이틀바 -->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="80dp">
+
+        <TextView
+            android:id="@+id/planListDayNumber"
+            android:layout_width="42dp"
+            android:layout_height="43dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginBottom="20dp"
+            android:text="28"
+            android:textColor="#000"
+            android:textSize="34sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/planListDayText"
+            android:layout_width="100dp"
+            android:layout_height="22dp"
+            android:layout_marginBottom="24dp"
+            android:text="수요일"
+            android:textAlignment="viewStart"
+            android:textColor="#000"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/planListDayNumber" />
+
+        <View
+            android:id="@+id/divider1"
+            android:layout_width="250dp"
+            android:layout_height="0.5dp"
+            android:background="#646464"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/monthlyDayPlanListRecycler"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="25dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="25dp"
+        android:layout_marginBottom="25dp" />
+
+    <!-- //end 타이틀바 -->
+
+    <!-- Notice -->
+
+    <!-- Notice -->
+
+    <!-- 닫기 버튼 -->
+    <!--// 닫기 버튼 -->
+</LinearLayout>
