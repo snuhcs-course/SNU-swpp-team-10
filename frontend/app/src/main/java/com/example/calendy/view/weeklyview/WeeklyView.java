@@ -108,7 +108,8 @@ public class WeeklyView extends ComponentActivity {
             // Add cells for each day of the week
             for (int j = 0; j < 7; j++) {
                 TextView cell = new TextView(this);
-                // cell.setBackgroundResource(R.drawable.border);
+                cell.setBackgroundResource(R.drawable.border);
+                row.setLayoutParams(lp);
                 row.addView(cell);
             }
 
