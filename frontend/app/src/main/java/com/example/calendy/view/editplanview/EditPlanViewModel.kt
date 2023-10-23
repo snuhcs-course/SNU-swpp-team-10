@@ -5,9 +5,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.calendy.data.category.Category
 import com.example.calendy.data.category.ICategoryRepository
+import com.example.calendy.data.plan.Plan
 import com.example.calendy.data.plan.Plan.PlanType
+import com.example.calendy.data.plan.Schedule
+import com.example.calendy.data.plan.Todo
 import com.example.calendy.data.plan.schedule.IScheduleRepository
 import com.example.calendy.data.plan.todo.ITodoRepository
+import com.example.calendy.data.repeatgroup.RepeatGroup
+import com.example.calendy.data.repeatgroup.IRepeatGroupRepository
 import com.example.calendy.utils.DateHelper.extract
 import com.example.calendy.utils.DateHelper.getDate
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +30,8 @@ import kotlin.math.min
 class EditPlanViewModel(
     private val scheduleRepository: IScheduleRepository,
     private val todoRepository: ITodoRepository,
-    private val categoryRepository: ICategoryRepository
+    private val categoryRepository: ICategoryRepository,
+    private val repeatGroupRepository: IRepeatGroupRepository
 ) : ViewModel() {
 
     // ViewModel 내에서만 uiState 수정 가능하도록 설정
@@ -163,6 +169,28 @@ class EditPlanViewModel(
         }
     }
 
+    fun setRepeatGroup(repeatGroup: RepeatGroup) {
+        _uiState.update { currentState -> currentState.copy(repeatGroup = repeatGroup)  }
+    }
+
+    fun deleteRepeatGroup(repeatGroup: RepeatGroup) {
+        viewModelScope.launch {
+            repeatGroupRepository.delete(repeatGroup)
+        }
+    }
+
+    fun addRepeatGroup(repeatGroup: RepeatGroup) {
+        viewModelScope.launch {
+            repeatGroupRepository.insert(repeatGroup)
+        }
+    }
+
+    fun updateRepeatGroup(repeatGroup: RepeatGroup) {
+        viewModelScope.launch {
+            repeatGroupRepository.update(repeatGroup)
+        }
+    }
+
     fun setPriority(input: Int) {
         val priority = max(1, min(5, input))
         _uiState.update { currentState -> currentState.copy(priority = priority) }
@@ -179,60 +207,72 @@ class EditPlanViewModel(
     }
 
 
-    fun deletePlan() {
+    fun deletePlan(plan: Plan) {
         when (_uiState.value.entryType) {
             is PlanType.Schedule -> {
-                // scheduleRepository.deleteSchedule()
+//                viewModelScope.launch { scheduleRepository.deleteSchedule()}
             }
 
-            is PlanType.Todo     -> {
-                // todoRepository.deleteTodo()
+            is PlanType.Todo  -> {
+//                viewModelScope.launch { todoRepository.deleteTodo()}
             }
-
-            else                 -> {}
         }
     }
 
-    fun editPlan() {
+    fun addPlan() {
         val currentState = _uiState.value
         when (currentState.entryType) {
             is PlanType.Schedule -> {
-//                val newSchedule: Schedule = Schedule(
-//                        title = currentState.titleField,
-//                        startTime = currentState.startTime ?: Date(),
-//                        endTime = currentState.endTime ?: Date(),
-//                        memo = currentState.memoField,
-//                        repeatGroupId = 0,  // You might need a way to set this from the UI or some logic
-//                        categoryId = currentState.categoryID,
-//                        priority = currentState.priority,
-//                )
-//                viewModelScope.launch { scheduleRepository.insertSchedule(newSchedule) }
-
-
+                val newSchedule: Schedule = Schedule(
+                        title = currentState.titleField,
+                        startTime = currentState.startTime,
+                        endTime = currentState.endTime,
+                        memo = currentState.memoField,
+                        repeatGroupId = currentState.repeatGroup?.id ?:null,
+                        categoryId = currentState.category?.id ?:null,
+                        priority = currentState.priority,
+                        showInMonthlyView = currentState.showInMonthlyView,
+                        isOverridden = false
+                )
+                viewModelScope.launch { scheduleRepository.insertSchedule(newSchedule) }
             }
 
-            // NOTE: isMonthly 검사하고, endOf(dueTime) 을 사용해야 한다.
-            is PlanType.Todo     -> {
-//                val newTodo: Todo = Todo(
-//                        title = currentState.titleField,
-//                        dueTime = currentState.endTime,
-//                        yearly = false,
-//                        monthly = false,
-//                        daily = false,
-//                        memo = currentState.memoField,
-//                        complete = false,
-//                        repeatGroupId = 0,
-//                        categoryId = currentState.categoryID,
-//                        priority = currentState.priority,
-//                )
-//                viewModelScope.launch { todoRepository.insertTodo(newTodo) }
+            is PlanType.Todo-> {
+                val newTodo: Todo = Todo(
+                        title = currentState.titleField,
+                        dueTime = currentState.dueTime,
+                        yearly = currentState.isYearly,
+                        monthly = currentState.isMonthly,
+                        daily = currentState.isDaily,
+                        memo = currentState.memoField,
+                        complete = currentState.isComplete,
+                        repeatGroupId = currentState.repeatGroup?.id ?:null,
+                        categoryId = currentState.category?.id ?:null,
+                        priority = currentState.priority,
+                        showInMonthlyView = currentState.showInMonthlyView,
+                        isOverridden = false
+                )
+                viewModelScope.launch { todoRepository.insertTodo(newTodo) }
 
             }
-
-            else                 -> {}
         }
-
     }
+
+//    fun updatePlan() {
+//        val currentState = _uiState.value
+//        when (currentState.entryType) {
+//            is PlanType.Schedule -> {
+//
+//                viewModelScope.launch { scheduleRepository.updateSchedule() }
+//            }
+//
+//            is PlanType.Todo-> {
+//
+//                viewModelScope.launch { todoRepository.updateTodo() }
+//
+//            }
+//        }
+//    }
 
 
 }

@@ -29,6 +29,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
+import com.example.calendy.data.plan.Plan
 import com.example.calendy.utils.bottomBorder
 
 
@@ -37,7 +38,7 @@ import com.example.calendy.utils.bottomBorder
 fun SetRepeat(uiState: EditPlanUiState) {
     var isDialogOpen by remember { mutableStateOf(false) }
     var repeatIntervalText by remember { mutableStateOf("반복 안 함") }
-    val calendar = Calendar.getInstance().apply { time = uiState.startTime }
+    val calendar = Calendar.getInstance().apply { time = if(uiState.entryType ==Plan.PlanType.Todo) uiState.dueTime else uiState.startTime } 
 
     FieldWithLeadingText(leadingText = "반복") {
         TextButton(
@@ -122,12 +123,7 @@ fun SetRepeatDialog(onDismiss: () -> Unit, calendar: Calendar) {
                         Divider()
                     }
                     item { RadioButtonLine("계속 반복", 1,durationRadioGroup) }
-                    item {
-                        RepeatTimeRadioButtonLine(
-                            "반복 횟수", "번 반복",2, calendar, durationRadioGroup
-                        )
-                    }
-                    item { EndTimeRadioButtonLine("종료 날짜", 3,durationRadioGroup) }
+                    item { EndTimeRadioButtonLine("종료 날짜", 2,durationRadioGroup) }
                 }
             }
         }
@@ -237,9 +233,6 @@ fun WeeklyRadioButtonLine(
                     .padding(16.dp)
             ) {
                 daysOfWeek.forEachIndexed { index, day ->
-                    if (day==selectedDay) {
-                        buttonStates[index] = true
-                    }
                     TextButton(
                         onClick = {
                             if (buttonStates[index]) {
@@ -336,9 +329,6 @@ fun MonthlyRadioButtonLine(
                             ) {
                                 val endIndex = minOf(i + 7, days.size)
                                 for (j in i until endIndex) {
-                                    if (day - 1==j) {
-                                        buttonStates[j] = true
-                                    }
                                     TextButton(
                                         onClick = {
                                             if (buttonStates[j]) {
@@ -439,9 +429,6 @@ fun YearlyRadioButtonLine(
                             ) {
                                 val endIndex = minOf(i + 6, months.size)
                                 for (j in i until endIndex) {
-                                    if (month - 1==j) {
-                                        buttonStates[j] = true
-                                    }
                                     TextButton(
                                         onClick = {
                                             if (buttonStates[j]) {

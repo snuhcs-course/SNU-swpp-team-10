@@ -7,11 +7,11 @@ import java.util.Date
 
 data class EditPlanUiState(
     // Style: properties' order is aligned with UI
-    val entryType: PlanType = PlanType.Schedule,
+    val entryType: PlanType = PlanType.Todo,
     val titleField: String = "",
     val isComplete: Boolean = false,
-    val startTime: Date = Date(),// schedule일 경우 필요
-    val endTime: Date = Date(), //schedule 과  todo에 모두 필요,
+    val startTime: Date = Date(),
+    val endTime: Date = Date(),
     val isYearly: Boolean = false,
     val isMonthly: Boolean = false,
     val isDaily: Boolean = false,

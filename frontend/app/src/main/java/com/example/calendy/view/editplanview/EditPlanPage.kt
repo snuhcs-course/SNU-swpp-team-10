@@ -73,10 +73,11 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.calendy.AppViewModelProvider
-import com.example.calendy.data.DummyCategoryRepository
-import com.example.calendy.data.DummyScheduleRepository
-import com.example.calendy.data.DummyTodoRepository
+import com.example.calendy.data.dummy.DummyCategoryRepository
+import com.example.calendy.data.dummy.DummyScheduleRepository
+import com.example.calendy.data.dummy.DummyTodoRepository
 import com.example.calendy.data.category.Category
+import com.example.calendy.data.dummy.DummyRepeatGroupRepository
 import com.example.calendy.data.plan.Plan.PlanType
 import com.example.calendy.utils.DateHelper.extract
 import com.example.calendy.utils.DateHelper.getDateInMillis
@@ -168,28 +169,33 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel = viewModel(factory = AppV
                       modifier = Modifier.weight(1f),
                       textStyle = TextStyle(fontSize = 32.sp, fontWeight = FontWeight.Bold)
             )
-            Checkbox(
-                checked = editPlanUiState.isComplete,
-                onCheckedChange = { editPlanViewModel.setIsComplete(it) },
-                modifier = Modifier.scale(1.5f)
-            )
+            if(editPlanUiState.entryType == PlanType.Todo){
+                Checkbox(
+                    checked = editPlanUiState.isComplete,
+                    onCheckedChange = { editPlanViewModel.setIsComplete(it) },
+                    modifier = Modifier.scale(1.5f)
+                )
+            }
         }
         //endregion
 
         //region Date Selector
-        DateSelector(
-            dueTime = editPlanUiState.dueTime,
-            onSelectDueTime = editPlanViewModel::setDueTime,
-            onSelectDueYear = editPlanViewModel::setDueYear,
-            onSelectDueMonth = editPlanViewModel::setDueMonth,
-            isYearly = editPlanUiState.isYearly,
-            toggleIsYearly = editPlanViewModel::toggleIsYearly,
-            isMonthly = editPlanUiState.isMonthly,
-            toggleIsMonthly = editPlanViewModel::toggleIsMonthly,
-            isDaily = editPlanUiState.isDaily,
-            toggleIsDaily = editPlanViewModel::toggleIsDaily,
-            modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
-        )
+        if(editPlanUiState.entryType == PlanType.Todo) {
+            DateSelector(
+                dueTime = editPlanUiState.dueTime,
+                onSelectDueTime = editPlanViewModel::setDueTime,
+                onSelectDueYear = editPlanViewModel::setDueYear,
+                onSelectDueMonth = editPlanViewModel::setDueMonth,
+                isYearly = editPlanUiState.isYearly,
+                toggleIsYearly = editPlanViewModel::toggleIsYearly,
+                isMonthly = editPlanUiState.isMonthly,
+                toggleIsMonthly = editPlanViewModel::toggleIsMonthly,
+                isDaily = editPlanUiState.isDaily,
+                toggleIsDaily = editPlanViewModel::toggleIsDaily,
+                modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
+            )
+        }
+
         //endregion
 
         //region Repeat
@@ -773,8 +779,9 @@ fun TodoScreenPreview() {
         editPlanViewModel = EditPlanViewModel(
             scheduleRepository = DummyScheduleRepository(),
             todoRepository = DummyTodoRepository(),
-            categoryRepository = DummyCategoryRepository()
-        )
+            categoryRepository = DummyCategoryRepository(),
+            repeatGroupRepository = DummyRepeatGroupRepository(),
+            )
     )
 }
 

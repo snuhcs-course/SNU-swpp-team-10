@@ -1,4 +1,4 @@
-package com.example.calendy.data
+package com.example.calendy.data.dummy
 
 import com.example.calendy.data.category.Category
 import com.example.calendy.data.category.ICategoryRepository
