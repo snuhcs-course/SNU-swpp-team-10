@@ -36,6 +36,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerState
+import androidx.compose.material3.DateRangePicker
 import androidx.compose.material3.DateRangePickerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -73,11 +74,11 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.calendy.AppViewModelProvider
+import com.example.calendy.data.category.Category
 import com.example.calendy.data.dummy.DummyCategoryRepository
+import com.example.calendy.data.dummy.DummyRepeatGroupRepository
 import com.example.calendy.data.dummy.DummyScheduleRepository
 import com.example.calendy.data.dummy.DummyTodoRepository
-import com.example.calendy.data.category.Category
-import com.example.calendy.data.dummy.DummyRepeatGroupRepository
 import com.example.calendy.data.plan.Plan.PlanType
 import com.example.calendy.utils.DateHelper.extract
 import com.example.calendy.utils.DateHelper.getDateInMillis
@@ -98,6 +99,12 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel = viewModel(factory = AppV
     val editPlanUiState: EditPlanUiState by editPlanViewModel.uiState.collectAsState()
     val categoryList: List<Category> by editPlanViewModel.categoryListState.collectAsState()
 
+    val isPageSchedule = editPlanUiState.entryType==PlanType.Schedule
+    val isPageTodo = editPlanUiState.entryType==PlanType.Todo
+    // TODO: Page Add Logic
+    val isPageAdd = editPlanUiState.showInMonthlyView
+    val isPageEdit = !isPageAdd
+
     val verticalScrollState = rememberScrollState(initial = 0)
     Column(
         modifier = Modifier
@@ -112,34 +119,51 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel = viewModel(factory = AppV
                   title = { },
                   trailingContent = {
                       Row {
-                          // Delete Button
-                          IconButton(onClick = { /*TODO Delete Button */ }) {
-                              Icon(
-                                  imageVector = Icons.Default.Delete, contentDescription = "Delete"
-                              )
+                          if (isPageAdd) {
+                              // Add Button
+                              IconButton(onClick = { /*TODO Add Button */ }) {
+                                  Icon(
+                                      imageVector = Icons.Default.Add, contentDescription = "Add"
+                                  )
+                              }
                           }
-                          // Save Button
-                          IconButton(onClick = { /*TODO Save Button */ }) {
-                              Icon(imageVector = Icons.Default.Save, contentDescription = "Submit")
+                          if (isPageEdit) {
+                              // Delete Button
+                              IconButton(onClick = { /*TODO Delete Button */ }) {
+                                  Icon(
+                                      imageVector = Icons.Default.Delete,
+                                      contentDescription = "Delete"
+                                  )
+                              }
+                              // Save Button
+                              IconButton(onClick = { /*TODO Save Button */ }) {
+                                  Icon(
+                                      imageVector = Icons.Default.Save,
+                                      contentDescription = "Submit"
+                                  )
+                              }
                           }
                       }
                   })
         //endregion
 
         //region Type Buttons
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            listOf(PlanType.Schedule, PlanType.Todo).forEach {
-                TypeButton(text = when (it) {
-                    PlanType.Schedule -> "일정"
-                    PlanType.Todo     -> "Todo"
-                }, isSelected = (editPlanUiState.entryType==it), onClick = {
-                    editPlanViewModel.setType(it)
-                })
+        if (isPageAdd) {
+            Row(
+                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                listOf(PlanType.Schedule, PlanType.Todo).forEach {
+                    TypeButton(
+                        text = when (it) {
+                            PlanType.Schedule -> "일정"
+                            PlanType.Todo     -> "Todo"
+                        },
+                        isSelected = (editPlanUiState.entryType==it),
+                        onClick = {
+                            editPlanViewModel.setType(it)
+                        },
+                    )
+                }
             }
         }
         //endregion
@@ -169,7 +193,7 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel = viewModel(factory = AppV
                       modifier = Modifier.weight(1f),
                       textStyle = TextStyle(fontSize = 32.sp, fontWeight = FontWeight.Bold)
             )
-            if(editPlanUiState.entryType == PlanType.Todo){
+            if (isPageTodo) {
                 Checkbox(
                     checked = editPlanUiState.isComplete,
                     onCheckedChange = { editPlanViewModel.setIsComplete(it) },
@@ -180,7 +204,7 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel = viewModel(factory = AppV
         //endregion
 
         //region Date Selector
-        if(editPlanUiState.entryType == PlanType.Todo) {
+        if (isPageTodo) {
             DateSelector(
                 dueTime = editPlanUiState.dueTime,
                 onSelectDueTime = editPlanViewModel::setDueTime,
@@ -195,7 +219,9 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel = viewModel(factory = AppV
                 modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
             )
         }
-
+        if (isPageSchedule) {
+            DateRangePickerButton()
+        }
         //endregion
 
         //region Repeat
@@ -300,15 +326,15 @@ fun TopAppBar(
 }
 
 @Composable
-fun TypeButton(text: String, isSelected: Boolean, onClick: () -> Unit) {
+fun TypeButton(
+    text: String, isSelected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier
+) {
     Button(
         onClick = { onClick() },
         colors = ButtonDefaults.buttonColors(if (isSelected) Color(0xFF7986CB) else Color.Gray),
         border = BorderStroke(2.dp, if (isSelected) Color.Black else Color.Black),
         shape = RoundedCornerShape(20),
-        modifier = Modifier
-            .width(136.dp)
-            .height(36.dp)
+        modifier = modifier
     ) {
         Text(text = text, fontSize = 16.sp)
     }
@@ -488,6 +514,7 @@ fun DateSelector(
             //endregion
             //region Date & Time Picker
             else {
+                // Neither isYearly, isMonthly, isDaily
                 Button(
                     onClick = { openDialog() },
                     modifier = Modifier.align(Alignment.BottomCenter),
@@ -529,6 +556,61 @@ fun DateSelector(
                 }
             }
             //endregion
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DateRangePickerButton(modifier: Modifier = Modifier) {
+    var isDialogOpen by remember { mutableStateOf(false) }
+    fun openDialog() {
+        isDialogOpen = true
+    }
+
+    fun closeDialog() {
+        isDialogOpen = false
+    }
+
+    // TODO: refactor me (especially in Date Picker, Date Time Picker region)
+    // TODO: Calendar 대신 uiState 날짜 사용
+    val calendar = Calendar.getInstance()
+    val dateRangePickerState = rememberDateRangePickerState()
+
+    Button(
+        onClick = { openDialog() },
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Transparent, contentColor = Color.Black
+        ),
+    ) {
+//        val formatter = SimpleDateFormat("yyyy.MM.dd HH:mm", Locale.getDefault())
+//        val textString = datePickerState.selectedDateMillis?.let {
+//            calendar.timeInMillis = it
+//            calendar.set(Calendar.HOUR_OF_DAY, hourPickerState.currentIndex)
+//            calendar.set(Calendar.MINUTE, minutePickerState.currentIndex)
+//            formatter.format(calendar.time)
+//        } ?: "Not Selected"
+        Text(text = "BUTTON", style = TextStyle(fontSize = 20.sp))
+    }
+
+    if (isDialogOpen) {
+        Dialog(
+            onDismissRequest = { closeDialog() },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Surface(
+                modifier = Modifier
+                    .width(360.dp)
+                    .wrapContentHeight(),
+                shape = RoundedCornerShape(24.dp)
+            ) {
+                Column {
+                    DateRangePicker(
+                        state = dateRangePickerState, modifier = Modifier.height(480.dp)
+                    )
+                    Text("HELLO")
+                }
+            }
         }
     }
 }
@@ -781,7 +863,7 @@ fun TodoScreenPreview() {
             todoRepository = DummyTodoRepository(),
             categoryRepository = DummyCategoryRepository(),
             repeatGroupRepository = DummyRepeatGroupRepository(),
-            )
+        )
     )
 }
 
