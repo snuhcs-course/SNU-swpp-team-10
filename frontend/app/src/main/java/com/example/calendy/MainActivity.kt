@@ -1,8 +1,11 @@
 package com.example.calendy
 
+import android.content.Context
+import android.content.ContextWrapper
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -26,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -34,6 +38,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.calendy.ui.theme.CalendyTheme
 import com.example.calendy.view.editplanview.EditPlanPage
 import com.example.calendy.view.monthlyview.MonthlyPage
+import com.example.calendy.view.monthlyview.MonthlyViewModel
 
 
 class MainActivity : ComponentActivity() {
@@ -153,13 +158,30 @@ fun NavigationGraph(navController: NavHostController) {
             WeeklyPage()
         }
         composable(BottomNavItem.Month.screenRoute) {
+            val monthlyViewModel: MonthlyViewModel = viewModel(factory = AppViewModelProvider.Factory)
+//            monthlyViewModel.
             AndroidView(
                 modifier = Modifier,
                 factory = { context ->
-                    MonthlyPage(context)
+                    MonthlyPage(context).apply {
+
+                    }
+                    // Sets up listeners for View -> Compose communication
+
+                    // ex)
+//                    setOnClickListener {
+//                        selectedItem = 1
+//                    }
                 },
                 update = { monthlyPage ->
+                    // View's been inflated or state read in this block has been updated
+                    // Add logic here if necessary
 
+                    // As selectedItem is read here, AndroidView will recompose
+                    // whenever the state changes
+                    // Example of Compose -> View communication
+
+                    // ex) view.selectedItem = selectedItem
                 },
             )
 //            FakeMonthlyPage()
