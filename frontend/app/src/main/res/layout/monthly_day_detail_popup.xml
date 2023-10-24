@@ -16,17 +16,17 @@
 
         <TextView
             android:id="@+id/monthlyPlanDetailTitle"
-            android:layout_width="240dp"
+            android:layout_width="250dp"
             android:layout_height="43dp"
-            android:layout_marginBottom="12dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginBottom="8dp"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="일정이름 이름이름 1"
+            android:text="일정이름 이름이름"
             android:textColor="#000"
             android:textSize="34sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
         <View
@@ -37,6 +37,17 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
+
+        <Button
+            android:id="@+id/editPlanButton"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_gravity="top|end"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="24dp"
+            android:background="@drawable/edit_plan_button"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -74,14 +85,14 @@
             android:id="@+id/monthlyPlanDetailMemo"
             android:layout_width="240dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="일정에 대한 세부 설명 및 기타 정보 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 "
-            android:textSize="16dp"
-            android:lineHeight="25dp"
-            android:textFontWeight="400"
-            android:maxLines="5"
+            android:layout_marginTop="12dp"
             android:ellipsize="end"
+            android:lineHeight="25dp"
+            android:maxLines="5"
+            android:text="일정에 대한 세부 설명 및 기타 정보 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 "
             android:textColor="#737373"
+            android:textFontWeight="400"
+            android:textSize="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/monthlyPlanDetailEndTime" />
