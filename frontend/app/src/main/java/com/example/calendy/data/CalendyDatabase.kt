@@ -27,7 +27,7 @@ abstract class CalendyDatabase : RoomDatabase() {
     abstract fun todoDao(): TodoDao
     abstract fun categoryDao(): CategoryDao
     abstract fun messageDao(): MessageDao
-    abstract fun repeatGroupDad(): RepeatGroupDao
+    abstract fun repeatGroupDao(): RepeatGroupDao
 
     companion object {
         @Volatile

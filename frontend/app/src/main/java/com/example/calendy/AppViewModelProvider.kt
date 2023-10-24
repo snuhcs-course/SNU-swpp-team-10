@@ -12,7 +12,8 @@ object AppViewModelProvider {
             EditPlanViewModel(
                     calendyApplication().container.scheduleRepository,
                     calendyApplication().container.todoRepository,
-                    calendyApplication().container.categoryRepository
+                    calendyApplication().container.categoryRepository,
+                    calendyApplication().container.repeatGroupRepository
             )
         }
     }

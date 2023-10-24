@@ -9,7 +9,7 @@ import com.example.calendy.data.repeatgroup.RepeatGroup
 import com.google.gson.annotations.SerializedName
 import java.util.Date
 
-// table name `todo` in 'calendy_database.db'
+// table name tod0(=t0do) in 'calendy_database.db'
 @Entity(
     tableName = "todo", foreignKeys = [ForeignKey(
         entity = Category::class,

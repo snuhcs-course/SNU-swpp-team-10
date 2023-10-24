@@ -1,4 +1,4 @@
-package com.example.calendy.data
+package com.example.calendy.data.dummy
 
 import com.example.calendy.data.plan.Todo
 import com.example.calendy.data.plan.todo.ITodoRepository

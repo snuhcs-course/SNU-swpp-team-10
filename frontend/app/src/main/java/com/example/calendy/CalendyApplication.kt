@@ -17,6 +17,9 @@ import com.example.calendy.data.plan.schedule.ScheduleRepository
 import com.example.calendy.data.plan.todo.ITodoRepository
 import com.example.calendy.data.plan.todo.TodoLocalDataSource
 import com.example.calendy.data.plan.todo.TodoRepository
+import com.example.calendy.data.repeatgroup.IRepeatGroupRepository
+import com.example.calendy.data.repeatgroup.RepeatGroupLocalDataSource
+import com.example.calendy.data.repeatgroup.RepeatGroupRepository
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -33,6 +36,7 @@ interface IAppContainer {
     val todoRepository: ITodoRepository
     val categoryRepository: ICategoryRepository
     val messageRepository: IMessageRepository
+    val repeatGroupRepository: IRepeatGroupRepository
 }
 
 class AppContainer(private val context: Context) : IAppContainer {
@@ -56,7 +60,9 @@ class AppContainer(private val context: Context) : IAppContainer {
     override val messageRepository: IMessageRepository by lazy {
         MessageRepository(MessageLocalDataSource(CalendyDatabase.getDatabase(context).messageDao()))
     }
-
+    override val repeatGroupRepository: IRepeatGroupRepository by lazy {
+        RepeatGroupRepository(RepeatGroupLocalDataSource(CalendyDatabase.getDatabase(context).repeatGroupDao()))
+    }
     private val baseUrl = "https://10.0.0.2"
     private val retrofit =
             Retrofit.Builder().baseUrl(baseUrl).addConverterFactory(GsonConverterFactory.create())
