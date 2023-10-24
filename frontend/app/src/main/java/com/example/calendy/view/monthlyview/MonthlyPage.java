@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -39,7 +40,7 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 
-public class MonthlyPage extends ViewGroup {
+public class MonthlyPage extends ConstraintLayout {
     private final String TAG = this.getClass().getSimpleName();
     private  CalendarDay selectedDate = CalendarDay.today();
     MaterialCalendarView calendarView;
@@ -62,14 +63,9 @@ public class MonthlyPage extends ViewGroup {
         onCreate();
     }
 
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-
-    }
-
     protected void onCreate() {
         View view = LayoutInflater.from(context).inflate(R.layout.activity_monthly_page, null, true);
-        addView(view);
+        this.addView(view);
 //        model = new ViewModelProvider(this).get(MonthlyViewModel.class);
 
         selectedDate=CalendarDay.today();
@@ -87,7 +83,7 @@ public class MonthlyPage extends ViewGroup {
                 .commit();
 
         // selected day decorator initialization
-//        selectedDayDecorator = new SelectedDayDecorator(CalendarDay.today(), context);
+        selectedDayDecorator = new SelectedDayDecorator(CalendarDay.today(), context);
         //temp dummy code
         schedulesOfMonth = new Hashtable<>();
         //set dummy
@@ -108,7 +104,7 @@ public class MonthlyPage extends ViewGroup {
                 new SundayDecorator()
                 ,new SaturdayDecorator()
                 ,oneDayDecorator
-//                ,selectedDayDecorator
+                ,selectedDayDecorator
                 ,dotDecorator
         );
 
@@ -116,11 +112,11 @@ public class MonthlyPage extends ViewGroup {
             // selected date changed
               @Override
               public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
-//                if(selectedDate.equals(date) && schedulesOfMonth.containsKey(date))
-//                    openDayPlanListPopup();
+                if(selectedDate.equals(date) && schedulesOfMonth.containsKey(date))
+                    openDayPlanListPopup();
                 calendarView.removeDecorator(selectedDayDecorator);
                 selectedDate=calendarView.getSelectedDate();
-//                selectedDayDecorator = new SelectedDayDecorator(selectedDate, MonthlyPage.this);
+                selectedDayDecorator = new SelectedDayDecorator(selectedDate, context);
                 calendarView.addDecorators(selectedDayDecorator);
 
               }
@@ -147,14 +143,13 @@ public class MonthlyPage extends ViewGroup {
 //        });
     }
 
-//    private void openDayPlanListPopup() {
-//
+    private void openDayPlanListPopup() {
 //        Intent intent = new Intent(MonthlyPage.this, MonthlyDayPlanListPopup.class);
 //        intent.putExtra("year",selectedDate.getYear());
 //        intent.putExtra("month",selectedDate.getMonth());
 //        intent.putExtra("day",selectedDate.getDay());
 //        startActivityResult.launch(intent);
-//    }
+    }
 
 
 }

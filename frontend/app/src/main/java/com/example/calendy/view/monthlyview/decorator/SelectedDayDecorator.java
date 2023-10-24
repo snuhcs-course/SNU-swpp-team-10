@@ -1,6 +1,7 @@
 package com.example.calendy.view.monthlyview.decorator;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 
 //import com.project.sample_calendar.R;
@@ -18,7 +19,7 @@ public class SelectedDayDecorator implements DayViewDecorator {
     private final Drawable drawable;
     private CalendarDay selectedDate;
 
-    public SelectedDayDecorator(CalendarDay date, Activity context) {
+    public SelectedDayDecorator(CalendarDay date, Context context) {
         drawable = context.getResources().getDrawable(R.drawable.more);
         this.selectedDate = date;
     }
