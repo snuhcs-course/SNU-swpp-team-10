@@ -11,8 +11,8 @@ import com.example.calendy.data.plan.Schedule
 import com.example.calendy.data.plan.Todo
 import com.example.calendy.data.plan.schedule.IScheduleRepository
 import com.example.calendy.data.plan.todo.ITodoRepository
-import com.example.calendy.data.repeatgroup.RepeatGroup
 import com.example.calendy.data.repeatgroup.IRepeatGroupRepository
+import com.example.calendy.data.repeatgroup.RepeatGroup
 import com.example.calendy.utils.DateHelper.extract
 import com.example.calendy.utils.DateHelper.getDate
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -70,17 +70,13 @@ class EditPlanViewModel(
         if (uiState.value.isYearly) {
             _uiState.update { currentState ->
                 currentState.copy(
-                    isYearly = false,
-                    isMonthly = false,
-                    isDaily = false
+                    isYearly = false, isMonthly = false, isDaily = false
                 )
             }
         } else {
             _uiState.update { currentState ->
                 currentState.copy(
-                    isYearly = true,
-                    isMonthly = false,
-                    isDaily = false
+                    isYearly = true, isMonthly = false, isDaily = false
                 )
             }
         }
@@ -90,17 +86,13 @@ class EditPlanViewModel(
         if (uiState.value.isMonthly) {
             _uiState.update { currentState ->
                 currentState.copy(
-                    isYearly = false,
-                    isMonthly = false,
-                    isDaily = false
+                    isYearly = false, isMonthly = false, isDaily = false
                 )
             }
         } else {
             _uiState.update { currentState ->
                 currentState.copy(
-                    isYearly = false,
-                    isMonthly = true,
-                    isDaily = false
+                    isYearly = false, isMonthly = true, isDaily = false
                 )
             }
         }
@@ -110,17 +102,13 @@ class EditPlanViewModel(
         if (uiState.value.isDaily) {
             _uiState.update { currentState ->
                 currentState.copy(
-                    isYearly = false,
-                    isMonthly = false,
-                    isDaily = false
+                    isYearly = false, isMonthly = false, isDaily = false
                 )
             }
         } else {
             _uiState.update { currentState ->
                 currentState.copy(
-                    isYearly = false,
-                    isMonthly = false,
-                    isDaily = true
+                    isYearly = false, isMonthly = false, isDaily = true
                 )
             }
         }
@@ -170,7 +158,7 @@ class EditPlanViewModel(
     }
 
     fun setRepeatGroup(repeatGroup: RepeatGroup) {
-        _uiState.update { currentState -> currentState.copy(repeatGroup = repeatGroup)  }
+        _uiState.update { currentState -> currentState.copy(repeatGroup = repeatGroup) }
     }
 
     fun deleteRepeatGroup(repeatGroup: RepeatGroup) {
@@ -213,7 +201,7 @@ class EditPlanViewModel(
 //                viewModelScope.launch { scheduleRepository.deleteSchedule()}
             }
 
-            is PlanType.Todo  -> {
+            is PlanType.Todo     -> {
 //                viewModelScope.launch { todoRepository.deleteTodo()}
             }
         }
@@ -224,33 +212,33 @@ class EditPlanViewModel(
         when (currentState.entryType) {
             is PlanType.Schedule -> {
                 val newSchedule: Schedule = Schedule(
-                        title = currentState.titleField,
-                        startTime = currentState.startTime,
-                        endTime = currentState.endTime,
-                        memo = currentState.memoField,
-                        repeatGroupId = currentState.repeatGroup?.id ?:null,
-                        categoryId = currentState.category?.id ?:null,
-                        priority = currentState.priority,
-                        showInMonthlyView = currentState.showInMonthlyView,
-                        isOverridden = false
+                    title = currentState.titleField,
+                    startTime = currentState.startTime,
+                    endTime = currentState.endTime,
+                    memo = currentState.memoField,
+                    repeatGroupId = currentState.repeatGroup?.id,
+                    categoryId = currentState.category?.id,
+                    priority = currentState.priority,
+                    showInMonthlyView = currentState.showInMonthlyView,
+                    isOverridden = false
                 )
                 viewModelScope.launch { scheduleRepository.insertSchedule(newSchedule) }
             }
 
-            is PlanType.Todo-> {
+            is PlanType.Todo     -> {
                 val newTodo: Todo = Todo(
-                        title = currentState.titleField,
-                        dueTime = currentState.dueTime,
-                        yearly = currentState.isYearly,
-                        monthly = currentState.isMonthly,
-                        daily = currentState.isDaily,
-                        memo = currentState.memoField,
-                        complete = currentState.isComplete,
-                        repeatGroupId = currentState.repeatGroup?.id ?:null,
-                        categoryId = currentState.category?.id ?:null,
-                        priority = currentState.priority,
-                        showInMonthlyView = currentState.showInMonthlyView,
-                        isOverridden = false
+                    title = currentState.titleField,
+                    dueTime = currentState.dueTime,
+                    yearly = currentState.isYearly,
+                    monthly = currentState.isMonthly,
+                    daily = currentState.isDaily,
+                    memo = currentState.memoField,
+                    complete = currentState.isComplete,
+                    repeatGroupId = currentState.repeatGroup?.id,
+                    categoryId = currentState.category?.id,
+                    priority = currentState.priority,
+                    showInMonthlyView = currentState.showInMonthlyView,
+                    isOverridden = false
                 )
                 viewModelScope.launch { todoRepository.insertTodo(newTodo) }
 
