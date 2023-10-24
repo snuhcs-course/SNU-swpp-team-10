@@ -87,8 +87,9 @@ public class MonthlyDayPlanListPopup extends ComponentActivity {
         dayPlanListAdaptor.setOnItemClickListener(new MonthlyDayPlanListAdaptor.OnItemClickEventListener() {
             @Override
             public void onItemClick(View view, int position) {
-//                Intent intent= new Intent(MonthlyDayPlanListPopup.this, MonthlyPlanDetailPopup.class);
-//                startActivity(intent);
+                Intent intent= new Intent(MonthlyDayPlanListPopup.this, MonthlyDayPlanDetailPopup.class);
+//                intent.putExtra("planId",)
+                startActivity(intent);
                 Log.d("","clicked item :"+position);
             }
         });

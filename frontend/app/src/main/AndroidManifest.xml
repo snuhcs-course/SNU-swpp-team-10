@@ -37,6 +37,11 @@
             android:theme="@android:style/Theme.Holo.Dialog"
         />
 
+        <activity
+            android:name=".view.monthlyview.MonthlyDayPlanDetailPopup"
+            android:theme="@android:style/Theme.Holo.Dialog"
+            />
+
     </application>
 
 </manifest>
