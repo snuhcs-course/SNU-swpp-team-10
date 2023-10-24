@@ -6,12 +6,17 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.example.calendy.R;
 import com.example.calendy.data.plan.Schedule;
@@ -34,7 +39,7 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 
-public class MonthlyPage extends ComponentActivity {
+public class MonthlyPage extends ViewGroup {
     private final String TAG = this.getClass().getSimpleName();
     private  CalendarDay selectedDate = CalendarDay.today();
     MaterialCalendarView calendarView;
@@ -49,14 +54,26 @@ public class MonthlyPage extends ComponentActivity {
 
     ActivityResultLauncher<Intent> startActivityResult;
 
+    Context context;
+
+    public MonthlyPage(Context context) {
+        super(context);
+        this.context = context;
+        onCreate();
+    }
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_monthly_page);
-        model = new ViewModelProvider(this).get(MonthlyViewModel.class);
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+
+    }
+
+    protected void onCreate() {
+        View view = LayoutInflater.from(context).inflate(R.layout.activity_monthly_page, null, true);
+        addView(view);
+//        model = new ViewModelProvider(this).get(MonthlyViewModel.class);
 
         selectedDate=CalendarDay.today();
-
+//
         // initial setting for calendar view
         calendarView = findViewById(R.id.materialMonthlyView);
         calendarView.setTitleFormatter(new MonthArrayTitleFormatter(getResources().getTextArray(R.array.custom_months)));
@@ -70,7 +87,7 @@ public class MonthlyPage extends ComponentActivity {
                 .commit();
 
         // selected day decorator initialization
-        selectedDayDecorator = new SelectedDayDecorator(CalendarDay.today(), MonthlyPage.this);
+//        selectedDayDecorator = new SelectedDayDecorator(CalendarDay.today(), context);
         //temp dummy code
         schedulesOfMonth = new Hashtable<>();
         //set dummy
@@ -91,7 +108,7 @@ public class MonthlyPage extends ComponentActivity {
                 new SundayDecorator()
                 ,new SaturdayDecorator()
                 ,oneDayDecorator
-                ,selectedDayDecorator
+//                ,selectedDayDecorator
                 ,dotDecorator
         );
 
@@ -99,11 +116,11 @@ public class MonthlyPage extends ComponentActivity {
             // selected date changed
               @Override
               public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
-                if(selectedDate.equals(date) && schedulesOfMonth.containsKey(date))
-                    openDayPlanListPopup();
+//                if(selectedDate.equals(date) && schedulesOfMonth.containsKey(date))
+//                    openDayPlanListPopup();
                 calendarView.removeDecorator(selectedDayDecorator);
                 selectedDate=calendarView.getSelectedDate();
-                selectedDayDecorator = new SelectedDayDecorator(selectedDate, MonthlyPage.this);
+//                selectedDayDecorator = new SelectedDayDecorator(selectedDate, MonthlyPage.this);
                 calendarView.addDecorators(selectedDayDecorator);
 
               }
@@ -118,28 +135,26 @@ public class MonthlyPage extends ComponentActivity {
         });
 
         //for modal view setting
-        startActivityResult = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            new ActivityResultCallback<ActivityResult>() {
-                @Override
-            public void onActivityResult(ActivityResult result) {
-                if (result.getResultCode() == Activity.RESULT_OK) {
-                    Log.d(TAG, "MainActivity로 돌아왔다. ");
-                }
-            }
-        });
-
-
+//        startActivityResult = registerForActivityResult(
+//            new ActivityResultContracts.StartActivityForResult(),
+//            new ActivityResultCallback<ActivityResult>() {
+//                @Override
+//            public void onActivityResult(ActivityResult result) {
+//                if (result.getResultCode() == Activity.RESULT_OK) {
+//                    Log.d(TAG, "MainActivity로 돌아왔다. ");
+//                }
+//            }
+//        });
     }
 
-    private void openDayPlanListPopup() {
-
-        Intent intent = new Intent(MonthlyPage.this, MonthlyDayPlanListPopup.class);
-        intent.putExtra("year",selectedDate.getYear());
-        intent.putExtra("month",selectedDate.getMonth());
-        intent.putExtra("day",selectedDate.getDay());
-        startActivityResult.launch(intent);
-    }
+//    private void openDayPlanListPopup() {
+//
+//        Intent intent = new Intent(MonthlyPage.this, MonthlyDayPlanListPopup.class);
+//        intent.putExtra("year",selectedDate.getYear());
+//        intent.putExtra("month",selectedDate.getMonth());
+//        intent.putExtra("day",selectedDate.getDay());
+//        startActivityResult.launch(intent);
+//    }
 
 
 }

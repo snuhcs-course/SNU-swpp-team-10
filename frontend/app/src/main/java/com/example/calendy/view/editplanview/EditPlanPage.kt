@@ -121,7 +121,7 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel = viewModel(factory = AppV
                       Row {
                           if (isPageAdd) {
                               // Add Button
-                              IconButton(onClick = { editPlanViewModel.addPlan() }) {
+                              IconButton(onClick = { editPlanViewModel.addPlan() /* TODO: Should close page */ }) {
                                   Icon(
                                       imageVector = Icons.Default.Add, contentDescription = "Add"
                                   )
