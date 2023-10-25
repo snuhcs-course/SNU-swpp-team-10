@@ -168,10 +168,12 @@ fun NavigationGraph(navController: NavHostController) {
             TodoPage()
         }
         composable(BottomNavItem.AiManager.screenRoute) {
+            // Test For Edit Plan
             ManagerPage()
         }
         composable(BottomNavItem.Setting.screenRoute) {
-            SettingPage()
+            // Test For New Plan
+            EditPlanPage()
         }
     }
 }

@@ -113,38 +113,41 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel = viewModel(factory = AppV
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
+        /* TODO Should not show bottom navigation */
         //region Top Bar
-        TopAppBar(showBackButton = true,
-                  onBackPressed = { /* Todo */ },
-                  title = { },
-                  trailingContent = {
-                      Row {
-                          if (isPageAdd) {
-                              // Add Button
-                              IconButton(onClick = { editPlanViewModel.addPlan() /* TODO: Should close page */ }) {
-                                  Icon(
-                                      imageVector = Icons.Default.Add, contentDescription = "Add"
-                                  )
-                              }
-                          }
-                          if (isPageEdit) {
-                              // Delete Button
-                              IconButton(onClick = { /*TODO Delete Button */ }) {
-                                  Icon(
-                                      imageVector = Icons.Default.Delete,
-                                      contentDescription = "Delete"
-                                  )
-                              }
-                              // Save Button
-                              IconButton(onClick = { /*TODO Save Button */ }) {
-                                  Icon(
-                                      imageVector = Icons.Default.Save,
-                                      contentDescription = "Submit"
-                                  )
-                              }
-                          }
-                      }
-                  })
+        TopAppBar(
+            showBackButton = true,
+            onBackPressed = { /* Todo TopBar Back Pressed */ },
+            title = { },
+            trailingContent = {
+                Row {
+                    if (isPageAdd) {
+                        // Add Button
+                        IconButton(onClick = { editPlanViewModel.addPlan() /* TODO: Should close page */ }) {
+                            Icon(
+                                imageVector = Icons.Default.Add, contentDescription = "Add",
+                            )
+                        }
+                    }
+                    if (isPageEdit) {
+                        // Delete Button
+                        IconButton(onClick = { /*TODO Delete Button */ }) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Delete",
+                            )
+                        }
+                        // Save Button
+                        IconButton(onClick = { /*TODO Save Button */ }) {
+                            Icon(
+                                imageVector = Icons.Default.Save,
+                                contentDescription = "Submit",
+                            )
+                        }
+                    }
+                }
+            },
+        )
         //endregion
 
         //region Type Buttons
@@ -157,11 +160,11 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel = viewModel(factory = AppV
                         text = when (it) {
                             PlanType.Schedule -> "일정"
                             PlanType.Todo     -> "Todo"
-                        },
-                        isSelected = (editPlanUiState.entryType==it),
-                        onClick = {
+                        }, isSelected = (editPlanUiState.entryType==it), onClick = {
                             editPlanViewModel.setType(it)
-                        },
+                        }, modifier = Modifier
+                            .width(136.dp)
+                            .height(40.dp)
                     )
                 }
             }
@@ -225,7 +228,9 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel = viewModel(factory = AppV
         //endregion
 
         //region Repeat
-        SetRepeat(editPlanUiState)
+        FieldWithLeadingText(leadingText = "반복") {
+            SetRepeat(editPlanUiState, editPlanViewModel)
+        }
         //endregion
 
         //region Category
@@ -380,6 +385,7 @@ fun DateSelector(
     toggleIsDaily: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // isDialogOpen: Daily Date Picker & Date And Time Picker
     var isDialogOpen by remember { mutableStateOf(false) }
     fun openDialog() {
         isDialogOpen = true
@@ -616,6 +622,31 @@ fun DateRangePickerButton(modifier: Modifier = Modifier) {
 }
 
 @Composable
+fun VerticalWheelPickerWrapper(
+    value: Int,
+    onValueChanged: (value: Int) -> Int,
+    content: @Composable () -> Unit,
+    valueToIndex: (value: Int) -> Int = { it },
+    indexToValue: (index: Int) -> Int = { it },
+    modifier: Modifier = Modifier,
+) {
+    val fPickerState = rememberFWheelPickerState(initialIndex = value)
+    // value -> Picker update
+    LaunchedEffect(key1 = value) {
+        fPickerState.scrollToIndex(valueToIndex(value))
+    }
+    // Picker -> value update
+    LaunchedEffect(key1 = fPickerState.currentIndex) {
+        onValueChanged(indexToValue(fPickerState.currentIndex))
+    }
+    FVerticalWheelPicker(
+        modifier = modifier, itemHeight = 20.dp, count = 100, state = fPickerState
+    ) { index ->
+        Text((index + 2001).toString())
+    }
+}
+
+@Composable
 fun YearPicker(state: FWheelPickerState, modifier: Modifier = Modifier) {
     FVerticalWheelPicker(
         modifier = modifier.width(60.dp), itemHeight = 20.dp, count = 100, state = state
@@ -670,6 +701,7 @@ private fun DateTimePickerDialog(
                                     ),
                                 ),
                             )
+                            // TODO: Hour & Minute Picker Extract
                             //region Hour & Minute Picker
                             if (showTimePicker) {
                                 FVerticalWheelPicker(
@@ -753,6 +785,7 @@ fun Category(
         newCategoryPriority = 3
     }
 
+    // UI Shown in Edit Plan Page as field
     Row(modifier = Modifier.fillMaxWidth()) {
         TextButton(
             onClick = { showSelectCategoryDialog = true },
@@ -777,7 +810,7 @@ fun Category(
                onDismissRequest = { showSelectCategoryDialog = false }) {
             Surface(modifier = Modifier.fillMaxSize()) {
                 Column {
-                    // TODO: Will TopAppBar be in scaffold?
+                    // TODO: Should use TopAppBar in Scaffold for uniformity
                     TopAppBar(showBackButton = true,
                               onBackPressed = { showSelectCategoryDialog = false },
                               title = { Text("Category") },

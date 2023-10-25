@@ -23,52 +23,144 @@ import androidx.compose.material3.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import com.example.calendy.data.plan.Plan
+import com.example.calendy.data.repeatgroup.RepeatGroup
 import com.example.calendy.utils.bottomBorder
+import java.util.Date
 
 
 @Composable
-
-fun SetRepeat(uiState: EditPlanUiState) {
+fun SetRepeat(uiState: EditPlanUiState, viewModel: EditPlanViewModel) {
     var isDialogOpen by remember { mutableStateOf(false) }
-    var repeatIntervalText by remember { mutableStateOf("반복 안 함") }
-    val calendar = Calendar.getInstance().apply { time = if(uiState.entryType ==Plan.PlanType.Todo) uiState.dueTime else uiState.startTime } 
+    var repeatInfoText = remember { mutableStateOf("반복 안 함") }
+    val calendar = Calendar.getInstance().apply {
+        time = if (uiState.entryType==Plan.PlanType.Todo) uiState.dueTime else uiState.startTime
+    }
+    val repeatGroup = uiState.repeatGroup
 
-    FieldWithLeadingText(leadingText = "반복") {
+    Row(modifier = Modifier.fillMaxWidth()) {
         TextButton(
             onClick = { isDialogOpen = true },
             modifier = Modifier
+                .weight(1f)
                 .padding(end = 20.dp)
                 .bottomBorder(1.dp, color = Color.Gray)
         ) {
-            Text(text = repeatIntervalText)
+            Text(text = repeatInfoText.value)
+        }
+        IconButton(onClick = { /* TODO: onClick Deselect */ }) {
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = "Deselect Repeat",
+            )
         }
     }
 
+
     if (isDialogOpen) {
+//        SetRepeatDialog(onDismiss = {
+//            isDialogOpen = false
+//        }, calendar, RepeatGroup(0,false,true,false,false, 2, "", null))
         SetRepeatDialog(onDismiss = {
             isDialogOpen = false
-        }, calendar)
+        }, onRepeatGroup = {
+            if(it != null) {
+                // uiState의 repeatGroup 정보 업데이트
+                viewModel.setRepeatGroup(it)
+            }
+        }, calendar, null)
     }
+    //Todo uiState.RepeatGroup 정보 이용하여 repeatInfoText 값 변경
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SetRepeatDialog(onDismiss: () -> Unit, calendar: Calendar) {
+fun SetRepeatDialog(onDismiss: () -> Unit, onRepeatGroup: (RepeatGroup?) -> Unit, calendar: Calendar, repeatGroup: RepeatGroup?) {
 
+    //SetRepeatDialog 종료시 ui에 맞는 repeatGroup 객체를 넘겨줌
+    fun exitDialog() {
+        if(repeatGroup == null) {
+            //Todo repeatRadioGroup, durationRadioGroup, repeatInterval, endPlanDate, weeklyRule, monthlyRule 참조하여 repeatGroup 새로 만들기
+            // repeatrule에서 last 입력 옵션은 일단 제거함
+            //val newRepeatGroup = RepeatGroup()
+            //onRepeatGroup(newRepeatGroup)
+        } else {
+            //Todo repeatRadioGroup, durationRadioGroup, repeatInterval, endPlanDate, weeklyRule, monthlyRule 참조하여 repeatGroup 업데이트
+            onRepeatGroup(repeatGroup)
+        }
+        onDismiss()
+    }
     // repeatGroup table's repeatInt attribute value
-    var repeatInterval = remember { mutableStateOf("") }
-    // 반복, 기간 2개의 라디오그룹 설정
-    val repeatRadioGroup = remember { mutableStateOf(1) }
-    val durationRadioGroup = remember { mutableStateOf(1) }
+    var repeatInterval = remember(repeatGroup) {
+        mutableStateOf("").apply {
+            if (repeatGroup==null) this.value = "1"
+            else this.value = repeatGroup.repeatInterval.toString()
+        }
+    }
+    // repeatGroup table's repeatRule attribute value - week ver
+    val weeklyRule = remember(repeatGroup) {
+        mutableStateListOf(*Array(7) { false }).apply {
+            if (repeatGroup==null) {
+                val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
+                this[if (dayOfWeek==1) 6 else dayOfWeek - 2] = true
+            } else {
+                //Todo 존재하던 repeatRule 반영 weeklyRule 값 변경 (해당하는 요일 index(0:월-6:일)의 값을 true로)
+            }
+        }
+    }
+    // repeatGroup table's repeatRule attribute value - month ver
+    val monthlyRule = remember(repeatGroup) {
+        mutableStateListOf(*Array(31) { false }).apply {
+            if (repeatGroup==null) {
+                val day = calendar.get(Calendar.DAY_OF_MONTH)-1
+                this[day] = true
+            } else {
+                //Todo 존재하던 repeatRule 반영 monthlyRule 값 변경 (해당하는 (날짜-1)(0-30) index의 값을 true로)
+            }
+        }
+    }
+    // repeatGroup table's endDate attribute value
+    var endPlanDate = remember(repeatGroup) {
+        mutableStateOf<Date?>(null).apply {
+            if (repeatGroup==null) calendar.time
+            else repeatGroup.endDate
+        }
+    }
+    // 반복 관련 radioGroup -> noRepeat : 반복 없음 / daily : day = true / monthly : month = true / yearly : year = true
+    var repeatRadioGroup = remember(repeatGroup) {
+        mutableStateOf("").apply {
+            if (repeatGroup==null) {
+                this.value = "noRepeat"
+            } else {
+                if (repeatGroup.day) this.value = "daily"
+                if (repeatGroup.week) this.value = "weekly"
+                if (repeatGroup.month) this.value = "monthly"
+                if (repeatGroup.year) this.value = "yearly"
+            }
+        }
+    }
+    // 기간 관련 radioGroup ->
+    val durationRadioGroup = remember(repeatGroup) {
+        mutableStateOf("").apply {
+            if (repeatGroup==null) {
+                this.value = "noEndTime"
+            } else {
+                if (repeatGroup.endDate==null) this.value = "noEndTime"
+                else this.value = "setEndTime"
+            }
+        }
+    }
+
     Dialog(
-        onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)
+        onDismissRequest = {exitDialog()}, properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Surface(
             modifier = Modifier.fillMaxSize()
@@ -76,7 +168,7 @@ fun SetRepeatDialog(onDismiss: () -> Unit, calendar: Calendar) {
             LazyColumn {
                 item {
                     TopAppBar(modifier = Modifier.fillMaxWidth(), navigationIcon = {
-                        IconButton(onClick = onDismiss) {
+                        IconButton(onClick = {exitDialog()}) {
                             Icon(Icons.Default.Close, contentDescription = null)
                         }
                     }, title = { Text("반복") })
@@ -89,31 +181,48 @@ fun SetRepeatDialog(onDismiss: () -> Unit, calendar: Calendar) {
                     )
                     Divider()
                 }
-                item { RadioButtonLine("반복 안 함", 1,repeatRadioGroup) }
+                item { RadioButtonLine("noRepeat", "반복 안 함", repeatRadioGroup) }
                 item {
                     DailyRadioButtonLine(
-                        "매일", "일마다", 2, calendar, repeatInterval, repeatRadioGroup
+                        "daily", "매일", "일마다", calendar, repeatInterval, repeatRadioGroup
                     )
                 }
                 item {
                     WeeklyRadioButtonLine(
-                        "매주", "주마다",3, calendar, repeatInterval, repeatRadioGroup
+                        "weekly",
+                        "매주",
+                        "주마다",
+                        calendar,
+                        repeatInterval,
+                        repeatRadioGroup,
+                        weeklyRule
                     )
                 }
                 item {
                     MonthlyRadioButtonLine(
-                        "매월", "개월마다",4, calendar, repeatInterval, repeatRadioGroup
+                        "monthly",
+                        "매월",
+                        "개월마다",
+                        calendar,
+                        repeatInterval,
+                        repeatRadioGroup,
+                        monthlyRule,
                     )
                 }
                 item {
                     YearlyRadioButtonLine(
-                        "매년", "년마다", 5, calendar, repeatInterval, repeatRadioGroup
+                        "yearly",
+                        "매년",
+                        "년마다",
+                        calendar,
+                        repeatInterval,
+                        repeatRadioGroup,
                     )
                 }
 
 
 
-                if (repeatRadioGroup.value!= 1) {
+                if (repeatRadioGroup.value!="noRepeat") {
                     item {
                         Text(
                             text = "기간",
@@ -122,8 +231,12 @@ fun SetRepeatDialog(onDismiss: () -> Unit, calendar: Calendar) {
                         )
                         Divider()
                     }
-                    item { RadioButtonLine("계속 반복", 1,durationRadioGroup) }
-                    item { EndTimeRadioButtonLine("종료 날짜", 2,durationRadioGroup) }
+                    item { RadioButtonLine("noEndTime", "계속 반복", durationRadioGroup) }
+                    item {
+                        EndTimeRadioButtonLine(
+                            "setEndTime", "종료 날짜", durationRadioGroup, endPlanDate
+                        )
+                    }
                 }
             }
         }
@@ -132,16 +245,15 @@ fun SetRepeatDialog(onDismiss: () -> Unit, calendar: Calendar) {
 
 
 @Composable
-fun RadioButtonLine(text: String,idx: Int, selected: MutableState<Int>) {
+fun RadioButtonLine(type: String, text: String, selected: MutableState<String>) {
     Row(
         modifier = Modifier
 
             .fillMaxWidth()
-            .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(8.dp), verticalAlignment = Alignment.CenterVertically
     ) {
-        RadioButton(selected = selected.value==idx, onClick = {
-            selected.value = idx
+        RadioButton(selected = selected.value==type, onClick = {
+            selected.value = type
         })
         Spacer(modifier = Modifier.width(8.dp))
         Text(text = text)
@@ -154,29 +266,25 @@ fun RadioButtonLine(text: String,idx: Int, selected: MutableState<Int>) {
 
 @Composable
 fun DailyRadioButtonLine(
+    type: String,
     text: String,
     text2: String,
-    idx: Int,
     calendar: Calendar,
     inputText: MutableState<String>,
-    selected: MutableState<Int>
+    selected: MutableState<String>
 ) {
-    LaunchedEffect(selected.value) {
-        if (selected.value==idx) {
-            inputText.value = "1"
-        }
-    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        RadioButton(selected = selected.value==idx, onClick = {
-            selected.value = idx
+        RadioButton(selected = selected.value==type, onClick = {
+            selected.value = type
         })
         Spacer(modifier = Modifier.width(8.dp))
-        if (selected.value==idx) {
+        if (selected.value==type) {
             TextField(
                 value = inputText.value,
                 modifier = Modifier.width(50.dp),
@@ -206,26 +314,24 @@ fun DailyRadioButtonLine(
 
 @Composable
 fun WeeklyRadioButtonLine(
+    type: String,
     text: String,
     text2: String,
-    idx: Int,
     calendar: Calendar,
     inputText: MutableState<String>,
-    selected: MutableState<Int>
+    selected: MutableState<String>,
+    buttonStates: MutableList<Boolean>,
 ) {
-    val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
     val daysOfWeek = listOf("월", "화", "수", "목", "금", "토", "일")
-    // startTime에 해당하는 요일
-    val selectedDay = daysOfWeek[if (dayOfWeek==1) 6 else dayOfWeek - 2]
-    // 각 TextButton의 클릭 상태를 관리하는 리스트
-    val buttonStates = remember { mutableStateListOf(*Array(daysOfWeek.size) { false }) }
+
     Column(
         modifier = Modifier.animateContentSize()
     ) {
-        DailyRadioButtonLine(text, text2, idx, calendar, inputText, selected)
+        DailyRadioButtonLine(type, text, text2, calendar, inputText, selected)
 
         // 선택되었을 때 펼쳐지는 ui
-        AnimatedVisibility(visible = selected.value==idx) {
+        AnimatedVisibility(visible = selected.value==type) {
+            Text("반복할 요일 선택")
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
@@ -237,6 +343,8 @@ fun WeeklyRadioButtonLine(
                         onClick = {
                             if (buttonStates[index]) {
                                 if (buttonStates.count { it } > 1) {
+                                    // 이미 선택된 버튼이 둘 이상 있을 때만 해제
+                                    // 즉, 선택된 버튼이 하나도 없는 상태를 방지
                                     buttonStates[index] = false
                                 }
                             } else {
@@ -251,7 +359,11 @@ fun WeeklyRadioButtonLine(
                             .clip(CircleShape)
                             .padding(8.dp)
                     ) {
-                        Text(text = day)
+                        Text(text = day, modifier = if (buttonStates[index]) Modifier.drawBehind {
+                            drawCircle(color = Color.Red, radius = this.size.maxDimension, style = Stroke(width = 4.dp.toPx()))
+                        } else Modifier
+                        )
+
                     }
                 }
             }
@@ -261,102 +373,61 @@ fun WeeklyRadioButtonLine(
 
 @Composable
 fun MonthlyRadioButtonLine(
+    type: String,
     text: String,
     text2: String,
-    idx: Int,
     calendar: Calendar,
     inputText: MutableState<String>,
-    selected: MutableState<Int>
+    selected: MutableState<String>,
+    buttonStates: MutableList<Boolean>,
 ) {
 
     var isDrawerVisible by remember { mutableStateOf(false) }
-    var selectedButtonIdx by remember { mutableStateOf<Int?>(null) }
-    val day = calendar.get(Calendar.DAY_OF_MONTH)
     val days = (1..31).toList()
-    val buttonStates = remember { mutableStateListOf(*Array(days.size) { false }) }
 
     Column(
         modifier = Modifier.animateContentSize(),
     ) {
-        DailyRadioButtonLine(text, text2, idx,calendar, inputText, selected)
+        DailyRadioButtonLine(type, text, text2, calendar, inputText, selected)
 
         // 선택되었을 때 펼쳐지는 ui
-        AnimatedVisibility(visible = selected.value==idx) {
-            Column(
-                modifier = Modifier.padding(8.dp)
-            ) {
-                TextButton(
-                    onClick = { selectedButtonIdx = 1 }, colors = if (selectedButtonIdx==1) {
-                        ButtonDefaults.textButtonColors(containerColor = Color.LightGray)
-                    } else ButtonDefaults.textButtonColors(containerColor = Color.Transparent)
-                ) {
-                    Text(text = "" + day + "일 마다 반복")
-
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-
-                TextButton(
-                    onClick = { selectedButtonIdx = 2 }, colors = if (selectedButtonIdx==2) {
-                        ButtonDefaults.textButtonColors(containerColor = Color.LightGray)
-                    } else ButtonDefaults.textButtonColors(containerColor = Color.Transparent)
-                ) {
-                    Text(text = "달의 마지막 날마다 반복")
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-
-                TextButton(
-                    onClick = {
-                        selectedButtonIdx = 3
-                        isDrawerVisible = !isDrawerVisible
-                    }, colors = if (selectedButtonIdx==3) {
-                        ButtonDefaults.textButtonColors(containerColor = Color.LightGray)
-                    } else ButtonDefaults.textButtonColors(containerColor = Color.Transparent)
-                ) {
-                    Text(text = "반복할 날짜 선택")
-                    if (selectedButtonIdx!=3) {
-                        isDrawerVisible = false
-                    }
-                }
-                // 반복 날짜 설정 버튼 클릭시 펼쳐지는 ui
-                AnimatedVisibility(visible = isDrawerVisible) {
-                    Column {
-                        for (i in days.indices step 7) {
-                            Row(
-                                horizontalArrangement = Arrangement.SpaceBetween,
+        AnimatedVisibility(visible = selected.value==type) {
+            Text("반복할 날짜 선택")
+            Column {
+                for (i in days.indices step 7) {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+                        val endIndex = minOf(i + 7, days.size)
+                        for (j in i until endIndex) {
+                            TextButton(
+                                onClick = {
+                                    if (buttonStates[j]) {
+                                        if (buttonStates.count { it } > 1) {
+                                            buttonStates[j] = false
+                                        }
+                                    } else {
+                                        buttonStates[j] = true
+                                    }
+                                },
+                                colors = if (buttonStates[j]) {
+                                    ButtonDefaults.textButtonColors(containerColor = Color.LightGray)
+                                } else ButtonDefaults.textButtonColors(containerColor = Color.Transparent),
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp)
+                                    .weight(1f)
+                                    .clip(CircleShape)
+                                    .padding(4.dp)
                             ) {
-                                val endIndex = minOf(i + 7, days.size)
-                                for (j in i until endIndex) {
-                                    TextButton(
-                                        onClick = {
-                                            if (buttonStates[j]) {
-                                                if (buttonStates.count { it } > 1) {
-                                                    buttonStates[j] = false
-                                                }
-                                            } else {
-                                                buttonStates[j] = true
-                                            }
-                                        },
-                                        colors = if (buttonStates[j]) {
-                                            ButtonDefaults.textButtonColors(containerColor = Color.LightGray)
-                                        } else ButtonDefaults.textButtonColors(containerColor = Color.Transparent),
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .clip(CircleShape)
-                                            .padding(4.dp)
-                                    ) {
-                                        Text(text = days[j].toString(), fontSize = 14.sp)
-                                    }
-                                }
-                                if (endIndex==31) {
-                                    repeat(4) {
-                                        Spacer(modifier = Modifier.weight(1f))
-                                    }
-                                }
+                                Text(text = days[j].toString(), fontSize = 14.sp)
                             }
-
+                        }
+                        if (endIndex==31) {
+                            repeat(4) {
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
                         }
                     }
 
@@ -368,144 +439,34 @@ fun MonthlyRadioButtonLine(
 
 @Composable
 fun YearlyRadioButtonLine(
+    type: String,
     text: String,
     text2: String,
-    idx: Int,
     calendar: Calendar,
     inputText: MutableState<String>,
-    selected: MutableState<Int>
+    selected: MutableState<String>,
 ) {
-
-    var isDrawerVisible by remember { mutableStateOf(false) }
-    var selectedButtonIdx by remember { mutableStateOf<Int?>(null) }
-    val month = calendar.get(Calendar.MONTH) + 1
-    val day = calendar.get(Calendar.DAY_OF_MONTH)
-    val months = listOf(
-        "1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"
-    )
-    val buttonStates = remember { mutableStateListOf(*Array(months.size) { false }) }
 
     Column(
         modifier = Modifier.animateContentSize(),
     ) {
-        DailyRadioButtonLine(text, text2, idx,calendar, inputText, selected)
-
-        // 선택되었을 때 펼쳐지는 ui
-        AnimatedVisibility(visible = selected.value==idx) {
-            Column(
-                modifier = Modifier.padding(8.dp)
-            ) {
-                TextButton(
-                    onClick = { selectedButtonIdx = 1 }, colors = if (selectedButtonIdx==1) {
-                        ButtonDefaults.textButtonColors(containerColor = Color.LightGray)
-                    } else ButtonDefaults.textButtonColors(containerColor = Color.Transparent)
-                ) {
-                    Text(text = "" + month + "월 " + day + "일에 반복")
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-
-                TextButton(
-                    onClick = {
-                        selectedButtonIdx = 2
-                        isDrawerVisible = !isDrawerVisible
-                    }, colors = if (selectedButtonIdx==2) {
-                        ButtonDefaults.textButtonColors(containerColor = Color.LightGray)
-                    } else ButtonDefaults.textButtonColors(containerColor = Color.Transparent)
-                ) {
-                    Text(text = "" + day + "일에 반복할 월 선택")
-                    if (selectedButtonIdx!=2) {
-                        isDrawerVisible = false
-                    }
-                }
-                // 반복 월 설정 버튼 선택시 펼쳐지는 항목
-                AnimatedVisibility(visible = isDrawerVisible) {
-                    Column {
-                        for (i in months.indices step 6) {
-                            Row(
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp)
-                            ) {
-                                val endIndex = minOf(i + 6, months.size)
-                                for (j in i until endIndex) {
-                                    TextButton(
-                                        onClick = {
-                                            if (buttonStates[j]) {
-                                                if (buttonStates.count { it } > 1) {
-                                                    buttonStates[j] = false
-                                                }
-                                            } else {
-                                                buttonStates[j] = true
-                                            }
-                                        },
-                                        colors = if (buttonStates[j]) {
-                                            ButtonDefaults.textButtonColors(containerColor = Color.LightGray)
-                                        } else ButtonDefaults.textButtonColors(containerColor = Color.Transparent),
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .clip(CircleShape)
-                                            .padding(4.dp)
-                                    ) {
-                                        Text(text = months[j], fontSize = 14.sp)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        DailyRadioButtonLine(type, text, text2, calendar, inputText, selected)
     }
 }
 
 
-@Composable
-fun RepeatTimeRadioButtonLine(
-    text: String, text2: String, idx: Int, calendar: Calendar, selected: MutableState<Int>
-) {
-    val repeatTime = remember { mutableStateOf("") }
-    DailyRadioButtonLine(text, text2, idx ,calendar, repeatTime, selected)
-}
 
 @Composable
-fun EndTimeRadioButtonLine(text: String,idx: Int, selected: MutableState<Int>) {
+fun EndTimeRadioButtonLine(
+    type: String, text: String, selected: MutableState<String>, endDate: MutableState<Date?>
+) {
     Column(
         modifier = Modifier.animateContentSize(),
     ) {
-        RadioButtonLine(text = text, idx = idx ,selected = selected)
-        AnimatedVisibility(visible = selected.value==idx) {
-
+        RadioButtonLine(type = type, text = text, selected = selected)
+        AnimatedVisibility(visible = selected.value==type) {
+            //Todo timepicker 구현 후  1. addplan의 경우 picker에서 선택한 값으로 endDate값 변경하기 2. editplan일 경우 endDate 값이 특정 값으로 주어질 텐데 그 값에 맞춰 picker 초기 상태 설정해주기
         }
     }
 }
-
-
-fun convertDayOfWeekToKor(dayOfWeek: Int): String {
-    return when (dayOfWeek) {
-        Calendar.SUNDAY    -> "일요일"
-        Calendar.MONDAY    -> "월요일"
-        Calendar.TUESDAY   -> "화요일"
-        Calendar.WEDNESDAY -> "수요일"
-        Calendar.THURSDAY  -> "목요일"
-        Calendar.FRIDAY    -> "금요일"
-        Calendar.SATURDAY  -> "토요일"
-        else               -> "알 수 없는 요일"
-    }
-}
-
-fun convertDayOfWeekToEng(dayOfWeek: Int): String {
-    return when (dayOfWeek) {
-        Calendar.SUNDAY    -> "SUN"
-        Calendar.MONDAY    -> "MON"
-        Calendar.TUESDAY   -> "TUE"
-        Calendar.WEDNESDAY -> "WED"
-        Calendar.THURSDAY  -> "THU"
-        Calendar.FRIDAY    -> "FRI"
-        Calendar.SATURDAY  -> "SUN"
-        else               -> "UNKNOWN"
-    }
-}
-
-
 
