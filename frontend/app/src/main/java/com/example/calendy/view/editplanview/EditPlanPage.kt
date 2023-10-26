@@ -64,8 +64,8 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel) {
 
     val isPageSchedule = editPlanUiState.entryType==PlanType.Schedule
     val isPageTodo = editPlanUiState.entryType==PlanType.Todo
-    // TODO: Page Add Logic
-    val isPageAdd = editPlanUiState.showInMonthlyView
+
+    val isPageAdd = editPlanUiState.isAddPage
     val isPageEdit = !isPageAdd
 
     val verticalScrollState = rememberScrollState(initial = 0)

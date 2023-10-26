@@ -5,7 +5,10 @@ import com.example.calendy.data.plan.Plan.PlanType
 import com.example.calendy.data.repeatgroup.RepeatGroup
 import java.util.Date
 
+// default value is important for `initialize` in view model
 data class EditPlanUiState(
+    val isAddPage: Boolean, // true: add page. false: edit page
+    val id: Int? = null, // id is set when editing existing plan
     // Style: properties' order is aligned with UI
     val entryType: PlanType = PlanType.Todo,
     val titleField: String = "",

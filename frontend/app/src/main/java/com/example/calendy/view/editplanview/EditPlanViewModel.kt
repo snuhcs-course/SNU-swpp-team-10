@@ -1,6 +1,5 @@
 package com.example.calendy.view.editplanview
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.calendy.data.category.Category
@@ -19,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -35,7 +35,7 @@ class EditPlanViewModel(
 ) : ViewModel() {
 
     // ViewModel 내에서만 uiState 수정 가능하도록 설정
-    private val _uiState = MutableStateFlow(EditPlanUiState())
+    private val _uiState = MutableStateFlow(EditPlanUiState(isAddPage = true))
     val uiState: StateFlow<EditPlanUiState> = _uiState.asStateFlow()
     val categoryListState = (categoryRepository.getCategoriesStream()).stateIn(
         scope = viewModelScope,
@@ -43,10 +43,75 @@ class EditPlanViewModel(
         started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000)
     )
 
+
+    // set once when navigating to EditPlanPage
+    fun initialize(id: Int?, type: PlanType) {
+        if (id==null) {
+            // new plan
+            _uiState.value = EditPlanUiState(isAddPage = true, entryType = type)
+        } else {
+            // edit existing plan
+            when (type) {
+                PlanType.Schedule -> {
+                    loadSchedule(id)
+                }
+
+                PlanType.Todo     -> {
+                    loadTodo(id)
+                }
+            }
+        }
+    }
+
+    private fun loadSchedule(id: Int) {
+        viewModelScope.launch {
+            val schedule = scheduleRepository.getScheduleById(id).first()
+
+            _uiState.value = EditPlanUiState(
+                isAddPage = false,
+                id = id,
+                entryType = PlanType.Schedule,
+                titleField = schedule.title,
+                startTime = schedule.startTime,
+                endTime = schedule.endTime,
+//                category = schedule.categoryId,
+//                repeatGroup = schedule.repeatGroupId,
+                priority = schedule.priority,
+                memoField = schedule.memo,
+                showInMonthlyView = schedule.showInMonthlyView
+            )
+        }
+    }
+
+    private fun loadTodo(id: Int) {
+        viewModelScope.launch {
+            val todo = todoRepository.getTodoById(id).first()
+
+            _uiState.value = EditPlanUiState(
+                isAddPage = false,
+                id = id,
+                entryType = PlanType.Todo,
+                titleField = todo.title,
+                isComplete = todo.complete,
+                isYearly = todo.yearly,
+                isMonthly = todo.monthly,
+                isDaily = todo.daily,
+                dueTime = todo.dueTime,
+//                category = schedule.categoryId,
+//                repeatGroup = schedule.repeatGroupId,
+                priority = todo.priority,
+                memoField = todo.memo,
+                showInMonthlyView = todo.showInMonthlyView
+            )
+        }
+    }
+
+
     // Style: functions' order is aligned with UI
     fun setType(selectedType: PlanType) {
         _uiState.update { currentState -> currentState.copy(entryType = selectedType) }
     }
+
 
     fun setTitle(userInput: String) {
         _uiState.update { currentState -> currentState.copy(titleField = userInput) }
@@ -66,6 +131,7 @@ class EditPlanViewModel(
         _uiState.update { currentState -> currentState.copy(endTime = inputDate) }
     }
 
+    //region DateSelector
     fun toggleIsYearly() {
         if (uiState.value.isYearly) {
             _uiState.update { currentState ->
@@ -143,9 +209,9 @@ class EditPlanViewModel(
     }
 
     fun setDueTime(inputDate: Date) {
-        Log.d("GUN", inputDate.toString())
         _uiState.update { currentState -> currentState.copy(dueTime = inputDate) }
     }
+    //endregion
 
     fun setCategory(category: Category?) {
         _uiState.update { currentState -> currentState.copy(category = category) }
@@ -157,6 +223,7 @@ class EditPlanViewModel(
         }
     }
 
+    //region Repeat Group
     fun setRepeatGroup(repeatGroup: RepeatGroup) {
         _uiState.update { currentState -> currentState.copy(repeatGroup = repeatGroup) }
     }
@@ -178,6 +245,7 @@ class EditPlanViewModel(
             repeatGroupRepository.update(repeatGroup)
         }
     }
+    //endregion
 
     fun setPriority(input: Int) {
         val priority = max(1, min(5, input))
@@ -241,7 +309,6 @@ class EditPlanViewModel(
                     isOverridden = false
                 )
                 viewModelScope.launch { todoRepository.insertTodo(newTodo) }
-
             }
         }
     }

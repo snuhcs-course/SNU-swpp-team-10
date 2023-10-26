@@ -151,6 +151,16 @@ sealed class BottomNavItem(
     )
 }
 
+sealed class DestinationRoute(val route: String) {
+    object AddSchedule : DestinationRoute("EditPage/schedule")
+
+    object AddTodo : DestinationRoute("EditPage/todo")
+
+    class EditSchedule(id: Int) : DestinationRoute("EditPage/schedule?id=$id")
+
+    class EditTodo(id: Int) : DestinationRoute("EditPage/todo?id=$id")
+}
+
 
 @Composable
 fun NavigationGraph(navController: NavHostController) {
@@ -176,35 +186,38 @@ fun NavigationGraph(navController: NavHostController) {
         composable(BottomNavItem.AiManager.screenRoute) {
             // ManagerPage()
             // Test For Edit Plan
-            Button(onClick = { navController.navigate("EditPage/schedule?id=2") }) {
-                Text("EditPage 2")
+            Button(onClick = { navController.navigate(DestinationRoute.EditTodo(id = 2).route) }) {
+                Text("EditPage Todo id=2")
             }
         }
         composable(BottomNavItem.Setting.screenRoute) {
             // SettingPage()
             // Test For New Plan
-            Button(onClick = { navController.navigate("EditPage/todo") }) {
+            Button(onClick = { navController.navigate(DestinationRoute.AddSchedule.route) }) {
                 Text("EditPage New")
             }
         }
         composable(
-            route = "EditPage/{type}?id={id}",
-            arguments = listOf(navArgument("type") {
-                type = NavType.StringType
-            }, navArgument("id") {
-                type = NavType.StringType
-                nullable = true
-                defaultValue = null
-            } )
+            route = "EditPage/{type}?id={id}", arguments = listOf(
+                navArgument("type") {
+                    type = NavType.StringType
+                },
+                navArgument("id") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+            )
         ) { entry ->
             val viewModel: EditPlanViewModel = viewModel(factory = AppViewModelProvider.Factory)
-            viewModel.setType(
-                when(entry.arguments?.getString("type")) {
+            viewModel.initialize(
+                id = entry.arguments?.getString("id")?.toIntOrNull(),
+                type = when (entry.arguments?.getString("type")) {
                     "schedule" -> Plan.PlanType.Schedule
-                    else -> Plan.PlanType.Todo
+                    else       -> Plan.PlanType.Todo
                 }
             )
-            val id = entry.arguments?.getString("id")
+
             EditPlanPage(viewModel)
         }
     }
