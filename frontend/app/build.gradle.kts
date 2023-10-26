@@ -80,10 +80,6 @@ dependencies {
     //monthly calendar
     implementation("com.github.prolificinteractive:material-calendarview:1.6.0")
 
-    //navigation
-    val nav_version = "2.5.3"
-    implementation("androidx.navigation:navigation-compose:$nav_version")
-
     //remote DB connect
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.google.code.gson:gson:2.8.9")
