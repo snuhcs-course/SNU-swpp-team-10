@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -26,13 +27,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.calendy.data.plan.Plan
 import com.example.calendy.ui.theme.CalendyTheme
 import com.example.calendy.view.editplanview.EditPlanPage
+import com.example.calendy.view.editplanview.EditPlanViewModel
 import com.example.calendy.view.monthlyview.MonthlyPage
 
 
@@ -168,12 +174,38 @@ fun NavigationGraph(navController: NavHostController) {
             TodoPage()
         }
         composable(BottomNavItem.AiManager.screenRoute) {
+            // ManagerPage()
             // Test For Edit Plan
-            ManagerPage()
+            Button(onClick = { navController.navigate("EditPage/schedule?id=2") }) {
+                Text("EditPage 2")
+            }
         }
         composable(BottomNavItem.Setting.screenRoute) {
+            // SettingPage()
             // Test For New Plan
-            EditPlanPage()
+            Button(onClick = { navController.navigate("EditPage/todo") }) {
+                Text("EditPage New")
+            }
+        }
+        composable(
+            route = "EditPage/{type}?id={id}",
+            arguments = listOf(navArgument("type") {
+                type = NavType.StringType
+            }, navArgument("id") {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            } )
+        ) { entry ->
+            val viewModel: EditPlanViewModel = viewModel(factory = AppViewModelProvider.Factory)
+            viewModel.setType(
+                when(entry.arguments?.getString("type")) {
+                    "schedule" -> Plan.PlanType.Schedule
+                    else -> Plan.PlanType.Todo
+                }
+            )
+            val id = entry.arguments?.getString("id")
+            EditPlanPage(viewModel)
         }
     }
 }
