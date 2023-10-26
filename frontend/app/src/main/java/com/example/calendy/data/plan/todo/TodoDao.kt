@@ -19,4 +19,7 @@ interface TodoDao : BaseDao<Todo> {
     fun getSpecialTodosStream(dueTime: Date, yearly: Boolean = false, monthly: Boolean = false, daily: Boolean = false): Flow<List<Todo>>
     @Query("SELECT * FROM todo WHERE id = :id")
     fun getTodoById(id: Int): Flow<Todo>
+
+    @Query("SELECT * FROM todo")
+    fun getAllTodo() : Flow<List<Todo>>
 }

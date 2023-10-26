@@ -20,4 +20,6 @@ class ScheduleLocalDataSource(private val scheduleDao: ScheduleDao) {
     fun getScheduleById(id: Int): Flow<Schedule> {
         return scheduleDao.getScheduleById(id)
     }
+
+    fun getAllSchedule():Flow<List<Schedule>> = scheduleDao.getAllSchedule()
 }

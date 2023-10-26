@@ -1,5 +1,6 @@
 package com.example.calendy.data.plan.schedule
 
+import androidx.navigation.FloatingWindow
 import com.example.calendy.data.plan.Schedule
 import kotlinx.coroutines.flow.Flow
 import java.util.Date
@@ -22,6 +23,7 @@ class ScheduleRepository(private val scheduleLocalDataSource: ScheduleLocalDataS
         return scheduleLocalDataSource.getScheduleById(id)
     }
 
+    override fun getAllSchedule():Flow<List<Schedule>> = scheduleLocalDataSource.getAllSchedule()
 //    suspend fun postSchedule(schedule: Schedule) {
 //        scheduleRemoteDataSource.postSchedule()
 //    }

@@ -25,4 +25,6 @@ class TodoLocalDataSource(private val todoDao: TodoDao) {
             todoDao.getSpecialTodosStream(DateHelper.getDailyDueTime(year, month, day), daily = true)
     fun getTodoById(id: Int): Flow<Todo> = todoDao.getTodoById(id)
 
+    fun getAllTodo() : Flow<List<Todo>> = todoDao.getAllTodo()
+
 }

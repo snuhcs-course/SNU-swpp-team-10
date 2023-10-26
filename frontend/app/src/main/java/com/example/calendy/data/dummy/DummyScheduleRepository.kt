@@ -26,4 +26,8 @@ class DummyScheduleRepository: IScheduleRepository {
         TODO("Not yet implemented")
     }
 
+    override fun getAllSchedule(): Flow<List<Schedule>> {
+        TODO("Not yet implemented")
+    }
+
 }

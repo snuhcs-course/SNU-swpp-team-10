@@ -13,4 +13,7 @@ interface ScheduleDao : BaseDao<Schedule> {
     fun getSchedulesStream(startTime: Date, endTime: Date): Flow<List<Schedule>>
     @Query("SELECT * FROM schedule WHERE id = :id")
     fun getScheduleById(id: Int): Flow<Schedule>
+
+    @Query("SELECT * FROM schedule")
+    fun getAllSchedule(): Flow<List<Schedule>>
 }
