@@ -1,11 +1,8 @@
 package com.example.calendy
 
-import android.content.Context
-import android.content.ContextWrapper
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -20,6 +17,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,9 +35,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.calendy.ui.theme.CalendyTheme
 import com.example.calendy.view.editplanview.EditPlanPage
-import com.example.calendy.view.monthlyview.MonthlyPage
 import com.example.calendy.view.monthlyview.MonthlyPageKT
 import com.example.calendy.view.monthlyview.MonthlyViewModel
+import com.prolificinteractive.materialcalendarview.MaterialCalendarView
 
 
 class MainActivity : ComponentActivity() {
@@ -52,7 +50,6 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
                     MainScreenView()
-//                    MonthlyPageKT()
                 }
             }
         }
@@ -162,33 +159,6 @@ fun NavigationGraph(navController: NavHostController) {
         }
         composable(BottomNavItem.Month.screenRoute) {
             MonthlyPageKT()
-//            val monthlyViewModel: MonthlyViewModel = viewModel(factory = AppViewModelProvider.Factory)
-////            monthlyViewModel.
-//            AndroidView(
-//                modifier = Modifier,
-//                factory = { context ->
-//                    MonthlyPage(context).apply {
-//
-//                    }
-//                    // Sets up listeners for View -> Compose communication
-//
-//                    // ex)
-////                    setOnClickListener {
-////                        selectedItem = 1
-////                    }
-//                },
-//                update = { monthlyPage ->
-//                    // View's been inflated or state read in this block has been updated
-//                    // Add logic here if necessary
-//
-//                    // As selectedItem is read here, AndroidView will recompose
-//                    // whenever the state changes
-//                    // Example of Compose -> View communication
-//
-//                    // ex) view.selectedItem = selectedItem
-//                },
-//            )
-////            FakeMonthlyPage()
         }
         composable(BottomNavItem.Todo.screenRoute) {
             TodoPage()
