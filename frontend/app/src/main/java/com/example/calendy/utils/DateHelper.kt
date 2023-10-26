@@ -122,8 +122,8 @@ object DateHelper {
 
 // extension for CalendarDay  and Date
 
-fun CalendarDay.toDate() : Date = Date(year,month,day)
-fun CalendarDay.toStartTime() : Date = Date(year,month,day,0,0)
-fun CalendarDay.toEndTime() : Date = Date(year,month,day,23,59)
-fun CalendarDay.getWeekDay() : String = DateHelper.getDayOfWeek(toDate())
-fun Date.toCalendarDay() : CalendarDay = CalendarDay.from(this)
+fun CalendarDay.toDate(): Date = Date(year, month, day)
+fun CalendarDay.toStartTime(): Date = Date(year, month, day, 0, 0)
+fun CalendarDay.toEndTime(): Date = Date(year, month, day, 23, 59)
+fun CalendarDay.getWeekDay(): String = DateHelper.getDayOfWeek(toDate())
+fun Date.toCalendarDay(): CalendarDay = CalendarDay.from(this)
