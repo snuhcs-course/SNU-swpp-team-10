@@ -1,5 +1,6 @@
 package com.example.calendy.view.monthlyview;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
@@ -11,9 +12,12 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelStore;
 
+import com.example.calendy.MainActivity;
 import com.example.calendy.R;
 import com.example.calendy.data.plan.Schedule;
+import com.example.calendy.utils.ContextHelperKt;
 import com.example.calendy.view.monthlyview.decorator.DotDecorator;
 import com.example.calendy.view.monthlyview.decorator.OneDayDecorator;
 import com.example.calendy.view.monthlyview.decorator.SaturdayDecorator;
@@ -32,6 +36,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
+
+import static com.example.calendy.utils.ContextHelperKt.getActivity;
 
 public class MonthlyPage extends ConstraintLayout {
     private final String TAG = this.getClass().getSimpleName();
@@ -59,7 +65,8 @@ public class MonthlyPage extends ConstraintLayout {
     protected void onCreate() {
         View view = LayoutInflater.from(context).inflate(R.layout.activity_monthly_page, null, true);
         this.addView(view);
-//        model = new ViewModelProvider(this).get(MonthlyViewModel.class);
+//        AppCompatActivity activity = ContextHelperKt.getActivity(context);
+        model = new ViewModelProvider((MainActivity)context).get(MonthlyViewModel.class);
 
         selectedDate = CalendarDay.today();
 //
@@ -92,7 +99,7 @@ public class MonthlyPage extends ConstraintLayout {
         List<Schedule> daySchedule = dummyDaySchedules;
         schedulesOfMonth.put(CalendarDay.from(2023, 9, 11), daySchedule);
 
-        dotDecorator = new DotDecorator(schedulesOfMonth);
+//        dotDecorator = new DotDecorator(schedulesOfMonth);
         calendarView.addDecorators(
                 new SundayDecorator()
                 , new SaturdayDecorator()

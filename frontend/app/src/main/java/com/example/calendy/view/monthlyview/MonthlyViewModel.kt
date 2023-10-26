@@ -2,14 +2,30 @@ package com.example.calendy.view.monthlyview
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.calendy.data.category.ICategoryRepository
+import com.example.calendy.data.plan.IPlanRepository
+import com.example.calendy.data.plan.Plan
 import com.example.calendy.data.plan.Schedule
 import com.example.calendy.data.plan.Todo
+import com.example.calendy.data.plan.schedule.IScheduleRepository
+import com.example.calendy.data.plan.todo.ITodoRepository
+import com.example.calendy.data.repeatgroup.IRepeatGroupRepository
+import com.example.calendy.utils.toDate
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import kotlinx.coroutines.flow.StateFlow
 import java.util.Hashtable
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 
-class MonthlyViewModel : ViewModel() {
+class MonthlyViewModel(
+    private val planRepository: IPlanRepository,
+    private val scheduleRepository: IScheduleRepository,
+    private val todoRepository: ITodoRepository,
+    private val categoryRepository: ICategoryRepository,
+    private val repeatGroupRepository: IRepeatGroupRepository
+) : ViewModel() {
     /*
     * TODO:
     * get all plan data (schedule and todo) within designated period (startTime~endTime)
@@ -22,6 +38,17 @@ class MonthlyViewModel : ViewModel() {
     // !! need to check if hash key exists after deleting all plans in a day
     val scheduleListByDay : Hashtable<CalendarDay, StateFlow<List<Schedule>>> = Hashtable()
     val todoListByDay : Hashtable<CalendarDay,StateFlow<List<Todo>>> = Hashtable()
+//    var planList : StateFlow<List<Plan>>
+    fun getPlanListState(startTime:CalendarDay,endTime:CalendarDay): StateFlow<List<Plan>> {
+        val result = (planRepository.getPlansStream(startTime.toDate(),endTime.toDate())).stateIn(
+            scope = viewModelScope,
+            initialValue = emptyList(),
+            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000)
+        )
+//        planList=result
+//        return planList
+        return result
+    }
 
     fun getScheduleOfDay(day:CalendarDay): StateFlow<List<Schedule>>? {
         return scheduleListByDay.getOrDefault(day,null)

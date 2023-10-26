@@ -38,6 +38,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.calendy.ui.theme.CalendyTheme
 import com.example.calendy.view.editplanview.EditPlanPage
 import com.example.calendy.view.monthlyview.MonthlyPage
+import com.example.calendy.view.monthlyview.MonthlyPageKT
 import com.example.calendy.view.monthlyview.MonthlyViewModel
 
 
@@ -51,6 +52,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
                     MainScreenView()
+//                    MonthlyPageKT()
                 }
             }
         }
@@ -155,36 +157,38 @@ sealed class BottomNavItem(
 fun NavigationGraph(navController: NavHostController) {
     NavHost(navController = navController, startDestination = BottomNavItem.Week.screenRoute) {
         composable(BottomNavItem.Week.screenRoute) {
-            WeeklyPage()
+//            WeeklyPage()
+            EditPlanPage()
         }
         composable(BottomNavItem.Month.screenRoute) {
-            val monthlyViewModel: MonthlyViewModel = viewModel(factory = AppViewModelProvider.Factory)
-//            monthlyViewModel.
-            AndroidView(
-                modifier = Modifier,
-                factory = { context ->
-                    MonthlyPage(context).apply {
-
-                    }
-                    // Sets up listeners for View -> Compose communication
-
-                    // ex)
-//                    setOnClickListener {
-//                        selectedItem = 1
+            MonthlyPageKT()
+//            val monthlyViewModel: MonthlyViewModel = viewModel(factory = AppViewModelProvider.Factory)
+////            monthlyViewModel.
+//            AndroidView(
+//                modifier = Modifier,
+//                factory = { context ->
+//                    MonthlyPage(context).apply {
+//
 //                    }
-                },
-                update = { monthlyPage ->
-                    // View's been inflated or state read in this block has been updated
-                    // Add logic here if necessary
-
-                    // As selectedItem is read here, AndroidView will recompose
-                    // whenever the state changes
-                    // Example of Compose -> View communication
-
-                    // ex) view.selectedItem = selectedItem
-                },
-            )
-//            FakeMonthlyPage()
+//                    // Sets up listeners for View -> Compose communication
+//
+//                    // ex)
+////                    setOnClickListener {
+////                        selectedItem = 1
+////                    }
+//                },
+//                update = { monthlyPage ->
+//                    // View's been inflated or state read in this block has been updated
+//                    // Add logic here if necessary
+//
+//                    // As selectedItem is read here, AndroidView will recompose
+//                    // whenever the state changes
+//                    // Example of Compose -> View communication
+//
+//                    // ex) view.selectedItem = selectedItem
+//                },
+//            )
+////            FakeMonthlyPage()
         }
         composable(BottomNavItem.Todo.screenRoute) {
             TodoPage()
