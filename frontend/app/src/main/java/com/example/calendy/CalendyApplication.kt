@@ -10,6 +10,8 @@ import com.example.calendy.data.category.ICategoryRepository
 import com.example.calendy.data.message.IMessageRepository
 import com.example.calendy.data.message.MessageLocalDataSource
 import com.example.calendy.data.message.MessageRepository
+import com.example.calendy.data.plan.IPlanRepository
+import com.example.calendy.data.plan.PlanRepository
 import com.example.calendy.data.plan.schedule.IScheduleRepository
 import com.example.calendy.data.plan.schedule.ScheduleLocalDataSource
 import com.example.calendy.data.plan.schedule.ScheduleRemoteDataSource
@@ -32,6 +34,7 @@ class CalendyApplication : Application() {
 }
 
 interface IAppContainer {
+    val planRepository : IPlanRepository
     val scheduleRepository: IScheduleRepository
     val todoRepository: ITodoRepository
     val categoryRepository: ICategoryRepository
@@ -40,6 +43,10 @@ interface IAppContainer {
 }
 
 class AppContainer(private val context: Context) : IAppContainer {
+    override val planRepository: IPlanRepository by lazy {
+        PlanRepository(scheduleRepository,todoRepository)
+    }
+
     override val scheduleRepository: IScheduleRepository by lazy {
         ScheduleRepository(
                 ScheduleLocalDataSource(

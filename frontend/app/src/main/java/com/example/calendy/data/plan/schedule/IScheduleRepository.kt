@@ -10,4 +10,5 @@ interface IScheduleRepository {
     suspend fun updateSchedule(schedule: Schedule)
     fun getSchedulesStream(startTime: Date, endTime: Date): Flow<List<Schedule>>
     fun getScheduleById(id: Int): Flow<Schedule>
+    fun getAllSchedule(): Flow<List<Schedule>>
 }

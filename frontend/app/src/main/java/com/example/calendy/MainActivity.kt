@@ -18,6 +18,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,6 +39,9 @@ import androidx.navigation.navArgument
 import com.example.calendy.data.plan.Plan
 import com.example.calendy.ui.theme.CalendyTheme
 import com.example.calendy.view.editplanview.EditPlanPage
+import com.example.calendy.view.monthlyview.MonthlyPageKT
+import com.example.calendy.view.monthlyview.MonthlyViewModel
+import com.prolificinteractive.materialcalendarview.MaterialCalendarView
 import com.example.calendy.view.editplanview.EditPlanViewModel
 import com.example.calendy.view.monthlyview.MonthlyPage
 
@@ -169,16 +173,7 @@ fun NavigationGraph(navController: NavHostController) {
             WeeklyPage()
         }
         composable(BottomNavItem.Month.screenRoute) {
-            AndroidView(
-                modifier = Modifier,
-                factory = { context ->
-                    MonthlyPage(context)
-                },
-                update = { monthlyPage ->
-
-                },
-            )
-//            FakeMonthlyPage()
+            MonthlyPageKT()
         }
         composable(BottomNavItem.Todo.screenRoute) {
             TodoPage()
