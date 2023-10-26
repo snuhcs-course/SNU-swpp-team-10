@@ -1,10 +1,6 @@
 package com.example.calendy.utils
 
 import com.prolificinteractive.materialcalendarview.CalendarDay
-import com.prolificinteractive.materialcalendarview.format.ArrayWeekDayFormatter
-import java.time.LocalDate
-import com.example.calendy.R
-import android.content.Context
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -13,7 +9,8 @@ import java.util.Locale
 object DateHelper {
     /**
      * Returns Date object from exact time
-     * Optional parameter hour, minute, second, millisecond is default to 0
+     * Optional parameter hour, minute is set default to 0
+     * We do not use second & millisecond. second & millisecond is set to 0
      * @param assertValueIsValid if set to true, try assertion if date is valid (e.g. 02.31).
      * if set to false, return valid date (e.g. 02.28)
      */
@@ -23,8 +20,6 @@ object DateHelper {
         day: Int,
         hourOfDay: Int = 0,
         minute: Int = 0,
-        second: Int = 0,
-        millisecond: Int = 0,
         assertValueIsValid: Boolean = true
     ): Date = with(Calendar.getInstance()) {
         for ((calendarField, value) in listOf(
@@ -33,8 +28,8 @@ object DateHelper {
             Pair(Calendar.DATE, day),
             Pair(Calendar.HOUR_OF_DAY, hourOfDay),
             Pair(Calendar.MINUTE, minute),
-            Pair(Calendar.SECOND, second),
-            Pair(Calendar.MILLISECOND, millisecond),
+            Pair(Calendar.SECOND, 0),
+            Pair(Calendar.MILLISECOND, 0),
         )) {
             if (assertValueIsValid) {
                 assert(this.getActualMinimum(calendarField) <= value)
@@ -54,7 +49,7 @@ object DateHelper {
         this.time
     }
 
-    fun getDateInMillis(dateInMillis: Long): Date {
+    fun getDateFromMillis(dateInMillis: Long): Date {
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = dateInMillis
         return calendar.time
@@ -78,6 +73,7 @@ object DateHelper {
 
     /**
      * Returns Date object for end of (year or month or ...)
+     * Usage: endOf(2023). endOf(2023, 8), endOf(2023, 8, 31)
      */
     fun endOf(
         year: Int,
@@ -85,24 +81,15 @@ object DateHelper {
         day: Int? = null,
         hourOfDay: Int? = null,
         minute: Int? = null,
-        second: Int? = null,
-        millisecond: Int? = null
     ): Date = with(Calendar.getInstance()) {
-        for ((calendarField, nullableValue) in listOf(
-            Pair(Calendar.YEAR, year),
-            Pair(Calendar.MONTH, monthZeroIndexed),
-            Pair(Calendar.DATE, day),
-            Pair(Calendar.HOUR_OF_DAY, hourOfDay),
-            Pair(Calendar.MINUTE, minute),
-            Pair(Calendar.SECOND, second),
-            Pair(Calendar.MILLISECOND, millisecond),
-        )) {
-            val value = nullableValue ?: this.getActualMaximum(calendarField)
-            assert(this.getActualMinimum(calendarField) <= value)
-            assert(value <= this.getActualMaximum(calendarField))
-            set(calendarField, value)
-        }
-        this.time
+        getDate(
+            year = year,
+            monthZeroIndexed = monthZeroIndexed ?: this.getActualMaximum(Calendar.MONTH),
+            day = day ?: this.getActualMaximum(Calendar.DATE),
+            hourOfDay = hourOfDay ?: this.getActualMaximum(Calendar.HOUR_OF_DAY),
+            minute = minute ?: this.getActualMaximum(Calendar.MINUTE),
+            assertValueIsValid = false
+        )
     }
 
 
@@ -135,8 +122,8 @@ object DateHelper {
 
 // extension for CalendarDay  and Date
 
-fun CalendarDay.toDate() : Date = Date(year,month,day)
-fun CalendarDay.toStartTime() : Date = Date(year,month,day,0,0)
-fun CalendarDay.toEndTime() : Date = Date(year,month,day,23,59)
-fun CalendarDay.getWeekDay() : String = DateHelper.getDayOfWeek(toDate())
+fun CalendarDay.toDate(): Date = Date(year, month, day)
+fun CalendarDay.toStartTime(): Date = Date(year, month, day, 0, 0)
+fun CalendarDay.toEndTime(): Date = Date(year, month, day, 23, 59)
+fun CalendarDay.getWeekDay(): String = DateHelper.getDayOfWeek(toDate())
 

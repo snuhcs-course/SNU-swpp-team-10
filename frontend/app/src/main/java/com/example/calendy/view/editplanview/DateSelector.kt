@@ -350,7 +350,7 @@ private fun DateTimePickerDialog(
                     headline = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             val date =
-                                DateHelper.getDateInMillis(datePickerState.selectedDateMillis ?: 0L)
+                                DateHelper.getDateFromMillis(datePickerState.selectedDateMillis ?: 0L)
                             val (year, monthZeroIndexed, day, _, _) = date.extract()
                             Text(
                                 text = String.format(
