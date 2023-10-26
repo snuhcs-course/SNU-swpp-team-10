@@ -1,5 +1,6 @@
 package com.example.calendy.view.monthlyview
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,7 +18,10 @@ import kotlinx.coroutines.flow.StateFlow
 import java.util.Hashtable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.runBlocking
+import java.util.Date
 
 class MonthlyViewModel(
     private val planRepository: IPlanRepository,
@@ -38,15 +42,19 @@ class MonthlyViewModel(
     // !! need to check if hash key exists after deleting all plans in a day
     val scheduleListByDay : Hashtable<CalendarDay, StateFlow<List<Schedule>>> = Hashtable()
     val todoListByDay : Hashtable<CalendarDay,StateFlow<List<Todo>>> = Hashtable()
-//    var planList : StateFlow<List<Plan>>
+//    var planList : StateFlow<List<Plan>> = scheduleRepository.getAllSchedule().stateIn(
+//        scope = viewModelScope,
+//        initialValue = emptyList<Plan>(),
+//        started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000)
+//    )
+
     fun getPlanListState(startTime:CalendarDay,endTime:CalendarDay): StateFlow<List<Plan>> {
-        val result = (planRepository.getPlansStream(startTime.toDate(),endTime.toDate())).stateIn(
+        val stream = (todoRepository.getAllTodo())
+        val result = stream.stateIn(
             scope = viewModelScope,
-            initialValue = emptyList(),
+            initialValue = emptyList<Plan>(),
             started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000)
         )
-//        planList=result
-//        return planList
         return result
     }
 

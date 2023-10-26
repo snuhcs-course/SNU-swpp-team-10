@@ -31,7 +31,11 @@ import java.util.Calendar
 import java.util.Hashtable
 
 @Composable
-fun MonthlyPageKT (monthlyViewModel: MonthlyViewModel = viewModel(factory = AppViewModelProvider.Factory)) {
+fun MonthlyPageKT (
+    monthlyViewModel: MonthlyViewModel
+        = viewModel(factory = AppViewModelProvider.Factory)
+)
+{
 
     val custom_months = stringArrayResource(id = R.array.custom_months)
     val custom_weekdays = stringArrayResource(id = R.array.custom_weekdays)
@@ -42,7 +46,8 @@ fun MonthlyPageKT (monthlyViewModel: MonthlyViewModel = viewModel(factory = AppV
     var dotDecorator: DotDecorator? = null
     val oneDayDecorator = OneDayDecorator()
 
-    val planList: List<Plan> by monthlyViewModel.getPlanListState(CalendarDay.from(2023,10,20),CalendarDay.from(2023,11,20)).collectAsState()
+//    val planList: List<Plan> by monthlyViewModel.planList.collectAsState()
+    val planList: List<Plan> by monthlyViewModel.getPlanListState(CalendarDay.from(2023,0,20),CalendarDay.from(2023,11,20)).collectAsState()
 
     AndroidView(
         modifier = Modifier.fillMaxSize(),
@@ -78,14 +83,11 @@ fun MonthlyPageKT (monthlyViewModel: MonthlyViewModel = viewModel(factory = AppV
 //                schedulesOfMonth!![CalendarDay.from(2023, 9, 11)] = daySchedule
 
                 //add dot decorator
-                planOfMonth = planListToHash(planList)
-                dotDecorator = DotDecorator(planOfMonth)
                 addDecorators(
                     SundayDecorator(),
                     SaturdayDecorator(),
                     oneDayDecorator,
                     selectedDayDecorator,
-                    dotDecorator
                 )
 
                 setOnDateChangedListener(OnDateSelectedListener { widget, date, selected ->
@@ -101,9 +103,8 @@ fun MonthlyPageKT (monthlyViewModel: MonthlyViewModel = viewModel(factory = AppV
                 setOnMonthChangedListener(
                     // selected month changed
                     OnMonthChangedListener { widget, date ->
-
+                        //TODO: change planList
                     })
-                Log.d("hochan","applied")
 
             }
         },
@@ -112,6 +113,11 @@ fun MonthlyPageKT (monthlyViewModel: MonthlyViewModel = viewModel(factory = AppV
 //            planOfMonth= planListToHash(planList)
 //            dotDecorator = DotDecorator(planOfMonth)
             Log.d("hochan","updated")
+
+            planOfMonth = planListToHash(planList)
+            view.removeDecorator(dotDecorator)
+            dotDecorator = DotDecorator(planOfMonth)
+            view.addDecorators(dotDecorator)
         }
         )
 
