@@ -91,14 +91,14 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel) {
                     }
                     if (isPageEdit) {
                         // Delete Button
-                        IconButton(onClick = { /*TODO Delete Button */ }) {
+                        IconButton(onClick = { editPlanViewModel.deletePlan() }) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
                                 contentDescription = "Delete",
                             )
                         }
                         // Save Button
-                        IconButton(onClick = { /*TODO Save Button */ }) {
+                        IconButton(onClick = { editPlanViewModel.updatePlan() }) {
                             Icon(
                                 imageVector = Icons.Default.Save,
                                 contentDescription = "Submit",
