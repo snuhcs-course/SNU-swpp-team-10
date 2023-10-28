@@ -80,7 +80,6 @@ dependencies {
     //monthly calendar
     implementation("com.github.prolificinteractive:material-calendarview:1.6.0")
 
-
     //remote DB connect
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.google.code.gson:gson:2.8.9")
