@@ -211,6 +211,11 @@ class EditPlanViewModel(
     fun setDueTime(inputDate: Date) {
         _uiState.update { currentState -> currentState.copy(dueTime = inputDate) }
     }
+
+    fun setTimeRange(startDate: Date, endDate: Date) {
+        _uiState.update { currentState -> currentState.copy(startTime = startDate, endTime = endDate) }
+    }
+
     //endregion
 
     fun setCategory(category: Category?) {

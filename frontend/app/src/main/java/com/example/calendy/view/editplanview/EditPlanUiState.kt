@@ -13,6 +13,7 @@ data class EditPlanUiState(
     val entryType: PlanType = PlanType.Todo,
     val titleField: String = "",
     val isComplete: Boolean = false,
+    val isAllDay: Boolean = false, // cannot specify time in Date Range Picker if true
     val startTime: Date = Date(),
     val endTime: Date = Date(),
     val isYearly: Boolean = false,

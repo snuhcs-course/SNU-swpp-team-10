@@ -94,18 +94,18 @@ object DateHelper {
 
 
     /**
-     * DueTime for todo
+     * DueTime for tod0
      */
     fun getYearlyDueTime(year: Int): Date = endOf(year)
 
     /**
-     * DueTime for todo
+     * DueTime for tod0
      * @param monthZeroIndexed 0 ~ 11 based
      */
     fun getMonthlyDueTime(year: Int, monthZeroIndexed: Int): Date = endOf(year, monthZeroIndexed)
 
     /**
-     * DueTime for todo
+     * DueTime for tod0
      * @param monthZeroIndexed 0 ~ 11 based
      */
     fun getDailyDueTime(year: Int, monthZeroIndexed: Int, day: Int): Date =

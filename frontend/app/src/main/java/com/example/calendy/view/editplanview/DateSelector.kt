@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -84,7 +85,7 @@ fun DateSelector(
 
     val (year, monthZeroIndexed, _, hour, minute) = dueTime.extract()
     val datePickerState = rememberDatePickerState(initialSelectedDateMillis = dueTime.time)
-    // if dueTime Change -> date state is set
+    // if dueTime Change -> picker state is updated
     datePickerState.setSelection(dueTime.time)
     // date state -> dueTime Change
     fun updateDueTime(timeInMillis: Long?, hour: Int, minute: Int) {
@@ -95,12 +96,14 @@ fun DateSelector(
     }
 
     // TODO: Date Picker view month change when (year, month) change
+    // Unavailable in Material3 DatePicker API
 
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         //region 3 Buttons
         val shape = RoundedCornerShape(8.dp)
         Row(
-            modifier = Modifier.height(32.dp)
+            modifier = Modifier
+                .height(32.dp)
                 .clip(shape = shape)
                 .border(width = 1.dp, color = Color.Black, shape = shape)
         ) {
@@ -342,15 +345,18 @@ private fun DateTimePickerDialog(
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Surface(
-            modifier = Modifier.width(360.dp).wrapContentHeight(), shape = RoundedCornerShape(24.dp)
+            modifier = Modifier
+                .width(360.dp)
+                .wrapContentHeight(), shape = RoundedCornerShape(24.dp)
         ) {
             Column {
                 DatePicker(
                     state = datePickerState, showModeToggle = false,
                     headline = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            val date =
-                                DateHelper.getDateFromMillis(datePickerState.selectedDateMillis ?: 0L)
+                            val date = DateHelper.getDateFromMillis(
+                                datePickerState.selectedDateMillis ?: 0L
+                            )
                             val (year, monthZeroIndexed, day, _, _) = date.extract()
                             Text(
                                 text = String.format(
@@ -381,7 +387,9 @@ private fun DateTimePickerDialog(
                         onConfirm(
                             datePickerState, hour, minute
                         )
-                    }, modifier = Modifier.padding(end = 16.dp).align(Alignment.End)
+                    }, modifier = Modifier
+                        .padding(end = 16.dp)
+                        .align(Alignment.End)
                 ) {
                     Icon(
                         imageVector = Icons.Filled.CheckCircle,
@@ -396,7 +404,13 @@ private fun DateTimePickerDialog(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DateRangeSelector(modifier: Modifier = Modifier) {
+fun DateRangeSelector(
+    startTime: Date,
+    endTime: Date,
+    isAllDay: Boolean,
+    onSelectTimeRange: (Date, Date) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     var isDialogOpen by remember { mutableStateOf(false) }
     fun openDialog() {
         isDialogOpen = true
@@ -408,16 +422,77 @@ fun DateRangeSelector(modifier: Modifier = Modifier) {
 
     // TODO: Calendar 대신 uiState 날짜 사용
     val calendar = Calendar.getInstance()
-
     val dateRangePickerState = rememberDateRangePickerState()
+    // if viewModel time Change -> picker state is updated
+    dateRangePickerState.setSelection(startTime.time, endTime.time)
+    // picker state -> viewModel time Change
+    fun updateTimeRange(
+        startTimeInMillis: Long?,
+        startHour: Int,
+        startMinute: Int,
+        endTimeInMillis: Long?,
+        endHour: Int,
+        endMinute: Int,
+    ) {
+        // TODO: Refactor me. maybe with helper function
+        calendar.timeInMillis = startTimeInMillis ?: calendar.timeInMillis
+        calendar.set(Calendar.HOUR_OF_DAY, startHour)
+        calendar.set(Calendar.MINUTE, startMinute)
+        val startDate = calendar.time
+
+        calendar.timeInMillis = endTimeInMillis ?: calendar.timeInMillis
+        calendar.set(Calendar.HOUR_OF_DAY, endHour)
+        calendar.set(Calendar.MINUTE, endMinute)
+        val endDate = calendar.time
+
+        onSelectTimeRange(startDate, endDate)
+    }
+
+
+    val (_, _, _, hour1, minute1) = startTime.extract()
+    var startHour by remember {
+        mutableStateOf(hour1)
+    }
+    var startMinute by remember {
+        mutableStateOf(minute1)
+    }
+    val (_, _, _, hour2, minute2) = endTime.extract()
+    var endHour by remember {
+        mutableStateOf(hour2)
+    }
+    var endMinute by remember {
+        mutableStateOf(minute2)
+    }
 
     Button(
         onClick = { openDialog() },
         colors = ButtonDefaults.buttonColors(
             containerColor = Color.Transparent, contentColor = Color.Black
         ),
+        modifier = modifier,
     ) {
-        Text(text = "BUTTON", style = TextStyle(fontSize = 20.sp))
+        val dateFormatter = SimpleDateFormat("yyyy.MM.dd", Locale.getDefault())
+        val startDateString = dateFormatter.format(startTime)
+        val endDateString = dateFormatter.format(endTime)
+        val timeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault())
+        val startTimeString = timeFormatter.format(startTime)
+        val endTImeString = timeFormatter.format(endTime)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = "$startDateString", style = TextStyle(fontSize = 20.sp))
+                Text(text = "$startTimeString", style = TextStyle(fontSize = 20.sp))
+            }
+            Icon(
+                imageVector = Icons.Default.ArrowForward,
+                contentDescription = "to",
+                modifier = Modifier.padding(horizontal = 12.dp)
+            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = "$endDateString", style = TextStyle(fontSize = 20.sp))
+                Text(text = "$endTImeString", style = TextStyle(fontSize = 20.sp))
+            }
+        }
+
     }
 
     if (isDialogOpen) {
@@ -426,14 +501,95 @@ fun DateRangeSelector(modifier: Modifier = Modifier) {
             properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
             Surface(
-                modifier = Modifier.width(360.dp).wrapContentHeight(),
+                modifier = Modifier
+                    .width(360.dp)
+                    .wrapContentHeight(),
                 shape = RoundedCornerShape(24.dp)
             ) {
                 Column {
                     DateRangePicker(
-                        state = dateRangePickerState, modifier = Modifier.height(480.dp)
+                        state = dateRangePickerState, showModeToggle = true,
+                        modifier = Modifier.height(600.dp),
+                        headline = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                // TODO: Refactor me (Maybe with DatePickerDialog too)
+                                val startDate = DateHelper.getDateFromMillis(
+                                    dateRangePickerState.selectedStartDateMillis ?: 0L
+                                )
+                                val endDate = DateHelper.getDateFromMillis(
+                                    dateRangePickerState.selectedEndDateMillis ?: 0L
+                                )
+
+                                val (startYear, startMonthZeroIndexed, startDay, _, _) = startDate.extract()
+                                val (endYear, endMonthZeroIndexed, endDay, _, _) = endDate.extract()
+
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        text = String.format(
+                                            "%d.%02d.%02d",
+                                            startYear,
+                                            startMonthZeroIndexed + 1,
+                                            startDay,
+                                        ),
+                                    )
+                                    HourMinutePicker(
+                                        currentHour = startHour,
+                                        currentMinute = startMinute,
+                                        onValueChanged = { newHour, newMinute ->
+                                            startHour = newHour
+                                            startMinute = newMinute
+                                        },
+                                    )
+                                }
+
+                                Icon(
+                                    imageVector = Icons.Default.ArrowForward,
+                                    contentDescription = "to"
+                                )
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        text = String.format(
+                                            "%d.%02d.%02d",
+                                            endYear,
+                                            endMonthZeroIndexed + 1,
+                                            endDay,
+                                        ),
+                                    )
+                                    HourMinutePicker(
+                                        currentHour = endHour,
+                                        currentMinute = endMinute,
+                                        onValueChanged = { newHour, newMinute ->
+                                            endHour = newHour
+                                            endMinute = newMinute
+                                        },
+                                    )
+                                }
+
+                            }
+
+                        },
                     )
-                    Text("HELLO")
+                    IconButton(
+                        onClick = {
+                            closeDialog()
+                            updateTimeRange(
+                                startTimeInMillis = dateRangePickerState.selectedStartDateMillis,
+                                startHour = startHour,
+                                startMinute = startMinute,
+                                endTimeInMillis = dateRangePickerState.selectedEndDateMillis,
+                                endHour = endHour,
+                                endMinute = endMinute
+                            )
+                        }, modifier = Modifier
+                            .padding(end = 16.dp)
+                            .align(Alignment.End)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.CheckCircle,
+                            contentDescription = "Confirm",
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
                 }
             }
         }

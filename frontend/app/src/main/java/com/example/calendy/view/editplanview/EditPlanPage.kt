@@ -1,6 +1,5 @@
 package com.example.calendy.view.editplanview
 
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -46,8 +45,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.calendy.AppViewModelProvider
 import com.example.calendy.data.category.Category
 import com.example.calendy.data.dummy.DummyCategoryRepository
 import com.example.calendy.data.dummy.DummyRepeatGroupRepository
@@ -186,7 +183,13 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel) {
             )
         }
         if (isPageSchedule) {
-            DateRangeSelector()
+            DateRangeSelector(
+                startTime = editPlanUiState.startTime,
+                endTime = editPlanUiState.endTime,
+                isAllDay = editPlanUiState.isAllDay,
+                onSelectTimeRange = editPlanViewModel::setTimeRange,
+                modifier = Modifier.fillMaxWidth().align(alignment = Alignment.CenterHorizontally)
+            )
         }
         //endregion
 
