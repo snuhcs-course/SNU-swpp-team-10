@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -23,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -32,7 +34,6 @@ import com.example.calendy.data.category.Category
 import com.example.calendy.utils.bottomBorder
 import com.gowtham.ratingbar.RatingBar
 import com.gowtham.ratingbar.RatingBarConfig
-import com.holix.android.bottomsheetdialog.compose.BottomSheetDialog
 
 @Composable
 fun CategorySelector(
@@ -119,7 +120,7 @@ private fun CategoryPickerDialog(
 
             if (showAddDialog) {
                 CategoryAddDialog(
-                    closeCategoryDialog = { closeCategoryDialog() },
+                    closeAddCategoryDialog = { showAddDialog = false },
                     onAddCategory = onAddCategory
                 )
             }
@@ -129,7 +130,7 @@ private fun CategoryPickerDialog(
 
 @Composable
 private fun CategoryAddDialog(
-    closeCategoryDialog: () -> Unit,
+    closeAddCategoryDialog: () -> Unit,
     onAddCategory: (String, Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -142,41 +143,41 @@ private fun CategoryAddDialog(
     }
 
 
-    BottomSheetDialog(onDismissRequest = {
-        closeCategoryDialog()
+    Dialog(onDismissRequest = {
+        closeAddCategoryDialog()
         resetToDefault()
     }) {
-        Card(modifier = Modifier.fillMaxSize()) {
-            Column {
-                TopAppBar(showBackButton = false, onBackPressed = { }, title = {
-                    Text(
-                        "New Category", modifier = Modifier.padding(horizontal = 8.dp)
-                    )
-                }, trailingContent = {
-                    IconButton(onClick = {
-                        onAddCategory(newCategoryTitle, newCategoryPriority)
-                        resetToDefault()
-                        closeCategoryDialog()
-                    }, modifier = Modifier.padding(horizontal = 8.dp)) {
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = "Add Category Confirm"
-                        )
-                    }
-                })
-                // TODO: Bottom Sheet 대신 작은 Dialog 로 변경
+        Card {
+            Column(modifier = Modifier.padding(12.dp)) {
                 TextField(value = newCategoryTitle,
                           onValueChange = { newCategoryTitle = it },
                           placeholder = {
                               Text(text = "Title")
-                          })
+                          },
+                          modifier = Modifier.padding(bottom = 8.dp)
+                )
 
                 RatingBar(
                     value = newCategoryPriority.toFloat(),
                     onValueChange = { newCategoryPriority = it.toInt() },
                     onRatingChanged = { },
-                    config = RatingBarConfig().size(40.dp)
+                    config = RatingBarConfig().size(40.dp),
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
+
+                IconButton(onClick = {
+                    onAddCategory(newCategoryTitle, newCategoryPriority)
+                    resetToDefault()
+                    closeAddCategoryDialog()
+                }, modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .align(Alignment.End)) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = "Add Category Confirm",
+                        modifier = Modifier.size(36.dp)
+                    )
+                }
             }
         }
     }
