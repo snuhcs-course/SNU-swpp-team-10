@@ -20,7 +20,7 @@ class PlanRepository(
     }
 
     // Usage: getPlanById(id = 3, type = Plan.PlanType.Schedule)
-    override fun getPlanById(id: Int, type: PlanType): Flow<Plan> = when(type) {
+    override fun getPlanById(id: Int, type: PlanType): Flow<Plan> = when (type) {
         PlanType.Schedule -> scheduleRepository.getScheduleById(id)
         PlanType.Todo     -> todoRepository.getTodoById(id)
     }
