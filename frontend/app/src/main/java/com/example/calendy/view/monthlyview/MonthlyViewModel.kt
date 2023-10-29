@@ -13,6 +13,8 @@ import com.example.calendy.data.plan.schedule.IScheduleRepository
 import com.example.calendy.data.plan.todo.ITodoRepository
 import com.example.calendy.data.repeatgroup.IRepeatGroupRepository
 import com.example.calendy.utils.toDate
+import com.example.calendy.utils.toEndTime
+import com.example.calendy.utils.toStartTime
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import kotlinx.coroutines.flow.StateFlow
 import java.util.Hashtable
@@ -49,6 +51,7 @@ class MonthlyViewModel(
 //    )
 
     fun getPlanListState(startTime:CalendarDay,endTime:CalendarDay): StateFlow<List<Plan>> {
+        //TODO: fix repositories. change into getPlansOfDay or getPlansStream
         val stream = (todoRepository.getAllTodo())
         val result = stream.stateIn(
             scope = viewModelScope,
@@ -58,6 +61,14 @@ class MonthlyViewModel(
         return result
     }
 
+    fun getPlanOfDay(day:CalendarDay) :StateFlow<List<Plan>>?{
+        //TODO: fix repositories. change into getPlansOfDay or getPlansStream
+        return todoRepository.getAllTodo().stateIn(
+            scope = viewModelScope,
+            initialValue = emptyList<Plan>(),
+            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000)
+        )
+    }
     fun getScheduleOfDay(day:CalendarDay): StateFlow<List<Schedule>>? {
         return scheduleListByDay.getOrDefault(day,null)
     }
@@ -68,5 +79,12 @@ class MonthlyViewModel(
         return scheduleListByDay.contains(day) || todoListByDay.contains(day)
     }
 
+    fun getPlanByID(id:Int, planType: Plan.PlanType) : StateFlow<Plan>{
+        return planRepository.getPlanById(id,planType).stateIn(
+            scope = viewModelScope,
+            initialValue = Todo(0,"",CalendarDay.today().toDate(),false,false,false,false,"",null,null,1,false,false),
+            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000)
+        )
+    }
 
 }
