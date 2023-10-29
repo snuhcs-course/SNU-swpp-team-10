@@ -5,7 +5,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-    private const val BASE_URL = "YOUR_SERVER_URL"
+    // https 사용 시 javax.net.ssl.SSLException: Unable to parse TLS packet header
+    private const val BASE_URL = "http://ec2-43-201-66-166.ap-northeast-2.compute.amazonaws.com:3000"
 
     val instance: CalendyApi by lazy {
         val retrofit = Retrofit.Builder()
