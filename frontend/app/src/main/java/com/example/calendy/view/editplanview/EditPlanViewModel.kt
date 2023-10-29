@@ -91,25 +91,25 @@ class EditPlanViewModel(
                 endTime = plan.endTime,
 //                category = schedule.categoryId,
 //                repeatGroup = schedule.repeatGroupId,
-                priority = plan.priority,
-                memoField = plan.memo,
-                showInMonthlyView = plan.showInMonthlyView
+                priority = plan.priority ?: 1,
+                memoField = plan.memo ?: "",
+                showInMonthlyView = plan.showInMonthlyView ?: false
             )
         }
 
         is Todo     -> {
             _uiState.value.copy(
                 titleField = plan.title,
-                isComplete = plan.complete,
-                isYearly = plan.yearly,
-                isMonthly = plan.monthly,
-                isDaily = plan.daily,
+                isComplete = plan.complete ?: false,
+                isYearly = plan.yearly ?: false,
+                isMonthly = plan.monthly ?: false,
+                isDaily = plan.daily ?: false,
                 dueTime = plan.dueTime,
 //                category = schedule.categoryId,
 //                repeatGroup = schedule.repeatGroupId,
-                priority = plan.priority,
-                memoField = plan.memo,
-                showInMonthlyView = plan.showInMonthlyView
+                priority = plan.priority ?: 1,
+                memoField = plan.memo ?: "",
+                showInMonthlyView = plan.showInMonthlyView ?: false
             )
         }
     }
@@ -125,9 +125,9 @@ class EditPlanViewModel(
                 endTime = schedule.endTime,
 //                category = schedule.categoryId,
 //                repeatGroup = schedule.repeatGroupId,
-                priority = schedule.priority,
-                memoField = schedule.memo,
-                showInMonthlyView = schedule.showInMonthlyView
+                priority = schedule.priority ?: 1,
+                memoField = schedule.memo ?: "",
+                showInMonthlyView = schedule.showInMonthlyView ?: false
             )
         }
     }
@@ -139,16 +139,16 @@ class EditPlanViewModel(
 
             _uiState.value = _uiState.value.copy(
                 titleField = todo.title,
-                isComplete = todo.complete,
-                isYearly = todo.yearly,
-                isMonthly = todo.monthly,
-                isDaily = todo.daily,
+                isComplete = todo.complete ?: false,
+                isYearly = todo.yearly ?: false,
+                isMonthly = todo.monthly ?: false,
+                isDaily = todo.daily ?: false,
                 dueTime = todo.dueTime,
 //                category = schedule.categoryId,
 //                repeatGroup = schedule.repeatGroupId,
-                priority = todo.priority,
-                memoField = todo.memo,
-                showInMonthlyView = todo.showInMonthlyView
+                priority = todo.priority ?: 1,
+                memoField = todo.memo ?: "",
+                showInMonthlyView = todo.showInMonthlyView ?: false
             )
         }
     }

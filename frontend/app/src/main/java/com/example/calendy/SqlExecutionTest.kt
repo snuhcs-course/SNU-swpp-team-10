@@ -46,6 +46,7 @@ fun SqlExecutionTestPage(modifier: Modifier = Modifier) {
 class SqlExecutionViewModel(val calendyDatabase: CalendyDatabase) : ViewModel() {
     fun sendQuery(queryString: String) {
         viewModelScope.launch {
+            Log.d("GUN", "send to server")
             val result = withContext(Dispatchers.IO) {
                 RetrofitClient.instance.sendMessageToServer(
                     MessageBody(

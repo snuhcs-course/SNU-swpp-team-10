@@ -39,7 +39,7 @@ data class Schedule(
     val endTime: Date,
     @ColumnInfo(name = "memo")
     @SerializedName("memo")
-    override val memo: String,
+    override val memo: String? = null,
     @ColumnInfo(name = "repeat_group_id")
     @SerializedName("repeat_group_id")
     override val repeatGroupId: Int? = null,
@@ -48,11 +48,11 @@ data class Schedule(
     override val categoryId: Int? = null,
     @ColumnInfo(name = "priority")
     @SerializedName("priority")
-    override val priority: Int,
+    override val priority: Int? = null,
     @ColumnInfo(name = "show_in_monthly_view")
     @SerializedName("show_in_monthly_view")
-    override val showInMonthlyView: Boolean,
+    override val showInMonthlyView: Boolean? = null,
     @ColumnInfo(name = "is_overridden")
     @SerializedName("is_overridden")
-    override val isOverridden: Boolean
+    override val isOverridden: Boolean? = null
 ) : Plan
