@@ -26,8 +26,10 @@ import com.example.calendy.data.dummy.DummyRepeatGroupRepository
 import com.example.calendy.data.dummy.DummyScheduleRepository
 import com.example.calendy.data.dummy.DummyTodoRepository
 import com.example.calendy.data.plan.Plan
+import com.example.calendy.data.plan.Schedule
 import com.example.calendy.data.plan.Todo
 import com.example.calendy.utils.getWeekDay
+import com.example.calendy.utils.toCalendarDay
 import com.example.calendy.utils.toDate
 import com.example.calendy.view.monthlyview.MonthlyDayPlanListAdaptor.OnItemClickEventListener
 import com.prolificinteractive.materialcalendarview.CalendarDay
@@ -44,6 +46,19 @@ fun MonthlyDayPlanListPopupKT(
 
 //    val planList : List<Plan> by monthlyViewModel.getPlanOfDay(selectedDate)!!.collectAsState()
     val planList : List<Plan> by monthlyViewModel.getAllPlans()!!.collectAsState()
+    val selectedPlanList = planList.filter {
+        when(it) {
+            is Schedule -> {
+                val startDay = it.startTime.toCalendarDay()
+                val endDay = it.endTime.toCalendarDay()
+                selectedDate.isInRange(startDay, endDay) || (selectedDate == startDay) || (selectedDate == endDay)
+            }
+            is Todo     -> {
+                val day = it.dueTime.toCalendarDay()
+                day == selectedDate
+            }
+        }
+    }
     var recyclerView : RecyclerView
     var dateTextView : TextView
     var weekdayTextView : TextView
@@ -78,7 +93,7 @@ fun MonthlyDayPlanListPopupKT(
             update = {
 
                 // set item onclick listener
-                val dayPlanListAdaptor = MonthlyDayPlanListAdaptor(planList)
+                val dayPlanListAdaptor = MonthlyDayPlanListAdaptor(selectedPlanList)
 
                 dayPlanListAdaptor.setOnItemClickListener(OnItemClickEventListener { view, position ->
                     //TODO: open detail popup
