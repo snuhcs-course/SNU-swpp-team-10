@@ -1,8 +1,11 @@
 package com.example.calendy
 
+import android.content.Context
+import android.content.ContextWrapper
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -37,6 +40,7 @@ import androidx.navigation.navArgument
 import com.example.calendy.data.plan.Plan
 import com.example.calendy.ui.theme.CalendyTheme
 import com.example.calendy.view.editplanview.EditPlanPage
+import com.example.calendy.view.monthlyview.MonthlyPage
 import com.example.calendy.view.editplanview.EditPlanViewModel
 import com.example.calendy.view.monthlyview.MonthlyPageKT
 

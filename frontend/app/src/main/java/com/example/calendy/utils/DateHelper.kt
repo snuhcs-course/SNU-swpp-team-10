@@ -1,6 +1,7 @@
 package com.example.calendy.utils
 
 import com.prolificinteractive.materialcalendarview.CalendarDay
+import com.prolificinteractive.materialcalendarview.CalendarDay.today
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -115,8 +116,9 @@ object DateHelper {
      * String formatter for date
      */
     fun getDayOfWeek(date: Date): String {
-        val sdf = SimpleDateFormat("EEEE", Locale.getDefault())
-        return sdf.format(date)
+        val sdf = SimpleDateFormat("EEEE", Locale.KOREA)
+        val yesterday: Date = Date(date.getTime() - 1000 * 60 * 60 * 24) // add one day. 요일이 하루씩 밀리는 문제가 있었음.
+        return sdf.format(yesterday)
     }
 }
 

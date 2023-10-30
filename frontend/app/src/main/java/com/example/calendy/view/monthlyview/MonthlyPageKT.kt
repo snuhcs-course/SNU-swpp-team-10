@@ -1,16 +1,26 @@
 package com.example.calendy.view.monthlyview
 
 import android.util.Log
+import android.view.LayoutInflater
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.calendy.AppViewModelProvider
 import com.example.calendy.R
+import com.example.calendy.data.dummy.DummyCategoryRepository
+import com.example.calendy.data.dummy.DummyPlanRepository
+import com.example.calendy.data.dummy.DummyRepeatGroupRepository
+import com.example.calendy.data.dummy.DummyScheduleRepository
+import com.example.calendy.data.dummy.DummyTodoRepository
 import com.example.calendy.data.plan.Plan
 import com.example.calendy.data.plan.Schedule
 import com.example.calendy.data.plan.Todo
@@ -40,7 +50,7 @@ fun MonthlyPageKT (
     val custom_months = stringArrayResource(id = R.array.custom_months)
     val custom_weekdays = stringArrayResource(id = R.array.custom_weekdays)
 
-    var selectedDate:CalendarDay = CalendarDay.today()
+    var selectedDate:CalendarDay by remember{ mutableStateOf(CalendarDay.today()) }
     var selectedDayDecorator :SelectedDayDecorator
     var planOfMonth: Hashtable<CalendarDay, MutableList<Plan>> = Hashtable( )
     var dotDecorator: DotDecorator? = null
@@ -48,6 +58,11 @@ fun MonthlyPageKT (
 
 //    val planList: List<Plan> by monthlyViewModel.planList.collectAsState()
     val planList: List<Plan> by monthlyViewModel.getPlanListState(CalendarDay.from(2023,0,20),CalendarDay.from(2023,11,20)).collectAsState()
+
+    var openListPopup by remember{mutableStateOf(false)}
+
+
+    fun openDayPlanListPopup(selectedDate:CalendarDay) { openListPopup=true }
 
     AndroidView(
         modifier = Modifier.fillMaxSize(),
@@ -60,6 +75,7 @@ fun MonthlyPageKT (
                 setTitleFormatter(MonthArrayTitleFormatter(custom_months))
                 setWeekDayFormatter(ArrayWeekDayFormatter(custom_weekdays))
                 setSelectedDate(selectedDate)
+                showOtherDates=MaterialCalendarView.SHOW_OTHER_MONTHS
                 state().edit()
                     .setFirstDayOfWeek(Calendar.SUNDAY)
                     .setMinimumDate(CalendarDay.from(2000, 0, 1))   //from 2000.1.1
@@ -68,19 +84,7 @@ fun MonthlyPageKT (
                     .commit();
 
                 // selected day decorator initialization
-
-                // selected day decorator initialization
                 selectedDayDecorator = SelectedDayDecorator(CalendarDay.today(), context)
-
-                //temp dummy code
-
-                //set dummy
-//                val dummyDaySchedules: java.util.ArrayList<Schedule> = ArrayList<Schedule>()
-//                dummyDaySchedules.add(Schedule(1231,"test1",Date(2023, 9, 11, 18, 0),Date(2023, 9, 11, 20, 0),"memomemo",1232,1,2,true,false))
-//                dummyDaySchedules.add(Schedule(1232,"test2",Date(2023, 9, 11, 18, 0),Date(2023, 9, 11, 20, 0),"memomemo",1232,1,2,true,false))
-
-//                val daySchedule: List<Schedule> = dummyDaySchedules
-//                schedulesOfMonth!![CalendarDay.from(2023, 9, 11)] = daySchedule
 
                 //add dot decorator
                 addDecorators(
@@ -119,15 +123,16 @@ fun MonthlyPageKT (
             dotDecorator = DotDecorator(planOfMonth)
             view.addDecorators(dotDecorator)
         }
-        )
+    )
+
+    if(openListPopup){
+        MonthlyDayPlanListPopupKT(onDismissRequest = {openListPopup=false}, selectedDate = selectedDate)
+    }
+
 
 }
 
 
-fun openDayPlanListPopup(selectedDate:CalendarDay) {
-    //TODO: open popup
-    Log.d("log","open detail popup for date : "+selectedDate)
-}
 
 fun planListToHash(planList:List<Plan>):Hashtable<CalendarDay,MutableList<Plan>>{
     val planOfMonth :Hashtable<CalendarDay,MutableList<Plan>> = Hashtable()
@@ -144,4 +149,19 @@ fun planListToHash(planList:List<Plan>):Hashtable<CalendarDay,MutableList<Plan>>
         list!!.add(p)
     }
     return planOfMonth
+}
+
+@Preview(showBackground=false, name="Monthly Calendar Preview")
+@Composable
+fun MonthlyCalendarPreview() {
+
+    MonthlyPageKT(
+        monthlyViewModel = MonthlyViewModel(
+            planRepository = DummyPlanRepository(),
+            scheduleRepository = DummyScheduleRepository(),
+            todoRepository = DummyTodoRepository(),
+            categoryRepository = DummyCategoryRepository(),
+            repeatGroupRepository = DummyRepeatGroupRepository(),
+        )
+    )
 }
