@@ -18,7 +18,7 @@ import com.example.calendy.data.repeatgroup.RepeatGroupDao
 
 @Database(
     entities = [Schedule::class, Todo::class, Category::class, Message::class, RepeatGroup::class],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(RoomConverters::class)
