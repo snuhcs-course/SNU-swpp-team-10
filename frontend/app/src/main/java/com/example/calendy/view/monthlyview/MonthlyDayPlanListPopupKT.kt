@@ -39,14 +39,14 @@ fun MonthlyDayPlanListPopupKT(
     ,selectedDate:CalendarDay = CalendarDay.today()
 ){
 
-    val planList : List<Plan> by monthlyViewModel.getPlanOfDay(selectedDate)!!.collectAsState()
-
+//    val planList : List<Plan> by monthlyViewModel.getPlanOfDay(selectedDate)!!.collectAsState()
+    val planList : List<Plan> by monthlyViewModel.getAllPlans()!!.collectAsState()
     var recyclerView : RecyclerView
     var dateTextView : TextView
     var weekdayTextView : TextView
     var openDetailPopup by remember{ mutableStateOf(false) }
 
-    var selectedPlan : Plan by remember { mutableStateOf(Todo(0,"",CalendarDay.today().toDate(),false,false,false,false,"",null,null,1,false,false))}
+    var selectedPlan : Plan by remember { mutableStateOf(Todo(0,"",CalendarDay.today().toDate(),false,false,false,false,"",null,null,1,false,false) as Plan)}
 
     Dialog(onDismissRequest={onDismissRequest()}){
 

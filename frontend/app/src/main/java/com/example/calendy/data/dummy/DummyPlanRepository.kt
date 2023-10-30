@@ -17,4 +17,8 @@ class DummyPlanRepository : IPlanRepository {
         TODO("Not yet implemented")
     }
 
+    override fun getAllPlans(): Flow<List<Plan>> {
+        TODO("Not yet implemented")
+    }
+
 }

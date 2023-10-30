@@ -52,7 +52,18 @@ class MonthlyViewModel(
 
     fun getPlanListState(startTime:CalendarDay,endTime:CalendarDay): StateFlow<List<Plan>> {
         //TODO: fix repositories. change into getPlansOfDay or getPlansStream
-        val stream = (todoRepository.getAllTodo())
+        val stream = (planRepository.getAllPlans())
+        val result = stream.stateIn(
+            scope = viewModelScope,
+            initialValue = emptyList<Plan>(),
+            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000)
+        )
+        return result
+    }
+
+    fun getAllPlans():StateFlow<List<Plan>>{
+
+        val stream = (planRepository.getAllPlans())
         val result = stream.stateIn(
             scope = viewModelScope,
             initialValue = emptyList<Plan>(),
@@ -63,7 +74,7 @@ class MonthlyViewModel(
 
     fun getPlanOfDay(day:CalendarDay) :StateFlow<List<Plan>>?{
         //TODO: fix repositories. change into getPlansOfDay or getPlansStream
-        return todoRepository.getAllTodo().stateIn(
+        return scheduleRepository.getSchedulesStream(day.toStartTime(),day.toEndTime()).stateIn(
             scope = viewModelScope,
             initialValue = emptyList<Plan>(),
             started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000)

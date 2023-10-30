@@ -63,7 +63,7 @@ fun MonthlyPageKT (
 
 
     fun openDayPlanListPopup(selectedDate:CalendarDay) { openListPopup=true }
-
+    fun openAddPlanPopup(selectedDate:CalendarDay){}
     AndroidView(
         modifier = Modifier.fillMaxSize(),
         factory = {
@@ -97,7 +97,9 @@ fun MonthlyPageKT (
                 setOnDateChangedListener(OnDateSelectedListener { widget, date, selected ->
 
                     // selected date changed
-                    if (selectedDate == date && planOfMonth!!.containsKey(date)) openDayPlanListPopup(selectedDate)
+                    if (selectedDate == date )
+                        if(planOfMonth!!.containsKey(date)) openDayPlanListPopup(selectedDate)
+                        else openAddPlanPopup(selectedDate)
                     removeDecorator(selectedDayDecorator)
                     selectedDate = date
                     selectedDayDecorator = SelectedDayDecorator(selectedDate, context)

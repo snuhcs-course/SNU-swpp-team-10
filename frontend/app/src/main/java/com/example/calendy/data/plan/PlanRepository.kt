@@ -15,7 +15,8 @@ class PlanRepository(
         val schedulesStream = scheduleRepository.getSchedulesStream(startTime, endTime)
         val todosStream = todoRepository.getTodosStream(startTime, endTime)
         return combine(schedulesStream, todosStream) { scheduleList, todoList ->
-            scheduleList + todoList
+            val result = scheduleList + todoList
+            result
         }
     }
 
@@ -23,5 +24,14 @@ class PlanRepository(
     override fun getPlanById(id: Int, type: PlanType): Flow<Plan> = when (type) {
         PlanType.Schedule -> scheduleRepository.getScheduleById(id)
         PlanType.Todo     -> todoRepository.getTodoById(id)
+    }
+
+    override fun getAllPlans(): Flow<List<Plan>> {
+        val schedulesStream = scheduleRepository.getAllSchedule()
+        val todosStream = todoRepository.getAllTodo()
+        return combine(schedulesStream, todosStream) { scheduleList, todoList ->
+            val result = scheduleList + todoList
+            result
+        }
     }
 }

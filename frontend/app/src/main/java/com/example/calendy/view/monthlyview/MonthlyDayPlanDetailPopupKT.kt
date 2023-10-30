@@ -13,6 +13,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.calendy.AppViewModelProvider
 import com.example.calendy.R
+import com.example.calendy.data.PlanType
 import com.example.calendy.data.plan.Plan
 import com.example.calendy.data.plan.Schedule
 import com.example.calendy.data.plan.Todo
@@ -47,7 +48,18 @@ fun MonthlyDayPlanDetailPopupKT(
 
                     //temporary code
                     titleView.setText(selectedPlan.title)
-                    startTimeView.text = (selectedPlan as Todo).dueTime.toString()
+                    when(selectedPlan){
+                        is Schedule ->
+                        {
+                            startTimeView.text = selectedPlan.startTime.toString()
+                            endTimeView.text = selectedPlan.endTime.toString()
+                        }
+
+                        is Todo ->
+                        {
+                            startTimeView.text = selectedPlan.dueTime.toString()
+                        }
+                    }
                     memoView.setText(selectedPlan.memo)
                 }
             },
