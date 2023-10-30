@@ -137,7 +137,6 @@ fun MonthlyPageKT(
         Log.d("hochan", "updated")
 
         planOfMonth = planListToHash(planList)
-        Log.d("GUN", "UPDATE: " + planOfMonth.toString())
         dotDecorator = DotDecorator(planOfMonth)
         view.removeDecorators()
         view.addDecorators(
