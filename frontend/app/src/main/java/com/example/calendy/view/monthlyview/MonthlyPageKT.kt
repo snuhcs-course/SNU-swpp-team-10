@@ -1,7 +1,6 @@
 package com.example.calendy.view.monthlyview
 
 import android.util.Log
-import android.view.LayoutInflater
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -42,8 +41,8 @@ import java.util.Hashtable
 
 @Composable
 fun MonthlyPageKT (
-    monthlyViewModel: MonthlyViewModel
-        = viewModel(factory = AppViewModelProvider.Factory)
+    monthlyViewModel: MonthlyViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    onNavigateToEditPage: (id: Int?, type: Plan.PlanType) -> Unit
 )
 {
 
@@ -128,7 +127,8 @@ fun MonthlyPageKT (
     )
 
     if(openListPopup){
-        MonthlyDayPlanListPopupKT(onDismissRequest = {openListPopup=false}, selectedDate = selectedDate)
+        MonthlyDayPlanListPopupKT(onDismissRequest = {openListPopup=false}, selectedDate = selectedDate,
+                                  onNavigateToEditPage = onNavigateToEditPage)
     }
 
 
@@ -164,6 +164,5 @@ fun MonthlyCalendarPreview() {
             todoRepository = DummyTodoRepository(),
             categoryRepository = DummyCategoryRepository(),
             repeatGroupRepository = DummyRepeatGroupRepository(),
-        )
-    )
+        )) { _, _ -> }
 }

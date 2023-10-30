@@ -2,6 +2,7 @@ package com.example.calendy.view.monthlyview
 
 import android.util.Log
 import android.view.LayoutInflater
+import android.widget.Button
 import android.widget.TextView
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
@@ -33,10 +34,12 @@ import com.prolificinteractive.materialcalendarview.CalendarDay
 
 @Composable
 fun MonthlyDayPlanListPopupKT(
-    monthlyViewModel: MonthlyViewModel
-        =viewModel(factory = AppViewModelProvider.Factory)
-    ,onDismissRequest: ()-> Unit = {}
-    ,selectedDate:CalendarDay = CalendarDay.today()
+    monthlyViewModel: MonthlyViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    ,
+    onDismissRequest: () -> Unit = {}
+    ,
+    selectedDate: CalendarDay = CalendarDay.today(),
+    onNavigateToEditPage: (id: Int?, type: Plan.PlanType) -> Unit
 ){
 
 //    val planList : List<Plan> by monthlyViewModel.getPlanOfDay(selectedDate)!!.collectAsState()
@@ -57,8 +60,6 @@ fun MonthlyDayPlanListPopupKT(
                 val inflater = LayoutInflater.from(context)
                 val view = inflater.inflate(R.layout.monthly_select_day_popup, null, false)
                 view.apply {
-
-
                     //UI 객체생성
                     recyclerView = findViewById<RecyclerView>(R.id.monthlyDayPlanListRecycler)
                     dateTextView = findViewById<TextView>(R.id.planListDayNumber)
@@ -68,9 +69,10 @@ fun MonthlyDayPlanListPopupKT(
                     val linearLayoutManager = LinearLayoutManager(this.context)
                     recyclerView.layoutManager = linearLayoutManager // LayoutManager 설정
 
-
+                    findViewById<Button>(R.id.addPlanButton).setOnClickListener {
+                        onNavigateToEditPage(null, Plan.PlanType.Schedule)
+                    }
                 }
-
 
             },
             update = {
@@ -103,7 +105,8 @@ fun MonthlyDayPlanListPopupKT(
     if(openDetailPopup)
         MonthlyDayPlanDetailPopupKT(
             onDismissRequest={openDetailPopup=false}
-            , selectedPlan=selectedPlan
+            , selectedPlan=selectedPlan,
+            onNavigateToEditPage = onNavigateToEditPage
             )
 
 }
@@ -119,6 +122,6 @@ fun ListPopupPreview(){
             categoryRepository = DummyCategoryRepository(),
             repeatGroupRepository = DummyRepeatGroupRepository(),
         )
-        ,{}
+        , {}, onNavigateToEditPage = { _, _ -> }
     )
 }

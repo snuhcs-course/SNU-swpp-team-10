@@ -1,18 +1,13 @@
 package com.example.calendy
 
-import android.content.Context
-import android.content.ContextWrapper
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.materialIcon
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -42,7 +37,6 @@ import androidx.navigation.navArgument
 import com.example.calendy.data.plan.Plan
 import com.example.calendy.ui.theme.CalendyTheme
 import com.example.calendy.view.editplanview.EditPlanPage
-import com.example.calendy.view.monthlyview.MonthlyPage
 import com.example.calendy.view.editplanview.EditPlanViewModel
 import com.example.calendy.view.monthlyview.MonthlyPageKT
 
@@ -174,17 +168,27 @@ fun NavigationGraph(navController: NavHostController) {
             WeeklyPage()
         }
         composable(BottomNavItem.Month.screenRoute) {
-            MonthlyPageKT()
+            MonthlyPageKT(onNavigateToEditPage = { id: Int?, type: Plan.PlanType ->
+                val route = if (id==null) {
+                    when (type) {
+                        Plan.PlanType.Schedule -> DestinationRoute.AddSchedule.route
+                        Plan.PlanType.Todo     -> DestinationRoute.AddTodo.route
+                    }
+                } else {
+                    when (type) {
+                        Plan.PlanType.Schedule -> DestinationRoute.EditSchedule(id = id).route
+                        Plan.PlanType.Todo     -> DestinationRoute.EditTodo(id = id).route
+                    }
+                }
+
+                navController.navigate(route)
+            })
         }
         composable(BottomNavItem.Todo.screenRoute) {
-            // Test For Edit Plan
-            Button(onClick = { navController.navigate(DestinationRoute.EditTodo(id = 2).route) }) {
-                Text("EditPage Todo id=2")
-            }
+            TodoPage()
         }
         composable(BottomNavItem.AiManager.screenRoute) {
             ManagerPage()
-
         }
         composable(BottomNavItem.Setting.screenRoute) {
             // SettingPage()
@@ -214,7 +218,7 @@ fun NavigationGraph(navController: NavHostController) {
                 }
             )
 
-            EditPlanPage(viewModel)
+            EditPlanPage(viewModel, onNavigateBack = { navController.popBackStack() })
         }
     }
 }

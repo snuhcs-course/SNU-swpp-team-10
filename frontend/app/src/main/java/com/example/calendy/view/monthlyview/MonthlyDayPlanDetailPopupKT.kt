@@ -1,6 +1,7 @@
 package com.example.calendy.view.monthlyview
 
 import android.view.LayoutInflater
+import android.widget.Button
 import android.widget.TextView
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,7 +14,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.calendy.AppViewModelProvider
 import com.example.calendy.R
-import com.example.calendy.data.PlanType
 import com.example.calendy.data.plan.Plan
 import com.example.calendy.data.plan.Schedule
 import com.example.calendy.data.plan.Todo
@@ -22,7 +22,8 @@ import com.example.calendy.data.plan.Todo
 fun MonthlyDayPlanDetailPopupKT(
     monthlyViewModel: MonthlyViewModel = viewModel(factory = AppViewModelProvider.Factory)
     , onDismissRequest : ()->Unit = {}
-    , selectedPlan: Plan
+    , selectedPlan: Plan,
+    onNavigateToEditPage: (id: Int?, type: Plan.PlanType) -> Unit
 ){
 //    val selectedPlan : Plan by monthlyViewModel.getPlanByID(selectedPlanId,planType)!!.collectAsState()
 
@@ -61,6 +62,13 @@ fun MonthlyDayPlanDetailPopupKT(
                         }
                     }
                     memoView.setText(selectedPlan.memo)
+
+                    findViewById<Button>(R.id.editPlanButton).setOnClickListener {
+                        when(selectedPlan) {
+                            is Schedule -> onNavigateToEditPage(selectedPlan.id, Plan.PlanType.Schedule)
+                            else        -> onNavigateToEditPage(selectedPlan.id, Plan.PlanType.Todo)
+                        }
+                    }
                 }
             },
             update = {

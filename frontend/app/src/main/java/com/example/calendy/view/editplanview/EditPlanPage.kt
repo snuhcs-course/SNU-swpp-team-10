@@ -55,7 +55,7 @@ import com.gowtham.ratingbar.RatingBar
 import com.gowtham.ratingbar.RatingBarConfig
 
 @Composable
-fun EditPlanPage(editPlanViewModel: EditPlanViewModel) {
+fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Unit) {
     val editPlanUiState: EditPlanUiState by editPlanViewModel.uiState.collectAsState()
     val categoryList: List<Category> by editPlanViewModel.categoryListState.collectAsState()
 
@@ -77,7 +77,7 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel) {
         //region Top Bar
         TopAppBar(
             showBackButton = true,
-            onBackPressed = { /* Todo TopBar Back Pressed */ },
+            onBackPressed = { onNavigateBack() },
             title = { },
             trailingContent = {
                 Row {
@@ -188,7 +188,9 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel) {
                 endTime = editPlanUiState.endTime,
                 isAllDay = editPlanUiState.isAllDay,
                 onSelectTimeRange = editPlanViewModel::setTimeRange,
-                modifier = Modifier.fillMaxWidth().align(alignment = Alignment.CenterHorizontally)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(alignment = Alignment.CenterHorizontally)
             )
         }
         //endregion
@@ -339,12 +341,10 @@ fun FieldWithLeadingText(
 @Preview(showBackground = true, name = "Todo Screen Preview")
 @Composable
 fun TodoScreenPreview() {
-    EditPlanPage(
-        editPlanViewModel = EditPlanViewModel(
-            scheduleRepository = DummyScheduleRepository(),
-            todoRepository = DummyTodoRepository(),
-            categoryRepository = DummyCategoryRepository(),
-            repeatGroupRepository = DummyRepeatGroupRepository(),
-        )
-    )
+    EditPlanPage(editPlanViewModel = EditPlanViewModel(
+        scheduleRepository = DummyScheduleRepository(),
+        todoRepository = DummyTodoRepository(),
+        categoryRepository = DummyCategoryRepository(),
+        repeatGroupRepository = DummyRepeatGroupRepository(),
+    ), onNavigateBack = { })
 }
