@@ -37,6 +37,8 @@ import com.prolificinteractive.materialcalendarview.OnMonthChangedListener
 import com.prolificinteractive.materialcalendarview.format.ArrayWeekDayFormatter
 import com.prolificinteractive.materialcalendarview.format.MonthArrayTitleFormatter
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import java.util.Calendar
 import java.util.Hashtable
 
@@ -60,17 +62,15 @@ fun MonthlyPageKT(
     var planList: List<Plan> by remember {
         mutableStateOf(emptyList())
     }
-    LaunchedEffect(key1 = planList, block = {
+    LaunchedEffect(key1 = Unit, block = {
         while (true) {
-            monthlyViewModel.getPlanListState(
+            val newPlanList = monthlyViewModel.getPlanListState(
                 CalendarDay.from(2023, 0, 20),
                 CalendarDay.from(2023, 11, 20)
-            ).collect {
-                Log.d("GUN", it.toString())
-                if (it.isNotEmpty()) {
-                    planList = it
-                }
-            }
+            ).filter {
+                it.isNotEmpty()
+            }.first()
+            planList = newPlanList
 
             delay(5000)
         }
