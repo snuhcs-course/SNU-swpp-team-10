@@ -23,6 +23,10 @@ object DateHelper {
         minute: Int = 0,
         assertValueIsValid: Boolean = true
     ): Date = with(Calendar.getInstance()) {
+        // set to date with no problem at all.
+        // if this was (month: Mar, day: 31) -> argument (month: Feb, day: 31) will pass
+        this.set(2020, 1 - 1, 1, 0, 0)
+
         for ((calendarField, value) in listOf(
             Pair(Calendar.YEAR, year),
             Pair(Calendar.MONTH, monthZeroIndexed),
