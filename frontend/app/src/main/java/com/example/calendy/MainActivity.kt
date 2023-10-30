@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.materialIcon
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -125,31 +127,31 @@ sealed class BottomNavItem(
 ) {
     object Week : BottomNavItem(
         title = R.string.text_weekly_view,
-        icon = R.drawable.ic_android_black_24dp,
+        icon = R.drawable.outline_format_list_bulleted_24,
         screenRoute = "Week"
     )
 
     object Month : BottomNavItem(
         title = R.string.text_monthly_view,
-        icon = R.drawable.ic_android_black_24dp,
+        icon = R.drawable.outline_calendar_month_24,
         screenRoute = "Month"
     )
 
     object Todo : BottomNavItem(
         title = R.string.text_todo_view,
-        icon = R.drawable.ic_android_black_24dp,
+        icon = R.drawable.outline_checklist_rtl_24,
         screenRoute = "Todo"
     )
 
     object AiManager : BottomNavItem(
         title = R.string.text_manager_view,
-        icon = R.drawable.ic_android_black_24dp,
+        icon = R.drawable.outline_person_outline_24,
         screenRoute = "AiManager"
     )
 
     object Setting : BottomNavItem(
         title = R.string.setting_view,
-        icon = R.drawable.ic_android_black_24dp,
+        icon = R.drawable.outline_app_settings_alt_24,
         screenRoute = "Setting"
     )
 }
@@ -175,14 +177,14 @@ fun NavigationGraph(navController: NavHostController) {
             MonthlyPageKT()
         }
         composable(BottomNavItem.Todo.screenRoute) {
-            TodoPage()
-        }
-        composable(BottomNavItem.AiManager.screenRoute) {
-            // ManagerPage()
             // Test For Edit Plan
             Button(onClick = { navController.navigate(DestinationRoute.EditTodo(id = 2).route) }) {
                 Text("EditPage Todo id=2")
             }
+        }
+        composable(BottomNavItem.AiManager.screenRoute) {
+            ManagerPage()
+
         }
         composable(BottomNavItem.Setting.screenRoute) {
             // SettingPage()
