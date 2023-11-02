@@ -9,7 +9,7 @@ interface CalendyApi {
     @GET("schedules")
     suspend fun getSchedules()
     @POST("manager/send")
-    fun sendMessageToServer(@Body body: MessageBody): Call<ServerResponse>
+    suspend fun sendMessageToServer(@Body body: MessageBody): ServerResponse
 }
 
 data class MessageBody(val message: String)

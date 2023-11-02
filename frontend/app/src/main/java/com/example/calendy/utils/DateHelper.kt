@@ -1,7 +1,6 @@
 package com.example.calendy.utils
 
 import com.prolificinteractive.materialcalendarview.CalendarDay
-import com.prolificinteractive.materialcalendarview.CalendarDay.today
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -12,8 +11,8 @@ object DateHelper {
      * Returns Date object from exact time
      * Optional parameter hour, minute is set default to 0
      * We do not use second & millisecond. second & millisecond is set to 0
-     * @param assertValueIsValid if set to true, try assertion if date is valid (e.g. 02.31).
-     * if set to false, return valid date (e.g. 02.28)
+     * @param softWrap if set to true, return valid date (e.g. 02.28)
+     * if set to false, assert if date is valid (e.g. 02.31) will cause exception
      */
     fun getDate(
         year: Int,
@@ -21,7 +20,7 @@ object DateHelper {
         day: Int,
         hourOfDay: Int = 0,
         minute: Int = 0,
-        assertValueIsValid: Boolean = true
+        softWrap: Boolean = true
     ): Date = with(Calendar.getInstance()) {
         // set to date with no problem at all.
         // if this was (month: Mar, day: 31) -> argument (month: Feb, day: 31) will pass
@@ -36,7 +35,7 @@ object DateHelper {
             Pair(Calendar.SECOND, 0),
             Pair(Calendar.MILLISECOND, 0),
         )) {
-            if (assertValueIsValid) {
+            if (softWrap) {
                 assert(this.getActualMinimum(calendarField) <= value)
                 assert(value <= this.getActualMaximum(calendarField))
                 set(calendarField, value)
@@ -86,16 +85,14 @@ object DateHelper {
         day: Int? = null,
         hourOfDay: Int? = null,
         minute: Int? = null,
-    ): Date = with(Calendar.getInstance()) {
-        getDate(
-            year = year,
-            monthZeroIndexed = monthZeroIndexed ?: this.getActualMaximum(Calendar.MONTH),
-            day = day ?: this.getActualMaximum(Calendar.DATE),
-            hourOfDay = hourOfDay ?: this.getActualMaximum(Calendar.HOUR_OF_DAY),
-            minute = minute ?: this.getActualMaximum(Calendar.MINUTE),
-            assertValueIsValid = false
-        )
-    }
+    ): Date = getDate(
+        year = year,
+        monthZeroIndexed = monthZeroIndexed ?: (13 - 1),
+        day = day ?: 32,
+        hourOfDay = hourOfDay ?: 25,
+        minute = minute ?: 61,
+        softWrap = true
+    )
 
 
     /**
@@ -121,7 +118,8 @@ object DateHelper {
      */
     fun getDayOfWeek(date: Date): String {
         val sdf = SimpleDateFormat("EEEE", Locale.KOREA)
-        val yesterday: Date = Date(date.getTime() - 1000 * 60 * 60 * 24) // add one day. 요일이 하루씩 밀리는 문제가 있었음.
+        val yesterday: Date =
+            Date(date.getTime() - 1000 * 60 * 60 * 24) // add one day. 요일이 하루씩 밀리는 문제가 있었음.
         return sdf.format(yesterday)
     }
 }

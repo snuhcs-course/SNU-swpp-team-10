@@ -34,34 +34,34 @@ data class Todo(
     @ColumnInfo(name = "due_time")
     @SerializedName("due_time")
     val dueTime: Date,
-    @ColumnInfo(name = "yearly")
+    @ColumnInfo(name = "yearly", defaultValue = "0")
     @SerializedName("yearly")
-    val yearly: Boolean? = null,
-    @ColumnInfo(name = "monthly")
+    val yearly: Boolean = false,
+    @ColumnInfo(name = "monthly", defaultValue = "0")
     @SerializedName("monthly")
-    val monthly: Boolean? = null,
-    @ColumnInfo(name = "daily")
+    val monthly: Boolean = false,
+    @ColumnInfo(name = "daily", defaultValue = "0")
     @SerializedName("daily")
-    val daily: Boolean? = null,
-    @ColumnInfo(name = "complete")
+    val daily: Boolean = false,
+    @ColumnInfo(name = "complete", defaultValue = "0")
     @SerializedName("complete")
-    val complete: Boolean? = null,
-    @ColumnInfo(name = "memo")
+    val complete: Boolean = false,
+    @ColumnInfo(name = "memo", defaultValue = "")
     @SerializedName("memo")
-    override val memo: String? = null,
-    @ColumnInfo(name = "repeat_group_id")
+    override val memo: String = "",
+    @ColumnInfo(name = "repeat_group_id", defaultValue = "NULL")
     @SerializedName("repeat_group_id")
     override val repeatGroupId: Int? = null,
-    @ColumnInfo(name = "category_id")
+    @ColumnInfo(name = "category_id", defaultValue = "NULL")
     @SerializedName("category_id")
     override val categoryId: Int? = null,
-    @ColumnInfo(name = "priority")
+    @ColumnInfo(name = "priority", defaultValue = "3")
     @SerializedName("priority")
-    override val priority: Int? = null,
-    @ColumnInfo(name = "show_in_monthly_view")
+    override val priority: Int = 3,
+    @ColumnInfo(name = "show_in_monthly_view", defaultValue = "0")
     @SerializedName("show_in_monthly_view")
-    override val showInMonthlyView: Boolean? = null,
-    @ColumnInfo(name = "is_overridden")
+    override val showInMonthlyView: Boolean = false,
+    @ColumnInfo(name = "is_overridden", defaultValue = "0")
     @SerializedName("is_overridden")
-    override val isOverridden: Boolean? = null
+    override val isOverridden: Boolean = false
 ) : Plan
