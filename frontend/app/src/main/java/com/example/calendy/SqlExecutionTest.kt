@@ -85,17 +85,48 @@ class SqlExecutionViewModel(
     fun sendQuery(requestMessage: String) {
         viewModelScope.launch {
             Log.d("GUN", "send to server $requestMessage")
+
+            val allCategories = calendyDatabase.categoryDao().getCategoriesStream().first()
+            // ex) (1, 컴퓨터 구조), ...
+            val allCategoriesPrompt = allCategories.joinToString(", ") {
+                "(${it.id},${it.title})"
+            }
+
+            val allSchedules = calendyDatabase.scheduleDao().getAllSchedule().first()
+            // ex) (1, 컴퓨터 구조), ...
+            val schedulePrompt = allSchedules.joinToString(", ") {
+                "(${it.id},${it.title})"
+            }
+
+            val allTodos = calendyDatabase.todoDao().getAllTodo().first()
+            // ex) (1, 컴퓨터 구조), ...
+            val todoPrompt = allTodos.joinToString(", ") {
+                "(${it.id},${it.title})"
+            }
+
             withContext(Dispatchers.IO) {
                 val result = RetrofitClient.instance.sendMessageToServer(
                     MessageBody(
-                        message = requestMessage
+                        message = requestMessage,
+                        category = allCategoriesPrompt,
+                        schedule = schedulePrompt,
+                        todo = todoPrompt
                     )
                 )
-
-                val queries = result.queries
+                Log.d(
+                    "GUN", MessageBody(
+                        message = requestMessage,
+                        category = allCategoriesPrompt,
+                        schedule = schedulePrompt,
+                        todo = todoPrompt
+                    ).toString()
+                )
+                
+                // TODO: Flag - NO_SUCH_TODO 등
+                val queries = result.split(";")
                 for (query in queries) {
-                    Log.d("GUN", query)
-                    sqlExecute(query)
+                    Log.d("GUN", query.trim())
+                    sqlExecute(query.trim())
                 }
             }
         }
