@@ -8,4 +8,6 @@ interface IMessageRepository {
     suspend fun delete(message: Message)
     suspend fun update(message: Message)
     fun getMessagesStream(startTime: Date, endTime: Date): Flow<List<Message>>
+
+    fun getAllMessages():Flow<List<Message>>
 }

@@ -14,4 +14,8 @@ class MessageRepository(private val messageLocalDataSource: MessageLocalDataSour
     override fun getMessagesStream(startTime: Date, endTime: Date): Flow<List<Message>> {
         return messageLocalDataSource.getMessagesStream(startTime, endTime)
     }
+
+    override fun getAllMessages(): Flow<List<Message>> {
+        return messageLocalDataSource.getAllMessages()
+    }
 }

@@ -5,6 +5,8 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.calendy.data.CalendyDatabase
+import com.example.calendy.view.messagepage.MessagePageViewModel
+import com.example.calendy.view.messagepage.SqlExecutionViewModel
 import com.example.calendy.view.editplanview.EditPlanViewModel
 import com.example.calendy.view.monthlyview.MonthlyViewModel
 
@@ -30,6 +32,11 @@ object AppViewModelProvider {
         initializer {
             SqlExecutionViewModel(
                 calendyDatabase = CalendyDatabase.getDatabase(calendyApplication().applicationContext)
+            )
+        }
+        initializer {
+            MessagePageViewModel(
+                calendyApplication().container.messageRepository
             )
         }
     }
