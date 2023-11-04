@@ -8,6 +8,7 @@ interface CalendyApi {
     suspend fun postSchedule()
     @GET("schedules")
     suspend fun getSchedules()
+    @Headers("Accept-Encoding: identity") // TODO: Test for Network Inspector Korean Encoding...
     @POST("manager/send")
     suspend fun sendMessageToServer(@Body body: MessageBody): ServerResponse
 }
