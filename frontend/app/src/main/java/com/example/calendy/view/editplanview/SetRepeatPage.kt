@@ -34,17 +34,100 @@ import androidx.compose.ui.window.DialogProperties
 import com.example.calendy.data.plan.Plan
 import com.example.calendy.data.repeatgroup.RepeatGroup
 import com.example.calendy.utils.bottomBorder
+import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 
 
 @Composable
 fun SetRepeat(uiState: EditPlanUiState, viewModel: EditPlanViewModel) {
     var isDialogOpen by remember { mutableStateOf(false) }
-    var repeatInfoText = remember { mutableStateOf("반복 안 함") }
     val calendar = Calendar.getInstance().apply {
         time = if (uiState.entryType==Plan.PlanType.Todo) uiState.dueTime else uiState.startTime
     }
-    val repeatGroup = uiState.repeatGroup
+    var repeatGroup = uiState.repeatGroup
+
+    if (isDialogOpen) {
+        SetRepeatDialog(onDismiss = {
+            isDialogOpen = false
+        }, onRepeatGroup = {
+            // uiState의 repeatGroup 정보 업데이트
+            viewModel.setRepeatGroup(it)
+        }, calendar, uiState.repeatGroup)
+    }
+    //uiState.RepeatGroup 정보 이용하여 repeatInfoText 값 변경
+    fun updateRepeatInfoText(): String {
+        if (repeatGroup==null) return "반복 안함"
+        else {
+            var endDate = ""
+            var repeatInterval = ""
+            var repeatRule = ""
+            if (repeatGroup.endDate!=null) {
+                val dateFormat = SimpleDateFormat("yyyy년 MM월 dd일", Locale.getDefault())
+                endDate = dateFormat.format(repeatGroup.endDate) + "까지 "
+            }
+            if (repeatGroup.day) {
+                repeatInterval =
+                    if (repeatGroup.repeatInterval==1) "매일 반복"
+                    else repeatGroup.repeatInterval.toString() + "일마다 반복"
+                return endDate + repeatInterval
+            }
+            if (repeatGroup.week) {
+                repeatInterval =
+                    if (repeatGroup.repeatInterval==1) "매주 "
+                    else repeatGroup.repeatInterval.toString() + "주마다 "
+                val dayMapping = mapOf(
+                    "MON" to "월요일",
+                    "TUE" to "화요일",
+                    "WED" to "수요일",
+                    "THU" to "목요일",
+                    "FRI" to "금요일",
+                    "SAT" to "토요일",
+                    "SUN" to "일요일"
+                )
+                val daysList = mutableListOf<String>()
+                for (i in repeatGroup.repeatRule!!.indices step 3) {
+                    val dayString = repeatGroup.repeatRule!!.substring(i, i + 3)
+                    dayMapping[dayString]?.let {
+                        dayMapping[dayString]?.let {
+                            daysList.add(it)
+                        }
+                    }
+                }
+                repeatRule = daysList.joinToString(", ")
+                return endDate + repeatInterval + repeatRule + "에 반복"
+
+            }
+            if (repeatGroup.month) {
+                repeatInterval =
+                    if (repeatGroup.repeatInterval==1) "매월 "
+                    else repeatGroup.repeatInterval.toString() + "개월마다 "
+
+                val dateList = mutableListOf<String>()
+                for (i in repeatGroup.repeatRule!!.indices step 2) {
+                    val dayString = repeatGroup.repeatRule!!.substring(i, i + 2).toInt()
+                    dateList.add(dayString.toString() +"일")
+                }
+                repeatRule = dateList.joinToString(", ")
+                return endDate + repeatInterval + repeatRule + "에 반복"
+
+            }
+            if (repeatGroup.year) {
+                repeatInterval =
+                    if (repeatGroup.repeatInterval==1) "매년 반복"
+                    else repeatGroup.repeatInterval.toString() + "년마다 반복"
+                return endDate + repeatInterval
+            }
+            else {
+                return "반복 안함"
+            }
+        }
+    }
+    var repeatInfoText = remember { mutableStateOf(updateRepeatInfoText()) }
+    // uiState의 repeatGroup 정보가 변경될 때마다 repeatInfoText 값을 업데이트
+    LaunchedEffect(uiState.repeatGroup, uiState.repeatGroup?.day, uiState.repeatGroup?.week, uiState.repeatGroup?.month, uiState.repeatGroup?.year, uiState.repeatGroup?.repeatInterval, uiState.repeatGroup?.repeatRule, uiState.repeatGroup?.endDate) {
+        repeatInfoText.value = updateRepeatInfoText()
+    }
 
     Row(modifier = Modifier.fillMaxWidth()) {
         TextButton(
@@ -56,48 +139,18 @@ fun SetRepeat(uiState: EditPlanUiState, viewModel: EditPlanViewModel) {
         ) {
             Text(text = repeatInfoText.value)
         }
-        IconButton(onClick = { /* TODO: onClick Deselect */ }) {
-            Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = "Deselect Repeat",
-            )
-        }
     }
-
-
-    if (isDialogOpen) {
-//        SetRepeatDialog(onDismiss = {
-//            isDialogOpen = false
-//        }, calendar, RepeatGroup(0,false,true,false,false, 2, "", null))
-        SetRepeatDialog(onDismiss = {
-            isDialogOpen = false
-        }, onRepeatGroup = {
-            if(it != null) {
-                // uiState의 repeatGroup 정보 업데이트
-                viewModel.setRepeatGroup(it)
-            }
-        }, calendar, null)
-    }
-    //Todo uiState.RepeatGroup 정보 이용하여 repeatInfoText 값 변경
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SetRepeatDialog(onDismiss: () -> Unit, onRepeatGroup: (RepeatGroup?) -> Unit, calendar: Calendar, repeatGroup: RepeatGroup?) {
+fun SetRepeatDialog(
+    onDismiss: () -> Unit,
+    onRepeatGroup: (RepeatGroup?) -> Unit,
+    calendar: Calendar,
+    repeatGroup: RepeatGroup?
+) {
 
-    //SetRepeatDialog 종료시 ui에 맞는 repeatGroup 객체를 넘겨줌
-    fun exitDialog() {
-        if(repeatGroup == null) {
-            //Todo repeatRadioGroup, durationRadioGroup, repeatInterval, endPlanDate, weeklyRule, monthlyRule 참조하여 repeatGroup 새로 만들기
-            // repeatrule에서 last 입력 옵션은 일단 제거함
-            //val newRepeatGroup = RepeatGroup()
-            //onRepeatGroup(newRepeatGroup)
-        } else {
-            //Todo repeatRadioGroup, durationRadioGroup, repeatInterval, endPlanDate, weeklyRule, monthlyRule 참조하여 repeatGroup 업데이트
-            onRepeatGroup(repeatGroup)
-        }
-        onDismiss()
-    }
     // repeatGroup table's repeatInt attribute value
     var repeatInterval = remember(repeatGroup) {
         mutableStateOf("").apply {
@@ -112,7 +165,32 @@ fun SetRepeatDialog(onDismiss: () -> Unit, onRepeatGroup: (RepeatGroup?) -> Unit
                 val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
                 this[if (dayOfWeek==1) 6 else dayOfWeek - 2] = true
             } else {
-                //Todo 존재하던 repeatRule 반영 weeklyRule 값 변경 (해당하는 요일 index(0:월-6:일)의 값을 true로)
+                //존재하던 repeatRule 반영 weeklyRule 값 변경 (해당하는 요일 index(0:월-6:일)의 값을 true로)
+                if (repeatGroup.repeatRule!=null) {
+                    if(repeatGroup.week) {
+                        val dayMapping = mapOf(
+                            "MON" to 0,
+                            "TUE" to 1,
+                            "WED" to 2,
+                            "THU" to 3,
+                            "FRI" to 4,
+                            "SAT" to 5,
+                            "SUN" to 6
+                        )
+                        for (i in repeatGroup.repeatRule!!.indices step 3) {
+                            val dayString = repeatGroup.repeatRule!!.substring(i, i + 3)
+                            dayMapping[dayString]?.let { index ->
+                                   this[index] = true
+                            }
+                         }
+                    } else {
+                        val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
+                        this[if (dayOfWeek==1) 6 else dayOfWeek - 2] = true
+                    }
+                } else {
+                    val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
+                    this[if (dayOfWeek==1) 6 else dayOfWeek - 2] = true
+                }
             }
         }
     }
@@ -120,18 +198,59 @@ fun SetRepeatDialog(onDismiss: () -> Unit, onRepeatGroup: (RepeatGroup?) -> Unit
     val monthlyRule = remember(repeatGroup) {
         mutableStateListOf(*Array(31) { false }).apply {
             if (repeatGroup==null) {
-                val day = calendar.get(Calendar.DAY_OF_MONTH)-1
+                val day = calendar.get(Calendar.DAY_OF_MONTH) - 1
                 this[day] = true
             } else {
-                //Todo 존재하던 repeatRule 반영 monthlyRule 값 변경 (해당하는 (날짜-1)(0-30) index의 값을 true로)
+                //존재하던 repeatRule 반영 monthlyRule 값 변경 (해당하는 (날짜-1)(0-30) index의 값을 true로)
+                if (repeatGroup.repeatRule!=null) {
+                    if(repeatGroup.month) {
+                        for (i in repeatGroup.repeatRule!!.indices step 2) {
+                            val dayString = repeatGroup.repeatRule!!.substring(i, i + 2)
+                            val dayIndex = dayString.toInt() - 1
+                            if (dayIndex in 0..30) {
+                                this[dayIndex] = true
+                            }
+                        }
+                    } else {
+                        val day = calendar.get(Calendar.DAY_OF_MONTH) - 1
+                        this[day] = true
+                    }
+                } else {
+                    val day = calendar.get(Calendar.DAY_OF_MONTH) - 1
+                    this[day] = true
+                }
             }
         }
     }
     // repeatGroup table's endDate attribute value
     var endPlanDate = remember(repeatGroup) {
-        mutableStateOf<Date?>(null).apply {
-            if (repeatGroup==null) calendar.time
-            else repeatGroup.endDate
+        mutableStateOf<Long>(0).also { state ->
+            if (repeatGroup == null) {
+                state.value = calendar.timeInMillis
+            } else if (repeatGroup.endDate == null) {
+                when {
+                    repeatGroup.day -> {
+                        calendar.add(Calendar.DATE, 7)
+                        state.value = calendar.timeInMillis
+                    }
+                    repeatGroup.week -> {
+                        calendar.add(Calendar.MONTH, 1)
+                        state.value = calendar.timeInMillis
+                    }
+                    repeatGroup.month -> {
+                        calendar.add(Calendar.YEAR, 1)
+                        state.value = calendar.timeInMillis
+                    }
+                    repeatGroup.year -> {
+                        calendar.add(Calendar.YEAR, 5)
+                        state.value = calendar.timeInMillis
+                    }
+                }
+            } else {
+                repeatGroup.endDate?.let {
+                    state.value = it.time
+                }
+            }
         }
     }
     // 반복 관련 radioGroup -> noRepeat : 반복 없음 / daily : day = true / monthly : month = true / yearly : year = true
@@ -159,8 +278,107 @@ fun SetRepeatDialog(onDismiss: () -> Unit, onRepeatGroup: (RepeatGroup?) -> Unit
         }
     }
 
+    //SetRepeatDialog 종료시 ui에 맞는 repeatGroup 객체를 넘겨줌
+    fun exitDialog() {
+        val endDate : Date? = if(durationRadioGroup.value == "noEndTime") null else Date(endPlanDate.value)
+        if (repeatGroup==null) {
+            val newRepeatGroup: RepeatGroup? = when (repeatRadioGroup.value) {
+                "noRepeat" -> null
+                "daily"    -> RepeatGroup(
+                    day = true,
+                    week = false,
+                    month = false,
+                    year = false,
+                    repeatInterval = repeatInterval.value.toInt(),
+                    repeatRule = null,
+                    endDate = endDate
+                )
+
+                "weekly"   -> RepeatGroup(
+                    day = false,
+                    week = true,
+                    month = false,
+                    year = false,
+                    repeatInterval = repeatInterval.value.toInt(),
+                    repeatRule = getRepeatRuleFromWeeklyRule(weeklyRule),
+                    endDate = endDate
+                )
+
+                "monthly"  -> RepeatGroup(
+                    day = false,
+                    week = false,
+                    month = true,
+                    year = false,
+                    repeatInterval = repeatInterval.value.toInt(),
+                    repeatRule = getRepeatRuleFromMonthlyRule(monthlyRule),
+                    endDate = endDate
+                )
+                //yearly
+                else       -> RepeatGroup(
+                    day = false,
+                    week = false,
+                    month = false,
+                    year = true,
+                    repeatInterval = repeatInterval.value.toInt(),
+                    repeatRule = null,
+                    endDate = endDate
+                )
+            }
+            onRepeatGroup(newRepeatGroup)
+        } else {
+            if (repeatRadioGroup.value=="noRepeat") onRepeatGroup(null)
+            else {
+                when (repeatRadioGroup.value) {
+                    "daily"   -> {
+                        repeatGroup.day = true
+                        repeatGroup.week = false
+                        repeatGroup.month = false
+                        repeatGroup.year = false
+                        repeatGroup.repeatInterval = repeatInterval.value.toInt()
+                        repeatGroup.repeatRule = null
+                        repeatGroup.endDate = endDate
+                    }
+
+                    "weekly"  -> {
+                        repeatGroup.day = false
+                        repeatGroup.week = true
+                        repeatGroup.month = false
+                        repeatGroup.year = false
+                        repeatGroup.repeatInterval = repeatInterval.value.toInt()
+                        repeatGroup.repeatRule = getRepeatRuleFromWeeklyRule(weeklyRule)
+                        repeatGroup.endDate = endDate
+                    }
+
+                    "monthly" -> {
+                        repeatGroup.day = false
+                        repeatGroup.week = false
+                        repeatGroup.month = true
+                        repeatGroup.year = false
+                        repeatGroup.repeatInterval = repeatInterval.value.toInt()
+                        repeatGroup.repeatRule = getRepeatRuleFromMonthlyRule(monthlyRule)
+                        repeatGroup.endDate = endDate
+                    }
+
+                    "yearly"  -> {
+                        repeatGroup.day = false
+                        repeatGroup.week = false
+                        repeatGroup.month = false
+                        repeatGroup.year = true
+                        repeatGroup.repeatInterval = repeatInterval.value.toInt()
+                        repeatGroup.repeatRule = null
+                        repeatGroup.endDate = endDate
+                    }
+                }
+                onRepeatGroup(repeatGroup)
+            }
+
+        }
+        onDismiss()
+    }
+
     Dialog(
-        onDismissRequest = {exitDialog()}, properties = DialogProperties(usePlatformDefaultWidth = false)
+        onDismissRequest = { exitDialog() },
+        properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Surface(
             modifier = Modifier.fillMaxSize()
@@ -168,10 +386,10 @@ fun SetRepeatDialog(onDismiss: () -> Unit, onRepeatGroup: (RepeatGroup?) -> Unit
             LazyColumn {
                 item {
                     TopAppBar(modifier = Modifier.fillMaxWidth(), navigationIcon = {
-                        IconButton(onClick = {exitDialog()}) {
+                        IconButton(onClick = { exitDialog() }) {
                             Icon(Icons.Default.Close, contentDescription = null)
                         }
-                    }, title = { Text("반복") })
+                    }, title = { Text("  반복") })
                 }
                 item {
                     Text(
@@ -225,7 +443,7 @@ fun SetRepeatDialog(onDismiss: () -> Unit, onRepeatGroup: (RepeatGroup?) -> Unit
                 if (repeatRadioGroup.value!="noRepeat") {
                     item {
                         Text(
-                            text = "기간",
+                            text = "  기간",
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
@@ -331,7 +549,7 @@ fun WeeklyRadioButtonLine(
 
         // 선택되었을 때 펼쳐지는 ui
         AnimatedVisibility(visible = selected.value==type) {
-            Text("반복할 요일 선택")
+            Text("  반복할 요일 선택")
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
@@ -351,18 +569,21 @@ fun WeeklyRadioButtonLine(
                                 buttonStates[index] = true
                             }
                         },
-                        colors = if (buttonStates[index]) {
-                            ButtonDefaults.textButtonColors(containerColor = Color.LightGray)
-                        } else ButtonDefaults.textButtonColors(containerColor = Color.Transparent),
+//                        colors = if (buttonStates[index]) {
+//                            ButtonDefaults.textButtonColors(containerColor = Color.LightGray)
+//                        } else ButtonDefaults.textButtonColors(containerColor = Color.Transparent),
                         modifier = Modifier
                             .weight(1f)
                             .clip(CircleShape)
                             .padding(8.dp)
                     ) {
                         Text(text = day, modifier = if (buttonStates[index]) Modifier.drawBehind {
-                            drawCircle(color = Color.Red, radius = this.size.maxDimension, style = Stroke(width = 4.dp.toPx()))
-                        } else Modifier
-                        )
+                            drawCircle(
+                                color = Color.LightGray,
+                                radius = this.size.maxDimension,
+                                style = Stroke(width = 6.dp.toPx())
+                            )
+                        } else Modifier)
 
                     }
                 }
@@ -392,8 +613,8 @@ fun MonthlyRadioButtonLine(
 
         // 선택되었을 때 펼쳐지는 ui
         AnimatedVisibility(visible = selected.value==type) {
-            Text("반복할 날짜 선택")
-            Column {
+            Column() {
+                Text("  반복할 날짜 선택")
                 for (i in days.indices step 7) {
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -413,15 +634,22 @@ fun MonthlyRadioButtonLine(
                                         buttonStates[j] = true
                                     }
                                 },
-                                colors = if (buttonStates[j]) {
-                                    ButtonDefaults.textButtonColors(containerColor = Color.LightGray)
-                                } else ButtonDefaults.textButtonColors(containerColor = Color.Transparent),
+//                                colors = if (buttonStates[j]) {
+//                                    ButtonDefaults.textButtonColors(containerColor = Color.LightGray)
+//                                } else ButtonDefaults.textButtonColors(containerColor = Color.Transparent),
                                 modifier = Modifier
                                     .weight(1f)
                                     .clip(CircleShape)
                                     .padding(4.dp)
                             ) {
-                                Text(text = days[j].toString(), fontSize = 14.sp)
+                                //Text(text = days[j].toString(), fontSize = 14.sp)
+                                Text(text = days[j].toString(), modifier = if (buttonStates[j]) Modifier.drawBehind {
+                                    drawCircle(
+                                        color = Color.LightGray,
+                                        radius = this.size.maxDimension,
+                                        style = Stroke(width = 3.dp.toPx())
+                                    )
+                                } else Modifier)
                             }
                         }
                         if (endIndex==31) {
@@ -455,18 +683,55 @@ fun YearlyRadioButtonLine(
 }
 
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EndTimeRadioButtonLine(
-    type: String, text: String, selected: MutableState<String>, endDate: MutableState<Date?>
+    type: String, text: String, selected: MutableState<String>, endDate: MutableState<Long>
 ) {
     Column(
         modifier = Modifier.animateContentSize(),
     ) {
         RadioButtonLine(type = type, text = text, selected = selected)
         AnimatedVisibility(visible = selected.value==type) {
-            //Todo timepicker 구현 후  1. addplan의 경우 picker에서 선택한 값으로 endDate값 변경하기 2. editplan일 경우 endDate 값이 특정 값으로 주어질 텐데 그 값에 맞춰 picker 초기 상태 설정해주기
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                val state = rememberDatePickerState(initialSelectedDateMillis = endDate.value,initialDisplayMode = DisplayMode.Picker)
+                DatePicker(state = state, modifier = Modifier.padding(16.dp))
+
+                LaunchedEffect(state.selectedDateMillis) {
+                    state.selectedDateMillis?.let {
+                        endDate.value = it
+                    }
+                }
+            }
         }
     }
 }
+
+
+
+fun getRepeatRuleFromMonthlyRule(monthlyRule: List<Boolean>): String {
+    val builder = StringBuilder()
+    for (i in monthlyRule.indices) {
+        if (monthlyRule[i]) {
+            // 인덱스 값을 기반으로 실제 날짜 값을 얻고, 이를 2자리 문자열로 변환
+            val day = (i + 1).toString().padStart(2, '0')
+            builder.append(day)
+        }
+    }
+    return builder.toString()
+}
+
+fun getRepeatRuleFromWeeklyRule(weeklyRule: List<Boolean>): String {
+    val dayMapping = listOf("MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN")
+    val builder = StringBuilder()
+
+    for (i in weeklyRule.indices) {
+        if (weeklyRule[i]) {
+            builder.append(dayMapping[i])
+        }
+    }
+    return builder.toString()
+}
+
+
 

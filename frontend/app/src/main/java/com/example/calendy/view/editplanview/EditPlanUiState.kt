@@ -22,6 +22,7 @@ data class EditPlanUiState(
     val dueTime: Date = Date(),
     val category: Category? = null,
     val repeatGroup: RepeatGroup? = null,
+    val repeatGroupId: Int? = null,
     val priority: Int = 1,
     val memoField: String = "",
     val showInMonthlyView: Boolean = true,

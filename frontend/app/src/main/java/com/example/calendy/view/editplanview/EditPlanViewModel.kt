@@ -272,8 +272,14 @@ class EditPlanViewModel(
     }
 
     //region Repeat Group
-    fun setRepeatGroup(repeatGroup: RepeatGroup) {
-        _uiState.update { currentState -> currentState.copy(repeatGroup = repeatGroup) }
+    fun setRepeatGroup(repeatGroup: RepeatGroup?) {
+        _uiState.update { currentState ->
+            if(repeatGroup != null) {
+                currentState.copy(repeatGroup = repeatGroup, repeatGroupId = repeatGroup.id)
+            } else {
+                currentState.copy(repeatGroup = repeatGroup)
+            }
+        }
     }
 
     fun deleteRepeatGroup(repeatGroup: RepeatGroup) {
