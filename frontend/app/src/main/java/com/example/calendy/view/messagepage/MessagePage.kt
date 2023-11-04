@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -141,13 +140,13 @@ fun MessageList(
                 prevDate = currDate
                 DateDivider(currDate)
             }
-            ChatItem(it)
+            MessageItem(it)
         }
     }
 }
 
 @Composable
-fun ChatItem(messageLog:Message, modifier:Modifier = Modifier){
+fun MessageItem(messageLog:Message, modifier:Modifier = Modifier){
     val chatBackground =
         when(messageLog.messageFromManager){
             true -> Color(0xFFACC7FA)
@@ -170,16 +169,16 @@ fun ChatItem(messageLog:Message, modifier:Modifier = Modifier){
                 //            .border(width = 2.dp, color = Color.Black, shape = RoundedCornerShape(15.dp, 15.dp, 15.dp, 15.dp))
                 .clip(shape = RoundedCornerShape(15.dp, 15.dp, 15.dp, 15.dp))
         ){
-            Text(
-                text = messageLog.content,
-                modifier = Modifier
-                    .wrapContentSize()
-                    .padding(10.dp)
-            )
+            when(messageLog.messageFromManager){
+                true -> MessageContentManager(messageLog)
+                false -> MessageContentUser(messageLog) 
+            }
         }
     }
 
 }
+
+
 
 @Composable
 fun DateDivider(
@@ -187,7 +186,7 @@ fun DateDivider(
     modifier:Modifier = Modifier
 ){
     Row (
-        modifier =modifier
+        modifier = modifier
             .padding(8.dp)
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -232,8 +231,11 @@ fun MessageInputPreview(){
 
 @Preview(showBackground = false, name = "chat item preview")
 @Composable
-fun ChatItemPreview(){
-    ChatItem(Message(0,Date(),false,"ooooooooxoxoxooxoxooxooxoxoxooxoxoxooxoxxoxoxoxoxoxoxoxoxo"))
+fun MessageItemPreview(){
+    Column(){
+        MessageItem(Message(0,Date(),false,"ooooooooxoxoxooxoxooxooxoxoxooxoxoxooxoxxoxoxoxoxoxoxoxoxo"))
+        MessageItem(Message(1,Date(),true,"how can i help you"))
+    }
 }
 
 @Preview
