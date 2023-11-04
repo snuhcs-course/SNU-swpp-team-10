@@ -10,26 +10,26 @@ data class RepeatGroup(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
     @SerializedName("id")
-    val id: Int,
+    val id: Int = 0,
     @ColumnInfo(name = "day", defaultValue = "0")
     @SerializedName("day")
-    val day: Boolean = false,
+    var day: Boolean = false,
     @ColumnInfo(name = "week", defaultValue = "0")
     @SerializedName("week")
-    val week: Boolean = false,
+    var week: Boolean = false,
     @ColumnInfo(name = "month", defaultValue = "0")
     @SerializedName("month")
-    val month: Boolean = false,
+    var month: Boolean = false,
     @ColumnInfo(name = "year", defaultValue = "0")
     @SerializedName("year")
-    val year: Boolean = false,
+    var year: Boolean = false,
     @ColumnInfo(name = "repeat_interval", defaultValue = "0")
     @SerializedName("repeat_interval")
-    val repeatInterval: Int = 0,
+    var repeatInterval: Int = 0,
     @ColumnInfo(name = "repeat_rule", defaultValue = "NULL")
     @SerializedName("repeat_rule")
-    val repeatRule: String? = null,
+    var repeatRule: String? = null,
     @ColumnInfo(name = "end_date")
     @SerializedName("end_date")
-    val endDate: Date?
+    var endDate: Date?
 )
