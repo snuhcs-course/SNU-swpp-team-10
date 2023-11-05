@@ -21,7 +21,8 @@ data class EditPlanUiState(
     val isDaily: Boolean = false,
     val dueTime: Date = Date(),
     val category: Category? = null,
-    val repeatGroup: RepeatGroup? = null,
+    val repeatGroupId: Int? = null, // store 기존 repeat group. Needed when editing repeat settings.
+    val repeatGroup: RepeatGroup? = null, // currently working repeat group. This repeat group can be changed in Edit Page
     val priority: Int = 1,
     val memoField: String = "",
     val showInMonthlyView: Boolean = true,

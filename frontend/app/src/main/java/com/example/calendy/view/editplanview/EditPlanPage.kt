@@ -83,7 +83,10 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
                 Row {
                     if (isPageAdd) {
                         // Add Button
-                        IconButton(onClick = { editPlanViewModel.addPlan() /* TODO: Should close page */ }) {
+                        IconButton(onClick = {
+                            editPlanViewModel.addPlan()
+                            onNavigateBack()
+                        }) {
                             Icon(
                                 imageVector = Icons.Default.Add, contentDescription = "Add",
                             )
@@ -91,14 +94,20 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
                     }
                     if (isPageEdit) {
                         // Delete Button
-                        IconButton(onClick = { editPlanViewModel.deletePlan() }) {
+                        IconButton(onClick = {
+                            editPlanViewModel.deletePlan()
+                            onNavigateBack()
+                        }) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
                                 contentDescription = "Delete",
                             )
                         }
                         // Save Button
-                        IconButton(onClick = { editPlanViewModel.updatePlan() }) {
+                        IconButton(onClick = {
+                            editPlanViewModel.updatePlan()
+                            onNavigateBack()
+                        }) {
                             Icon(
                                 imageVector = Icons.Default.Save,
                                 contentDescription = "Submit",

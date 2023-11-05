@@ -55,18 +55,8 @@ class EditPlanViewModel(
             // TODO: _uiState.value is set. but it is suspended because of db query
             // TODO: 임시 값 넣어놓기?
             _uiState.value = EditPlanUiState(isAddPage = false, id = id, entryType = type)
+
             // fill in other values after db query
-
-//            when (type) {
-//                PlanType.Schedule -> {
-//                    loadSchedule(id)
-//                }
-//
-//                PlanType.Todo     -> {
-//                    loadTodo(id)
-//                }
-//            }
-
             viewModelScope.launch {
                 val plan = when (type) {
                     PlanType.Schedule -> {
@@ -83,34 +73,42 @@ class EditPlanViewModel(
         }
     }
 
-    private fun fillIn(plan: Plan): EditPlanUiState = when (plan) {
-        is Schedule -> {
-            _uiState.value.copy(
-                titleField = plan.title,
-                startTime = plan.startTime,
-                endTime = plan.endTime,
-//                category = schedule.categoryId,
-//                repeatGroup = schedule.repeatGroupId,
-                priority = plan.priority ?: 1,
-                memoField = plan.memo ?: "",
-                showInMonthlyView = plan.showInMonthlyView ?: false
-            )
+    private suspend fun fillIn(plan: Plan): EditPlanUiState {
+        val category: Category? = if (plan.categoryId!=null) {
+            categoryRepository.getCategoryById(plan.categoryId!!).first()
+        } else {
+            null
         }
 
-        is Todo     -> {
-            _uiState.value.copy(
-                titleField = plan.title,
-                isComplete = plan.complete ?: false,
-                isYearly = plan.yearly ?: false,
-                isMonthly = plan.monthly ?: false,
-                isDaily = plan.daily ?: false,
-                dueTime = plan.dueTime,
-//                category = schedule.categoryId,
-//                repeatGroup = schedule.repeatGroupId,
-                priority = plan.priority ?: 1,
-                memoField = plan.memo ?: "",
-                showInMonthlyView = plan.showInMonthlyView ?: false
-            )
+        return when (plan) {
+            is Schedule -> {
+                _uiState.value.copy(
+                    titleField = plan.title,
+                    startTime = plan.startTime,
+                    endTime = plan.endTime,
+                    category = category,
+                    //                repeatGroup = schedule.repeatGroupId, // TODO
+                    priority = plan.priority,
+                    memoField = plan.memo,
+                    showInMonthlyView = plan.showInMonthlyView
+                )
+            }
+
+            is Todo     -> {
+                _uiState.value.copy(
+                    titleField = plan.title,
+                    isComplete = plan.complete,
+                    isYearly = plan.yearly,
+                    isMonthly = plan.monthly,
+                    isDaily = plan.daily,
+                    dueTime = plan.dueTime,
+                    category = category,
+                    //                repeatGroup = schedule.repeatGroupId, // TODO
+                    priority = plan.priority,
+                    memoField = plan.memo,
+                    showInMonthlyView = plan.showInMonthlyView
+                )
+            }
         }
     }
 
@@ -125,9 +123,9 @@ class EditPlanViewModel(
                 endTime = schedule.endTime,
 //                category = schedule.categoryId,
 //                repeatGroup = schedule.repeatGroupId,
-                priority = schedule.priority ?: 1,
-                memoField = schedule.memo ?: "",
-                showInMonthlyView = schedule.showInMonthlyView ?: false
+                priority = schedule.priority,
+                memoField = schedule.memo,
+                showInMonthlyView = schedule.showInMonthlyView
             )
         }
     }
@@ -139,16 +137,16 @@ class EditPlanViewModel(
 
             _uiState.value = _uiState.value.copy(
                 titleField = todo.title,
-                isComplete = todo.complete ?: false,
-                isYearly = todo.yearly ?: false,
-                isMonthly = todo.monthly ?: false,
-                isDaily = todo.daily ?: false,
+                isComplete = todo.complete,
+                isYearly = todo.yearly,
+                isMonthly = todo.monthly,
+                isDaily = todo.daily,
                 dueTime = todo.dueTime,
 //                category = schedule.categoryId,
 //                repeatGroup = schedule.repeatGroupId,
-                priority = todo.priority ?: 1,
-                memoField = todo.memo ?: "",
-                showInMonthlyView = todo.showInMonthlyView ?: false
+                priority = todo.priority,
+                memoField = todo.memo,
+                showInMonthlyView = todo.showInMonthlyView
             )
         }
     }
@@ -228,7 +226,7 @@ class EditPlanViewModel(
                 day = day,
                 hourOfDay = hour,
                 minute = minute,
-                assertValueIsValid = false
+                softWrap = true
             )
         )
     }
@@ -242,7 +240,7 @@ class EditPlanViewModel(
                 day = day,
                 hourOfDay = hour,
                 minute = minute,
-                assertValueIsValid = false
+                softWrap = true
             )
         )
     }
@@ -272,8 +270,15 @@ class EditPlanViewModel(
     }
 
     //region Repeat Group
-    fun setRepeatGroup(repeatGroup: RepeatGroup) {
-        _uiState.update { currentState -> currentState.copy(repeatGroup = repeatGroup) }
+    fun setRepeatGroup(repeatGroup: RepeatGroup?) {
+        _uiState.update { currentState ->
+            if(repeatGroup != null) {
+                // TODO: Is it valid to set repeatGroup.id?
+                currentState.copy(repeatGroup = repeatGroup, repeatGroupId = repeatGroup.id)
+            } else {
+                currentState.copy(repeatGroup = null)
+            }
+        }
     }
 
     fun deleteRepeatGroup(repeatGroup: RepeatGroup) {
@@ -410,19 +415,13 @@ class EditPlanViewModel(
         // id: Int? is smart casted into type Int
         when (currentState.entryType) {
             is PlanType.Schedule -> {
-                val deletedTodo = Schedule(
+                val deletedSchedule = Schedule(
                     id = currentState.id,
                     title = currentState.titleField,
                     startTime = currentState.startTime,
                     endTime = currentState.endTime,
-                    memo = currentState.memoField,
-                    repeatGroupId = currentState.repeatGroup?.id,
-                    categoryId = currentState.category?.id,
-                    priority = currentState.priority,
-                    showInMonthlyView = currentState.showInMonthlyView,
-                    isOverridden = false
                 )
-                viewModelScope.launch { scheduleRepository.deleteSchedule(deletedTodo) }
+                viewModelScope.launch { scheduleRepository.deleteSchedule(deletedSchedule) }
             }
 
             is PlanType.Todo     -> {
@@ -430,16 +429,6 @@ class EditPlanViewModel(
                     id = currentState.id,
                     title = currentState.titleField,
                     dueTime = currentState.dueTime,
-                    yearly = currentState.isYearly,
-                    monthly = currentState.isMonthly,
-                    daily = currentState.isDaily,
-                    memo = currentState.memoField,
-                    complete = currentState.isComplete,
-                    repeatGroupId = currentState.repeatGroup?.id,
-                    categoryId = currentState.category?.id,
-                    priority = currentState.priority,
-                    showInMonthlyView = currentState.showInMonthlyView,
-                    isOverridden = false
                 )
                 viewModelScope.launch { todoRepository.deleteTodo(deletedTodo) }
             }

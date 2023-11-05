@@ -70,13 +70,15 @@ class AppContainer(private val context: Context) : IAppContainer {
     override val repeatGroupRepository: IRepeatGroupRepository by lazy {
         RepeatGroupRepository(RepeatGroupLocalDataSource(CalendyDatabase.getDatabase(context).repeatGroupDao()))
     }
-    private val baseUrl = "https://10.0.0.2"
-    private val retrofit =
-            Retrofit.Builder().baseUrl(baseUrl).addConverterFactory(GsonConverterFactory.create())
-                    .build()
-    private val serviceApi: CalendyApi by lazy {
-        retrofit.create(CalendyApi::class.java)
-    }
 
+    // TODO: Use CalendyApi in CalendyApplication
+//    private val baseUrl = "https://10.0.0.2"
+//    private val retrofit =
+//            Retrofit.Builder().baseUrl(baseUrl).addConverterFactory(GsonConverterFactory.create())
+//                    .build()
+//    private val serviceApi: CalendyApi by lazy {
+//        retrofit.create(CalendyApi::class.java)
+//    }
+//
 
 }

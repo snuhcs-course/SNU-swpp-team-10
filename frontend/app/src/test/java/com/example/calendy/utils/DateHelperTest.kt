@@ -17,7 +17,7 @@ class DateHelperTest {
             day = 26,
             hourOfDay = 16,
             minute = 14,
-            assertValueIsValid = true
+            softWrap = false
         )
 
         assertEquals(/* expected = */ expected, /* actual = */ result)
@@ -32,7 +32,7 @@ class DateHelperTest {
             day = 31,
             hourOfDay = 16,
             minute = 14,
-            assertValueIsValid = false
+            softWrap = true
         )
 
         assertEquals(/* expected = */ expected, /* actual = */ result)

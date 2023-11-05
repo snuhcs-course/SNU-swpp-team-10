@@ -23,11 +23,11 @@ data class DayPlanListItem(
     val showInMonthlyView: Boolean = true,
 )
 
-//fun Schedule.toListItem() : DayPlanListItem = DayPlanListItem(
-//    planType = if(this.javaClass == Schedule::class.java) {Plan.PlanType.Schedule} else {Plan.PlanType.Todo},
-//    titleField = title,
-//    startTime = startTime,
-//    endTime = endTime,
-//    isComplete = if(this.javaClass == Todo::class.java) (this as Todo).complete else false,
-//    showInMonthlyView = showInMonthlyView
-//)
+fun Schedule.toListItem() : DayPlanListItem = DayPlanListItem(
+    planType = if(this.javaClass == Schedule::class.java) {Plan.PlanType.Schedule} else {Plan.PlanType.Todo},
+    titleField = title,
+    startTime = startTime,
+    endTime = endTime,
+    isComplete = if(this.javaClass == Todo::class.java) (this as Todo).complete else false,
+    showInMonthlyView = showInMonthlyView
+)
