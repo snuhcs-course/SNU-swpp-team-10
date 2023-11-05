@@ -9,6 +9,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
@@ -29,6 +31,7 @@ import com.example.calendy.view.monthlyview.decorator.OneDayDecorator
 import com.example.calendy.view.monthlyview.decorator.SaturdayDecorator
 import com.example.calendy.view.monthlyview.decorator.SelectedDayDecorator
 import com.example.calendy.view.monthlyview.decorator.SundayDecorator
+import com.example.calendy.view.monthlyview.decorator.TitleDecorator
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.CalendarMode
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView
@@ -53,8 +56,12 @@ fun MonthlyPageKT(
 
     var selectedDate: CalendarDay by remember { mutableStateOf(CalendarDay.today()) }
     var selectedDayDecorator: SelectedDayDecorator
-    var planOfMonth: Hashtable<CalendarDay, MutableList<Plan>> = Hashtable()
+    var saturdayDecorator : SaturdayDecorator = SaturdayDecorator(CalendarDay.today().month)
+    var sundayDecorator : SundayDecorator = SundayDecorator(CalendarDay.today().month)
+    var titleDecorators : ArrayList<TitleDecorator>
+    var titleDecorator : TitleDecorator? = null
     var dotDecorator: DotDecorator? = null
+    var planOfMonth: Hashtable<CalendarDay, MutableList<Plan>> = Hashtable()
     val oneDayDecorator = OneDayDecorator()
 
 //    val planList: List<Plan> by monthlyViewModel.planList.collectAsState()
@@ -91,6 +98,8 @@ fun MonthlyPageKT(
             // initial setting for calendar view
             setTitleFormatter(MonthArrayTitleFormatter(custom_months))
             setWeekDayFormatter(ArrayWeekDayFormatter(custom_weekdays))
+            setTileHeightDp(-1)
+            selectionColor = -1
             setSelectedDate(selectedDate)
             showOtherDates = MaterialCalendarView.SHOW_OTHER_MONTHS
             state().edit()
@@ -102,22 +111,22 @@ fun MonthlyPageKT(
 
             // selected day decorator initialization
             selectedDayDecorator = SelectedDayDecorator(CalendarDay.today(), context)
-
+//            titleDecorators=ArrayList<TitleDecorator>()
+//            titleDecorators.add()
             //add dot decorator
             addDecorators(
-                SundayDecorator(),
-                SaturdayDecorator(),
+                saturdayDecorator,
+                sundayDecorator,
                 oneDayDecorator,
-                selectedDayDecorator,
+                selectedDayDecorator
             )
 
             setOnDateChangedListener(OnDateSelectedListener { widget, date, selected ->
 
                 // selected date changed
-                if (selectedDate==date) if (planOfMonth!!.containsKey(date)) openDayPlanListPopup(
-                    selectedDate
-                )
-                else openAddPlanPopup(selectedDate)
+                if (selectedDate==date)
+                    if (planOfMonth!!.containsKey(date)) openDayPlanListPopup(selectedDate)
+                    else openAddPlanPopup(selectedDate)
                 removeDecorator(selectedDayDecorator)
                 selectedDate = date
                 selectedDayDecorator = SelectedDayDecorator(selectedDate, context)
@@ -126,8 +135,16 @@ fun MonthlyPageKT(
             // event
             setOnMonthChangedListener(
                 // selected month changed
-                OnMonthChangedListener { widget, date ->
+                { widget, date ->
                     //TODO: change planList
+                    removeDecorator(saturdayDecorator)
+                    removeDecorator(sundayDecorator)
+                    saturdayDecorator = SaturdayDecorator(date.month)
+                    sundayDecorator = SundayDecorator(date.month)
+                    addDecorators(saturdayDecorator,sundayDecorator)
+
+                    // recreate title decorators
+
                 })
 
         }
@@ -138,12 +155,20 @@ fun MonthlyPageKT(
 
         planOfMonth = planListToHash(planList)
         dotDecorator = DotDecorator(planOfMonth)
+//        titleDecorator  =TitleDecorator()
         view.removeDecorators()
+
+//        titleDecorators= ArrayList()
+        for (p in planOfMonth){
+            view.addDecorator(TitleDecorator(p.key,p.value))
+        }
+
         view.addDecorators(
-            SundayDecorator(),
-            SaturdayDecorator(),
             oneDayDecorator,
-            dotDecorator
+            saturdayDecorator,
+            sundayDecorator,
+//            dotDecorator,
+//            titleDecorator
         )
     })
 

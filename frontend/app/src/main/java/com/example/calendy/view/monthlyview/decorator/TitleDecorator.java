@@ -19,26 +19,30 @@ import java.util.List;
 /**
  * Decorate several days with a dot
  */
-public class DotDecorator implements DayViewDecorator {
+public class TitleDecorator implements DayViewDecorator {
 
     private int color;
-    private Hashtable<CalendarDay, List<Plan>> schedules;
-
-    public DotDecorator(Hashtable<CalendarDay, List<Plan>> plans) {
+    private CalendarDay targetDay;
+    private List<Plan> planList;
+    public TitleDecorator(CalendarDay day, List<Plan> plans) {
         this.color = Color.DKGRAY;
-        this.schedules=plans;
+        this.targetDay = day;
+        this.planList=plans;
     }
 
     @Override
     public boolean shouldDecorate(CalendarDay day) {
-
-        return schedules.containsKey(day);
+        return targetDay.equals(day);
 
     }
 
     @Override
     public void decorate(DayViewFacade view) {
-        view.addSpan(new DotSpan(6, color)); // 날자밑에 점
-//        view.addSpan(new SinglePlanSpan(color,"title",1));
+//        view.addSpan(new DotSpan(6, color)); // 날자밑에 점
+        int count=0;
+        for(Plan p : planList){
+            view.addSpan(new SinglePlanSpan(color,p.getTitle(),count++));
+            if(count==2) break; //hardcoded max viewable plan count
+        }
     }
 }

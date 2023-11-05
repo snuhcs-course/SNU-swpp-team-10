@@ -2,7 +2,9 @@ package com.example.calendy.view.monthlyview.decorator;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.text.style.ForegroundColorSpan;
 
 //import com.project.sample_calendar.R;
 import com.example.calendy.R;
@@ -31,6 +33,8 @@ public class SelectedDayDecorator implements DayViewDecorator {
 
     @Override
     public void decorate(DayViewFacade view) {
-        view.setBackgroundDrawable(drawable);
+
+        view.setSelectionDrawable(drawable);
+        view.addSpan(new ForegroundColorSpan(Color.BLACK));
     }
 }
