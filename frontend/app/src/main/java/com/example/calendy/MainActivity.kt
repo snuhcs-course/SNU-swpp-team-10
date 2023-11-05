@@ -36,6 +36,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.calendy.data.plan.Plan
 import com.example.calendy.ui.theme.CalendyTheme
+import com.example.calendy.view.messagepage.MessagePage
 import com.example.calendy.view.editplanview.EditPlanPage
 import com.example.calendy.view.editplanview.EditPlanViewModel
 import com.example.calendy.view.monthlyview.MonthlyPageKT
@@ -185,7 +186,8 @@ fun NavigationGraph(navController: NavHostController) {
             })
         }
         composable(BottomNavItem.Todo.screenRoute) {
-            TodoPage()
+//            TodoPage()
+            MessagePage()
         }
         composable(BottomNavItem.AiManager.screenRoute) {
             ManagerPage()

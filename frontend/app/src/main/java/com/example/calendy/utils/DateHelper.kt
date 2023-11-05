@@ -133,3 +133,6 @@ fun CalendarDay.toStartTime(): Date = Date(year, month, day, 0, 0)
 fun CalendarDay.toEndTime(): Date = Date(year, month, day, 23, 59)
 fun CalendarDay.getWeekDay(): String = DateHelper.getDayOfWeek(toDate())
 fun Date.toCalendarDay(): CalendarDay = CalendarDay.from(this)
+
+fun Date.toDayString(): String = String.format("%d월 %d일 %s",month,day,DateHelper.getDayOfWeek(this))
+fun Date.equalDay(date:Date): Boolean = year==date.year && month == date.month && day == date.day
