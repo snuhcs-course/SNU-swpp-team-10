@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".view.weeklyview.WeeklyView">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="30dp" />
+
+    <TextView
+        android:id="@+id/timeLabelPlaceholder"
+        android:layout_width="30dp"
+        android:layout_height="0dp"
+        android:background="@android:color/transparent"
+        app:layout_constraintEnd_toStartOf="@+id/materialWeeklyView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.prolificinteractive.materialcalendarview.MaterialCalendarView
+        android:id="@+id/materialWeeklyView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/timeLabelPlaceholder"
+        app:layout_constraintTop_toTopOf="parent"
+        app:mcv_calendarMode="week"
+        app:mcv_dateTextAppearance="@color/black"
+        app:mcv_selectionColor="@android:color/white"
+        app:mcv_showOtherDates="none" />
+
+    <TableLayout
+        android:id="@+id/timeTable"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/materialWeeklyView"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:stretchColumns="1,2,3,4,5,6,7">
+    </TableLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

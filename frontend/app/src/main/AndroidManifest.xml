@@ -18,6 +18,11 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".view.weeklyview.WeeklyView"
+            android:exported="true" >
+
+        </activity>
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
@@ -27,16 +32,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".view.monthlyview.MonthlyDayPlanListPopup"
-            android:theme="@android:style/Theme.Holo.Dialog"
-        />
-
-        <activity
-            android:name=".view.monthlyview.MonthlyDayPlanDetailPopup"
-            android:theme="@android:style/Theme.Holo.Dialog"
-            />
-
     </application>
 
 </manifest>
