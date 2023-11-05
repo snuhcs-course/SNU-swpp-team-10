@@ -11,7 +11,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.example.calendy.R;
-import com.example.calendy.data.Schedule;
+import com.example.calendy.data.plan.Schedule;
 import com.example.calendy.view.weeklyview.decorator.SaturdayDecorator;
 import com.example.calendy.view.weeklyview.decorator.SundayDecorator;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
