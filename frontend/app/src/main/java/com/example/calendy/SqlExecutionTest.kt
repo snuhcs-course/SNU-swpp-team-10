@@ -37,6 +37,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
 @Composable
@@ -108,20 +111,13 @@ class SqlExecutionViewModel(
                 val result = RetrofitClient.instance.sendMessageToServer(
                     MessageBody(
                         message = requestMessage,
+                        time = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date()),
                         category = allCategoriesPrompt,
                         schedule = schedulePrompt,
                         todo = todoPrompt
                     )
                 )
-                Log.d(
-                    "GUN", MessageBody(
-                        message = requestMessage,
-                        category = allCategoriesPrompt,
-                        schedule = schedulePrompt,
-                        todo = todoPrompt
-                    ).toString()
-                )
-                
+
                 // TODO: Flag - NO_SUCH_TODO 등
                 val queries = result.split(";")
                 for (query in queries) {
@@ -143,6 +139,9 @@ class SqlExecutionViewModel(
         }
     }
 
+    // TODO: Message ID 받아서, Log DB에 넣을 때 message id 넣어놔야 한다.
+    // Log DB에 INSERT, UPDATE, DELETE Flag 기록해두기 (Schedule, Tod0)
+    // log_schedule, log_tod0
     private suspend fun sqlExecute(gptQuery: String) {
         // TODO: Refactor Me
         Log.d("GUN", "Query Start: $gptQuery")
@@ -163,6 +162,7 @@ class SqlExecutionViewModel(
             }
         }
         val queryTable = if (isSchedule) "schedule" else "todo"
+        val logTable = "log_$queryTable"
 
         // 모두 삭제해둔다.
         emptyDatabase.deleteAll()
@@ -179,7 +179,10 @@ class SqlExecutionViewModel(
                         is Schedule -> calendyDatabase.scheduleDao().insert(plan)
                         is Todo     -> calendyDatabase.todoDao().insert(plan)
                     }
+                    // TODO: Log DB에 변경된 plan 기록하기
                 }
+                
+                // TODO: Message DB에 Message 넣어주기
             } else if (isUpdate) {
                 // SELECT table where ... 로 교체
                 // ex) UPDATE table SET ... WHERE ...
@@ -188,7 +191,7 @@ class SqlExecutionViewModel(
                     gptQuery.substring(startIndex = whereStartsAt).trim()
                 } else "" // if WHERE is not present, use empty string
 
-                // Calendy DB의 DAO.rawQuery 로 planList 받기
+                // Calendy DB의 DAO.rawQuery 로 UPDATE에 영향을 받는 planList 받기
                 val calendySelectQuery = SimpleSQLiteQuery(
                     "SELECT * FROM $queryTable $whereString",
                 )
@@ -204,6 +207,7 @@ class SqlExecutionViewModel(
                         is Schedule -> emptyDatabase.scheduleDao().insert(plan)
                         is Todo     -> emptyDatabase.todoDao().insert(plan)
                     }
+                    // TODO: Log DB에 UPDATE 이전의 기록 보존하기
                 }
                 // EmptyDB에 update sqlQuery 실행 - emptyDB.query()
                 emptyDatabase.openHelper.writableDatabase.execSQL(gptQuery)
@@ -216,6 +220,8 @@ class SqlExecutionViewModel(
                         is Todo     -> calendyDatabase.todoDao().update(plan)
                     }
                 }
+
+                // TODO: Message DB에 Message 넣어주기
             } else if (isDelete) {
                 // SELECT where ... 로 교체
                 // ex) DELETE table WHERE ...
@@ -241,6 +247,8 @@ class SqlExecutionViewModel(
                         is Todo     -> calendyDatabase.todoDao().delete(plan)
                     }
                 }
+
+                // TODO: Message DB에 Message 넣어주기
             }
         } catch (e: Throwable) {
             // TODO: Catching all throwable may not be good

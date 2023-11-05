@@ -17,8 +17,10 @@ interface CalendyApi {
     ): String
 }
 
+// TODO: time 자동으로 생성해주는 함수
 data class MessageBody(
     val message: String,
+    val time: String,
     val category: String,
     val todo: String,
     val schedule: String

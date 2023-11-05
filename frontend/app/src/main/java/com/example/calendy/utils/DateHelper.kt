@@ -36,10 +36,6 @@ object DateHelper {
             Pair(Calendar.MILLISECOND, 0),
         )) {
             if (softWrap) {
-                assert(this.getActualMinimum(calendarField) <= value)
-                assert(value <= this.getActualMaximum(calendarField))
-                set(calendarField, value)
-            } else {
                 var safeValue = value
                 if (value < this.getActualMinimum(calendarField)) {
                     safeValue = this.getActualMinimum(calendarField)
@@ -48,6 +44,10 @@ object DateHelper {
                     safeValue = this.getActualMaximum(calendarField)
                 }
                 set(calendarField, safeValue)
+            } else {
+                assert(this.getActualMinimum(calendarField) <= value)
+                assert(value <= this.getActualMaximum(calendarField))
+                set(calendarField, value)
             }
         }
         this.time

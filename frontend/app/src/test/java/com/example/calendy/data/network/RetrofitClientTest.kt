@@ -5,6 +5,9 @@ import com.example.calendy.data.MessageBody
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Test
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class RetrofitClientTest {
     @Test
@@ -14,11 +17,15 @@ class RetrofitClientTest {
 
         val result = RetrofitClient.instance.sendMessageToServer(
             MessageBody(
-                message = queryString
+                message = queryString,
+                time = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date()),
+                category = "",
+                schedule = "",
+                todo = ""
             )
         )
 
-        val queries = result.queries
+        val queries = result.split(";")
 
         println("Queries: $queries")
         assertEquals(1,queries.size)
@@ -33,11 +40,15 @@ class RetrofitClientTest {
 
         val result = RetrofitClient.instance.sendMessageToServer(
             MessageBody(
-                message = queryString
+                message = queryString,
+                time = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date()),
+                category = "",
+                schedule = "",
+                todo = ""
             )
         )
 
-        val queries = result.queries
+        val queries = result.split(";")
 
         println("Queries: $queries")
         assertEquals(1,queries.size)
