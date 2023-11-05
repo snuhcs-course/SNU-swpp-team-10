@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.calendy.data.category.ICategoryRepository
+import com.example.calendy.data.message.Message
 import com.example.calendy.data.plan.IPlanRepository
 import com.example.calendy.data.plan.Plan
 import com.example.calendy.data.plan.Schedule
@@ -14,88 +15,65 @@ import com.example.calendy.data.plan.todo.ITodoRepository
 import com.example.calendy.data.repeatgroup.IRepeatGroupRepository
 import com.example.calendy.utils.toDate
 import com.example.calendy.utils.toEndTime
+import com.example.calendy.utils.toFirstDateOfMonth
+import com.example.calendy.utils.toLastDateOfMonth
 import com.example.calendy.utils.toStartTime
 import com.prolificinteractive.materialcalendarview.CalendarDay
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import java.util.Hashtable
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.Date
 
 class MonthlyViewModel(
     private val planRepository: IPlanRepository,
-    private val scheduleRepository: IScheduleRepository,
-    private val todoRepository: ITodoRepository,
-    private val categoryRepository: ICategoryRepository,
-    private val repeatGroupRepository: IRepeatGroupRepository
 ) : ViewModel() {
-    /*
-    * TODO:
-    * get all plan data (schedule and todo) within designated period (startTime~endTime)
-    * should provide plan data which has been separated by each dates
-    *
-    */
 
-    // rearrange schedules/todos by calendar day
-    // calendar day use year, month, day for equal operation
-    // !! need to check if hash key exists after deleting all plans in a day
-    val scheduleListByDay : Hashtable<CalendarDay, StateFlow<List<Schedule>>> = Hashtable()
-    val todoListByDay : Hashtable<CalendarDay,StateFlow<List<Todo>>> = Hashtable()
-//    var planList : StateFlow<List<Plan>> = scheduleRepository.getAllSchedule().stateIn(
-//        scope = viewModelScope,
-//        initialValue = emptyList<Plan>(),
-//        started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000)
-//    )
+    private val _uiState = MutableStateFlow(MonthlyPageUIState())
+    val uiState :StateFlow<MonthlyPageUIState> = _uiState.asStateFlow()
+    var job : Job?=null
 
-    fun getPlanListState(startTime:CalendarDay,endTime:CalendarDay): StateFlow<List<Plan>> {
-        //TODO: fix repositories. change into getPlansOfDay or getPlansStream
-        val stream = (planRepository.getAllPlans())
-        val result = stream.stateIn(
-            scope = viewModelScope,
-            initialValue = emptyList<Plan>(),
-            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000)
-        )
-        return result
+    init{
+        getPlansOfMonth(CalendarDay.today(),CalendarDay.today())
     }
 
-    fun getAllPlans():StateFlow<List<Plan>>{
-
-        val stream = (planRepository.getAllPlans())
-        val result = stream.stateIn(
-            scope = viewModelScope,
-            initialValue = emptyList<Plan>(),
-            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000)
-        )
-        return result
+    fun setCurrentMonth(month : CalendarDay)
+    {
+        _uiState.update { current -> current.copy(currentMonth = month) }
     }
-
-    fun getPlanOfDay(day:CalendarDay) :StateFlow<List<Plan>>?{
-        //TODO: fix repositories. change into getPlansOfDay or getPlansStream
-        return scheduleRepository.getSchedulesStream(day.toStartTime(),day.toEndTime()).stateIn(
+    fun setSelectedDate(day :CalendarDay){
+        _uiState.update { current -> current.copy(selectedDate = day) }
+    }
+    fun getAllPlans():StateFlow<List<Plan>>
+    {
+        return planRepository.getAllPlans().stateIn(
             scope = viewModelScope,
             initialValue = emptyList<Plan>(),
             started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000)
         )
     }
-    fun getScheduleOfDay(day:CalendarDay): StateFlow<List<Schedule>>? {
-        return scheduleListByDay.getOrDefault(day,null)
-    }
-    fun getTodoOfDay(day:CalendarDay): StateFlow<List<Todo>>?{
-        return todoListByDay.getOrDefault(day,null)
-    }
-    fun hasPlan(day:CalendarDay): Boolean {
-        return scheduleListByDay.contains(day) || todoListByDay.contains(day)
-    }
-
-    fun getPlanByID(id:Int, planType: Plan.PlanType) : StateFlow<Plan>{
-        return planRepository.getPlanById(id,planType).stateIn(
-            scope = viewModelScope,
-            initialValue = Todo(0,"",CalendarDay.today().toDate(),false,false,false,false,"",null,null,1,false,false),
-            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000)
-        )
+    fun getPlansOfMonth(startDate:CalendarDay,endDate:CalendarDay)
+    {
+        val flow = planRepository.getPlansStream(startDate.toFirstDateOfMonth(),endDate.toLastDateOfMonth())
+        job?.cancel()
+        job = viewModelScope.launch {
+            flow.collect{
+                updatePlanList(it)
+            }
+        }
     }
 
+    private fun updatePlanList(planList:List<Plan>)
+    {
+        _uiState.update { current -> current.copy(plansOfMonth = planList) }
+    }
 }

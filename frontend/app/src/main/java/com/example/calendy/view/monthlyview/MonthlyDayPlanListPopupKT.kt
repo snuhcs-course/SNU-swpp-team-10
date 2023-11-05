@@ -132,10 +132,6 @@ fun ListPopupPreview(){
     MonthlyDayPlanListPopupKT(
         monthlyViewModel = MonthlyViewModel(
             planRepository = DummyPlanRepository(),
-            scheduleRepository = DummyScheduleRepository(),
-            todoRepository = DummyTodoRepository(),
-            categoryRepository = DummyCategoryRepository(),
-            repeatGroupRepository = DummyRepeatGroupRepository(),
         )
         , {}, onNavigateToEditPage = { _, _ -> }
     )

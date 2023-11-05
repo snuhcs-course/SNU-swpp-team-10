@@ -1,7 +1,6 @@
 package com.example.calendy.utils
 
 import com.prolificinteractive.materialcalendarview.CalendarDay
-import com.prolificinteractive.materialcalendarview.CalendarDay.today
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -119,20 +118,34 @@ object DateHelper {
     /**
      * String formatter for date
      */
-    fun getDayOfWeek(date: Date): String {
-        val sdf = SimpleDateFormat("EEEE", Locale.KOREA)
-        val yesterday: Date = Date(date.getTime() - 1000 * 60 * 60 * 24) // add one day. 요일이 하루씩 밀리는 문제가 있었음.
-        return sdf.format(yesterday)
-    }
+
+
 }
 
 // extension for CalendarDay  and Date
-
-fun CalendarDay.toDate(): Date = Date(year, month, day)
-fun CalendarDay.toStartTime(): Date = Date(year, month, day, 0, 0)
-fun CalendarDay.toEndTime(): Date = Date(year, month, day, 23, 59)
-fun CalendarDay.getWeekDay(): String = DateHelper.getDayOfWeek(toDate())
+fun Date.dayOfWeek(): String {
+    val sdf = SimpleDateFormat("EEEE", Locale.KOREA)
+    val yesterday: Date = Date(getTime() - 1000 * 60 * 60 * 24) // add one day. 요일이 하루씩 밀리는 문제가 있었음.
+    return sdf.format(yesterday)
+}
+fun CalendarDay.toDate(): Date = Date(year-1900, month, day)
+fun CalendarDay.toStartTime(): Date = Date(year-1900, month, day, 0, 0)
+fun CalendarDay.toEndTime(): Date = Date(year-1900, month, day, 23, 59)
+fun CalendarDay.toFirstDateOfMonth():Date = Date(year-1900,month,1)
+fun CalendarDay.toLastDateOfMonth():Date = Date(year - 1900, month,1).lastDayOfMonth()
+fun CalendarDay.getWeekDay(): String = toDate().dayOfWeek()
 fun Date.toCalendarDay(): CalendarDay = CalendarDay.from(this)
 
-fun Date.toDayString(): String = String.format("%d월 %d일 %s",month,day,DateHelper.getDayOfWeek(this))
+fun Date.toDayString(): String = String.format("%d월 %d일 %s",month+1,day,this.dayOfWeek())
 fun Date.equalDay(date:Date): Boolean = year==date.year && month == date.month && day == date.day
+
+@Suppress("deprecation")
+fun Date.lastDayOfMonth(): Date {
+    val calendar = Calendar.getInstance()
+    calendar.time = this
+    val lastDay = calendar
+        .getActualMaximum(Calendar.DAY_OF_MONTH)
+    val lastDate = calendar.time
+    lastDate.date = lastDay
+    return lastDate
+}

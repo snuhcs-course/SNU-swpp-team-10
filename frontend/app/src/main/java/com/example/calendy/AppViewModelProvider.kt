@@ -23,10 +23,6 @@ object AppViewModelProvider {
         initializer {
             MonthlyViewModel(
                 calendyApplication().container.planRepository,
-                calendyApplication().container.scheduleRepository,
-                calendyApplication().container.todoRepository,
-                calendyApplication().container.categoryRepository,
-                calendyApplication().container.repeatGroupRepository
             )
         }
         initializer {
