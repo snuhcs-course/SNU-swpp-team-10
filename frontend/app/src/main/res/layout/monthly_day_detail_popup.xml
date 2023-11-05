@@ -5,6 +5,7 @@
     android:id="@+id/monthlyDayDetailPopup"
     android:layout_width="300dp"
     android:layout_height="400dp"
+    android:minHeight="400dp"
     android:background="@drawable/white_round"
     android:orientation="vertical">
 

@@ -13,15 +13,15 @@ import androidx.compose.ui.text.style.TextAlign
 @Composable
 fun TodoPage() {
     Box(
-            modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.DarkGray)
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.DarkGray)
     ) {
         Text(
-                text = "Todo",
-                textAlign = TextAlign.Center,
-                color = Color.White,
-                modifier = Modifier.align(Alignment.Center)
+            text = "Todo",
+            textAlign = TextAlign.Center,
+            color = Color.White,
+            modifier = Modifier.align(Alignment.Center)
         )
     }
 }

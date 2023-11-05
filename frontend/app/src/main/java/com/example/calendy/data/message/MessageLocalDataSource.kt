@@ -14,4 +14,7 @@ class MessageLocalDataSource(private val messageDao: MessageDao) {
     fun getMessagesStream(startTime: Date, endTime: Date): Flow<List<Message>> {
         return messageDao.getMessagesStream(startTime, endTime)
     }
+    fun getAllMessages():Flow<List<Message>>{
+        return messageDao.getAllMessages()
+    }
 }

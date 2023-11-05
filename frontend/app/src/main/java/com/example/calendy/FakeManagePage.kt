@@ -13,15 +13,10 @@ import androidx.compose.ui.text.style.TextAlign
 @Composable
 fun ManagerPage() {
     Box(
-            modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black)
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.DarkGray)
     ) {
-        Text(
-                text = "AI Manager",
-                textAlign = TextAlign.Center,
-                color = Color.White,
-                modifier = Modifier.align(Alignment.Center)
-        )
+        SqlExecutionTestPage()
     }
 }

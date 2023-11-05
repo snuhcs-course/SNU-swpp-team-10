@@ -10,11 +10,11 @@ data class Category(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
     @SerializedName("id")
-    var id: Int = 0,
+    val id: Int = 0,
     @ColumnInfo(name = "title")
     @SerializedName("title")
-    var title: String,
-    @ColumnInfo(name = "default_priority")
+    val title: String,
+    @ColumnInfo(name = "default_priority", defaultValue = "3")
     @SerializedName("default_priority")
-    var defaultPriority: Int
+    val defaultPriority: Int = 3
 )

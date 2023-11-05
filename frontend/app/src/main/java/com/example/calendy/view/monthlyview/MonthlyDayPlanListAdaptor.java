@@ -17,6 +17,7 @@ import com.example.calendy.data.plan.Schedule;
 import com.example.calendy.data.plan.Todo;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.example.calendy.data.PlanType.SCHEDULE;
 import static com.example.calendy.data.PlanType.TODO;
@@ -27,7 +28,7 @@ public class MonthlyDayPlanListAdaptor extends RecyclerView.Adapter<RecyclerView
         void onItemClick(View a_view, int a_position);
     }
     private OnItemClickEventListener mItemClickListener;
-    private ArrayList<Plan> localDataSet;
+    private List<Plan> localDataSet;
 
     //===== 뷰홀더 클래스 =====================================================
     public static class ScheduleViewHolder extends RecyclerView.ViewHolder {
@@ -76,7 +77,7 @@ public class MonthlyDayPlanListAdaptor extends RecyclerView.Adapter<RecyclerView
 
     //----- 생성자 --------------------------------------
     // 생성자를 통해서 데이터를 전달받도록 함
-    public MonthlyDayPlanListAdaptor (ArrayList<Plan> dataSet) {
+    public MonthlyDayPlanListAdaptor (List<Plan> dataSet) {
         localDataSet = dataSet;
     }
     //--------------------------------------------------

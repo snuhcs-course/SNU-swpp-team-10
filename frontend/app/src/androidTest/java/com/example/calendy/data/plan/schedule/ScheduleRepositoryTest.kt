@@ -16,9 +16,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.io.IOException
-import java.util.Calendar
-import java.util.Date
 
 @RunWith(AndroidJUnit4::class)
 class ScheduleRepositoryTest {
@@ -79,7 +76,7 @@ class ScheduleRepositoryTest {
         id = 2,
         title = "second",
         startTime = DateHelper.getDate(2023, 10, 13, 12, 30),
-        endTime = DateHelper.getDate(2023,11,1),
+        endTime = DateHelper.getDate(2023, 11, 1),
         memo = "",
         priority = 2,
         showInMonthlyView = false,
@@ -96,7 +93,12 @@ class ScheduleRepositoryTest {
     @Throws(Exception::class)
     fun daoInsert_test() = runBlocking {
         addTwoItemToDb()
-        var allSchedules = scheduleRepository.getSchedulesStream(DateHelper.getDate(2023,10,9,12),DateHelper.getDate(2023, 10,10)).first()
+        var allSchedules = scheduleRepository.getSchedulesStream(DateHelper.getDate(
+            2023,
+            10,
+            9,
+            12
+        ), DateHelper.getDate(2023, 10, 10)).first()
         TestCase.assertEquals(allSchedules[0], schedule1)
         var scheduleId1 = scheduleRepository.getScheduleById(1)
         TestCase.assertEquals(scheduleId1.first(), schedule1)

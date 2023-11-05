@@ -13,15 +13,16 @@ import java.util.Calendar;
 public class SaturdayDecorator implements DayViewDecorator {
 
     private final Calendar calendar = Calendar.getInstance();
-
-    public SaturdayDecorator() {
+    private int currentMonth;
+    public SaturdayDecorator(int month) {
+        currentMonth=month;
     }
 
     @Override
     public boolean shouldDecorate(CalendarDay day) {
         day.copyTo(calendar);
         int weekDay = calendar.get(Calendar.DAY_OF_WEEK);
-        return weekDay == Calendar.SATURDAY;
+        return weekDay == Calendar.SATURDAY && currentMonth == day.getMonth();
     }
 
     @Override

@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable;
 
 //import com.project.sample_calendar.R;
 import com.example.calendy.R;
+import com.example.calendy.data.plan.Plan;
 import com.example.calendy.data.plan.Schedule;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.DayViewDecorator;
@@ -21,11 +22,11 @@ import java.util.List;
 public class DotDecorator implements DayViewDecorator {
 
     private int color;
-    private Hashtable<CalendarDay, List<Schedule>> schedules;
+    private Hashtable<CalendarDay, List<Plan>> schedules;
 
-    public DotDecorator(Hashtable<CalendarDay, List<Schedule>> schedules) {
+    public DotDecorator(Hashtable<CalendarDay, List<Plan>> plans) {
         this.color = Color.DKGRAY;
-        this.schedules=schedules;
+        this.schedules=plans;
     }
 
     @Override
@@ -38,5 +39,6 @@ public class DotDecorator implements DayViewDecorator {
     @Override
     public void decorate(DayViewFacade view) {
         view.addSpan(new DotSpan(6, color)); // 날자밑에 점
+//        view.addSpan(new SinglePlanSpan(color,"title",1));
     }
 }

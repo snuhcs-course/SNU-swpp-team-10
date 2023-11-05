@@ -1,16 +1,29 @@
 package com.example.calendy.data
 
 import androidx.room.TypeConverter
+import com.example.calendy.utils.DateHelper
+import java.text.ParseException
+import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 
 class RoomConverters {
+    private val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+    // IMPORTANT: SQLite assumes that dates are stored in UTC
+//    iso8601Format.setTimeZone(TimeZone.getTimeZone("UTC"));
+
     @TypeConverter
-    fun fromTimestamp(value: Long): Date {
-        return Date(value)
+    fun fromString(value: String): Date {
+        return try {
+            format.parse(value)!!
+        } catch (e: ParseException) {
+            e.printStackTrace()
+            DateHelper.getDate(2023, 12 - 1, 31)
+        }
     }
 
     @TypeConverter
-    fun dateToTimestamp(date: Date): Long {
-        return date.time
+    fun dateToString(date: Date): String {
+        return format.format(date)
     }
 }

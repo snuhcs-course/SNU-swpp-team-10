@@ -14,4 +14,5 @@ interface ITodoRepository {
     fun getMonthlyTodosStream(year: Int, month: Int): Flow<List<Todo>>
     fun getDailyTodosStream(year: Int, month: Int, day: Int): Flow<List<Todo>>
     fun getTodoById(id: Int): Flow<Todo>
+    fun getAllTodo(): Flow<List<Todo>>
 }

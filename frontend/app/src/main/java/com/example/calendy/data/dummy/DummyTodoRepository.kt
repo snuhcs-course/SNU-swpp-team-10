@@ -37,4 +37,8 @@ class DummyTodoRepository: ITodoRepository {
     override fun getTodoById(id: Int): Flow<Todo> {
         TODO("Not yet implemented")
     }
+
+    override fun getAllTodo(): Flow<List<Todo>> {
+        TODO("Not yet implemented")
+    }
 }
