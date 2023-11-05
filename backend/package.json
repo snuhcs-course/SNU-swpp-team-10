@@ -1,25 +1,26 @@
 {
-  "name": "backend",
-  "version": "0.0.1",
-  "description": "server for android app",
-  "main": "src/app.js",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "body-parser": "^1.20.2",
+    "express": "^4.18.2",
+    "mysql": "^2.18.1"
+  },
+  "name": "calendy-server",
+  "version": "1.0.0",
+  "description": "server for calendy android application",
+  "main": "main.js",
+  "devDependencies": {},
   "scripts": {
-    "start": "nodemon app",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "swpp team 10",
-  "license": "ISC",
-  "dependencies": {
-    "bcrypt": "^5.1.1",
-    "cookie-parser": "^1.4.6",
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2",
-    "express-session": "^1.17.3",
-    "morgan": "^1.10.0",
-    "mysql2": "^3.6.1",
-    "openai": "^4.11.1"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/snuhcs-course/swpp-2023-project-team-10.git"
   },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
-  }
+  "author": "Fall 2023 SWPP Team 10",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/snuhcs-course/swpp-2023-project-team-10/issues"
+  },
+  "homepage": "https://github.com/snuhcs-course/swpp-2023-project-team-10#readme"
 }
