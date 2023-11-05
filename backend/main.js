@@ -10,7 +10,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
 const OPENAI_API_URL= 'https://api.openai.com/v1/chat/completions'
-const OPENAI_API_KEY='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';
+const OPENAI_API_KEY='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';
 
 
 app.get('/', (req, res) => {
