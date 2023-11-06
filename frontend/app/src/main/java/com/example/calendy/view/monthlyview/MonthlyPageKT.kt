@@ -1,5 +1,6 @@
 package com.example.calendy.view.monthlyview
 
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -19,6 +20,7 @@ import com.example.calendy.data.dummy.DummyPlanRepository
 import com.example.calendy.data.plan.Plan
 import com.example.calendy.data.plan.Schedule
 import com.example.calendy.data.plan.Todo
+import com.example.calendy.utils.afterDays
 import com.example.calendy.utils.toCalendarDay
 import com.example.calendy.utils.toDate
 import com.example.calendy.view.monthlyview.decorator.OneDayDecorator
@@ -27,15 +29,18 @@ import com.example.calendy.view.monthlyview.decorator.SelectedDayDecorator
 import com.example.calendy.view.monthlyview.decorator.SundayDecorator
 import com.example.calendy.view.monthlyview.decorator.TitleDecorator
 import com.example.calendy.view.popup.AddButton
-import com.example.calendy.view.popup.PlanListPopup
+import com.example.calendy.view.popup.EditButton
+import com.example.calendy.view.popup.PlanDetailPopup
 import com.example.calendy.view.popup.PopupHeaderDate
 import com.example.calendy.view.popup.PopupHeaderTitle
+import com.example.calendy.view.popup.SwitchablePlanListPopup
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.CalendarMode
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView
 import com.prolificinteractive.materialcalendarview.format.ArrayWeekDayFormatter
 import com.prolificinteractive.materialcalendarview.format.MonthArrayTitleFormatter
 import java.util.Calendar
+import java.util.Date
 import java.util.Hashtable
 
 @Composable
@@ -54,20 +59,36 @@ fun MonthlyPageKT(
 
     var planOfMonth: Hashtable<CalendarDay, List<Plan>> = planListToHash(uiState.plansOfMonth)
 
+    var popupDate by remember { mutableStateOf(uiState.selectedDate) }
+    var popupPlan :Plan by remember { mutableStateOf(Schedule(-1,"", Date(),Date()))}
+    var showListPopup by remember { mutableStateOf(false) }
+    var showDetailPopup by remember { mutableStateOf(false) }
 
 
-    var openListPopup by remember { mutableStateOf(false) }
-
-
-    fun openDayPlanListPopup(selectedDate: CalendarDay) {
-        openListPopup = true
+    fun openListPopup(selectedDate: CalendarDay)
+    {
+        popupDate=selectedDate
+        showListPopup = true
     }
-
+    fun openDetailPopup(plan:Plan)
+    {
+        popupPlan=plan
+        showDetailPopup=true
+    }
     fun openAddPlanPopup(selectedDate: CalendarDay)
     {
         onNavigateToEditPage(null, Plan.PlanType.Schedule)
     }
 
+    fun onListPopupDismissed()
+    {
+        showListPopup=false
+//        popupDate=uiState.selectedDate
+    }
+    fun onDetailPopupDismissed()
+    {
+        showDetailPopup=false
+    }
 
     AndroidView(modifier = Modifier.fillMaxSize(), factory = { context ->
         val calendar = MaterialCalendarView(context)
@@ -95,10 +116,8 @@ fun MonthlyPageKT(
 
                 if(date == uiState.selectedDate)
                 {
-                    if(planOfMonth!!.containsKey(date))
-                        openDayPlanListPopup(date)
-                    else
-                        openAddPlanPopup(date)
+                    openListPopup(date)
+//                    openAddPlanPopup(date)
                 }
                 else{
                     monthlyViewModel.setSelectedDate(date)
@@ -112,6 +131,7 @@ fun MonthlyPageKT(
                     monthlyViewModel.setCurrentMonth(date)
                 })
 
+            Log.d("BANG","mcv initialize")
         }
     },
         update =
@@ -129,26 +149,53 @@ fun MonthlyPageKT(
             for (p in planOfMonth){
                 mcv.addDecorator(TitleDecorator(p.key,p.value))
             }
-    }
+            Log.d("BANG","mcv redraw")
+        }
     )
 
-    if (openListPopup) {
-        PlanListPopup(
-            planList = planOfMonth.get(uiState.selectedDate),
-            header = { PopupHeaderDate(uiState.selectedDate.toDate())},
-            onDismissed = {openListPopup=false},
+    //list popup
+    if (showListPopup && !showDetailPopup) {
+        val planList = planOfMonth[popupDate]
+        SwitchablePlanListPopup(
+            planList = if(planList != null) planList else emptyList(),
+            header = { PopupHeaderDate(popupDate.toDate())},
+            onDismissed = ::onListPopupDismissed,
             addButton = {
                 AddButton(
-                    onNavigateToEditPage = onNavigateToEditPage,
+                    onButtonClick = { onNavigateToEditPage(null,Plan.PlanType.Schedule) },
                     onEditComplete = {},
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
 
                 )
-            }
+            },
+            onItemClick = ::openDetailPopup,
+            onCheckboxClicked =
+                {plan,checked ->
+                    val todo = plan as Todo
+                    monthlyViewModel.updatePlan(todo.copy(complete = !todo.complete))
+                },
+            onLeftButton = {popupDate = popupDate.afterDays(-1)},
+            onRightButton = {popupDate = popupDate.afterDays(1)}
         )
+        Log.d("BANG","list popup opened")
     }
-
+    //detail popup
+    if(showDetailPopup){
+        PlanDetailPopup(
+            plan = popupPlan,
+            header = { PopupHeaderTitle(popupPlan.title)},
+            editButton = {
+                EditButton(
+                    plan = popupPlan,
+                    onNavigateToEditPage = onNavigateToEditPage,
+                    modifier=Modifier.align(Alignment.TopEnd)
+                )
+            },
+            onDismissed = ::onDetailPopupDismissed
+        )
+        Log.d("BANG","detail popup opened")
+    }
 
 }
 

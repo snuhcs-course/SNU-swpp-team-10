@@ -72,6 +72,11 @@ class MonthlyViewModel(
         }
     }
 
+    //to toggle tod0's isComplete
+    fun updatePlan(plan:Plan){
+        viewModelScope.launch { planRepository.updatePlan(plan) }
+    }
+
     private fun updatePlanList(planList:List<Plan>)
     {
         _uiState.update { current -> current.copy(plansOfMonth = planList) }

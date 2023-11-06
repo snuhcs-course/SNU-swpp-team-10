@@ -38,7 +38,7 @@ import com.example.calendy.AppViewModelProvider
 import com.example.calendy.R
 import com.example.calendy.data.message.Message
 import com.example.calendy.utils.equalDay
-import com.example.calendy.utils.toDayString
+import com.example.calendy.utils.toDateDayString
 import java.util.Date
 
 @Composable
@@ -200,7 +200,7 @@ fun DateDivider(
             color = Color.Gray // Optional: You can set the color of the divider
         )
         Text(
-            text = date!!.toDayString(),
+            text = date!!.toDateDayString(),
             modifier = Modifier
                 .padding(horizontal = 10.dp),
             fontSize = 12.sp,

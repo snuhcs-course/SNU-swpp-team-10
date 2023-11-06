@@ -21,4 +21,8 @@ class DummyPlanRepository : IPlanRepository {
         TODO("Not yet implemented")
     }
 
+    override suspend fun updatePlan(plan: Plan) {
+        TODO("Not yet implemented")
+    }
+
 }

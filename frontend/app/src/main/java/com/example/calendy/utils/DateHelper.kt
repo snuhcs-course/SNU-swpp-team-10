@@ -123,8 +123,8 @@ object DateHelper {
 // extension for CalendarDay  and Date
 fun Date.dayOfWeek(): String {
     val sdf = SimpleDateFormat("EEEE", Locale.KOREA)
-    val yesterday: Date = Date(getTime() - 1000 * 60 * 60 * 24) // add one day. 요일이 하루씩 밀리는 문제가 있었음.
-    return sdf.format(yesterday)
+//    val yesterday: Date = Date(getTime() - 1000 * 60 * 60 * 24) // add one day. 요일이 하루씩 밀리는 문제가 있었음.
+    return sdf.format(this)
 }
 fun CalendarDay.toDate(): Date = Date(year-1900, month, day)
 fun CalendarDay.toStartTime(): Date = Date(year-1900, month, day, 0, 0)
@@ -132,11 +132,31 @@ fun CalendarDay.toEndTime(): Date = Date(year-1900, month, day, 23, 59)
 fun CalendarDay.toFirstDateOfMonth():Date = Date(year-1900,month,1)
 fun CalendarDay.toLastDateOfMonth():Date = Date(year - 1900, month,1).lastDayOfMonth()
 fun CalendarDay.getWeekDay(): String = toDate().dayOfWeek()
+fun CalendarDay.afterDays(amount:Int): CalendarDay=toDate().afterDays(amount).toCalendarDay()
 fun Date.toCalendarDay(): CalendarDay = CalendarDay.from(this)
 
-fun Date.toDayString(): String = String.format("%d월 %d일 %s",month+1,day,this.dayOfWeek())
-fun Date.equalDay(date:Date): Boolean = year==date.year && month == date.month && day == date.day
-
+fun Date.toDateDayString(showYear:Boolean=false): String
+    = toDateString(showYear) + " " + dayOfWeek()
+fun Date.toDateTimeString(showYear: Boolean = false): String
+    = toDateString(showYear) + " " + toAmPmString() + " " + toTimeString(hour12 = true)
+fun Date.toDateString(showYear: Boolean):String
+    = if(showYear) String.format("%d년 %d월 %d일",year,month,date) else String.format("%d월 %d일",month,date)
+fun Date.toAmPmString():String = if(hours<12) "오전" else "오후"
+fun Date.toTimeString(hour12:Boolean = false, showSeconds:Boolean=false):String
+{
+    val h = if(hour12)
+                if(hours<=12) hours else hours-12
+            else
+                hours
+    return String.format("%d:%02d",h,minutes)
+}
+fun Date.equalDay(date:Date): Boolean = year==date.year && month == date.month && this.date == date.date
+fun Date.afterDays(amount: Int):Date{
+    val c = Calendar.getInstance()
+    c.time=this
+    c.add(Calendar.DATE,amount)
+    return c.time
+}
 @Suppress("deprecation")
 fun Date.lastDayOfMonth(): Date {
     val calendar = Calendar.getInstance()

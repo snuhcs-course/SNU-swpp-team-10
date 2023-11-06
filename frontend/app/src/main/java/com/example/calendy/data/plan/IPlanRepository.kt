@@ -8,4 +8,6 @@ interface IPlanRepository {
     fun getPlanById(id: Int, type: Plan.PlanType): Flow<Plan>
 
     fun getAllPlans():Flow<List<Plan>>
+
+    suspend fun updatePlan(plan: Plan)
 }

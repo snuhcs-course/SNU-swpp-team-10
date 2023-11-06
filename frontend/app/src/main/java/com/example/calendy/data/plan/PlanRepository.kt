@@ -34,4 +34,11 @@ class PlanRepository(
             result
         }
     }
+
+    override suspend fun updatePlan(plan: Plan) {
+        when(plan){
+            is Schedule -> scheduleRepository.updateSchedule(plan)
+            is Todo -> todoRepository.updateTodo(plan)
+        }
+    }
 }

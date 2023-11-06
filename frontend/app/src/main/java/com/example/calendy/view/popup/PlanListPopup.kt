@@ -2,6 +2,7 @@ package com.example.calendy.view.popup
 
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
@@ -10,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidthIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
@@ -19,6 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -32,10 +36,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.example.calendy.R
 import com.example.calendy.data.plan.Plan
 import com.example.calendy.data.plan.Schedule
@@ -47,65 +54,153 @@ import java.util.Date
 fun PlanListPopup(
     planList: List<Plan>? = emptyList(),
     header: @Composable ()->Unit = {},
-    addButton:  @Composable() (BoxScope.() -> Unit),
+    addButton:  @Composable() (BoxScope.() -> Unit)={},
     onItemClick: (Plan) -> Unit = {},
     onCheckboxClicked:(Plan, Boolean) -> Unit ={ plan, check->},
     onDismissed:()->Unit={}
 ){
     Dialog(
-        onDismissRequest = { onDismissed }
+        onDismissRequest =  onDismissed
     ) {
-        Box(modifier = Modifier
-            .width(300.dp)
-            .height(400.dp)
-            .shadow(
-                elevation = 4.dp,
-                spotColor = Color(0x40000000),
-                ambientColor = Color(0x40000000)
-            )
-            .background(color = Color(0xFFF1F5FB), shape = RoundedCornerShape(size = 20.dp))
-            .padding(25.dp))
-        {
+        ListPopupBox(
+            planList=planList,
+            header=header,
+            addButton=addButton,
+            onItemClick=onItemClick,
+            onCheckboxClicked=onCheckboxClicked
+        )
+    }
+}
 
-            Column(
+@Composable
+fun SwitchablePlanListPopup(
+    planList: List<Plan>? = emptyList(),
+    header: @Composable ()->Unit = {},
+    addButton:  @Composable() (BoxScope.() -> Unit),
+    onItemClick: (Plan) -> Unit = {},
+    onCheckboxClicked:(Plan, Boolean) -> Unit ={ plan, check->},
+    onDismissed:()->Unit={},
+    onLeftButton:()->Unit={},
+    onRightButton:()->Unit={},
+) {
+    Dialog(
+        onDismissRequest = onDismissed,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.wrapContentWidth()
+        ) {
+
+            IconButton(
+                onClick = onLeftButton,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
+                    .padding(5.dp)
+                    .weight(1f)
+                    .height(400.dp) //hard coded equal to popup box height
+                    .requiredWidthIn(min=50.dp,max=60.dp)
             ) {
-
-                header()
-//            Divider(
-//                modifier = Modifier
-//                    .padding(horizontal = 0.dp, vertical = 2.dp)
-//            )
-                LazyColumn(
+                Icon(
+                    painter = painterResource(id = com.prolificinteractive.materialcalendarview.R.drawable.mcv_action_previous),
+                    contentDescription = "prev",
+                    tint=Color.DarkGray,
                     modifier = Modifier
-                        .padding(vertical = 20.dp)
-                        .fillMaxWidth()
-                ) {
-                    items(planList!!) {
-                        when (it) {
-                            is Schedule -> ScheduleListItem(schedule = it, onItemClick)
-                            is Todo -> TodoListItem(
-                                todo = it,
-                                onItemClick = onItemClick,
-                                onChecked = onCheckboxClicked
-                            )
-                        }
+                        .size(50.dp)
+
+                )
+            }
+            ListPopupBox(
+                planList = planList,
+                header = header,
+                addButton = addButton,
+                onItemClick = onItemClick,
+                onCheckboxClicked = onCheckboxClicked
+            )
+            IconButton(
+                onClick = onRightButton,
+                modifier = Modifier
+                    .padding(5.dp)
+                    .weight(1f)
+                    .height(400.dp) //hard coded equal to popup box height
+                    .requiredWidthIn(min=50.dp,max=60.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = com.prolificinteractive.materialcalendarview.R.drawable.mcv_action_next),
+                    contentDescription = "next",
+                    tint=Color.DarkGray,
+                    modifier = Modifier
+                        .size(50.dp)
+
+                )
+            }
+        }
+    }
+
+}
+
+
+@Composable
+fun ListPopupBox(
+    planList: List<Plan>? = emptyList(),
+    header: @Composable ()->Unit = {},
+    addButton:  @Composable() (BoxScope.() -> Unit),
+    onItemClick: (Plan) -> Unit = {},
+    onCheckboxClicked:(Plan, Boolean) -> Unit ={ plan, check->},
+    onDismissed:()->Unit={},
+){
+    Box(modifier = Modifier
+        .width(300.dp)
+        .height(400.dp)
+        .shadow(
+            elevation = 4.dp,
+            spotColor = Color(0x40000000),
+            ambientColor = Color(0x40000000)
+        )
+        .background(color = Color(0xFFF1F5FB), shape = RoundedCornerShape(size = 20.dp))
+        .padding(25.dp)
+    ) {
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+        ) {
+
+            header()
+            Divider(
+                modifier = Modifier
+                    .padding(horizontal = 0.dp, vertical = 8.dp)
+            )
+            LazyColumn(
+                modifier = Modifier
+                    .padding(start = 10.dp, end = 20.dp)
+                    .fillMaxWidth()
+            ) {
+                items(planList!!) {
+                    when (it) {
+                        is Schedule -> ScheduleListItem(schedule = it, onItemClick)
+                        is Todo -> TodoListItem(
+                            todo = it,
+                            onItemClick = onItemClick,
+                            onChecked = onCheckboxClicked
+                        )
                     }
                 }
             }
-
-
-            //add button
-            addButton()
         }
+
+
+        //add button
+        addButton()
     }
 }
 
 @Composable
 fun PopupHeaderTitle(
-    title:String =""
+    title:String ="",
+    modifier:Modifier = Modifier
 ){
     Text(
         text = title,
@@ -115,7 +210,10 @@ fun PopupHeaderTitle(
             fontWeight = FontWeight(700),
             color = Color(0xFF000000),
             letterSpacing = 0.37.sp,
-        )
+        ),
+        maxLines=1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = modifier
     )
 }
 @Composable
@@ -126,7 +224,7 @@ fun PopupHeaderDate(
         verticalAlignment = Alignment.Bottom
     ){
         Text(
-            text = date.day.toString(),
+            text = date.date.toString(),
             modifier = Modifier
                 .padding(end=10.dp),
             style = TextStyle(
@@ -195,47 +293,32 @@ fun TodoListItem(
                 .width(15.dp)
                 .height(15.dp)
                 .scale(0.8f)
-                .background(color = Color(0xFFACC7FA), shape = CircleShape)
         )
         ClickableText(
             text = AnnotatedString(todo.title),
             modifier = Modifier
                 .padding(horizontal = 10.dp),
-            onClick = {onItemClick(todo)}
+            onClick = {onItemClick(todo)},
+            style = if(todo.complete!!)
+                        TextStyle(textDecoration = TextDecoration.LineThrough, color = Color.Gray)
+                    else
+                        TextStyle(),
 
         )
     }
 }
 
-@Composable
-fun EditButton(
-    plan : Plan,
-    onNavigateToEditPage:(id: Int?, type: Plan.PlanType) -> Unit,
-    onEditComplete:(Plan)->Unit={}
-){
-    IconButton(
-        onClick = { onNavigateToEditPage },
-
-        modifier = Modifier
-//                .padding(end = 10.dp)
-            .wrapContentWidth()
-            .wrapContentHeight(),
-    ) {
-        Icon(painter = painterResource(id = R.drawable.edit_plan_button),"edit")
-    }
-
-}
 
 @Composable
 fun AddButton(
     date:Date=Date(),
-    onNavigateToEditPage: (id: Int?, type: Plan.PlanType) -> Unit,
+    onButtonClick: () -> Unit = {},
     onEditComplete:(Plan)->Unit={},
     modifier: Modifier = Modifier
 ){
 
     IconButton(
-        onClick = { onNavigateToEditPage },
+        onClick = onButtonClick,
 
         modifier = modifier
 //                .padding(end = 10.dp)
@@ -260,12 +343,11 @@ fun ListPopupPreview(){
     var planList : ArrayList<Plan> = ArrayList()
     planList.add(Schedule(0,"my schedule",Date(), Date()))
     planList.add(Todo(0,"my schedule",Date(),complete=false))
-    PlanListPopup(
+    SwitchablePlanListPopup(
         planList,
         header = { PopupHeaderTitle("Added plans") },
         addButton = {
             AddButton(
-                onNavigateToEditPage = { id, plan -> },
                 onEditComplete = {},
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
@@ -303,5 +385,5 @@ fun EditButtonPreview(){
 @Preview
 @Composable
 fun AddButtonPreview(){
-    AddButton(onNavigateToEditPage = { id, plan->}, onEditComplete = {})
+    AddButton( onEditComplete = {})
 }

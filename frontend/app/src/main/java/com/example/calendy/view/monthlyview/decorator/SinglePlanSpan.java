@@ -33,7 +33,7 @@ public class SinglePlanSpan implements LineBackgroundSpan {
         Paint.Align oldAlign = paint.getTextAlign();
 
 
-        paint.setColor(0xff54ecf7);
+        paint.setColor(0xffBFC6D9);
         paint.setTextSize(30);
         paint.setTextAlign(Paint.Align.LEFT);
 
