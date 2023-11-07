@@ -2,9 +2,7 @@ package com.example.calendy.data.message
 import kotlinx.coroutines.flow.Flow
 import java.util.Date
 class MessageLocalDataSource(private val messageDao: MessageDao) {
-    suspend fun insert(message: Message) {
-        messageDao.insert(message)
-    }
+    suspend fun insert(message: Message): Long = messageDao.insert(message)
     suspend fun update(message: Message) {
         messageDao.update(message)
     }

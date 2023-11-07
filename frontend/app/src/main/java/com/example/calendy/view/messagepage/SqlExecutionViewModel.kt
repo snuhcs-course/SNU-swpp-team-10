@@ -7,13 +7,17 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.sqlite.db.SimpleSQLiteQuery
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.calendy.data.CalendyDatabase
 import com.example.calendy.data.MessageBody
 import com.example.calendy.data.emptydb.EmptyDatabase
+import com.example.calendy.data.log.LogSchedule
+import com.example.calendy.data.log.LogTodo
+import com.example.calendy.data.message.IMessageRepository
+import com.example.calendy.data.message.Message
 import com.example.calendy.data.network.RetrofitClient
 import com.example.calendy.data.plan.Schedule
 import com.example.calendy.data.plan.Todo
+import com.example.calendy.utils.DateHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -22,10 +26,19 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.properties.Delegates
 
 class SqlExecutionViewModel(
-    val calendyDatabase: CalendyDatabase, val emptyDatabase: EmptyDatabase
+    val calendyDatabase: CalendyDatabase,
+    val emptyDatabase: EmptyDatabase,
+    val messageRepository: IMessageRepository
 ) : ViewModel() {
+    // TODO: This should have valid id in it
+    val gptOriginalMessage = Message(
+        sentTime = DateHelper.getDate(2023, 11 - 1, 7), messageFromManager = true, content = ""
+    )
+    var messageId by Delegates.notNull<Int>()
+
     fun sendQuery(requestMessage: String) {
         viewModelScope.launch {
             Log.d("GUN", "send to server $requestMessage")
@@ -49,23 +62,34 @@ class SqlExecutionViewModel(
             }
 
             withContext(Dispatchers.IO) {
-                val result = RetrofitClient.instance.sendMessageToServer(
-                    MessageBody(
-                        message = requestMessage,
-                        time = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(
-                            Date()
-                        ),
-                        category = allCategoriesPrompt,
-                        schedule = schedulePrompt,
-                        todo = todoPrompt
+                try {
+                    messageRepository.update(
+                        gptOriginalMessage.copy(content = "AI 매니저가 살펴보고 있어요")
                     )
-                )
 
-                // TODO: Flag - NO_SUCH_TODO 등
-                val queries = result.split(";")
-                for (query in queries) {
-                    Log.d("GUN", query.trim())
-                    sqlExecute(query.trim())
+                    val result = RetrofitClient.instance.sendMessageToServer(
+                        MessageBody(
+                            message = requestMessage,
+                            time = SimpleDateFormat(
+                                "yyyy-MM-dd HH:mm:ss", Locale.getDefault()
+                            ).format(
+                                Date()
+                            ),
+                            category = allCategoriesPrompt,
+                            schedule = schedulePrompt,
+                            todo = todoPrompt
+                        )
+                    )
+
+                    // TODO: Flag - NO_SUCH_TODO 등
+                    val queries = result.split(";")
+                    for (query in queries) {
+                        if (query.isNotBlank()) {
+                            sqlExecute(query.trim())
+                        }
+                    }
+                } catch (e: Throwable) {
+                    Log.e("GUN", e.stackTraceToString())
                 }
             }
         }
@@ -73,11 +97,14 @@ class SqlExecutionViewModel(
 
     fun testLocal() {
         viewModelScope.launch {
+            // TODO: Erase This!
+            messageId = messageRepository.insert(gptOriginalMessage).toInt()
+
             withContext(Dispatchers.IO) {
                 sqlExecute("INSERT INTO schedule (title, start_time, end_time, priority) VALUES ('컴퓨터구조 시험', datetime('now', '+1 day', '3 hours'), datetime('now', '+1 day', '4 hours'), 1)")
-                sqlExecute("UPDATE schedule SET start_time = datetime('2023-11-06 00:00:00'), end_time = datetime('2023-11-06 23:59:59') WHERE title = '컴퓨터구조 시험'")
-                sqlExecute("DELETE schedule WHERE title = '컴퓨터구조 시험'")
-                sqlExecute("DELETE schedule")
+//                sqlExecute("UPDATE schedule SET start_time = datetime('2023-11-06 00:00:00'), end_time = datetime('2023-11-06 23:59:59') WHERE title = '컴퓨터구조 시험'")
+//                sqlExecute("DELETE schedule WHERE title = '컴퓨터구조 시험'")
+//                sqlExecute("DELETE schedule")
             }
         }
     }
@@ -120,12 +147,34 @@ class SqlExecutionViewModel(
                 for (plan in planList) {
                     when (plan) {
                         is Schedule -> calendyDatabase.scheduleDao().insert(plan)
-                        is Todo -> calendyDatabase.todoDao().insert(plan)
+                        is Todo     -> calendyDatabase.todoDao().insert(plan)
                     }
-                    // TODO: Log DB에 변경된 plan 기록하기
+
+                    Log.d("GUN", "Before Log DB")
+                    // Log DB에 변경된 plan 기록하기
+                    when (plan) {
+                        is Schedule -> calendyDatabase.logScheduleDao().insert(
+                            LogSchedule(
+                                messageId = gptOriginalMessage.id,
+                                logType = "INSERT",
+                                planId = null // TODO: plan id 설정하기!
+                            )
+                        )
+
+                        is Todo     -> calendyDatabase.logTodoDao().insert(
+                            LogTodo(
+                                messageId = gptOriginalMessage.id,
+                                logType = "INSERT",
+                                planId = null // TODO: plan id 설정하기!
+                            )
+                        )
+                    }
                 }
 
-                // TODO: Message DB에 Message 넣어주기
+                // Message DB에 Message 넣어주기
+                messageRepository.update(
+                    gptOriginalMessage.copy(content = "AI 매니저가 일정을 추가했어요", hasLogPlan = true)
+                )
             } else if (isUpdate) {
                 // SELECT table where ... 로 교체
                 // ex) UPDATE table SET ... WHERE ...
@@ -148,9 +197,48 @@ class SqlExecutionViewModel(
                 for (plan in originalPlanList) {
                     when (plan) {
                         is Schedule -> emptyDatabase.scheduleDao().insert(plan)
-                        is Todo -> emptyDatabase.todoDao().insert(plan)
+                        is Todo     -> emptyDatabase.todoDao().insert(plan)
                     }
-                    // TODO: Log DB에 UPDATE 이전의 기록 보존하기
+
+                    // Log DB에 변경되기 전의 plan 기록하기
+                    when (plan) {
+                        is Schedule -> calendyDatabase.logScheduleDao().insert(
+                            LogSchedule(
+                                messageId = gptOriginalMessage.id,
+                                logType = "UPDATE",
+                                planId = plan.id,
+                                title = plan.title,
+                                startTime = plan.startTime,
+                                endTime = plan.endTime,
+                                memo = plan.memo,
+                                repeatGroupId = plan.repeatGroupId,
+                                categoryId = plan.categoryId,
+                                priority = plan.priority,
+                                showInMonthlyView = plan.showInMonthlyView,
+                                isOverridden = plan.isOverridden,
+                            )
+                        )
+
+                        is Todo     -> calendyDatabase.logTodoDao().insert(
+                            LogTodo(
+                                messageId = gptOriginalMessage.id,
+                                logType = "UPDATE",
+                                planId = plan.id,
+                                title = plan.title,
+                                dueTime = plan.dueTime,
+                                memo = plan.memo,
+                                repeatGroupId = plan.repeatGroupId,
+                                categoryId = plan.categoryId,
+                                priority = plan.priority,
+                                showInMonthlyView = plan.showInMonthlyView,
+                                isOverridden = plan.isOverridden,
+                                yearly = plan.yearly,
+                                monthly = plan.monthly,
+                                daily = plan.daily,
+                                complete = plan.complete,
+                            )
+                        )
+                    }
                 }
                 // EmptyDB에 update sqlQuery 실행 - emptyDB.query()
                 emptyDatabase.openHelper.writableDatabase.execSQL(gptQuery)
@@ -160,11 +248,14 @@ class SqlExecutionViewModel(
                 for (plan in planList) {
                     when (plan) {
                         is Schedule -> calendyDatabase.scheduleDao().update(plan)
-                        is Todo -> calendyDatabase.todoDao().update(plan)
+                        is Todo     -> calendyDatabase.todoDao().update(plan)
                     }
                 }
 
-                // TODO: Message DB에 Message 넣어주기
+                // Message DB에 Message 넣어주기
+                messageRepository.update(
+                    gptOriginalMessage.copy(content = "AI 매니저가 일정을 수정했어요", hasLogPlan = true)
+                )
             } else if (isDelete) {
                 // SELECT where ... 로 교체
                 // ex) DELETE table WHERE ...
@@ -187,15 +278,61 @@ class SqlExecutionViewModel(
                 for (plan in originalPlanList) {
                     when (plan) {
                         is Schedule -> calendyDatabase.scheduleDao().delete(plan)
-                        is Todo -> calendyDatabase.todoDao().delete(plan)
+                        is Todo     -> calendyDatabase.todoDao().delete(plan)
+                    }
+
+                    // Log DB에 변경되기 전의 plan 기록하기
+                    when (plan) {
+                        is Schedule -> calendyDatabase.logScheduleDao().insert(
+                            LogSchedule(
+                                messageId = gptOriginalMessage.id,
+                                logType = "DELETE",
+                                planId = plan.id,
+                                title = plan.title,
+                                startTime = plan.startTime,
+                                endTime = plan.endTime,
+                                memo = plan.memo,
+                                repeatGroupId = plan.repeatGroupId,
+                                categoryId = plan.categoryId,
+                                priority = plan.priority,
+                                showInMonthlyView = plan.showInMonthlyView,
+                                isOverridden = plan.isOverridden,
+                            )
+                        )
+
+                        is Todo     -> calendyDatabase.logTodoDao().insert(
+                            LogTodo(
+                                messageId = gptOriginalMessage.id,
+                                logType = "DELETE",
+                                planId = plan.id,
+                                title = plan.title,
+                                dueTime = plan.dueTime,
+                                memo = plan.memo,
+                                repeatGroupId = plan.repeatGroupId,
+                                categoryId = plan.categoryId,
+                                priority = plan.priority,
+                                showInMonthlyView = plan.showInMonthlyView,
+                                isOverridden = plan.isOverridden,
+                                yearly = plan.yearly,
+                                monthly = plan.monthly,
+                                daily = plan.daily,
+                                complete = plan.complete,
+                            )
+                        )
                     }
                 }
 
-                // TODO: Message DB에 Message 넣어주기
+                // Message DB에 Message 넣어주기
+                messageRepository.update(
+                    gptOriginalMessage.copy(content = "AI 매니저가 일정을 삭제했어요", hasLogPlan = true)
+                )
             }
         } catch (e: Throwable) {
             // TODO: Catching all throwable may not be good
             Log.e("GUN", e.stackTraceToString())
+            messageRepository.update(
+                gptOriginalMessage.copy(content = "으악! 에러다!", hasLogPlan = false)
+            )
         }
     }
 

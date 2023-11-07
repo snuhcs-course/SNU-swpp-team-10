@@ -6,7 +6,9 @@ import kotlinx.coroutines.flow.Flow
 import java.util.Date
 
 class TodoLocalDataSource(private val todoDao: TodoDao) {
-    suspend fun insertTodo(todo: Todo) = todoDao.insert(todo)
+    suspend fun insertTodo(todo: Todo) {
+        todoDao.insert(todo)
+    }
     suspend fun deleteTodo(todo: Todo) = todoDao.delete(todo)
     suspend fun updateTodo(todo: Todo) = todoDao.update(todo)
 

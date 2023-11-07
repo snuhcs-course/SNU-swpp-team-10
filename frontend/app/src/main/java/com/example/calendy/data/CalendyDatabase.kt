@@ -7,6 +7,10 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.example.calendy.data.category.Category
 import com.example.calendy.data.category.CategoryDao
+import com.example.calendy.data.log.LogSchedule
+import com.example.calendy.data.log.LogScheduleDao
+import com.example.calendy.data.log.LogTodo
+import com.example.calendy.data.log.LogTodoDao
 import com.example.calendy.data.message.Message
 import com.example.calendy.data.message.MessageDao
 import com.example.calendy.data.plan.Schedule
@@ -17,8 +21,8 @@ import com.example.calendy.data.repeatgroup.RepeatGroup
 import com.example.calendy.data.repeatgroup.RepeatGroupDao
 
 @Database(
-    entities = [Schedule::class, Todo::class, Category::class, Message::class, RepeatGroup::class],
-    version = 7,
+    entities = [Schedule::class, Todo::class, Category::class, Message::class, RepeatGroup::class, LogSchedule::class, LogTodo::class],
+    version = 8,
     exportSchema = false
 )
 @TypeConverters(RoomConverters::class)
@@ -26,8 +30,10 @@ abstract class CalendyDatabase : RoomDatabase() {
     abstract fun scheduleDao(): ScheduleDao
     abstract fun todoDao(): TodoDao
     abstract fun categoryDao(): CategoryDao
-    abstract fun messageDao(): MessageDao
     abstract fun repeatGroupDao(): RepeatGroupDao
+    abstract fun messageDao(): MessageDao
+    abstract fun logScheduleDao(): LogScheduleDao
+    abstract fun logTodoDao(): LogTodoDao
 
     companion object {
         @Volatile

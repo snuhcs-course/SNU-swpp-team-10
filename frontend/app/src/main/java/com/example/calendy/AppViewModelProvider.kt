@@ -29,7 +29,8 @@ object AppViewModelProvider {
         initializer {
             SqlExecutionViewModel(
                 calendyDatabase = CalendyDatabase.getDatabase(calendyApplication().applicationContext),
-                emptyDatabase = EmptyDatabase.getDatabase(calendyApplication().applicationContext)
+                emptyDatabase = EmptyDatabase.getDatabase(calendyApplication().applicationContext),
+                messageRepository = calendyApplication().container.messageRepository
             )
         }
         initializer {
