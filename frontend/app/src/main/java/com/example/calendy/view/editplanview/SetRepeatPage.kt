@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
@@ -128,17 +129,20 @@ fun SetRepeat(uiState: EditPlanUiState, viewModel: EditPlanViewModel) {
     LaunchedEffect(uiState.repeatGroup, uiState.repeatGroup?.day, uiState.repeatGroup?.week, uiState.repeatGroup?.month, uiState.repeatGroup?.year, uiState.repeatGroup?.repeatInterval, uiState.repeatGroup?.repeatRule, uiState.repeatGroup?.endDate) {
         repeatInfoText.value = updateRepeatInfoText()
     }
-
-    Row(modifier = Modifier.fillMaxWidth()) {
-        TextButton(
-            onClick = { isDialogOpen = true },
+    TextButton(
+        onClick = { isDialogOpen = true },
+        modifier = Modifier
+//            .weight(1f)
+            .fillMaxWidth(),
+//                .padding(end = 20.dp)
+//                .bottomBorder(1.dp, color = Color.Gray)
+    ) {
+        Text(
+            text = repeatInfoText.value,
+            textAlign = TextAlign.Left,
             modifier = Modifier
-                .weight(1f)
-                .padding(end = 20.dp)
-                .bottomBorder(1.dp, color = Color.Gray)
-        ) {
-            Text(text = repeatInfoText.value)
-        }
+                .fillMaxWidth()
+        )
     }
 }
 

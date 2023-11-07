@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -53,10 +54,15 @@ fun CategorySelector(
             onClick = { showCategoryPickerDialog = true },
             modifier = Modifier
                 .weight(1f)
-                .padding(end = 20.dp)
-                .bottomBorder(1.dp, color = Color.Gray)
+//                .padding(end = 20.dp)
+//                .bottomBorder(1.dp, color = Color.Gray)
         ) {
-            Text(text = currentCategory?.title ?: "No Category")
+            Text(
+                text = currentCategory?.title ?: "No Category",
+                modifier = Modifier
+                    .fillMaxWidth(),
+                textAlign = TextAlign.Left
+            )
         }
         IconButton(onClick = { onSelectCategory(null) }) {
             Icon(

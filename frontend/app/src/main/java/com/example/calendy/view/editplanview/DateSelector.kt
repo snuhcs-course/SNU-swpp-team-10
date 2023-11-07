@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
@@ -100,7 +101,7 @@ fun DateSelector(
 
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         //region 3 Buttons
-        val shape = RoundedCornerShape(8.dp)
+        val shape = CircleShape
         Row(
             modifier = Modifier
                 .height(32.dp)
@@ -115,8 +116,10 @@ fun DateSelector(
                 Button(
                     onClick = { onClick() }, colors = ButtonDefaults.buttonColors(
                         containerColor = if (isSelected) Color(0xFF7986CB) else Color.Transparent,
-                        contentColor = Color.Black
-                    ), shape = RectangleShape
+                        contentColor = Color.Black,
+                    ),
+                    shape = RectangleShape,
+                    contentPadding= PaddingValues(vertical = 0.dp, horizontal = 10.dp),
                 ) {
                     Text(text = label)
                 }

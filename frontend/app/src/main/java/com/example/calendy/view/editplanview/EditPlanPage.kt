@@ -1,9 +1,13 @@
 package com.example.calendy.view.editplanview
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +28,7 @@ import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Switch
@@ -41,6 +46,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -54,6 +61,7 @@ import com.example.calendy.data.plan.Plan.PlanType
 import com.gowtham.ratingbar.RatingBar
 import com.gowtham.ratingbar.RatingBarConfig
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Unit) {
     val editPlanUiState: EditPlanUiState by editPlanViewModel.uiState.collectAsState()
@@ -122,7 +130,9 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
         //region Type Buttons
         if (isPageAdd) {
             Row(
-                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(20.dp),
             ) {
                 listOf(PlanType.Schedule, PlanType.Todo).forEach {
                     TypeButton(
@@ -132,8 +142,8 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
                         }, isSelected = (editPlanUiState.entryType==it), onClick = {
                             editPlanViewModel.setType(it)
                         }, modifier = Modifier
-                            .width(136.dp)
-                            .height(40.dp)
+                            .background(color = Color(0xFFDBE2F6), shape = RoundedCornerShape(size = 30.dp))
+
                     )
                 }
             }
@@ -142,36 +152,26 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
 
         //region Title Text Field & Checkbox
         Row(verticalAlignment = Alignment.CenterVertically) {
-            TextField(value = editPlanUiState.titleField,
-                      placeholder = {
-                          Text(
-                              "제목",
-                              style = TextStyle(fontSize = 32.sp, fontWeight = FontWeight.Bold)
-                          )
-                      },
-                      onValueChange = { value -> editPlanViewModel.setTitle(value) },
-                      colors = Color.Transparent.let {
-                          TextFieldDefaults.colors(
-                              focusedContainerColor = it,
-                              unfocusedContainerColor = it,
-                              disabledContainerColor = it,
-                              errorContainerColor = it,
-                              focusedIndicatorColor = Color.Black,
-                              unfocusedIndicatorColor = Color.Black,
-                              disabledIndicatorColor = Color.Black,
-                              errorIndicatorColor = Color.Black
-                          )
-                      },
-                      modifier = Modifier.weight(1f),
-                      textStyle = TextStyle(fontSize = 32.sp, fontWeight = FontWeight.Bold)
+            BasicTextField(
+                value = editPlanUiState.titleField,
+
+                onValueChange = { value -> editPlanViewModel.setTitle(value) },
+                modifier = Modifier
+                    .weight(1f)
+                    .then(Modifier.padding(horizontal = 12.dp, vertical = 5.dp)), // Remove padding
+                textStyle = TextStyle(fontSize = 32.sp, fontWeight = FontWeight.Bold),
+                decorationBox = {innerTextField->
+                    if (editPlanUiState.titleField.isEmpty()) {
+                        Text(
+                            text = "제목",
+                            fontSize = 32.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = Color.LightGray
+                        )
+                    }
+                    innerTextField()
+                }
             )
-            if (isPageTodo) {
-                Checkbox(
-                    checked = editPlanUiState.isComplete,
-                    onCheckedChange = { editPlanViewModel.setIsComplete(it) },
-                    modifier = Modifier.scale(1.5f)
-                )
-            }
         }
         //endregion
 
@@ -205,20 +205,20 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
         //endregion
 
         //region Repeat
-        FieldWithLeadingText(leadingText = "반복") {
-            SetRepeat(editPlanUiState, editPlanViewModel)
-        }
+//        FieldWithLeadingText(leadingText = "반복") {
+        SetRepeat(editPlanUiState, editPlanViewModel)
+//        }
         //endregion
 
         //region Category
-        FieldWithLeadingText(leadingText = "분류") {
-            CategorySelector(
-                currentCategory = editPlanUiState.category,
-                categoryList = categoryList,
-                onAddCategory = editPlanViewModel::addCategory,
-                onSelectCategory = editPlanViewModel::setCategory
-            )
-        }
+//        FieldWithLeadingText(leadingText = "분류") {
+        CategorySelector(
+            currentCategory = editPlanUiState.category,
+            categoryList = categoryList,
+            onAddCategory = editPlanViewModel::addCategory,
+            onSelectCategory = editPlanViewModel::setCategory
+        )
+//        }
         //endregion
 
         //region Priority
@@ -228,7 +228,7 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
                     value = editPlanUiState.priority.toFloat(),
                     onValueChange = { editPlanViewModel.setPriority(it.toInt()) },
                     onRatingChanged = { },
-                    config = RatingBarConfig().size(40.dp)
+                    config = RatingBarConfig().size(30.dp)
                 )
             }
         }
@@ -236,46 +236,34 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
 
         //region Memo Text Field
         FieldWithLeadingText(leadingText = "메모", alignment = Alignment.Top) {
-            BasicTextField(value = editPlanUiState.memoField,
-                           onValueChange = { value -> editPlanViewModel.setMemo(value) },
-                           modifier = Modifier.fillMaxWidth(),
-                           textStyle = TextStyle(fontSize = 16.sp),
-                           decorationBox = { innerTextField ->
-                               Column(
-                                   modifier = Modifier.drawWithContent {
-                                       drawContent()
-                                       drawLine(
-                                           color = Color(0xFF494949),
-                                           start = Offset(
-                                               x = 0f,
-                                               y = size.height - 1.dp.toPx(),
-                                           ),
-                                           end = Offset(
-                                               x = size.width,
-                                               y = size.height - 1.dp.toPx(),
-                                           ),
-                                           strokeWidth = 1.dp.toPx(),
-                                       )
-                                   },
-                               ) {
-                                   Row(
-                                       verticalAlignment = Alignment.CenterVertically,
-                                       horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                   ) {
-                                       innerTextField()
-                                   }
-                                   Spacer(modifier = Modifier.height(8.dp))
-                               }
-                           })
+            BasicTextField(
+                value = editPlanUiState.memoField,
+                onValueChange = { value -> editPlanViewModel.setMemo(value) },
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = TextStyle(fontSize = 16.sp),
+                decorationBox = {innerTextField->
+                    if (editPlanUiState.memoField.isEmpty()) {
+                        Text(
+                            text = "memo",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = Color.LightGray
+                        )
+                    }
+                    innerTextField()
+                }
+           )
         }
         //endregion
 
         //region Show In Monthly View Switch
         FieldWithLeadingText(
-            leadingText = "월별 보기에 표시", modifier = Modifier.fillMaxWidth(), textWidth = 240.dp
+            leadingText = "월별 캘린더에 표시", modifier = Modifier.fillMaxWidth(), textWidth = 240.dp
         ) {
-            Switch(checked = editPlanUiState.showInMonthlyView,
-                   onCheckedChange = { editPlanViewModel.setShowInMonthlyView(it) })
+            Checkbox(
+                checked = editPlanUiState.showInMonthlyView,
+                onCheckedChange = { editPlanViewModel.setShowInMonthlyView(it) }
+            )
         }
         //endregion
 
@@ -313,12 +301,29 @@ fun TypeButton(
 ) {
     Button(
         onClick = { onClick() },
-        colors = ButtonDefaults.buttonColors(if (isSelected) Color(0xFF7986CB) else Color.Gray),
-        border = BorderStroke(2.dp, if (isSelected) Color.Black else Color.Black),
-        shape = RoundedCornerShape(20),
+        colors = ButtonDefaults.buttonColors(if (isSelected) Color(0xFFDBE2F6) else Color.Transparent),
+        contentPadding= PaddingValues(0.dp),
         modifier = modifier
+            .border(
+                width = 2.dp,
+                color = Color(0xFF000000),
+                shape = RoundedCornerShape(size = 30.dp)
+            )
+            .width(60.dp)
+            .height(25.dp)
     ) {
-        Text(text = text, fontSize = 16.sp)
+        Text(
+            text = text,
+            fontSize = 16.sp,
+            style = TextStyle(
+                fontSize = 14.sp,
+                lineHeight = 18.sp,
+                fontWeight = FontWeight(500),
+                color = Color(0xFF000000),
+
+                textAlign = TextAlign.Center,
+            )
+        )
     }
 }
 
