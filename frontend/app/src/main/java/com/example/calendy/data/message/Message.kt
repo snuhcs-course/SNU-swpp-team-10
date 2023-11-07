@@ -20,5 +20,8 @@ data class Message(
     val messageFromManager: Boolean = false,
     @ColumnInfo(name = "content", defaultValue = "")
     @SerializedName("content")
-    val content: String = ""
+    val content: String = "",
+    @ColumnInfo(name = "has_log_plan", defaultValue = "0")
+    @SerializedName("has_log_plan")
+    val hasLogPlan: Boolean = false, // 연결되는 LogSchedule 혹은 LogTodo가 존재한다.
 )

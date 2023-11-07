@@ -6,7 +6,7 @@ import androidx.room.Query
 import androidx.room.Update
 interface BaseDao<T> {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insert(entity: T)
+    suspend fun insert(entity: T): Long
     @Update
     suspend fun update(entity: T)
     @Delete
