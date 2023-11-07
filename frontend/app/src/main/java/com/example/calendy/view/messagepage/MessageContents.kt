@@ -39,8 +39,11 @@ fun MessageContentUser(
 fun MessageContentManager(
     messageLog: Message
 ){
-//    MessageContentManagerDefault(messageLog)
-    MessageContentManagerWithButton(messageLog)
+    when(messageLog.hasLogPlan)
+    {
+        false -> MessageContentManagerDefault(messageLog)
+        true  -> MessageContentManagerWithButton(messageLog)
+    }
 }
 
 @Composable
@@ -94,6 +97,5 @@ fun MessageContentManagerWithButton(
         }
     }
 
-    if(openPopup){
-    }
+
 }

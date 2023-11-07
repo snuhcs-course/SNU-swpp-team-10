@@ -187,10 +187,9 @@ fun NavigationGraph(navController: NavHostController) {
         }
         composable(BottomNavItem.Todo.screenRoute) {
 //            TodoPage()
-            MessagePage()
         }
         composable(BottomNavItem.AiManager.screenRoute) {
-            ManagerPage()
+            MessagePage()
         }
         composable(BottomNavItem.Setting.screenRoute) {
             // SettingPage()

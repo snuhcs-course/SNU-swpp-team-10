@@ -1,5 +1,8 @@
 package com.example.calendy.view.messagepage
 
+import android.content.Intent
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +19,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -24,10 +29,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,43 +46,64 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.calendy.AppViewModelProvider
 import com.example.calendy.R
 import com.example.calendy.data.message.Message
+import com.example.calendy.data.plan.Plan
+import com.example.calendy.data.plan.Todo
+import com.example.calendy.utils.afterDays
 import com.example.calendy.utils.equalDay
+import com.example.calendy.utils.toDate
 import com.example.calendy.utils.toDateDayString
+import com.example.calendy.view.monthlyview.MonthlyDayPlanDetailPopup
+import com.example.calendy.view.popup.AddButton
+import com.example.calendy.view.popup.PlanListPopup
+import com.example.calendy.view.popup.PopupHeaderDate
+import com.example.calendy.view.popup.PopupHeaderTitle
 import java.util.Date
 
 @Composable
 fun MessagePage(
     messagePageViewModel: MessagePageViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    sqlExecutionViewModel: SqlExecutionViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    val messageUiState:MessageUIState by messagePageViewModel.uiState.collectAsState()
+    val messageUiState: MessageUIState by messagePageViewModel.uiState.collectAsState()
     val userInput = messageUiState.userInputText
-    val messageLogList : List<Message> = messageUiState.messageLogs
+    val messageLogList: List<Message> = messageUiState.messageLogs
+    val context = LocalContext.current
 
-    fun onValueChanged(text:String){
-        messagePageViewModel.setUserInputText(text)
-    }
-    fun onSendButtonClicked(){
-        messagePageViewModel.addUserMessage()
-        messagePageViewModel.setUserInputText("")
-//        sqlExecutionViewModel.sendQuery(userInput)
 
+    fun onMicButtonClicked() {
+
+        val speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
+        speechRecognizer.setRecognitionListener(messagePageViewModel.recognitionListener)
+
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+        intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, context.packageName)
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ko-KR")
+        intent.putExtra(
+            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+        )
+        intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+        speechRecognizer.startListening(intent)
     }
+
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight()
-    ){
+    ) {
 
-    MessageList(messageLogList, modifier = Modifier
-        .weight(1f)
-        .fillMaxHeight())
-    MessageInputField(
-        onValueChanged = ::onValueChanged,
-        onSendButtonClicked = ::onSendButtonClicked,
-        text = userInput
-    )
+        MessageList(
+            messageLogList, modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+        )
+        MessageInputField(
+
+            onValueChanged = messagePageViewModel::setUserInputText,
+            onSendButtonClicked = messagePageViewModel::onSendButtonClicked,
+            onMicButtonClicked = ::onMicButtonClicked,
+            text = userInput,
+        )
     }
 
 }
@@ -81,17 +111,23 @@ fun MessagePage(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessageInputField(
-    onSendButtonClicked: ()->Unit = {},
-    onValueChanged: (text:String)->Unit = {},
+    onSendButtonClicked: () -> Unit = {},
+    onMicButtonClicked: () -> Unit = {},
+    onValueChanged: (text: String) -> Unit = {},
     text: String = "",
-    modifier :Modifier = Modifier
-){
+    modifier: Modifier = Modifier
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth()
             .background(color = Color(0xFFF1F1F1))
     ) {
+        IconButton(
+            onClick = onMicButtonClicked,
+        ) {
+            Icon(imageVector = Icons.Default.Mic, contentDescription = null)
+        }
         BasicTextField(
             value = text,
             onValueChange = onValueChanged,
@@ -114,8 +150,8 @@ fun MessageInputField(
                 .wrapContentWidth()
                 .wrapContentHeight(),
 
-        ) {
-            Icon(painter = painterResource(id = R.drawable.send),"send")
+            ) {
+            Icon(painter = painterResource(id = R.drawable.send), "send")
         }
 
     }
@@ -123,12 +159,12 @@ fun MessageInputField(
 
 @Composable
 fun MessageList(
-    chatLogList:List<Message> = emptyList(),
-    modifier :Modifier = Modifier
+    chatLogList: List<Message> = emptyList(),
+    modifier: Modifier = Modifier
 ) {
-    var prevDate :Date? =Date(0)
+    var prevDate: Date? = Date(0)
     LazyColumn(
-        reverseLayout=true,
+        reverseLayout = true,
         modifier = modifier
             .fillMaxWidth()
 
@@ -136,7 +172,7 @@ fun MessageList(
     {
         items(chatLogList) {
             var currDate = it.sentTime
-            if(!prevDate!!.equalDay(currDate)){
+            if (!prevDate!!.equalDay(currDate)) {
                 prevDate = currDate
                 DateDivider(currDate)
             }
@@ -146,20 +182,21 @@ fun MessageList(
 }
 
 @Composable
-fun MessageItem(messageLog:Message, modifier:Modifier = Modifier){
+fun MessageItem(messageLog: Message, modifier: Modifier = Modifier) {
     val chatBackground =
-        when(messageLog.messageFromManager){
+        when (messageLog.messageFromManager) {
             true -> Color(0xFFACC7FA)
-            false ->  Color(0xFFDBE2F6)
+            false -> Color(0xFFDBE2F6)
         }
     Row(
         modifier = modifier
             .fillMaxWidth(),
 
-        horizontalArrangement = when(messageLog.messageFromManager){
+        horizontalArrangement = when (messageLog.messageFromManager) {
             true -> Arrangement.Start
-            false ->  Arrangement.End
-        }){
+            false -> Arrangement.End
+        }
+    ) {
         Box(
             modifier = Modifier
                 .widthIn(20.dp, 320.dp)
@@ -168,10 +205,10 @@ fun MessageItem(messageLog:Message, modifier:Modifier = Modifier){
                 .background(color = chatBackground, shape = RoundedCornerShape(size = 15.dp))
                 //            .border(width = 2.dp, color = Color.Black, shape = RoundedCornerShape(15.dp, 15.dp, 15.dp, 15.dp))
                 .clip(shape = RoundedCornerShape(15.dp, 15.dp, 15.dp, 15.dp))
-        ){
-            when(messageLog.messageFromManager){
+        ) {
+            when (messageLog.messageFromManager) {
                 true -> MessageContentManager(messageLog)
-                false -> MessageContentUser(messageLog) 
+                false -> MessageContentUser(messageLog)
             }
         }
     }
@@ -179,19 +216,18 @@ fun MessageItem(messageLog:Message, modifier:Modifier = Modifier){
 }
 
 
-
 @Composable
 fun DateDivider(
-    date:Date? = null,
-    modifier:Modifier = Modifier
-){
-    Row (
+    date: Date? = null,
+    modifier: Modifier = Modifier
+) {
+    Row(
         modifier = modifier
             .padding(8.dp)
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
 
-    ){
+    ) {
         Divider(
             modifier = Modifier
                 .fillMaxWidth()
@@ -224,19 +260,27 @@ fun DateDivider(
 
 @Preview(showBackground = false, name = "chatbar preview")
 @Composable
-fun MessageInputPreview(){
+fun MessageInputPreview() {
     MessageInputField()
 }
 
 
 @Preview(showBackground = false, name = "chat item preview")
 @Composable
-fun MessageItemPreview(){
-    Column(){
-        MessageItem(Message(0,Date(),false,"ooooooooxoxoxooxoxooxooxoxoxooxoxoxooxoxxoxoxoxoxoxoxoxoxo"))
-        MessageItem(Message(1,Date(),true,"how can i help you"))
+fun MessageItemPreview() {
+    Column() {
+        MessageItem(
+            Message(
+                0,
+                Date(),
+                false,
+                "ooooooooxoxoxooxoxooxooxoxoxooxoxoxooxoxxoxoxoxoxoxoxoxoxo"
+            )
+        )
+        MessageItem(Message(1, Date(), true, "how can i help you"))
     }
 }
+
 
 @Preview
 @Composable

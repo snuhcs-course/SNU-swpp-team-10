@@ -1,5 +1,6 @@
 package com.example.calendy.data.dummy
 
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.example.calendy.data.plan.Schedule
 import com.example.calendy.data.plan.schedule.IScheduleRepository
 import kotlinx.coroutines.flow.Flow
@@ -27,6 +28,10 @@ class DummyScheduleRepository: IScheduleRepository {
     }
 
     override fun getAllSchedule(): Flow<List<Schedule>> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getSchedulesViaQuery(query: SupportSQLiteQuery): List<Schedule> {
         TODO("Not yet implemented")
     }
 
