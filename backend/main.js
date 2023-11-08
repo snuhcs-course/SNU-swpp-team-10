@@ -10,7 +10,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
 const OPENAI_API_URL= 'https://api.openai.com/v1/chat/completions'
-const OPENAI_API_KEY='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';
+const OPENAI_API_KEY='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';
 
 
 app.get('/', (req, res) => {
@@ -42,7 +42,7 @@ app.post('/manager/send', async (req, res) => {
     schedule(id INTEGER, title TEXT, start_time TEXT, end_time TEXT, memo TEXT DEFAULT NULL, repeat_group_id=INTEGER DEFAULT NULL, category_id DEFAULT NULL, priority INTEGER DEFAULT 3, show_in_monthly_view INTEGER DEFAULT 1)
     todo(id INTEGER, title TEXT, due_time TEXT, memo TEXT DEFAULT NULL, repeat_group_id=INTEGER DEFAULT NULL, category_id DEFAULT NULL, priority INTEGER DEFAULT 3, show_in_monthly_view INTEGER DEFAULT 0, is_overridden DEFAULT 0)
 
-current time is [2023-11-03 12:25:39]. follow the same format. 
+current time is [${time}]. follow the same format. 
 when modifying time attributes partially, for example only changing the date, use substr() and concatenation.
 
 
