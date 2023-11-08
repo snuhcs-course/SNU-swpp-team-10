@@ -30,9 +30,6 @@ import java.util.Date
 import kotlin.math.max
 import kotlin.math.min
 
-sealed class EditPlanEvent {
-    object PlanDeleted : EditPlanEvent()
-}
 class EditPlanViewModel(
     private val scheduleRepository: IScheduleRepository,
     private val todoRepository: ITodoRepository,
@@ -136,44 +133,6 @@ class EditPlanViewModel(
        }
     }
 
-    // set once when editing existing schedule
-    private fun loadSchedule(id: Int) {
-        viewModelScope.launch {
-            val schedule = scheduleRepository.getScheduleById(id).first()
-
-            _uiState.value = _uiState.value.copy(
-                titleField = schedule.title,
-                startTime = schedule.startTime,
-                endTime = schedule.endTime,
-//              category = schedule.categoryId,
-//                repeatGroup = schedule.repeatGroupId,
-                priority = schedule.priority,
-                memoField = schedule.memo,
-                showInMonthlyView = schedule.showInMonthlyView
-            )
-        }
-    }
-
-    // set once when editing existing tod0
-    private fun loadTodo(id: Int) {
-        viewModelScope.launch {
-            val todo = todoRepository.getTodoById(id).first()
-
-            _uiState.value = _uiState.value.copy(
-                titleField = todo.title,
-                isComplete = todo.complete,
-                isYearly = todo.yearly,
-                isMonthly = todo.monthly,
-                isDaily = todo.daily,
-                dueTime = todo.dueTime,
-//                category = schedule.categoryId,
-//                repeatGroup = schedule.repeatGroupId,
-                priority = todo.priority,
-                memoField = todo.memo,
-                showInMonthlyView = todo.showInMonthlyView
-            )
-        }
-    }
 
 
     // Style: functions' order is aligned with UI

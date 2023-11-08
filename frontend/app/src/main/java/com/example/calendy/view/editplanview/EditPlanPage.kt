@@ -74,7 +74,6 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
     val isPageAdd = editPlanUiState.isAddPage
     val isPageEdit = !isPageAdd
 
-
     val verticalScrollState = rememberScrollState(initial = 0)
     Column(
         modifier = Modifier

@@ -41,6 +41,8 @@ import com.example.calendy.view.messagepage.MessagePage
 import com.example.calendy.view.editplanview.EditPlanPage
 import com.example.calendy.view.editplanview.EditPlanViewModel
 import com.example.calendy.view.monthlyview.MonthlyPageKT
+import com.example.calendy.view.todolistview.ToDoListPage
+import com.example.calendy.view.todolistview.TodoListViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -198,7 +200,11 @@ fun NavigationGraph(navController: NavHostController) {
             })
         }
         composable(BottomNavItem.Todo.screenRoute) {
-//            TodoPage()
+            val viewModel : TodoListViewModel  = viewModel(factory = AppViewModelProvider.Factory)
+            ToDoListPage(viewModel, onNavigateToEditPage = { date: Date? ->
+                val route = DestinationRoute.AddTodo(date = date?: Date()).route
+                navController.navigate(route)
+            } )
         }
         composable(BottomNavItem.AiManager.screenRoute) {
             MessagePage()

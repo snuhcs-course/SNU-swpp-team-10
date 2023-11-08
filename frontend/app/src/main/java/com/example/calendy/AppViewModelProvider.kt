@@ -9,6 +9,7 @@ import com.example.calendy.view.messagepage.MessagePageViewModel
 import com.example.calendy.data.emptydb.EmptyDatabase
 import com.example.calendy.view.editplanview.EditPlanViewModel
 import com.example.calendy.view.monthlyview.MonthlyViewModel
+import com.example.calendy.view.todolistview.TodoListViewModel
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
@@ -32,6 +33,11 @@ object AppViewModelProvider {
                 calendyApplication().container.categoryRepository,
                 emptyDatabase = EmptyDatabase.getDatabase(calendyApplication().applicationContext),
                 logPlanRepository = calendyApplication().container.logPlanRepository,
+            )
+        }
+        initializer {
+            TodoListViewModel(
+                calendyApplication().container.todoRepository
             )
         }
     }
