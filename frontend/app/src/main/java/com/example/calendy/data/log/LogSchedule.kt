@@ -38,16 +38,16 @@ data class LogSchedule(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
     @SerializedName("id")
-    val id: Int = 0,
+    override val id: Int = 0,
     @ColumnInfo(name = "message_id")
     @SerializedName("message_id")
-    val messageId: Int, // connected message
+    override val messageId: Int, // connected message
     @ColumnInfo(name = "log_type")
     @SerializedName("log_type")
-    val logType: String, // "INSERT", "UPDATE", "DELETE"
+    override val logType: String, // "INSERT", "UPDATE", "DELETE"
     @ColumnInfo(name = "plan_id")
     @SerializedName("plan_id")
-    val planId: Int?, // null when logType = "INSERT"
+    override val planId: Int?, // null when logType = "INSERT"
     @ColumnInfo(name = "title")
     @SerializedName("title")
     val title: String? = null,
@@ -75,4 +75,4 @@ data class LogSchedule(
     @ColumnInfo(name = "is_overridden", defaultValue = "0")
     @SerializedName("is_overridden")
     val isOverridden: Boolean = false
-)
+): LogPlan

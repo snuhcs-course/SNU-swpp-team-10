@@ -33,7 +33,10 @@ import com.example.calendy.R
 import com.example.calendy.data.plan.Plan
 import com.example.calendy.data.plan.Schedule
 import com.example.calendy.data.plan.Todo
+import com.example.calendy.utils.equalDay
+import com.example.calendy.utils.toAmPmString
 import com.example.calendy.utils.toDateTimeString
+import com.example.calendy.utils.toTimeString
 import java.util.Date
 
 @Composable
@@ -68,26 +71,39 @@ fun PlanDetailPopup(
                     modifier = Modifier
                         .padding(horizontal = 0.dp, vertical = 8.dp)
                 )
-                
+
                 //show times
                 when(plan){
                     is Schedule -> {
-                        Text(
-                            text = plan.startTime.toDateTimeString(),
+                        val sameDay = plan.startTime.equalDay(plan.endTime)
+                        var startTimeString =plan.startTime.toDateTimeString()
+                        val endTimeString ="~ " +  plan.endTime.toDateTimeString()
+                        if(sameDay)
+                        {
+                            val isSameAMPM = plan.startTime.toAmPmString().equals( plan.endTime.toAmPmString())
+                            val ampmString = if(isSameAMPM) "" else plan.endTime.toAmPmString() + " "
+                            startTimeString += " ~ " + ampmString + plan.endTime.toTimeString()
+                        }
+                        else
+                            startTimeString ="  " + startTimeString
+                                    Text(
+                            text = startTimeString,
                             style = TextStyle(
                                 fontSize = 16.sp,
                                 lineHeight = 18.sp,
                                 fontWeight = FontWeight(500),
                             )
                         )
-                        Text(
-                            text = plan.startTime.toDateTimeString(),
-                            style = TextStyle(
-                                fontSize = 16.sp,
-                                lineHeight = 18.sp,
-                                fontWeight = FontWeight(500),
+                        if(!sameDay) {
+                            Text(
+                                text = endTimeString,
+                                style = TextStyle(
+                                    fontSize = 16.sp,
+                                    lineHeight = 18.sp,
+                                    fontWeight = FontWeight(500),
+                                )
                             )
-                        )
+                        }
                     }
                     is Todo -> {
                         Text(

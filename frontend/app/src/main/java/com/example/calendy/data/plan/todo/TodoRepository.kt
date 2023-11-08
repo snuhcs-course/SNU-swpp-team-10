@@ -1,5 +1,6 @@
 package com.example.calendy.data.plan.todo
 
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.example.calendy.data.plan.Todo
 import kotlinx.coroutines.flow.Flow
 import java.util.Date
@@ -19,4 +20,6 @@ class TodoRepository(private val todoLocalDataSource: TodoLocalDataSource) : ITo
     override fun getTodoById(id: Int): Flow<Todo> = todoLocalDataSource.getTodoById(id)
 
     override fun getAllTodo() : Flow<List<Todo>> = todoLocalDataSource.getAllTodo()
+    override fun getTodosViaQuery(query: SupportSQLiteQuery): List<Todo> =
+        todoLocalDataSource.getTodosViaQuery(query)
 }

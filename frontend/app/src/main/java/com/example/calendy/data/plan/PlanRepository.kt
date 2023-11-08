@@ -1,5 +1,6 @@
 package com.example.calendy.data.plan
 
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.example.calendy.data.plan.Plan.PlanType
 import com.example.calendy.data.plan.schedule.IScheduleRepository
 import com.example.calendy.data.plan.todo.ITodoRepository
@@ -23,7 +24,7 @@ class PlanRepository(
     // Usage: getPlanById(id = 3, type = Plan.PlanType.Schedule)
     override fun getPlanById(id: Int, type: PlanType): Flow<Plan> = when (type) {
         PlanType.Schedule -> scheduleRepository.getScheduleById(id)
-        PlanType.Todo     -> todoRepository.getTodoById(id)
+        PlanType.Todo -> todoRepository.getTodoById(id)
     }
 
     override fun getAllPlans(): Flow<List<Plan>> {
@@ -35,10 +36,31 @@ class PlanRepository(
         }
     }
 
+    override fun getTodosViaQuery(query: SupportSQLiteQuery): List<Todo> =
+        todoRepository.getTodosViaQuery(query)
+
+    override fun getSchedulesViaQuery(query: SupportSQLiteQuery): List<Schedule> =
+        scheduleRepository.getSchedulesViaQuery(query)
+
+    override suspend fun insertPlan(plan: Plan) {
+        when (plan) {
+            is Schedule -> scheduleRepository.insertSchedule(plan)
+            is Todo -> todoRepository.insertTodo(plan)
+        }
+    }
     override suspend fun updatePlan(plan: Plan) {
-        when(plan){
+        when (plan) {
             is Schedule -> scheduleRepository.updateSchedule(plan)
             is Todo -> todoRepository.updateTodo(plan)
         }
     }
+
+    override suspend fun deletePlan(plan: Plan) {
+        when (plan) {
+            is Schedule -> scheduleRepository.deleteSchedule(plan)
+            is Todo -> todoRepository.deleteTodo(plan)
+        }
+    }
+
+
 }

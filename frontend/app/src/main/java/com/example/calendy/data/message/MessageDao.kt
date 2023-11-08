@@ -8,6 +8,6 @@ import java.util.Date
 interface MessageDao : BaseDao<Message> {
     @Query("SELECT * FROM message WHERE sent_time BETWEEN :startTime AND :endTime")
     fun getMessagesStream(startTime: Date, endTime: Date): Flow<List<Message>>
-    @Query("SELECT * FROM message ORDER BY sent_time DESC")
+    @Query("SELECT * FROM message ORDER BY id DESC")
     fun getAllMessages(): Flow<List<Message>>
 }
