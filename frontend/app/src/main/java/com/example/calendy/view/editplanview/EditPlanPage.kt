@@ -36,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -73,6 +74,7 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
     val isPageAdd = editPlanUiState.isAddPage
     val isPageEdit = !isPageAdd
 
+
     val verticalScrollState = rememberScrollState(initial = 0)
     Column(
         modifier = Modifier
@@ -105,6 +107,7 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
                         IconButton(onClick = {
                             editPlanViewModel.deletePlan()
                             onNavigateBack()
+
                         }) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
@@ -205,20 +208,20 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
         //endregion
 
         //region Repeat
-//        FieldWithLeadingText(leadingText = "반복") {
+       FieldWithLeadingText(leadingText = "반복") {
         SetRepeat(editPlanUiState, editPlanViewModel)
-//        }
+       }
         //endregion
 
         //region Category
-//        FieldWithLeadingText(leadingText = "분류") {
+       FieldWithLeadingText(leadingText = "분류") {
         CategorySelector(
             currentCategory = editPlanUiState.category,
             categoryList = categoryList,
             onAddCategory = editPlanViewModel::addCategory,
             onSelectCategory = editPlanViewModel::setCategory
         )
-//        }
+       }
         //endregion
 
         //region Priority

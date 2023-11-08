@@ -1,5 +1,7 @@
 package com.example.calendy.view.editplanview
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
@@ -15,6 +18,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -51,16 +55,13 @@ fun CategorySelector(
     // UI Shown in Edit Plan Page as field
     Row(modifier = Modifier.fillMaxWidth()) {
         TextButton(
-            onClick = { showCategoryPickerDialog = true },
-            modifier = Modifier
-                .weight(1f)
+            onClick = { showCategoryPickerDialog = true }, modifier = Modifier.weight(1f)
 //                .padding(end = 20.dp)
 //                .bottomBorder(1.dp, color = Color.Gray)
         ) {
             Text(
                 text = currentCategory?.title ?: "No Category",
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Left
             )
         }
@@ -112,13 +113,33 @@ private fun CategoryPickerDialog(
                 // Display Category List
                 LazyColumn(modifier = Modifier.padding(16.dp)) {
                     this.items(items = categoryList) { category ->
-                        TextButton(
+                        OutlinedButton(
                             onClick = {
                                 onSelectCategory(category)
                                 closeCategoryDialog()
-                            }, modifier = Modifier.padding(8.dp)
+                            },
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .fillMaxWidth()
                         ) {
-                            Text(text = category.title)
+                            Column {
+                                Text(text = category.title)
+                                // 감싸는 Box에 clickable 수정자 적용
+                                Box(modifier = Modifier
+                                    .clickable {
+                                        onSelectCategory(category)
+                                        closeCategoryDialog()
+                                    }
+                                    .fillMaxWidth()) {
+                                    RatingBar(value = category.defaultPriority.toFloat(),
+                                              onValueChange = {},
+                                              onRatingChanged = {
+                                                  onSelectCategory(category)
+                                                  closeCategoryDialog()
+                                              })
+                                }
+                            }
                         }
                     }
                 }

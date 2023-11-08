@@ -380,7 +380,7 @@ fun PopupHeaderDatePreview(){
 @Preview
 @Composable
 fun EditButtonPreview(){
-    EditButton(Todo(0,"Todo",Date()),{id,plan->})
+    EditButton(Todo(0,"Todo",Date()),{id,plan,date->})
 }
 @Preview
 @Composable

@@ -144,7 +144,7 @@ fun PlanDetailPopup(
 @Composable
 fun EditButton(
     plan : Plan,
-    onNavigateToEditPage:(id: Int?, type: Plan.PlanType) -> Unit,
+    onNavigateToEditPage:(id: Int?, type: Plan.PlanType, date: Date?) -> Unit,
     onEditComplete:(Plan)->Unit={},
     modifier:Modifier = Modifier
 ){
@@ -153,8 +153,8 @@ fun EditButton(
             {
                 // TODO :Can we make it more simple?
                 when(plan){
-                    is Schedule -> onNavigateToEditPage(plan.id, Plan.PlanType.Schedule)
-                    is Todo -> onNavigateToEditPage(plan.id, Plan.PlanType.Todo)
+                    is Schedule -> onNavigateToEditPage(plan.id, Plan.PlanType.Schedule, null)
+                    is Todo -> onNavigateToEditPage(plan.id, Plan.PlanType.Todo, null)
                 }
             },
 
@@ -183,7 +183,7 @@ fun PlanDetailPopupPreview(){
         editButton = {
             EditButton(
                 plan = p,
-                onNavigateToEditPage = {_,_->},
+                onNavigateToEditPage = {_,_,_->},
                 modifier=Modifier.align(Alignment.TopEnd)
             )
         }

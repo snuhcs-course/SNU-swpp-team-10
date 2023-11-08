@@ -1,6 +1,7 @@
 package com.example.calendy
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
@@ -40,6 +41,9 @@ import com.example.calendy.view.messagepage.MessagePage
 import com.example.calendy.view.editplanview.EditPlanPage
 import com.example.calendy.view.editplanview.EditPlanViewModel
 import com.example.calendy.view.monthlyview.MonthlyPageKT
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
 class MainActivity : ComponentActivity() {
@@ -152,9 +156,17 @@ sealed class BottomNavItem(
 }
 
 sealed class DestinationRoute(val route: String) {
-    object AddSchedule : DestinationRoute("EditPage/schedule")
 
-    object AddTodo : DestinationRoute("EditPage/todo")
+    companion object {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        // Helper method to convert a Date to a String
+        fun dateToString(date: Date): String {
+            return dateFormat.format(date)
+        }
+    }
+    class AddSchedule(date: Date) : DestinationRoute("EditPage/schedule?date=${dateToString(date)}")
+
+    class AddTodo(date: Date) : DestinationRoute("EditPage/todo?date=${dateToString(date)}")
 
     class EditSchedule(id: Int) : DestinationRoute("EditPage/schedule?id=$id")
 
@@ -169,11 +181,11 @@ fun NavigationGraph(navController: NavHostController) {
             WeeklyPage()
         }
         composable(BottomNavItem.Month.screenRoute) {
-            MonthlyPageKT(onNavigateToEditPage = { id: Int?, type: Plan.PlanType ->
+            MonthlyPageKT(onNavigateToEditPage = { id: Int?, type: Plan.PlanType, date: Date? ->
                 val route = if (id==null) {
                     when (type) {
-                        Plan.PlanType.Schedule -> DestinationRoute.AddSchedule.route
-                        Plan.PlanType.Todo     -> DestinationRoute.AddTodo.route
+                        Plan.PlanType.Schedule -> DestinationRoute.AddSchedule(date= date?: Date()).route
+                        Plan.PlanType.Todo     -> DestinationRoute.AddTodo(date = date?: Date()).route
                     }
                 } else {
                     when (type) {
@@ -195,12 +207,12 @@ fun NavigationGraph(navController: NavHostController) {
         composable(BottomNavItem.Setting.screenRoute) {
             // SettingPage()
             // Test For New Plan
-            Button(onClick = { navController.navigate(DestinationRoute.AddSchedule.route) }) {
+            Button(onClick = { navController.navigate(DestinationRoute.AddSchedule(date = Date()).route) }) {
                 Text("EditPage New")
             }
         }
         composable(
-            route = "EditPage/{type}?id={id}", arguments = listOf(
+            route = "EditPage/{type}?id={id}&date={date}", arguments = listOf(
                 navArgument("type") {
                     type = NavType.StringType
                 },
@@ -209,18 +221,30 @@ fun NavigationGraph(navController: NavHostController) {
                     nullable = true
                     defaultValue = null
                 },
+                navArgument("date") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
             )
         ) { entry ->
+            Log.d("GUN", "Recompose")
+            Log.d("GUN", entry.arguments?.toString() ?: "Empty Argument")
+
+            val dateString = entry.arguments?.getString("date")
+            val date = dateString?.let { DestinationRoute.dateFormat.parse(it) }
+
             val viewModel: EditPlanViewModel = viewModel(factory = AppViewModelProvider.Factory)
             viewModel.initialize(
                 id = entry.arguments?.getString("id")?.toIntOrNull(),
                 type = when (entry.arguments?.getString("type")) {
                     "schedule" -> Plan.PlanType.Schedule
                     else       -> Plan.PlanType.Todo
-                }
+                },
+                date = date
             )
 
-            EditPlanPage(viewModel, onNavigateBack = { navController.popBackStack() })
+            EditPlanPage(viewModel, onNavigateBack = { navController.popBackStack()})
         }
     }
 }

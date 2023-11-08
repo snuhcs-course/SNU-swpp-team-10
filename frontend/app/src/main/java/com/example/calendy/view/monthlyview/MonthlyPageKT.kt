@@ -1,6 +1,8 @@
 package com.example.calendy.view.monthlyview
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -39,6 +41,7 @@ import com.prolificinteractive.materialcalendarview.CalendarMode
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView
 import com.prolificinteractive.materialcalendarview.format.ArrayWeekDayFormatter
 import com.prolificinteractive.materialcalendarview.format.MonthArrayTitleFormatter
+import java.time.ZoneId
 import java.util.Calendar
 import java.util.Date
 import java.util.Hashtable
@@ -46,7 +49,7 @@ import java.util.Hashtable
 @Composable
 fun MonthlyPageKT(
     monthlyViewModel: MonthlyViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    onNavigateToEditPage: (id: Int?, type: Plan.PlanType) -> Unit
+    onNavigateToEditPage: (id: Int?, type: Plan.PlanType, date: Date?) -> Unit
 ) {
 
     val custom_months = stringArrayResource(id = R.array.custom_months)
@@ -77,7 +80,7 @@ fun MonthlyPageKT(
     }
     fun openAddPlanPopup(selectedDate: CalendarDay)
     {
-        onNavigateToEditPage(null, Plan.PlanType.Schedule)
+        onNavigateToEditPage(null, Plan.PlanType.Schedule, selectedDate.toDate())
     }
 
     fun onListPopupDismissed()
@@ -109,20 +112,17 @@ fun MonthlyPageKT(
                 .commit();
 
 
-            setOnDateChangedListener(
-            { widget, date, selected ->
+            setOnDateChangedListener { widget, date, selected ->
 
-                if(planOfMonth.size==0) planOfMonth= planListToHash(uiState.plansOfMonth)
+                if (planOfMonth.size==0) planOfMonth = planListToHash(uiState.plansOfMonth)
 
-                if(date == uiState.selectedDate)
-                {
+                if (date==uiState.selectedDate) {
                     openListPopup(date)
 //                    openAddPlanPopup(date)
-                }
-                else{
+                } else {
                     monthlyViewModel.setSelectedDate(date)
                 }
-            })
+            }
             // event
             setOnMonthChangedListener(
                 // selected month changed
@@ -162,7 +162,7 @@ fun MonthlyPageKT(
             onDismissed = ::onListPopupDismissed,
             addButton = {
                 AddButton(
-                    onButtonClick = { onNavigateToEditPage(null,Plan.PlanType.Schedule) },
+                    onButtonClick = { onNavigateToEditPage(null,Plan.PlanType.Schedule, popupDate.toDate()) },
                     onEditComplete = {},
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
@@ -215,6 +215,7 @@ fun planListToHash(planList: List<Plan>): Hashtable<CalendarDay, List<Plan>> {
     return planOfMonth
 }
 
+
 @Preview(showBackground = false, name = "Monthly Calendar Preview")
 @Composable
 fun MonthlyCalendarPreview() {
@@ -223,5 +224,5 @@ fun MonthlyCalendarPreview() {
         monthlyViewModel = MonthlyViewModel(
             planRepository = DummyPlanRepository(),
         )
-    ) { _, _ -> }
+    ) { _, _, _ -> }
 }

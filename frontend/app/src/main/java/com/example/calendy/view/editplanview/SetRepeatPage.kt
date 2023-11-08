@@ -703,7 +703,14 @@ fun EndTimeRadioButtonLine(
 
                 LaunchedEffect(state.selectedDateMillis) {
                     state.selectedDateMillis?.let {
-                        endDate.value = it
+                        val calendar = Calendar.getInstance().apply {
+                            timeInMillis = it
+                            set(Calendar.HOUR_OF_DAY, 23)
+                            set(Calendar.MINUTE, 59)
+                            set(Calendar.SECOND, 59)
+                            set(Calendar.MILLISECOND, 999)
+                        }
+                        endDate.value = calendar.timeInMillis
                     }
                 }
             }

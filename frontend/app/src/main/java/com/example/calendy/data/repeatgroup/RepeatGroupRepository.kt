@@ -5,9 +5,8 @@ import kotlinx.coroutines.flow.Flow
 import java.util.Date
 
 class RepeatGroupRepository(private val repeatGroupLocalDataSource: RepeatGroupLocalDataSource): IRepeatGroupRepository {
-    override suspend fun insert(repeatGroup: RepeatGroup) {
-        repeatGroupLocalDataSource.insert(repeatGroup)
-    }
+    override suspend fun insert(repeatGroup: RepeatGroup): Long = repeatGroupLocalDataSource.insert(repeatGroup)
+
     override suspend fun delete(repeatGroup: RepeatGroup) {
         repeatGroupLocalDataSource.delete(repeatGroup)
     }
@@ -16,5 +15,9 @@ class RepeatGroupRepository(private val repeatGroupLocalDataSource: RepeatGroupL
     }
     override fun getRepeatGroupById(id: Int): Flow<RepeatGroup> {
        return repeatGroupLocalDataSource.getRepeatGroupById(id)
+    }
+
+    override suspend fun deleteRepeatGroupById(id: Int) {
+        return repeatGroupLocalDataSource.deleteRepeatGroupById(id)
     }
 }

@@ -10,4 +10,7 @@ import java.util.Date
 interface RepeatGroupDao : BaseDao<RepeatGroup> {
     @Query("SELECT * FROM repeat_group WHERE id = :id")
     fun getRepeatGroupById(id: Int): Flow<RepeatGroup>
+
+    @Query("DELETE FROM repeat_group WHERE id = :id")
+    suspend fun deleteRepeatGroupById(id: Int)
 }
