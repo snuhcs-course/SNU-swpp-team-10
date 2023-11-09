@@ -46,4 +46,8 @@ class DummyTodoRepository: ITodoRepository {
     override fun getTodosViaQuery(query: SupportSQLiteQuery): List<Todo> {
         TODO("Not yet implemented")
     }
+
+    override suspend fun getTodosByIds(iDs: List<Int>): List<Todo> {
+        TODO("Not yet implemented")
+    }
 }

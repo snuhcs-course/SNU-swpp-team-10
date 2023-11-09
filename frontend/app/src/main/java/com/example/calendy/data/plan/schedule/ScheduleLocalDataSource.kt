@@ -31,4 +31,8 @@ class ScheduleLocalDataSource(private val scheduleDao: ScheduleDao) {
     fun getSchedulesViaQuery(query: SupportSQLiteQuery): List<Schedule> =
         scheduleDao.getSchedulesViaQuery(query)
 
+    suspend fun getSchedulesByIds(id: List<Int>): List<Schedule> {
+        return scheduleDao.getSchedulesByIds(id)
+    }
+
 }

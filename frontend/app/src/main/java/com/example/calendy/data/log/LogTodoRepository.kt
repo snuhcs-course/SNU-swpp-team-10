@@ -13,9 +13,9 @@ class LogTodoRepository(private val logTodoDao: LogTodoDao): ILogTodoRepository 
         logTodoDao.delete(logSchedule)
     }
 
-    override fun getLogTodosByMessageId(messageId: Int): List<LogTodo> {
+    override suspend fun getLogTodosByMessageId(messageId: Int): List<LogTodo> {
         return logTodoDao.getLogTodosByMessageId(messageId)
     }
 
-    override fun getAllLogTodos(): List<LogTodo> = logTodoDao.getAllLogTodos()
+    override suspend fun getAllLogTodos(): List<LogTodo> = logTodoDao.getAllLogTodos()
 }

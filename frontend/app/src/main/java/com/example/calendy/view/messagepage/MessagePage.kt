@@ -274,10 +274,18 @@ fun MessageItemPreview() {
                 0,
                 Date(),
                 false,
-                "ooooooooxoxoxooxoxooxooxoxoxooxoxoxooxoxxoxoxoxoxoxoxoxoxo"
+                "ooooooooxoxoxooxoxooxooxoxoxooxoxoxooxoxxoxoxoxoxoxoxoxoxo",
             )
         )
-        MessageItem(Message(1, Date(), true, "how can i help you"))
+        MessageItem(
+            Message(
+                1,
+                Date(),
+                true,
+                "how can i help you",
+                hasLogPlan = true
+            )
+        )
     }
 }
 

@@ -13,9 +13,9 @@ class LogScheduleRepository(private val logScheduleDao: LogScheduleDao) : ILogSc
         logScheduleDao.delete(logSchedule)
     }
 
-    override fun getLogSchedulesByMessageId(messageId: Int): List<LogSchedule> {
+    override suspend fun getLogSchedulesByMessageId(messageId: Int): List<LogSchedule> {
         return logScheduleDao.getLogSchedulesByMessageId(messageId)
     }
 
-    override fun getAllLogSchedules(): List<LogSchedule> = logScheduleDao.getAllLogSchedules()
+    override suspend fun getAllLogSchedules(): List<LogSchedule> = logScheduleDao.getAllLogSchedules()
 }

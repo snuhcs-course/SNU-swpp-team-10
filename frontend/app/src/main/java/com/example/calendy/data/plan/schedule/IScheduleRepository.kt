@@ -13,4 +13,5 @@ interface IScheduleRepository {
     fun getScheduleById(id: Int): Flow<Schedule>
     fun getAllSchedule(): Flow<List<Schedule>>
     fun getSchedulesViaQuery(query: SupportSQLiteQuery): List<Schedule>
+    suspend fun getSchedulesByIds(ids: List<Int>): List<Schedule>
 }

@@ -8,6 +8,7 @@ import com.example.calendy.data.CalendyDatabase
 import com.example.calendy.view.messagepage.MessagePageViewModel
 import com.example.calendy.data.emptydb.EmptyDatabase
 import com.example.calendy.view.editplanview.EditPlanViewModel
+import com.example.calendy.view.messagepage.MessagePlanLogViewModel
 import com.example.calendy.view.monthlyview.MonthlyViewModel
 import com.example.calendy.view.todolistview.TodoListViewModel
 
@@ -39,6 +40,14 @@ object AppViewModelProvider {
             TodoListViewModel(
                 calendyApplication().container.todoRepository
             )
+        }
+        initializer {
+            MessagePlanLogViewModel(
+                calendyApplication().container.messageRepository,
+                calendyApplication().container.planRepository,
+                calendyApplication().container.logPlanRepository
+            )
+
         }
     }
 

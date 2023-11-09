@@ -22,4 +22,7 @@ interface ScheduleDao : BaseDao<Schedule> {
 
     @RawQuery
     fun getSchedulesViaQuery(query: SupportSQLiteQuery): List<Schedule>
+
+    @Query("SELECT * FROM schedule WHERE id IN (:id)")
+    suspend fun getSchedulesByIds(id: List<Int>): List<Schedule>
 }

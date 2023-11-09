@@ -27,4 +27,6 @@ interface TodoDao : BaseDao<Todo> {
 
     @RawQuery
     fun getTodosViaQuery(query: SupportSQLiteQuery): List<Todo>
+    @Query("SELECT * FROM todo WHERE id IN (:iDs)")
+    suspend fun getTodosByIds(iDs: List<Int>): List<Todo>
 }

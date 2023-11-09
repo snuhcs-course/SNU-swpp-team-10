@@ -7,8 +7,8 @@ import com.example.calendy.data.BaseDao
 @Dao
 interface LogTodoDao : BaseDao<LogTodo> {
     @Query("SELECT * FROM log_todo WHERE message_id = :messageId")
-    fun getLogTodosByMessageId(messageId: Int): List<LogTodo>
+    suspend fun getLogTodosByMessageId(messageId: Int): List<LogTodo>
 
     @Query("SELECT * FROM log_todo")
-    fun getAllLogTodos(): List<LogTodo>
+    suspend fun getAllLogTodos(): List<LogTodo>
 }

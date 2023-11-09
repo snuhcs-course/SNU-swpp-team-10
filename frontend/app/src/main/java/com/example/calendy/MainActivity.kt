@@ -41,6 +41,7 @@ import com.example.calendy.view.messagepage.MessagePage
 import com.example.calendy.view.editplanview.EditPlanPage
 import com.example.calendy.view.editplanview.EditPlanViewModel
 import com.example.calendy.view.monthlyview.MonthlyPageKT
+import com.example.calendy.view.settingview.SettingPage
 import com.example.calendy.view.todolistview.ToDoListPage
 import com.example.calendy.view.todolistview.TodoListViewModel
 import java.text.SimpleDateFormat
@@ -78,7 +79,7 @@ fun MainScreenView() {
 @Composable
 fun BottomNavigation(navController: NavHostController) {
     val items = listOf(
-        BottomNavItem.Week,
+//        BottomNavItem.Week,
         BottomNavItem.Month,
         BottomNavItem.Todo,
         BottomNavItem.AiManager,
@@ -178,7 +179,7 @@ sealed class DestinationRoute(val route: String) {
 
 @Composable
 fun NavigationGraph(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = BottomNavItem.Week.screenRoute) {
+    NavHost(navController = navController, startDestination = BottomNavItem.Month.screenRoute) {
         composable(BottomNavItem.Week.screenRoute) {
             WeeklyPage()
         }
@@ -210,11 +211,7 @@ fun NavigationGraph(navController: NavHostController) {
             MessagePage()
         }
         composable(BottomNavItem.Setting.screenRoute) {
-            // SettingPage()
-            // Test For New Plan
-            Button(onClick = { navController.navigate(DestinationRoute.AddSchedule(date = Date()).route) }) {
-                Text("EditPage New")
-            }
+            SettingPage()
         }
         composable(
             route = "EditPage/{type}?id={id}&date={date}", arguments = listOf(

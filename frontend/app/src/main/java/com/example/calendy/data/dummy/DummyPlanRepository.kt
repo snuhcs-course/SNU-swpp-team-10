@@ -44,5 +44,9 @@ class DummyPlanRepository : IPlanRepository {
         TODO("Not yet implemented")
     }
 
+    override suspend fun getPlansByIds(scheduelIDs: List<Int>, todoIDs: List<Int>): List<Plan> {
+        TODO("Not yet implemented")
+    }
+
 
 }

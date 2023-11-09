@@ -34,6 +34,11 @@ class ScheduleRepository(private val scheduleLocalDataSource: ScheduleLocalDataS
         scheduleLocalDataSource.getSchedulesViaQuery(query)
 
 
+    override suspend fun getSchedulesByIds(ids: List<Int>): List<Schedule> {
+        return scheduleLocalDataSource.getSchedulesByIds(ids)
+    }
+
+
 //    suspend fun postSchedule(schedule: Schedule) {
 //        scheduleRemoteDataSource.postSchedule()
 //    }

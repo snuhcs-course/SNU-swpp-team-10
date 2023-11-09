@@ -15,4 +15,6 @@ interface IPlanRepository {
     suspend fun deletePlan(plan: Plan)
     fun getSchedulesViaQuery(query: SupportSQLiteQuery): List<Schedule>
     fun getTodosViaQuery(query: SupportSQLiteQuery): List<Todo>
+    //TODO : check if this suspend is validn
+    suspend fun getPlansByIds(scheduelIDs: List<Int>, todoIDs: List<Int>): List<Plan>
 }
