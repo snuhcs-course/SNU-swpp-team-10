@@ -8,4 +8,5 @@ interface ICategoryRepository {
     suspend fun update(category: Category)
     fun getCategoriesStream(): Flow<List<Category>>
     fun getCategoryById(id: Int): Flow<Category>
+
 }

@@ -105,7 +105,7 @@ class EditPlanViewModel(
                        category = category,
                        repeatGroupId = plan.repeatGroupId,
                        repeatGroup = repeatGroup,
-                       priority = plan.priority,
+                       priority = plan.priority!!,
                        memoField = plan.memo,
                        showInMonthlyView = plan.showInMonthlyView
                    )
@@ -122,7 +122,7 @@ class EditPlanViewModel(
                        category = category,
                        repeatGroupId = plan.repeatGroupId,
                        repeatGroup = repeatGroup,
-                       priority = plan.priority,
+                       priority = plan.priority!!,
                        memoField = plan.memo,
                        showInMonthlyView = plan.showInMonthlyView
                    )

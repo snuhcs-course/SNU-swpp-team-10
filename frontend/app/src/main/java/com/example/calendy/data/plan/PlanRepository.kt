@@ -1,15 +1,20 @@
 package com.example.calendy.data.plan
 
 import androidx.sqlite.db.SupportSQLiteQuery
+import com.example.calendy.data.category.Category
+import com.example.calendy.data.category.ICategoryRepository
 import com.example.calendy.data.plan.Plan.PlanType
 import com.example.calendy.data.plan.schedule.IScheduleRepository
 import com.example.calendy.data.plan.todo.ITodoRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import java.util.Date
 
 class PlanRepository(
-    private val scheduleRepository: IScheduleRepository, private val todoRepository: ITodoRepository
+    private val scheduleRepository: IScheduleRepository, private val todoRepository: ITodoRepository,
+    private val categoryRepository: ICategoryRepository
 ) : IPlanRepository {
     // TODO: not tested. should test both stream update
     override fun getPlansStream(startTime: Date, endTime: Date): Flow<List<Plan>> {
@@ -43,9 +48,22 @@ class PlanRepository(
         scheduleRepository.getSchedulesViaQuery(query)
 
     override suspend fun insertPlan(plan: Plan) {
-        when (plan) {
-            is Schedule -> scheduleRepository.insertSchedule(plan)
-            is Todo -> todoRepository.insertTodo(plan)
+        val newPriority = plan.priority ?: plan.categoryId?.let { categoryId ->
+            categoryRepository.getCategoryById(categoryId)
+                .firstOrNull()
+                ?.defaultPriority
+        } ?:3
+
+        val newPlan = when (plan) {
+            is Schedule -> plan.copy(priority = newPriority)
+            is Todo -> plan.copy(priority = newPriority)
+            // Add other implementations if there are any
+        }
+
+        when (newPlan) {
+            is Schedule -> scheduleRepository.insertSchedule(newPlan)
+            is Todo -> todoRepository.insertTodo(newPlan)
+            // Handle other implementations similarly
         }
     }
     override suspend fun updatePlan(plan: Plan) {

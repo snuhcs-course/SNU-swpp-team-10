@@ -11,12 +11,14 @@ import java.util.Date
 
 
 @Entity(
-    tableName = "schedule", foreignKeys = [ForeignKey(
-        entity = Category::class,
-        parentColumns = ["id"],
-        childColumns = ["category_id"],
-        onDelete = ForeignKey.SET_DEFAULT
-    ), ForeignKey(
+    tableName = "schedule", foreignKeys = [
+//        ForeignKey(
+//        entity = Category::class,
+//        parentColumns = ["id"],
+//        childColumns = ["category_id"],
+//        onDelete = ForeignKey.SET_DEFAULT
+//    ),
+        ForeignKey(
         entity = RepeatGroup::class,
         parentColumns = ["id"],
         childColumns = ["repeat_group_id"],
@@ -46,9 +48,9 @@ data class Schedule(
     @ColumnInfo(name = "category_id", defaultValue = "NULL")
     @SerializedName("category_id")
     override val categoryId: Int? = null,
-    @ColumnInfo(name = "priority", defaultValue = "3")
+    @ColumnInfo(name = "priority", defaultValue = "NULL")
     @SerializedName("priority")
-    override val priority: Int = 3,
+    override val priority: Int? = null,
     @ColumnInfo(name = "show_in_monthly_view", defaultValue = "0")
     @SerializedName("show_in_monthly_view")
     override val showInMonthlyView: Boolean = false,
