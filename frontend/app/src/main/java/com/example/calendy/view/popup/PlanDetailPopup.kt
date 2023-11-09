@@ -82,7 +82,7 @@ fun PlanDetailPopup(
                         {
                             val isSameAMPM = plan.startTime.toAmPmString().equals( plan.endTime.toAmPmString())
                             val ampmString = if(isSameAMPM) "" else plan.endTime.toAmPmString() + " "
-                            startTimeString += " ~ " + ampmString + plan.endTime.toTimeString()
+                            startTimeString += " \n~ " + ampmString + plan.endTime.toTimeString()
                         }
                         else
                             startTimeString ="  " + startTimeString

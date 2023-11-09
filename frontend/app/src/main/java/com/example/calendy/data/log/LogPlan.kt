@@ -8,4 +8,9 @@ interface LogPlan {
     val messageId: Int
     val logType: String // "INSERT", "UPDATE", "DELETE"
     val planId: Int? // null when logType = "INSERT"
+
+    sealed class PlanType {
+        object LogSchedule : PlanType()
+        object LogTodo: PlanType()
+    }
 }

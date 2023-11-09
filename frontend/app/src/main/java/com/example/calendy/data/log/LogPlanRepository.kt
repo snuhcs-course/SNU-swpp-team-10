@@ -28,13 +28,13 @@ class LogPlanRepository(
     }
 
     // TODO: Flow를 써야 할 수도?
-    override fun getLogPlansByMessageId(messageId: Int): List<LogPlan> {
+    override suspend fun getLogPlansByMessageId(messageId: Int): List<LogPlan> {
         val logScheduleList = logScheduleRepository.getLogSchedulesByMessageId(messageId)
         val logTodoList = logTodoRepository.getLogTodosByMessageId(messageId)
         return logScheduleList + logTodoList
     }
 
-    override fun getAllLogPlans(): List<LogPlan> {
+    override suspend fun getAllLogPlans(): List<LogPlan> {
         val logScheduleList = logScheduleRepository.getAllLogSchedules()
         val logTodoList = logTodoRepository.getAllLogTodos()
         return logScheduleList + logTodoList

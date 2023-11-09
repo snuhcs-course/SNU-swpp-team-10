@@ -11,6 +11,7 @@ import com.example.calendy.data.MessageBody
 import com.example.calendy.data.category.ICategoryRepository
 import com.example.calendy.data.emptydb.EmptyDatabase
 import com.example.calendy.data.log.ILogPlanRepository
+import com.example.calendy.data.log.LogPlan
 import com.example.calendy.data.log.LogSchedule
 import com.example.calendy.data.log.LogTodo
 import com.example.calendy.data.message.IMessageRepository
@@ -66,14 +67,7 @@ class MessagePageViewModel(
         Log.d("calendy", "getmessages")
     }
 
-    fun getAllMessages(): StateFlow<List<Message>> {
-        val messages = messageRepository.getAllMessages().stateIn(
-            scope = viewModelScope,
-            initialValue = emptyList<Message>(),
-            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000)
-        )
-        return messages
-    }
+
 
     fun addUserMessage(text: String) {
         // add user input in text input field to db 

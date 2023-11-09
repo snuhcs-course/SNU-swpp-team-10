@@ -35,4 +35,8 @@ class DummyScheduleRepository: IScheduleRepository {
         TODO("Not yet implemented")
     }
 
+    override suspend fun getSchedulesByIds(ids: List<Int>): List<Schedule> {
+        TODO("Not yet implemented")
+    }
+
 }

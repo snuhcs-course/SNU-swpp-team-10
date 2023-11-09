@@ -17,4 +17,5 @@ interface ITodoRepository {
     fun getTodoById(id: Int): Flow<Todo>
     fun getAllTodo(): Flow<List<Todo>>
     fun getTodosViaQuery(query: SupportSQLiteQuery): List<Todo>
+    abstract suspend fun getTodosByIds(iDs: List<Int>): List<Todo>
 }

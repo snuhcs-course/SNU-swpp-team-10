@@ -4,6 +4,6 @@ interface ILogScheduleRepository {
     suspend fun insertLogSchedule(logSchedule: LogSchedule)
     suspend fun updateLogSchedule(logSchedule: LogSchedule)
     suspend fun deleteLogSchedule(logSchedule: LogSchedule)
-    fun getLogSchedulesByMessageId(messageId: Int): List<LogSchedule>
-    fun getAllLogSchedules(): List<LogSchedule>
+    suspend fun getLogSchedulesByMessageId(messageId: Int): List<LogSchedule>
+    suspend fun getAllLogSchedules(): List<LogSchedule>
 }

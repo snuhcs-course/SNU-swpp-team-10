@@ -21,6 +21,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
@@ -327,12 +329,25 @@ fun AddButton(
 
     ) {
         Icon(
-            painter = painterResource(id = R.drawable.add_new_plan_button),
-            contentDescription =  "add",
+            imageVector = Icons.Filled.Add,
+            contentDescription = "Add",
             modifier = Modifier
-                .wrapContentSize()
-
+                .size(80.dp)
+                .background(color = Color(0xFFACC7FA), shape = RoundedCornerShape(20.dp))
+                .shadow(
+                    elevation = 4.dp,
+                    spotColor = Color(0x40000000),
+                    ambientColor = Color(0x40000000)
+                ),
         )
+
+//        Icon(
+//            painter = painterResource(id = R.drawable.add_new_plan_button),
+//            contentDescription =  "add",
+//            modifier = Modifier
+//                .wrapContentSize()
+//
+//        )
     }
 }
 

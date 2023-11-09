@@ -140,7 +140,7 @@ fun Date.toDateDayString(showYear:Boolean=false): String
 fun Date.toDateTimeString(showYear: Boolean = false): String
     = toDateString(showYear) + " " + toAmPmString() + " " + toTimeString(hour12 = true)
 fun Date.toDateString(showYear: Boolean):String
-    = if(showYear) String.format("%d년 %d월 %d일",year,month,date) else String.format("%d월 %d일",month,date)
+    = if(showYear) String.format("%d년 %d월 %d일",year+1900,month+1,date) else String.format("%d월 %d일",month+1,date)
 fun Date.toAmPmString():String = if(hours<12) "오전" else "오후"
 fun Date.toTimeString(hour12:Boolean = false, showSeconds:Boolean=false):String
 {

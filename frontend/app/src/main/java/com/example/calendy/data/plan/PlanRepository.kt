@@ -62,5 +62,10 @@ class PlanRepository(
         }
     }
 
+    override suspend fun getPlansByIds(scheduelIDs: List<Int>, todoIDs:List<Int>): List<Plan> {
+        val schedules = scheduleRepository.getSchedulesByIds(scheduelIDs)
+        val todos = todoRepository.getTodosByIds(todoIDs)
+        return schedules + todos
+    }
 
 }

@@ -36,4 +36,8 @@ class TodoLocalDataSource(private val todoDao: TodoDao) {
     fun getTodosViaQuery(query: SupportSQLiteQuery): List<Todo> =
         todoDao.getTodosViaQuery(query)
 
+    suspend fun getTodosByIds(iDs: List<Int>): List<Todo> {
+        return todoDao.getTodosByIds(iDs)
+    }
+
 }
