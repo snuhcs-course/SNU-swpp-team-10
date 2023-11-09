@@ -125,7 +125,7 @@ fun ToDoListPage(
                 add(Calendar.DAY_OF_YEAR, 30)
             }
             calendar.time = currentDate
-            item { OneDayTodos(date = currentDate, todos = todosForToday) }
+            item { OneDayTodos(date = currentDate, todos = todosForToday, todoListViewModel = todoListViewModel) }
             calendar.add(Calendar.DAY_OF_YEAR, 1)
 
             while (calendar.before(endRange)) {
@@ -133,7 +133,7 @@ fun ToDoListPage(
                 item {
                     val todos = todoListViewModel.getTodosForDate(futureDate)
                         .collectAsState(initial = emptyList()).value
-                    OneDayTodos(date = futureDate, todos = todos)
+                    OneDayTodos(date = futureDate, todos = todos, todoListViewModel = todoListViewModel)
                 }
                 calendar.add(Calendar.DAY_OF_YEAR, 1)
             }
@@ -143,7 +143,7 @@ fun ToDoListPage(
 }
 
 @Composable
-fun OneDayTodos(date: Date, todos: List<Todo>) {
+fun OneDayTodos(date: Date, todos: List<Todo>, todoListViewModel: TodoListViewModel) {
     Column {
         Divider()
         Text(
@@ -154,13 +154,13 @@ fun OneDayTodos(date: Date, todos: List<Todo>) {
             else SimpleDateFormat("MM.dd", Locale.getDefault()).format(date)
         )
         todos.forEach { toDo ->
-            ToDoItem(toDo)
+            ToDoItem(toDo, todoListViewModel)
         }
     }
 }
 
 @Composable
-fun ToDoItem(todo: Todo) {
+fun ToDoItem(todo: Todo, todoListViewModel: TodoListViewModel) {
     var isChecked by remember { mutableStateOf(false) }
 
     Row(
@@ -169,7 +169,10 @@ fun ToDoItem(todo: Todo) {
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Checkbox(checked = isChecked, onCheckedChange = { isChecked = it })
+        Checkbox(checked = isChecked, onCheckedChange = {
+            isChecked = it
+            todoListViewModel.updateCompletionOfTodo(todo)
+        })
         Spacer(modifier = Modifier.width(8.dp))
         Column(modifier = Modifier.padding(3.dp)){
             Text(

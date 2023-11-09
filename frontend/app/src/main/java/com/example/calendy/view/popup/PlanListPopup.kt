@@ -21,6 +21,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddBox
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
@@ -327,7 +330,7 @@ fun AddButton(
 
     ) {
         Icon(
-            painter = painterResource(id = R.drawable.add_new_plan_button),
+            imageVector = Icons.Filled.Add,
             contentDescription =  "add",
             modifier = Modifier
                 .wrapContentSize()

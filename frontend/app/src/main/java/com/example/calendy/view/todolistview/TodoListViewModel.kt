@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.Date
 
@@ -36,6 +37,12 @@ class TodoListViewModel(
         val end: Date = calendar.time // This represents 23:59:59 of the current day
 
         return todoRepository.getTodosStream(start, end)
+    }
+
+    fun updateCompletionOfTodo(todo: Todo) {
+        viewModelScope.launch{
+            todoRepository.updateTodo(todo.copy(complete = !todo.complete))
+        }
     }
 
 
