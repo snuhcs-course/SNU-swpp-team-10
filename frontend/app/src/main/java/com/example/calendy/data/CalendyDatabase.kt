@@ -22,7 +22,7 @@ import com.example.calendy.data.repeatgroup.RepeatGroupDao
 
 @Database(
     entities = [Schedule::class, Todo::class, Category::class, Message::class, RepeatGroup::class, LogSchedule::class, LogTodo::class],
-    version = 8,
+    version = 9,
     exportSchema = false
 )
 @TypeConverters(RoomConverters::class)
