@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddBox
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
@@ -330,7 +331,7 @@ fun AddButton(
     ) {
         Icon(
             imageVector = Icons.Filled.Add,
-            contentDescription = "Add",
+            contentDescription =  "add",
             modifier = Modifier
                 .size(80.dp)
                 .background(color = Color(0xFFACC7FA), shape = RoundedCornerShape(20.dp))
