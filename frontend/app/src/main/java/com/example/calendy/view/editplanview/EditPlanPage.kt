@@ -74,6 +74,11 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
     val isPageAdd = editPlanUiState.isAddPage
     val isPageEdit = !isPageAdd
 
+    val commonHeight = 50.dp // common height for the Repeat, Category, Priority, Memo, MonthlyViewSwitch regions
+
+    val selectedColor = Color(0xFFDBE2F6) // Color when selected
+    val unselectedColor = Color.Transparent // Color when not selected
+
     val verticalScrollState = rememberScrollState(initial = 0)
     Column(
         modifier = Modifier
@@ -207,13 +212,13 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
         //endregion
 
         //region Repeat
-       FieldWithLeadingText(leadingText = "반복") {
+       FieldWithLeadingText(leadingText = "반복", modifier = Modifier.height(commonHeight)) {
         SetRepeat(editPlanUiState, editPlanViewModel)
        }
         //endregion
 
         //region Category
-       FieldWithLeadingText(leadingText = "분류") {
+       FieldWithLeadingText(leadingText = "분류", modifier = Modifier.height(commonHeight)) {
         CategorySelector(
             currentCategory = editPlanUiState.category,
             categoryList = categoryList,
@@ -224,8 +229,8 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
         //endregion
 
         //region Priority
-        FieldWithLeadingText(leadingText = "중요도") {
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        FieldWithLeadingText(leadingText = "중요도", modifier = Modifier.height(commonHeight)) {
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
                 RatingBar(
                     value = editPlanUiState.priority.toFloat(),
                     onValueChange = { editPlanViewModel.setPriority(it.toInt()) },
@@ -237,7 +242,7 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
         //endregion
 
         //region Memo Text Field
-        FieldWithLeadingText(leadingText = "메모", alignment = Alignment.Top) {
+        FieldWithLeadingText(leadingText = "메모", modifier = Modifier.height(commonHeight), alignment = Alignment.Top) {
             BasicTextField(
                 value = editPlanUiState.memoField,
                 onValueChange = { value -> editPlanViewModel.setMemo(value) },
@@ -260,7 +265,11 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
 
         //region Show In Monthly View Switch
         FieldWithLeadingText(
-            leadingText = "월별 캘린더에 표시", modifier = Modifier.fillMaxWidth(), textWidth = 240.dp
+            leadingText = "월별 캘린더에 표시",
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(commonHeight),
+            textWidth = 240.dp
         ) {
             Checkbox(
                 checked = editPlanUiState.showInMonthlyView,
@@ -301,18 +310,23 @@ fun TopAppBar(
 fun TypeButton(
     text: String, isSelected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier
 ) {
+    val backgroundColor = if (isSelected) Color(0xFFDBE2F6) else Color.White
+    val contentColor = Color.Black // Content color based on isSelected
+
     Button(
         onClick = { onClick() },
-        colors = ButtonDefaults.buttonColors(if (isSelected) Color(0xFFDBE2F6) else Color.Transparent),
-        contentPadding= PaddingValues(0.dp),
+        // Set the containerColor for the selected/unselected state
+        colors = ButtonDefaults.buttonColors(containerColor = backgroundColor, contentColor = contentColor),
+        // Adjust padding as needed
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         modifier = modifier
             .border(
                 width = 2.dp,
-                color = Color(0xFF000000),
+                color = Color.Black,
                 shape = RoundedCornerShape(size = 30.dp)
             )
-            .width(60.dp)
-            .height(25.dp)
+            .height(40.dp)
+            .width(100.dp)
     ) {
         Text(
             text = text,
@@ -321,8 +335,6 @@ fun TypeButton(
                 fontSize = 14.sp,
                 lineHeight = 18.sp,
                 fontWeight = FontWeight(500),
-                color = Color(0xFF000000),
-
                 textAlign = TextAlign.Center,
             )
         )
