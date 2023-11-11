@@ -202,9 +202,14 @@ fun NavigationGraph(navController: NavHostController) {
         }
         composable(BottomNavItem.Todo.screenRoute) {
             val viewModel : TodoListViewModel  = viewModel(factory = AppViewModelProvider.Factory)
-            ToDoListPage(viewModel, onNavigateToEditPage = { date: Date? ->
-                val route = DestinationRoute.AddTodo(date = date?: Date()).route
-                navController.navigate(route)
+            ToDoListPage(viewModel, onNavigateToEditPage = { id: Int? ,date: Date? ->
+                if(id != null){
+                    val route = DestinationRoute.EditTodo(id = id).route
+                    navController.navigate(route)
+                } else {
+                    val route = DestinationRoute.AddTodo(date = date?: Date()).route
+                    navController.navigate(route)
+                }
             } )
         }
         composable(BottomNavItem.AiManager.screenRoute) {

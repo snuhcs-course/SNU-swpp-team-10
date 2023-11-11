@@ -283,6 +283,9 @@ class EditPlanViewModel(
 
 
     fun addPlan() {
+        if(_uiState.value.titleField ==""){
+            _uiState.update { currentState -> currentState.copy(titleField = "Untitled") }
+        }
         val currentState = _uiState.value
         when (currentState.entryType) {
             is PlanType.Schedule -> {
@@ -575,6 +578,9 @@ class EditPlanViewModel(
     }
 
     fun updatePlan() {
+        if(_uiState.value.titleField ==""){
+            _uiState.update { currentState -> currentState.copy(titleField = "Untitled") }
+        }
         val currentState = _uiState.value
 
         if (currentState.id==null) {
