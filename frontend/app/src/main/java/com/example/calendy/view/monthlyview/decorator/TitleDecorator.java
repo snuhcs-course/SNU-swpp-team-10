@@ -42,7 +42,7 @@ public class TitleDecorator implements DayViewDecorator {
         int count=0;
         for(Plan p : planList){
             view.addSpan(new SinglePlanSpan(color,p.getTitle(),count++));
-            if(count==2) break; //hardcoded max viewable plan count
+            if(count==4) break; //hardcoded max viewable plan count
         }
     }
 }

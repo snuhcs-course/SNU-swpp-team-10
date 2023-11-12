@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddBox
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -314,15 +315,12 @@ fun TodoListItem(
 
 @Composable
 fun AddButton(
-    date:Date=Date(),
     onButtonClick: () -> Unit = {},
-    onEditComplete:(Plan)->Unit={},
     modifier: Modifier = Modifier
 ){
 
-    IconButton(
+    FloatingActionButton(
         onClick = onButtonClick,
-
         modifier = modifier
 //                .padding(end = 10.dp)
             .wrapContentWidth()
@@ -332,14 +330,7 @@ fun AddButton(
         Icon(
             imageVector = Icons.Filled.Add,
             contentDescription =  "add",
-            modifier = Modifier
-                .size(80.dp)
-                .background(color = Color(0xFFACC7FA), shape = RoundedCornerShape(20.dp))
-                .shadow(
-                    elevation = 4.dp,
-                    spotColor = Color(0x40000000),
-                    ambientColor = Color(0x40000000)
-                ),
+//            modifier = Modifier
         )
 
 //        Icon(
@@ -364,7 +355,6 @@ fun ListPopupPreview(){
         header = { PopupHeaderTitle("Added plans") },
         addButton = {
             AddButton(
-                onEditComplete = {},
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
 
@@ -401,5 +391,5 @@ fun EditButtonPreview(){
 @Preview
 @Composable
 fun AddButtonPreview(){
-    AddButton( onEditComplete = {})
+    AddButton( )
 }
