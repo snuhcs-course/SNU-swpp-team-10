@@ -1,30 +1,20 @@
 package com.example.calendy.view.monthlyview;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
 
 import androidx.activity.ComponentActivity;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.calendy.R;
 import com.example.calendy.data.PlanType;
-import com.example.calendy.data.plan.Plan;
-import com.example.calendy.data.plan.Schedule;
-import com.example.calendy.data.plan.Todo;
-import com.prolificinteractive.materialcalendarview.CalendarDay;
+import com.example.calendy.data.maindb.plan.Plan;
+import com.example.calendy.data.maindb.plan.Schedule;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Set;
 
 public class MonthlyDayPlanDetailPopup extends ComponentActivity {
 
@@ -60,9 +50,9 @@ public class MonthlyDayPlanDetailPopup extends ComponentActivity {
         // gets date data from previous activity
         Intent intent = getIntent();
         int planId = intent.getIntExtra("planId",0);
-        Plan.PlanType planType =
+        com.example.calendy.data.maindb.plan.PlanType planType =
                 intent.getIntExtra("planType", PlanType.SCHEDULE) == PlanType.SCHEDULE ?
-                        Plan.PlanType.Schedule.INSTANCE : Plan.PlanType.Todo.INSTANCE;
+                        com.example.calendy.data.maindb.plan.PlanType.SCHEDULE : com.example.calendy.data.maindb.plan.PlanType.TODO;
 
         // fetch data view model
         model = new ViewModelProvider(this, new MonthlyDayPlanDetailViewModel.Factory(getApplication(),planId,planType)).get(MonthlyDayPlanDetailViewModel.class);

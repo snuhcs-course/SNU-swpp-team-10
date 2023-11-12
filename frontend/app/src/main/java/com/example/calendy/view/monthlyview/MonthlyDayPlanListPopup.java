@@ -1,6 +1,5 @@
 package com.example.calendy.view.monthlyview;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,24 +10,19 @@ import android.view.Window;
 import android.widget.TextView;
 
 import androidx.activity.ComponentActivity;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.calendy.AppContainer;
 import com.example.calendy.R;
-import com.example.calendy.data.plan.Plan;
-import com.example.calendy.data.plan.PlanRepository;
-import com.example.calendy.data.plan.Schedule;
-import com.example.calendy.data.plan.Todo;
+import com.example.calendy.data.maindb.plan.Plan;
+import com.example.calendy.data.maindb.plan.Schedule;
+import com.example.calendy.data.maindb.plan.Todo;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import com.example.calendy.utils.DateHelperKt;
 
 public class MonthlyDayPlanListPopup extends ComponentActivity {
 
@@ -58,25 +52,24 @@ public class MonthlyDayPlanListPopup extends ComponentActivity {
         //초기 데이터 가져오기
         // gets date data from previous activity
         Intent intent = getIntent();
-        int yy = intent.getIntExtra("year",2023);
+        int yy = intent.getIntExtra("year", 2023);
         int mm = intent.getIntExtra("month", 0);
         int dd = intent.getIntExtra("day", 1);
-        date=CalendarDay.from(yy,mm,dd);
+        date = CalendarDay.from(yy, mm, dd);
 
         // fetch data view model
-        model = new ViewModelProvider(this, new MonthlyDayPlanListViewModel.Factory(getApplication(),date)).get(MonthlyDayPlanListViewModel.class);
+        model = new ViewModelProvider(this, new MonthlyDayPlanListViewModel.Factory(getApplication(), date)).get(MonthlyDayPlanListViewModel.class);
 
-        planList=model.getPlans().getValue();
+        planList = model.getPlans().getValue();
 
         //use dummy data
         //TODO: use real data
         ArrayList dummyDayPlans = new ArrayList<>();
-        dummyDayPlans.add(new Schedule(1231,"test1", new Date(2023,9,11,18,00),new Date(2023,9,11,20,00),"memomemo",1232,1,2,true,false));
-        dummyDayPlans.add(new Schedule(1232,"test2", new Date(2023,9,11,18,00),new Date(2023,9,11,20,00),"memomemo",1232,1,2,true,false));
-        dummyDayPlans.add(new Schedule(1233,"test3", new Date(2023,9,11,18,00),new Date(2023,9,11,20,00),"memomemo",1232,1,2,true,false));
-        dummyDayPlans.add(new Todo(1234,"test4", new Date(2023,9,11,18,00),false,false,false,false,"memomemo",1232,1,2,true,false));
-        dummyDayPlans.add(new Todo(1235,"test5", new Date(2023,9,11,18,00),false,false,false,false,"memomemo",1232,1,2,true,false));
-
+        dummyDayPlans.add(new Schedule(1231, "test1", new Date(2023, 9, 11, 18, 00), new Date(2023, 9, 11, 20, 00), "memomemo", 1232, 1, 2, true, false));
+        dummyDayPlans.add(new Schedule(1232, "test2", new Date(2023, 9, 11, 18, 00), new Date(2023, 9, 11, 20, 00), "memomemo", 1232, 1, 2, true, false));
+        dummyDayPlans.add(new Schedule(1233, "test3", new Date(2023, 9, 11, 18, 00), new Date(2023, 9, 11, 20, 00), "memomemo", 1232, 1, 2, true, false));
+        dummyDayPlans.add(new Todo(1234, "test4", new Date(2023, 9, 11, 18, 00), false, "memomemo", 1232, 1, 2, true, false));
+        dummyDayPlans.add(new Todo(1235, "test5", new Date(2023, 9, 11, 18, 00), false, "memomemo", 1232, 1, 2, true, false));
 
 
         // list recycler view
@@ -87,10 +80,10 @@ public class MonthlyDayPlanListPopup extends ComponentActivity {
         dayPlanListAdaptor.setOnItemClickListener(new MonthlyDayPlanListAdaptor.OnItemClickEventListener() {
             @Override
             public void onItemClick(View view, int position) {
-                Intent intent= new Intent(MonthlyDayPlanListPopup.this, MonthlyDayPlanDetailPopup.class);
+                Intent intent = new Intent(MonthlyDayPlanListPopup.this, MonthlyDayPlanDetailPopup.class);
 //                intent.putExtra("planId",)
                 startActivity(intent);
-                Log.d("","clicked item :"+position);
+                Log.d("", "clicked item :" + position);
             }
         });
         recyclerView.setAdapter(dayPlanListAdaptor); // 어댑터 설정
@@ -102,7 +95,7 @@ public class MonthlyDayPlanListPopup extends ComponentActivity {
         dateTextView.setText(Integer.toString(date.getDay()));
     }
 
-    public void closeActivity(){
+    public void closeActivity() {
         //데이터 전달하기
         Intent intent = new Intent();
 //        intent.putExtra("result", "Close Popup");

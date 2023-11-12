@@ -2,33 +2,24 @@ package com.example.calendy
 
 import android.app.Application
 import android.content.Context
-import com.example.calendy.data.CalendyApi
-import com.example.calendy.data.CalendyDatabase
-import com.example.calendy.data.category.CategoryLocalDataSource
-import com.example.calendy.data.category.CategoryRepository
-import com.example.calendy.data.category.ICategoryRepository
-import com.example.calendy.data.log.ILogPlanRepository
-import com.example.calendy.data.log.ILogScheduleRepository
-import com.example.calendy.data.log.LogPlanRepository
-import com.example.calendy.data.log.LogScheduleRepository
-import com.example.calendy.data.log.LogTodoRepository
-import com.example.calendy.data.message.IMessageRepository
-import com.example.calendy.data.message.MessageLocalDataSource
-import com.example.calendy.data.message.MessageRepository
-import com.example.calendy.data.plan.IPlanRepository
-import com.example.calendy.data.plan.PlanRepository
-import com.example.calendy.data.plan.schedule.IScheduleRepository
-import com.example.calendy.data.plan.schedule.ScheduleLocalDataSource
-import com.example.calendy.data.plan.schedule.ScheduleRemoteDataSource
-import com.example.calendy.data.plan.schedule.ScheduleRepository
-import com.example.calendy.data.plan.todo.ITodoRepository
-import com.example.calendy.data.plan.todo.TodoLocalDataSource
-import com.example.calendy.data.plan.todo.TodoRepository
-import com.example.calendy.data.repeatgroup.IRepeatGroupRepository
-import com.example.calendy.data.repeatgroup.RepeatGroupLocalDataSource
-import com.example.calendy.data.repeatgroup.RepeatGroupRepository
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import com.example.calendy.data.maindb.CalendyDatabase
+import com.example.calendy.data.maindb.category.CategoryRepository
+import com.example.calendy.data.maindb.category.ICategoryRepository
+import com.example.calendy.data.maindb.history.HistoryRepository
+import com.example.calendy.data.maindb.history.IHistoryRepository
+import com.example.calendy.data.maindb.message.IMessageRepository
+import com.example.calendy.data.maindb.message.MessageRepository
+import com.example.calendy.data.maindb.plan.IPlanRepository
+import com.example.calendy.data.maindb.plan.PlanRepository
+import com.example.calendy.data.maindb.plan.schedule.IScheduleRepository
+import com.example.calendy.data.maindb.plan.schedule.ScheduleRepository
+import com.example.calendy.data.maindb.plan.todo.ITodoRepository
+import com.example.calendy.data.maindb.plan.todo.TodoRepository
+import com.example.calendy.data.maindb.repeatgroup.IRepeatGroupRepository
+import com.example.calendy.data.maindb.repeatgroup.RepeatGroupRepository
+import com.example.calendy.data.network.CalendyServerApi
+import com.example.calendy.data.network.RetrofitClient
+import com.example.calendy.data.rawsqldb.RawSqlDatabase
 
 class CalendyApplication : Application() {
     lateinit var container: IAppContainer
@@ -45,56 +36,41 @@ interface IAppContainer {
     val categoryRepository: ICategoryRepository
     val messageRepository: IMessageRepository
     val repeatGroupRepository: IRepeatGroupRepository
-    val logPlanRepository: ILogPlanRepository
+    val historyRepository: IHistoryRepository
+    val rawSqlDatabase: RawSqlDatabase
+    val calendyServerApi: CalendyServerApi // Network
 }
 
 class AppContainer(private val context: Context) : IAppContainer {
+    val db: CalendyDatabase by lazy { CalendyDatabase.getDatabase(context) }
+
     override val planRepository: IPlanRepository by lazy {
         PlanRepository(scheduleRepository, todoRepository)
     }
 
+    // TODO: Don't expose scheduleRepository
     override val scheduleRepository: IScheduleRepository by lazy {
-        ScheduleRepository(
-            ScheduleLocalDataSource(
-                CalendyDatabase.getDatabase(context).scheduleDao()
-            )
-        )
+        ScheduleRepository(db.scheduleDao())
     }
     override val todoRepository: ITodoRepository by lazy {
-        TodoRepository(TodoLocalDataSource(CalendyDatabase.getDatabase(context).todoDao()))
+        TodoRepository(db.todoDao())
     }
     override val categoryRepository: ICategoryRepository by lazy {
-        CategoryRepository(
-            CategoryLocalDataSource(
-                CalendyDatabase.getDatabase(context).categoryDao()
-            )
-        )
+        CategoryRepository(db.categoryDao())
     }
     override val messageRepository: IMessageRepository by lazy {
-        MessageRepository(MessageLocalDataSource(CalendyDatabase.getDatabase(context).messageDao()))
+        MessageRepository(db.messageDao())
     }
     override val repeatGroupRepository: IRepeatGroupRepository by lazy {
-        RepeatGroupRepository(
-            RepeatGroupLocalDataSource(
-                CalendyDatabase.getDatabase(context).repeatGroupDao()
-            )
-        )
+        RepeatGroupRepository(db.repeatGroupDao())
     }
-    override val logPlanRepository: ILogPlanRepository by lazy {
-        LogPlanRepository(
-            LogScheduleRepository(CalendyDatabase.getDatabase(context).logScheduleDao()),
-            LogTodoRepository(CalendyDatabase.getDatabase(context).logTodoDao())
-        )
+    override val historyRepository: IHistoryRepository by lazy {
+        HistoryRepository(db.managerHistoryDao(), db.savedScheduleDao(), db.savedTodoDao())
     }
+    override val rawSqlDatabase: RawSqlDatabase = RawSqlDatabase.getDatabase(context)
 
-    // TODO: Use CalendyApi in CalendyApplication
-//    private val baseUrl = "https://10.0.0.2"
-//    private val retrofit =
-//            Retrofit.Builder().baseUrl(baseUrl).addConverterFactory(GsonConverterFactory.create())
-//                    .build()
-//    private val serviceApi: CalendyApi by lazy {
-//        retrofit.create(CalendyApi::class.java)
-//    }
-//
+    override val calendyServerApi: CalendyServerApi by lazy {
+        RetrofitClient.instance
+    }
 
 }

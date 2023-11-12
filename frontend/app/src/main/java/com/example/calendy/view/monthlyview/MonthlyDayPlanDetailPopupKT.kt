@@ -3,27 +3,25 @@ package com.example.calendy.view.monthlyview
 import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.TextView
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.calendy.AppViewModelProvider
 import com.example.calendy.R
-import com.example.calendy.data.plan.Plan
-import com.example.calendy.data.plan.Schedule
-import com.example.calendy.data.plan.Todo
+import com.example.calendy.data.maindb.plan.Plan
+import com.example.calendy.data.maindb.plan.PlanType
+import com.example.calendy.data.maindb.plan.Schedule
+import com.example.calendy.data.maindb.plan.Todo
 
 @Composable
 fun MonthlyDayPlanDetailPopupKT(
     monthlyViewModel: MonthlyViewModel = viewModel(factory = AppViewModelProvider.Factory)
     , onDismissRequest : ()->Unit = {}
     , selectedPlan: Plan,
-    onNavigateToEditPage: (id: Int?, type: Plan.PlanType) -> Unit
+    onNavigateToEditPage: (id: Int?, type: PlanType) -> Unit
 ){
 //    val selectedPlan : Plan by monthlyViewModel.getPlanByID(selectedPlanId,planType)!!.collectAsState()
 
@@ -56,7 +54,7 @@ fun MonthlyDayPlanDetailPopupKT(
                             endTimeView.text = selectedPlan.endTime.toString()
                         }
 
-                        is Todo ->
+                        is Todo     ->
                         {
                             startTimeView.text = selectedPlan.dueTime.toString()
                         }
@@ -65,8 +63,8 @@ fun MonthlyDayPlanDetailPopupKT(
 
                     findViewById<Button>(R.id.editPlanButton).setOnClickListener {
                         when(selectedPlan) {
-                            is Schedule -> onNavigateToEditPage(selectedPlan.id, Plan.PlanType.Schedule)
-                            else        -> onNavigateToEditPage(selectedPlan.id, Plan.PlanType.Todo)
+                            is Schedule -> onNavigateToEditPage(selectedPlan.id, PlanType.SCHEDULE)
+                            else        -> onNavigateToEditPage(selectedPlan.id, PlanType.TODO)
                         }
                     }
                 }

@@ -1,8 +1,7 @@
 package com.example.calendy.data.dummy
 
-import com.example.calendy.data.repeatgroup.IRepeatGroupRepository
-import com.example.calendy.data.repeatgroup.RepeatGroup
-import kotlinx.coroutines.flow.Flow
+import com.example.calendy.data.maindb.repeatgroup.IRepeatGroupRepository
+import com.example.calendy.data.maindb.repeatgroup.RepeatGroup
 
 class DummyRepeatGroupRepository : IRepeatGroupRepository {
     override suspend fun insert(repeatGroup: RepeatGroup): Long = TODO("Not yet implemented")
@@ -16,7 +15,7 @@ class DummyRepeatGroupRepository : IRepeatGroupRepository {
         TODO("Not yet implemented")
     }
 
-    override fun getRepeatGroupById(int: Int): Flow<RepeatGroup> {
+    override fun getRepeatGroupById(int: Int): RepeatGroup {
         TODO("Not yet implemented")
     }
 

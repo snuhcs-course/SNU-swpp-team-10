@@ -25,9 +25,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.calendy.AppViewModelProvider
-import com.example.calendy.data.message.Message
-import com.example.calendy.data.plan.Plan
-import com.example.calendy.data.plan.Todo
+import com.example.calendy.data.maindb.message.Message
+import com.example.calendy.data.maindb.plan.Plan
+import com.example.calendy.data.maindb.plan.Todo
 import com.example.calendy.view.popup.PlanDetailPopup
 import com.example.calendy.view.popup.PlanListPopup
 import java.util.Date
@@ -48,7 +48,7 @@ fun MessageContentUser(
 fun MessageContentManager(
     messageLog: Message
 ){
-    when(messageLog.hasLogPlan)
+    when(messageLog.hasRevision)
     {
         false -> MessageContentManagerDefault(messageLog)
         true  -> MessageContentManagerWithButton(messageLog)
@@ -75,7 +75,7 @@ fun MessageContentManagerWithButton(
 
     var openListPopup : Boolean by remember { mutableStateOf(false)   }
     var openDetailPopup : Boolean by remember { mutableStateOf(false) }
-    var selectedPlan : Plan by remember { mutableStateOf(Todo(-1,"", Date()))     }
+    var selectedPlan : Plan by remember { mutableStateOf(Todo(-1, "", Date()))     }
 
 
 

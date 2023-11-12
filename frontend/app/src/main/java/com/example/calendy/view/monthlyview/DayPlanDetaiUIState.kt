@@ -1,19 +1,15 @@
 package com.example.calendy.view.monthlyview
 
-import com.example.calendy.R
-import com.example.calendy.data.PlanType
-import com.example.calendy.data.category.Category
-import com.example.calendy.data.plan.Plan
-import com.example.calendy.data.plan.Schedule
-import com.example.calendy.data.plan.Todo
+import com.example.calendy.data.maindb.plan.PlanType
+import com.example.calendy.data.maindb.plan.Schedule
+import com.example.calendy.data.maindb.plan.Todo
 import java.util.Date
-import kotlin.reflect.typeOf
 
 data class DayPlanDetailUiState(
     val item: DayPlanDetailItem? = null,
 )
 data class DayPlanDetailItem(
-    val planType: Plan.PlanType = Plan.PlanType.Schedule,
+    val planType: PlanType = PlanType.SCHEDULE,
     val title: String = "",
     val startTime: Date = Date(),// schedule일 경우 필요
     val endTime: Date = Date(), //schedule 과  todo에 모두 필요
@@ -24,7 +20,9 @@ data class DayPlanDetailItem(
 )
 
 fun Schedule.toDetailItem() : DayPlanDetailItem = DayPlanDetailItem(
-    planType = if(this.javaClass == Schedule::class.java) {Plan.PlanType.Schedule} else {Plan.PlanType.Todo},
+    planType = if(this.javaClass == Schedule::class.java) {
+        com.example.calendy.data.maindb.plan.PlanType.SCHEDULE} else {
+        com.example.calendy.data.maindb.plan.PlanType.TODO},
     title = title,
     startTime = startTime,
     endTime = endTime,

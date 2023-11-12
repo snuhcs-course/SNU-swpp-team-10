@@ -18,79 +18,95 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.example.calendy.AppViewModelProvider
 import com.example.calendy.R
-import com.example.calendy.data.dummy.DummyCategoryRepository
 import com.example.calendy.data.dummy.DummyPlanRepository
-import com.example.calendy.data.dummy.DummyRepeatGroupRepository
-import com.example.calendy.data.dummy.DummyScheduleRepository
-import com.example.calendy.data.dummy.DummyTodoRepository
-import com.example.calendy.data.plan.Plan
-import com.example.calendy.data.plan.Schedule
-import com.example.calendy.data.plan.Todo
+import com.example.calendy.data.maindb.plan.IPlanRepository
+import com.example.calendy.data.maindb.plan.Plan
+import com.example.calendy.data.maindb.plan.PlanType
+import com.example.calendy.data.maindb.plan.Schedule
+import com.example.calendy.data.maindb.plan.Todo
 import com.example.calendy.utils.getWeekDay
 import com.example.calendy.utils.toCalendarDay
 import com.example.calendy.utils.toDate
 import com.example.calendy.view.monthlyview.MonthlyDayPlanListAdaptor.OnItemClickEventListener
 import com.prolificinteractive.materialcalendarview.CalendarDay
+import kotlinx.coroutines.flow.Flow
+import java.util.Date
 
 @Composable
 fun MonthlyDayPlanListPopupKT(
-    monthlyViewModel: MonthlyViewModel = viewModel(factory = AppViewModelProvider.Factory)
-    ,
-    onDismissRequest: () -> Unit = {}
-    ,
+    monthlyViewModel: MonthlyViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    onDismissRequest: () -> Unit = {},
     selectedDate: CalendarDay = CalendarDay.today(),
-    onNavigateToEditPage: (id: Int?, type: Plan.PlanType) -> Unit
-){
+    onNavigateToEditPage: (id: Int?, type: PlanType) -> Unit
+) {
 
 //    val planList : List<Plan> by monthlyViewModel.getPlanOfDay(selectedDate)!!.collectAsState()
-    val planList : List<Plan> by monthlyViewModel.getAllPlans()!!.collectAsState()
+    val planList: List<Plan> by monthlyViewModel.getAllPlans()!!.collectAsState()
     val selectedPlanList = planList.filter {
-        when(it) {
+        when (it) {
             is Schedule -> {
                 val startDay = it.startTime.toCalendarDay()
                 val endDay = it.endTime.toCalendarDay()
-                selectedDate.isInRange(startDay, endDay) || (selectedDate == startDay) || (selectedDate == endDay)
+                selectedDate.isInRange(
+                    startDay, endDay
+                ) || (selectedDate==startDay) || (selectedDate==endDay)
             }
+
             is Todo     -> {
                 val day = it.dueTime.toCalendarDay()
-                day == selectedDate
+                day==selectedDate
             }
         }
     }
-    var recyclerView : RecyclerView
-    var dateTextView : TextView
-    var weekdayTextView : TextView
-    var openDetailPopup by remember{ mutableStateOf(false) }
+    var recyclerView: RecyclerView
+    var dateTextView: TextView
+    var weekdayTextView: TextView
+    var openDetailPopup by remember { mutableStateOf(false) }
 
-    var selectedPlan : Plan by remember { mutableStateOf(Todo(0,"",CalendarDay.today().toDate(),false,false,false,false,"",null,null,1,false,false) as Plan)}
+    var selectedPlan: Plan by remember {
+        mutableStateOf(
+            Todo(
+                id = 0,
+                title = "",
+                dueTime = CalendarDay.today().toDate(),
+                complete = false,
+                memo = "",
+                repeatGroupId = null,
+                categoryId = null,
+                priority = 1,
+                showInMonthlyView = false,
+                isOverridden = false
+            ) as Plan
+        )
+    }
 
-    Dialog(onDismissRequest={onDismissRequest()}){
+    Dialog(onDismissRequest = { onDismissRequest() }) {
 
-        AndroidView(
-            modifier = Modifier.fillMaxWidth(),
+        AndroidView(modifier = Modifier.fillMaxWidth(),
 
-            factory = { context ->
-                val inflater = LayoutInflater.from(context)
-                val view = inflater.inflate(R.layout.monthly_select_day_popup, null, false)
-                view.apply {
-                    //UI 객체생성
-                    recyclerView = findViewById<RecyclerView>(R.id.monthlyDayPlanListRecycler)
-                    dateTextView = findViewById<TextView>(R.id.planListDayNumber)
-                    weekdayTextView = findViewById<TextView>(R.id.planListDayText)
+                    factory = { context ->
+                        val inflater = LayoutInflater.from(context)
+                        val view = inflater.inflate(R.layout.monthly_select_day_popup, null, false)
+                        view.apply {
+                            //UI 객체생성
+                            recyclerView =
+                                findViewById<RecyclerView>(R.id.monthlyDayPlanListRecycler)
+                            dateTextView = findViewById<TextView>(R.id.planListDayNumber)
+                            weekdayTextView = findViewById<TextView>(R.id.planListDayText)
 
-                    // list recycler view
-                    val linearLayoutManager = LinearLayoutManager(this.context)
-                    recyclerView.layoutManager = linearLayoutManager // LayoutManager 설정
+                            // list recycler view
+                            val linearLayoutManager = LinearLayoutManager(this.context)
+                            recyclerView.layoutManager = linearLayoutManager // LayoutManager 설정
 
-                    findViewById<Button>(R.id.addPlanButton).setOnClickListener {
-                        onNavigateToEditPage(null, Plan.PlanType.Schedule)
-                    }
-                }
+                            findViewById<Button>(R.id.addPlanButton).setOnClickListener {
+                                onNavigateToEditPage(null, PlanType.SCHEDULE)
+                            }
+                        }
 
-            },
-            update = {
+                    }, update = {
 
                 // set item onclick listener
                 val dayPlanListAdaptor = MonthlyDayPlanListAdaptor(selectedPlanList)
@@ -98,7 +114,7 @@ fun MonthlyDayPlanListPopupKT(
                 dayPlanListAdaptor.setOnItemClickListener(OnItemClickEventListener { view, position ->
                     //TODO: open detail popup
                     selectedPlan = planList.get(position)
-                    openDetailPopup=true
+                    openDetailPopup = true
                     Log.d("calendy", "clicked item :$position")
                 })
                 recyclerView = it.findViewById(R.id.monthlyDayPlanListRecycler)
@@ -113,26 +129,21 @@ fun MonthlyDayPlanListPopupKT(
                 weekdayTextView.text = selectedDate.getWeekDay()
                 dateTextView.text = Integer.toString(selectedDate.getDay())
 
-            }
-        )
+            })
     }
 
-    if(openDetailPopup)
-        MonthlyDayPlanDetailPopupKT(
-            onDismissRequest={openDetailPopup=false}
-            , selectedPlan=selectedPlan,
-            onNavigateToEditPage = onNavigateToEditPage
-            )
+    if (openDetailPopup) MonthlyDayPlanDetailPopupKT(
+        onDismissRequest = { openDetailPopup = false },
+        selectedPlan = selectedPlan,
+        onNavigateToEditPage = onNavigateToEditPage
+    )
 
 }
 
-@Preview(showBackground = false,name="List Popup preview")
+@Preview(showBackground = false, name = "List Popup preview")
 @Composable
-fun ListPopupPreview(){
-    MonthlyDayPlanListPopupKT(
-        monthlyViewModel = MonthlyViewModel(
-            planRepository = DummyPlanRepository(),
-        )
-        , {}, onNavigateToEditPage = { _, _ -> }
-    )
+fun ListPopupPreview() {
+    MonthlyDayPlanListPopupKT(monthlyViewModel = MonthlyViewModel(
+        planRepository = DummyPlanRepository(),
+    ), {}, onNavigateToEditPage = { _, _ -> })
 }

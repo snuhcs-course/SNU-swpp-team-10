@@ -3,16 +3,16 @@ package com.example.calendy.view.editplanview
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.calendy.data.category.Category
-import com.example.calendy.data.category.ICategoryRepository
-import com.example.calendy.data.plan.Plan
-import com.example.calendy.data.plan.Plan.PlanType
-import com.example.calendy.data.plan.Schedule
-import com.example.calendy.data.plan.Todo
-import com.example.calendy.data.plan.schedule.IScheduleRepository
-import com.example.calendy.data.plan.todo.ITodoRepository
-import com.example.calendy.data.repeatgroup.IRepeatGroupRepository
-import com.example.calendy.data.repeatgroup.RepeatGroup
+import com.example.calendy.data.maindb.category.Category
+import com.example.calendy.data.maindb.category.ICategoryRepository
+import com.example.calendy.data.maindb.plan.Plan
+import com.example.calendy.data.maindb.plan.PlanType
+import com.example.calendy.data.maindb.plan.Schedule
+import com.example.calendy.data.maindb.plan.Todo
+import com.example.calendy.data.maindb.plan.schedule.IScheduleRepository
+import com.example.calendy.data.maindb.plan.todo.ITodoRepository
+import com.example.calendy.data.maindb.repeatgroup.IRepeatGroupRepository
+import com.example.calendy.data.maindb.repeatgroup.RepeatGroup
 import com.example.calendy.utils.DateHelper.extract
 import com.example.calendy.utils.DateHelper.getDate
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -70,30 +69,30 @@ class EditPlanViewModel(
             // fill in other values after db query
             viewModelScope.launch {
                 val plan = when (type) {
-                    PlanType.Schedule -> {
+                    PlanType.SCHEDULE -> {
                         scheduleRepository.getScheduleById(id)
                     }
 
-                    PlanType.Todo     -> {
+                    PlanType.TODO     -> {
                         todoRepository.getTodoById(id)
                     }
-                }.first()
+                }
 
                 _uiState.value = fillIn(plan)
             }
         }
     }
 
-    private suspend fun fillIn(plan: Plan?): EditPlanUiState {
+    private fun fillIn(plan: Plan?): EditPlanUiState {
        if(plan != null){
            val category: Category? = if (plan.categoryId!=null) {
-               categoryRepository.getCategoryById(plan.categoryId!!).first()
+               categoryRepository.getCategoryById(plan.categoryId!!)
            } else {
                null
            }
 
-           var repeatGroup: RepeatGroup? = if(plan.repeatGroupId!=null) {
-               repeatGroupRepository.getRepeatGroupById(plan.repeatGroupId!!).first()
+           val repeatGroup: RepeatGroup? = if(plan.repeatGroupId!=null) {
+               repeatGroupRepository.getRepeatGroupById(plan.repeatGroupId!!)
            } else null
 
            return when (plan) {
@@ -115,9 +114,6 @@ class EditPlanViewModel(
                    _uiState.value.copy(
                        titleField = plan.title,
                        isComplete = plan.complete,
-                       isYearly = plan.yearly,
-                       isMonthly = plan.monthly,
-                       isDaily = plan.daily,
                        dueTime = plan.dueTime,
                        category = category,
                        repeatGroupId = plan.repeatGroupId,
@@ -285,7 +281,7 @@ class EditPlanViewModel(
     fun addPlan() {
         val currentState = _uiState.value
         when (currentState.entryType) {
-            is PlanType.Schedule -> {
+            PlanType.SCHEDULE -> {
                 val repeatGroup = currentState.repeatGroup
                 if(repeatGroup!=null) {
                     viewModelScope.launch {
@@ -312,7 +308,7 @@ class EditPlanViewModel(
                                             isOverridden = false
                                         )
                                         // Insert the schedule into the database
-                                        scheduleRepository.insertSchedule(newSchedule)
+                                        scheduleRepository.insert(newSchedule)
 
                                         // Calculate the next start and end times
                                         start = Date(start.time + repeatGroup.repeatInterval * 24L * 60 * 60 * 1000)
@@ -342,7 +338,7 @@ class EditPlanViewModel(
                                                 showInMonthlyView = currentState.showInMonthlyView,
                                                 isOverridden = false
                                             )
-                                            scheduleRepository.insertSchedule(newSchedule)
+                                            scheduleRepository.insert(newSchedule)
                                         }
                                         // Move to the next interval
                                         start = Date(start.time + repeatGroup.repeatInterval * 7L * 24 * 60 * 60 * 1000)
@@ -378,7 +374,7 @@ class EditPlanViewModel(
                                                         isOverridden = false
                                                     )
                                                     // Insert the schedule into the database
-                                                    scheduleRepository.insertSchedule(newSchedule)
+                                                    scheduleRepository.insert(newSchedule)
                                                 }
                                             }
                                         }
@@ -401,7 +397,7 @@ class EditPlanViewModel(
                                         isOverridden = false
                                     )
                                     // Insert the schedule into the database
-                                    scheduleRepository.insertSchedule(newSchedule)
+                                    scheduleRepository.insert(newSchedule)
 
                                     // Calculate the next start and end times
                                     start = Date(start.time + repeatGroup.repeatInterval *365L* 24 * 60 * 60 * 1000)
@@ -425,12 +421,12 @@ class EditPlanViewModel(
                         showInMonthlyView = currentState.showInMonthlyView,
                         isOverridden = false
                     )
-                    viewModelScope.launch { scheduleRepository.insertSchedule(newSchedule) }
+                    viewModelScope.launch { scheduleRepository.insert(newSchedule) }
                 }
 
             }
 
-            is PlanType.Todo     -> {
+            PlanType.TODO -> {
                 val repeatGroup = currentState.repeatGroup
                 if(repeatGroup!=null) {
                     viewModelScope.launch{
@@ -444,9 +440,6 @@ class EditPlanViewModel(
                                         val newTodo = Todo(
                                             title = currentState.titleField,
                                             dueTime = dueTime,
-                                            yearly = currentState.isYearly,
-                                            monthly = currentState.isMonthly,
-                                            daily = currentState.isDaily,
                                             memo = currentState.memoField,
                                             complete = currentState.isComplete,
                                             repeatGroupId = repeatGroupId,
@@ -455,7 +448,7 @@ class EditPlanViewModel(
                                             showInMonthlyView = currentState.showInMonthlyView,
                                             isOverridden = false
                                         )
-                                        todoRepository.insertTodo(newTodo)
+                                        todoRepository.insert(newTodo)
                                         dueTime = Date(dueTime.time + repeatGroup.repeatInterval*24L*60*60*1000)
                                     }
                                 } else if(repeatGroup.week) {
@@ -472,9 +465,6 @@ class EditPlanViewModel(
                                             val newTodo = Todo(
                                                 title = currentState.titleField,
                                                 dueTime = newDue,
-                                                yearly = currentState.isYearly,
-                                                monthly = currentState.isMonthly,
-                                                daily = currentState.isDaily,
                                                 memo = currentState.memoField,
                                                 complete = currentState.isComplete,
                                                 repeatGroupId = repeatGroupId,
@@ -483,7 +473,7 @@ class EditPlanViewModel(
                                                 showInMonthlyView = currentState.showInMonthlyView,
                                                 isOverridden = false
                                             )
-                                            todoRepository.insertTodo(newTodo)
+                                            todoRepository.insert(newTodo)
                                         }
                                         // Move to the next interval
                                         dueTime = Date(dueTime.time + repeatGroup.repeatInterval * 7L * 24 * 60 * 60 * 1000)
@@ -507,9 +497,6 @@ class EditPlanViewModel(
                                                     val newTodo = Todo(
                                                         title = currentState.titleField,
                                                         dueTime = newDue,
-                                                        yearly = currentState.isYearly,
-                                                        monthly = currentState.isMonthly,
-                                                        daily = currentState.isDaily,
                                                         memo = currentState.memoField,
                                                         complete = currentState.isComplete,
                                                         repeatGroupId = repeatGroupId,
@@ -518,7 +505,7 @@ class EditPlanViewModel(
                                                         showInMonthlyView = currentState.showInMonthlyView,
                                                         isOverridden = false
                                                     )
-                                                    todoRepository.insertTodo(newTodo)
+                                                    todoRepository.insert(newTodo)
                                                 }
                                             }
                                         }
@@ -532,9 +519,6 @@ class EditPlanViewModel(
                                         val newTodo = Todo(
                                             title = currentState.titleField,
                                             dueTime = dueTime,
-                                            yearly = currentState.isYearly,
-                                            monthly = currentState.isMonthly,
-                                            daily = currentState.isDaily,
                                             memo = currentState.memoField,
                                             complete = currentState.isComplete,
                                             repeatGroupId = repeatGroupId,
@@ -543,7 +527,7 @@ class EditPlanViewModel(
                                             showInMonthlyView = currentState.showInMonthlyView,
                                             isOverridden = false
                                         )
-                                        todoRepository.insertTodo(newTodo)
+                                        todoRepository.insert(newTodo)
                                         dueTime = Date(dueTime.time + repeatGroup.repeatInterval * 365L * 24 * 60 * 60 * 1000)
                                     }
                                 }
@@ -556,9 +540,6 @@ class EditPlanViewModel(
                     val newTodo = Todo(
                         title = currentState.titleField,
                         dueTime = currentState.dueTime,
-                        yearly = currentState.isYearly,
-                        monthly = currentState.isMonthly,
-                        daily = currentState.isDaily,
                         memo = currentState.memoField,
                         complete = currentState.isComplete,
                         repeatGroupId = null,
@@ -567,7 +548,7 @@ class EditPlanViewModel(
                         showInMonthlyView = currentState.showInMonthlyView,
                         isOverridden = false
                     )
-                    viewModelScope.launch { todoRepository.insertTodo(newTodo) }
+                    viewModelScope.launch { todoRepository.insert(newTodo) }
                 }
 
             }
@@ -589,7 +570,7 @@ class EditPlanViewModel(
         } else {
             // id: Int? is smart casted into type Int
             when (currentState.entryType) {
-                is PlanType.Schedule -> {
+                PlanType.SCHEDULE -> {
                     val updatedSchedule = Schedule(
                         id = currentState.id,
                         title = currentState.titleField,
@@ -602,17 +583,14 @@ class EditPlanViewModel(
                         showInMonthlyView = currentState.showInMonthlyView,
                         isOverridden = false
                     )
-                    viewModelScope.launch { scheduleRepository.updateSchedule(updatedSchedule) }
+                    viewModelScope.launch { scheduleRepository.update(updatedSchedule) }
                 }
 
-                is PlanType.Todo     -> {
+                PlanType.TODO -> {
                     val updatedTodo = Todo(
                         id = currentState.id,
                         title = currentState.titleField,
                         dueTime = currentState.dueTime,
-                        yearly = currentState.isYearly,
-                        monthly = currentState.isMonthly,
-                        daily = currentState.isDaily,
                         memo = currentState.memoField,
                         complete = currentState.isComplete,
                         repeatGroupId = currentState.repeatGroup?.id,
@@ -621,7 +599,7 @@ class EditPlanViewModel(
                         showInMonthlyView = currentState.showInMonthlyView,
                         isOverridden = false
                     )
-                    viewModelScope.launch { todoRepository.updateTodo(updatedTodo) }
+                    viewModelScope.launch { todoRepository.update(updatedTodo) }
                 }
             }
         }
@@ -643,7 +621,7 @@ class EditPlanViewModel(
             } else {
                 // id: Int? is smart casted into type Int
                 when (currentState.entryType) {
-                    is PlanType.Schedule -> {
+                    PlanType.SCHEDULE -> {
 
                         val deletedSchedule = Schedule(
                             id = currentState.id,
@@ -651,16 +629,16 @@ class EditPlanViewModel(
                             startTime = currentState.startTime,
                             endTime = currentState.endTime,
                         )
-                        scheduleRepository.deleteSchedule(deletedSchedule)
+                        scheduleRepository.delete(deletedSchedule)
                     }
 
-                    is PlanType.Todo     -> {
+                    PlanType.TODO -> {
                         val deletedTodo = Todo(
                             id = currentState.id,
                             title = currentState.titleField,
                             dueTime = currentState.dueTime,
                         )
-                        todoRepository.deleteTodo(deletedTodo)
+                        todoRepository.delete(deletedTodo)
                     }
                 }
             }

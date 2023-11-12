@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.calendy.CalendyApplication
-import com.example.calendy.data.plan.Plan
-import com.example.calendy.data.plan.PlanRepository
+import com.example.calendy.data.maindb.plan.Plan
+import com.example.calendy.data.maindb.plan.PlanRepository
 import com.example.calendy.utils.toEndTime
 import com.example.calendy.utils.toStartTime
 import com.prolificinteractive.materialcalendarview.CalendarDay

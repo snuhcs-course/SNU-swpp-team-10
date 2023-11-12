@@ -1,6 +1,5 @@
 package com.example.calendy.data.network
 
-import com.example.calendy.data.CalendyApi
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
@@ -16,7 +15,7 @@ object RetrofitClient {
     private const val BASE_URL =
         "http://ec2-43-201-66-166.ap-northeast-2.compute.amazonaws.com:3000"
 
-    val instance: CalendyApi by lazy {
+    val instance: CalendyServerApi by lazy {
         // Create Retrofit Instance
         val okHttpClient = OkHttpClient().newBuilder()
             .connectTimeout(30, TimeUnit.SECONDS)
@@ -43,9 +42,12 @@ object RetrofitClient {
             )
         }
 
-        val retrofit = Retrofit.Builder().baseUrl(BASE_URL).client(okHttpClient)
-            .addConverterFactory(requestGsonConverterFactory).build()
+        val retrofit = Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(requestGsonConverterFactory)
+            .build()
 
-        retrofit.create(CalendyApi::class.java)
+        retrofit.create(CalendyServerApi::class.java)
     }
 }

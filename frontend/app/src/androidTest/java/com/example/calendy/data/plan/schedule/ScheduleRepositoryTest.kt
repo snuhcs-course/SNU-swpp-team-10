@@ -4,8 +4,9 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.example.calendy.data.CalendyDatabase
-import com.example.calendy.data.plan.Schedule
+import com.example.calendy.data.maindb.CalendyDatabase
+import com.example.calendy.data.maindb.plan.Schedule
+import com.example.calendy.data.maindb.plan.schedule.ScheduleRepository
 import com.example.calendy.utils.DateHelper
 import junit.framework.TestCase
 import kotlinx.coroutines.flow.first

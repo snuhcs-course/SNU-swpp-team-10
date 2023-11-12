@@ -1,31 +1,22 @@
 package com.example.calendy.view.todolistview
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBar
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.calendy.data.dummy.DummyTodoRepository
-import com.example.calendy.data.plan.Plan
-import com.example.calendy.data.plan.Todo
+import com.example.calendy.data.maindb.plan.Todo
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.time.LocalDate
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -33,8 +24,7 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ToDoListPage(
-    todoListViewModel: TodoListViewModel,
-    onNavigateToEditPage: (date: Date?) -> Unit
+    todoListViewModel: TodoListViewModel, onNavigateToEditPage: (date: Date?) -> Unit
 ) {
     val currentState: TodoListUiState by todoListViewModel.uiState.collectAsState()
     val lazyListState = rememberLazyListState()
@@ -125,7 +115,13 @@ fun ToDoListPage(
                 add(Calendar.DAY_OF_YEAR, 30)
             }
             calendar.time = currentDate
-            item { OneDayTodos(date = currentDate, todos = todosForToday, todoListViewModel = todoListViewModel) }
+            item {
+                OneDayTodos(
+                    date = currentDate,
+                    todos = todosForToday,
+                    todoListViewModel = todoListViewModel
+                )
+            }
             calendar.add(Calendar.DAY_OF_YEAR, 1)
 
             while (calendar.before(endRange)) {
@@ -133,7 +129,11 @@ fun ToDoListPage(
                 item {
                     val todos = todoListViewModel.getTodosForDate(futureDate)
                         .collectAsState(initial = emptyList()).value
-                    OneDayTodos(date = futureDate, todos = todos, todoListViewModel = todoListViewModel)
+                    OneDayTodos(
+                        date = futureDate,
+                        todos = todos,
+                        todoListViewModel = todoListViewModel
+                    )
                 }
                 calendar.add(Calendar.DAY_OF_YEAR, 1)
             }
@@ -174,7 +174,7 @@ fun ToDoItem(todo: Todo, todoListViewModel: TodoListViewModel) {
             todoListViewModel.updateCompletionOfTodo(todo)
         })
         Spacer(modifier = Modifier.width(8.dp))
-        Column(modifier = Modifier.padding(3.dp)){
+        Column(modifier = Modifier.padding(3.dp)) {
             Text(
                 text = todo.title,
                 textDecoration = if (isChecked) TextDecoration.LineThrough else null,

@@ -1,38 +1,24 @@
 package com.example.calendy.data.dummy
 
 import androidx.sqlite.db.SupportSQLiteQuery
-import com.example.calendy.data.category.Category
-import com.example.calendy.data.category.ICategoryRepository
-import com.example.calendy.data.plan.IPlanRepository
-import com.example.calendy.data.plan.Plan
-import com.example.calendy.data.plan.Schedule
-import com.example.calendy.data.plan.Todo
+import com.example.calendy.data.maindb.plan.IPlanRepository
+import com.example.calendy.data.maindb.plan.Plan
+import com.example.calendy.data.maindb.plan.PlanType
+import com.example.calendy.data.maindb.plan.Schedule
+import com.example.calendy.data.maindb.plan.Todo
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
 import java.util.Date
 
 class DummyPlanRepository : IPlanRepository {
+    override fun getAllPlansStream(): Flow<List<Plan>> {
+        TODO("Not yet implemented")
+    }
+
     override fun getPlansStream(startTime: Date, endTime: Date): Flow<List<Plan>> {
         TODO("Not yet implemented")
     }
 
-    override fun getPlanById(id: Int, type: Plan.PlanType): Flow<Plan> {
-        TODO("Not yet implemented")
-    }
-
-    override fun getAllPlans(): Flow<List<Plan>> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun updatePlan(plan: Plan) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun insertPlan(plan: Plan) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun deletePlan(plan: Plan) {
+    override fun getPlanById(id: Int, type: PlanType): Plan {
         TODO("Not yet implemented")
     }
 
@@ -44,9 +30,19 @@ class DummyPlanRepository : IPlanRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getPlansByIds(scheduelIDs: List<Int>, todoIDs: List<Int>): List<Plan> {
+    override fun getPlansByIds(scheduleIDs: List<Int>, todoIDs: List<Int>): List<Plan> {
         TODO("Not yet implemented")
     }
 
+    override suspend fun insert(entity: Plan): Long {
+        TODO("Not yet implemented")
+    }
 
+    override suspend fun update(entity: Plan) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun delete(entity: Plan) {
+        TODO("Not yet implemented")
+    }
 }

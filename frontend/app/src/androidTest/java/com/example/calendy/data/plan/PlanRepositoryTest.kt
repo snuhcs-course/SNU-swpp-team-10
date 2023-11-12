@@ -3,11 +3,13 @@ package com.example.calendy.data.plan
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
-import com.example.calendy.data.CalendyDatabase
-import com.example.calendy.data.plan.schedule.ScheduleLocalDataSource
-import com.example.calendy.data.plan.schedule.ScheduleRepository
-import com.example.calendy.data.plan.todo.TodoLocalDataSource
-import com.example.calendy.data.plan.todo.TodoRepository
+import com.example.calendy.data.maindb.CalendyDatabase
+import com.example.calendy.data.maindb.plan.Plan
+import com.example.calendy.data.maindb.plan.PlanRepository
+import com.example.calendy.data.maindb.plan.Schedule
+import com.example.calendy.data.maindb.plan.Todo
+import com.example.calendy.data.maindb.plan.schedule.ScheduleRepository
+import com.example.calendy.data.maindb.plan.todo.TodoRepository
 import com.example.calendy.utils.DateHelper
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -103,7 +105,7 @@ class PlanRepositoryTest {
     )
 
     private suspend fun addOneTodo() {
-        todoRepository.insertTodo(todo1)
+        todoRepository.insert(todo1)
     }
 
     @Test
