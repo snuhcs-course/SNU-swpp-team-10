@@ -23,6 +23,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBackIos
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
@@ -102,7 +103,7 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
                             onNavigateBack()
                         }) {
                             Icon(
-                                imageVector = Icons.Default.Add, contentDescription = "Add",
+                                imageVector = Icons.Default.Check, contentDescription = "Add",
                             )
                         }
                     }
@@ -149,8 +150,7 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
                         }, isSelected = (editPlanUiState.entryType==it), onClick = {
                             editPlanViewModel.setType(it)
                         }, modifier = Modifier
-                            .background(color = Color(0xFFDBE2F6), shape = RoundedCornerShape(size = 30.dp))
-
+                            .weight(1f)
                     )
                 }
             }
@@ -195,7 +195,7 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
                 toggleIsMonthly = editPlanViewModel::toggleIsMonthly,
                 isDaily = editPlanUiState.isDaily,
                 toggleIsDaily = editPlanViewModel::toggleIsDaily,
-                modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
+                modifier = Modifier.align(alignment = Alignment.CenterHorizontally),
             )
         }
         if (isPageSchedule) {
@@ -206,6 +206,7 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
                 onSelectTimeRange = editPlanViewModel::setTimeRange,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
                     .align(alignment = Alignment.CenterHorizontally)
             )
         }
@@ -311,22 +312,23 @@ fun TypeButton(
     text: String, isSelected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier
 ) {
     val backgroundColor = if (isSelected) Color(0xFFDBE2F6) else Color.White
-    val contentColor = Color.Black // Content color based on isSelected
+    val contentColor = if (isSelected) Color.Black else Color(0xFFB1B1B1)
+    val borderColor = if (isSelected) Color.Black else Color(0xFFB1B1B1)
 
     Button(
         onClick = { onClick() },
         // Set the containerColor for the selected/unselected state
         colors = ButtonDefaults.buttonColors(containerColor = backgroundColor, contentColor = contentColor),
         // Adjust padding as needed
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        contentPadding = PaddingValues(0.dp),
         modifier = modifier
+            .height(40.dp)
+            .fillMaxWidth()
             .border(
                 width = 2.dp,
-                color = Color.Black,
-                shape = RoundedCornerShape(size = 30.dp)
+                color = borderColor,
+                shape = RoundedCornerShape(size = 40.dp)
             )
-            .height(40.dp)
-            .width(100.dp)
     ) {
         Text(
             text = text,
