@@ -78,7 +78,8 @@ dependencies {
     implementation("androidx.room:room-ktx:${rootProject.extra["room_version"]}")
 
     //monthly calendar
-    implementation("com.github.prolificinteractive:material-calendarview:1.6.0")
+//    implementation("com.github.prolificinteractive:material-calendarview:1.6.0")
+    implementation("com.github.hochanb:material-calendarview:1.6.2")
 
     //remote DB connect
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
