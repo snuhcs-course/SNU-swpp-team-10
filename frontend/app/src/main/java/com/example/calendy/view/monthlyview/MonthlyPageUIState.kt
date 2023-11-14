@@ -1,6 +1,6 @@
 package com.example.calendy.view.monthlyview
 
-import com.example.calendy.data.plan.Plan
+import com.example.calendy.data.maindb.plan.Plan
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import java.util.Hashtable
 

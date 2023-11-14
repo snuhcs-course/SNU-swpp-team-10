@@ -10,7 +10,7 @@ import java.util.Locale
 class RoomConverters {
     private val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
     // IMPORTANT: SQLite assumes that dates are stored in UTC
-//    iso8601Format.setTimeZone(TimeZone.getTimeZone("UTC"));
+    // iso8601Format.setTimeZone(TimeZone.getTimeZone("UTC"));
 
     @TypeConverter
     fun fromString(value: String): Date {

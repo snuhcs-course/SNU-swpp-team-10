@@ -30,9 +30,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.calendy.R
-import com.example.calendy.data.plan.Plan
-import com.example.calendy.data.plan.Schedule
-import com.example.calendy.data.plan.Todo
+import com.example.calendy.data.maindb.plan.Plan
+import com.example.calendy.data.maindb.plan.PlanType
+import com.example.calendy.data.maindb.plan.Schedule
+import com.example.calendy.data.maindb.plan.Todo
 import com.example.calendy.utils.equalDay
 import com.example.calendy.utils.toAmPmString
 import com.example.calendy.utils.toDateTimeString
@@ -105,7 +106,7 @@ fun PlanDetailPopup(
                             )
                         }
                     }
-                    is Todo -> {
+                    is Todo     -> {
                         Text(
                             text = plan.dueTime.toDateTimeString(),
                             style = TextStyle(
@@ -160,7 +161,7 @@ fun PlanDetailPopup(
 @Composable
 fun EditButton(
     plan : Plan,
-    onNavigateToEditPage:(id: Int?, type: Plan.PlanType, date: Date?) -> Unit,
+    onNavigateToEditPage:(id: Int?, type: PlanType, date: Date?) -> Unit,
     onEditComplete:(Plan)->Unit={},
     modifier:Modifier = Modifier
 ){
@@ -169,8 +170,8 @@ fun EditButton(
             {
                 // TODO :Can we make it more simple?
                 when(plan){
-                    is Schedule -> onNavigateToEditPage(plan.id, Plan.PlanType.Schedule, null)
-                    is Todo -> onNavigateToEditPage(plan.id, Plan.PlanType.Todo, null)
+                    is Schedule -> onNavigateToEditPage(plan.id, PlanType.SCHEDULE, null)
+                    is Todo     -> onNavigateToEditPage(plan.id, PlanType.TODO, null)
                 }
             },
 
@@ -188,7 +189,7 @@ fun EditButton(
 @Preview
 @Composable
 fun PlanDetailPopupPreview(){
-    val p=Todo(0,"Todo", Date(),memo="MemoMemoMemoMemoMemoMemoMemo MemoMemoMemo Memo MemoMemo MemoMemoMemo Memo")
+    val p= Todo(0, "Todo", Date(), memo="MemoMemoMemoMemoMemoMemoMemo MemoMemoMemo Memo MemoMemo MemoMemoMemo Memo")
     PlanDetailPopup(
         plan=p,
         header= {

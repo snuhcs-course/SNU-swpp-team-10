@@ -2,6 +2,10 @@ package com.example.calendy.view.todolistview
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,7 +25,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.calendy.data.maindb.plan.Todo
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import com.example.calendy.data.plan.Todo
 import com.example.calendy.view.popup.EditButton
 import com.example.calendy.view.popup.PlanDetailPopup

@@ -49,6 +49,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.calendy.R
+import com.example.calendy.data.maindb.plan.Plan
+import com.example.calendy.data.maindb.plan.Schedule
+import com.example.calendy.data.maindb.plan.Todo
 import com.example.calendy.data.plan.Plan
 import com.example.calendy.data.plan.Schedule
 import com.example.calendy.data.plan.Todo
@@ -193,7 +196,7 @@ fun ListPopupBox(
                 items(planList!!) {
                     when (it) {
                         is Schedule -> ScheduleListItem(schedule = it, onItemClick)
-                        is Todo -> TodoListItem(
+                        is Todo     -> TodoListItem(
                             todo = it,
                             onItemClick = onItemClick,
                             onChecked = onCheckboxClicked
@@ -313,7 +316,7 @@ fun ScheduleListItem(
 fun TodoListItem(
     todo : Todo,
     onItemClick: (Plan) -> Unit ={},
-    onChecked : (Plan, Boolean) -> Unit = {plan,check->}
+    onChecked : (Plan, Boolean) -> Unit = { plan, check->}
 ){
     Row(
         modifier= Modifier
@@ -397,8 +400,8 @@ fun AddButton(
 @Composable
 fun ListPopupPreview(){
     var planList : ArrayList<Plan> = ArrayList()
-    planList.add(Schedule(0,"my schedule",Date(), Date()))
-    planList.add(Todo(0,"my schedule",Date(),complete=false))
+    planList.add(Schedule(0, "my schedule", Date(), Date()))
+    planList.add(Todo(0, "my schedule", Date(), complete=false))
     SwitchablePlanListPopup(
         planList,
         header = { PopupHeaderTitle("Added plans") },
@@ -435,7 +438,7 @@ fun PopupHeaderDatePreview(){
 @Preview
 @Composable
 fun EditButtonPreview(){
-    EditButton(Todo(0,"Todo",Date()),{id,plan,date->})
+    EditButton(Todo(0, "Todo", Date()), { id, plan, date->})
 }
 @Preview
 @Composable

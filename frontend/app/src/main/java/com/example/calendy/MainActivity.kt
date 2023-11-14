@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -35,7 +34,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.calendy.data.plan.Plan
+import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.ui.theme.CalendyTheme
 import com.example.calendy.view.messagepage.MessagePage
 import com.example.calendy.view.editplanview.EditPlanPage
@@ -186,16 +185,16 @@ fun NavigationGraph(navController: NavHostController) {
             WeeklyPageKT()
         }
         composable(BottomNavItem.Month.screenRoute) {
-            MonthlyPageKT(onNavigateToEditPage = { id: Int?, type: Plan.PlanType, date: Date? ->
+            MonthlyPageKT(onNavigateToEditPage = { id: Int?, type: PlanType, date: Date? ->
                 val route = if (id==null) {
                     when (type) {
-                        Plan.PlanType.Schedule -> DestinationRoute.AddSchedule(date= date?: Date()).route
-                        Plan.PlanType.Todo     -> DestinationRoute.AddTodo(date = date?: Date()).route
+                        PlanType.SCHEDULE -> DestinationRoute.AddSchedule(date= date?: Date()).route
+                        PlanType.TODO     -> DestinationRoute.AddTodo(date = date?: Date()).route
                     }
                 } else {
                     when (type) {
-                        Plan.PlanType.Schedule -> DestinationRoute.EditSchedule(id = id).route
-                        Plan.PlanType.Todo     -> DestinationRoute.EditTodo(id = id).route
+                        PlanType.SCHEDULE -> DestinationRoute.EditSchedule(id = id).route
+                        PlanType.TODO     -> DestinationRoute.EditTodo(id = id).route
                     }
                 }
 
@@ -247,8 +246,8 @@ fun NavigationGraph(navController: NavHostController) {
             viewModel.initialize(
                 id = entry.arguments?.getString("id")?.toIntOrNull(),
                 type = when (entry.arguments?.getString("type")) {
-                    "schedule" -> Plan.PlanType.Schedule
-                    else       -> Plan.PlanType.Todo
+                    "schedule" -> PlanType.SCHEDULE
+                    else       -> PlanType.TODO
                 },
                 date = date
             )

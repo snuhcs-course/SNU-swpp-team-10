@@ -29,9 +29,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,18 +42,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.calendy.AppViewModelProvider
 import com.example.calendy.R
-import com.example.calendy.data.message.Message
-import com.example.calendy.data.plan.Plan
-import com.example.calendy.data.plan.Todo
-import com.example.calendy.utils.afterDays
+import com.example.calendy.data.maindb.message.Message
 import com.example.calendy.utils.equalDay
-import com.example.calendy.utils.toDate
 import com.example.calendy.utils.toDateDayString
-import com.example.calendy.view.monthlyview.MonthlyDayPlanDetailPopup
-import com.example.calendy.view.popup.AddButton
-import com.example.calendy.view.popup.PlanListPopup
-import com.example.calendy.view.popup.PopupHeaderDate
-import com.example.calendy.view.popup.PopupHeaderTitle
 import java.util.Date
 
 @Composable
@@ -283,7 +271,7 @@ fun MessageItemPreview() {
                 Date(),
                 true,
                 "how can i help you",
-                hasLogPlan = true
+                hasRevision = true
             )
         )
     }

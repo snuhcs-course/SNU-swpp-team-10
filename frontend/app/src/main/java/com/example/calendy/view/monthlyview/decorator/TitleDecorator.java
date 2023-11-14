@@ -1,11 +1,9 @@
 package com.example.calendy.view.monthlyview.decorator;
 
 //import com.project.sample_calendar.R;
-import com.example.calendy.data.PlanType;
-import com.example.calendy.data.plan.Plan;
-import com.example.calendy.data.plan.Schedule;
-import com.example.calendy.utils.DateHelper;
-import com.example.calendy.utils.DateHelperKt;
+import com.example.calendy.R;
+import com.example.calendy.data.maindb.plan.Plan;
+import com.example.calendy.data.maindb.plan.Schedule;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.DayViewDecorator;
 import com.prolificinteractive.materialcalendarview.DayViewFacade;

@@ -2,10 +2,10 @@ package com.example.calendy.view.todolistview
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.calendy.data.category.ICategoryRepository
-import com.example.calendy.data.plan.Todo
-import com.example.calendy.data.plan.todo.ITodoRepository
-import com.example.calendy.data.repeatgroup.IRepeatGroupRepository
+import com.example.calendy.data.maindb.category.ICategoryRepository
+import com.example.calendy.data.maindb.plan.Todo
+import com.example.calendy.data.maindb.plan.todo.ITodoRepository
+import com.example.calendy.data.maindb.repeatgroup.IRepeatGroupRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

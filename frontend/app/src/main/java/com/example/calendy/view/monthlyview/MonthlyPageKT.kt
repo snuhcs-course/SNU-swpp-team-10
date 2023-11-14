@@ -1,6 +1,5 @@
 package com.example.calendy.view.monthlyview
 
-import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
@@ -24,12 +23,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.example.calendy.AppViewModelProvider
 import com.example.calendy.R
 import com.example.calendy.data.dummy.DummyPlanRepository
-import com.example.calendy.data.plan.Plan
-import com.example.calendy.data.plan.Schedule
-import com.example.calendy.data.plan.Todo
+import com.example.calendy.data.maindb.plan.IPlanRepository
+import com.example.calendy.data.maindb.plan.Plan
+import com.example.calendy.data.maindb.plan.PlanType
+import com.example.calendy.data.maindb.plan.Schedule
+import com.example.calendy.data.maindb.plan.Todo
 import com.example.calendy.utils.afterDays
 import com.example.calendy.utils.equalDay
 import com.example.calendy.utils.toCalendarDay
@@ -50,7 +52,7 @@ import com.prolificinteractive.materialcalendarview.CalendarMode
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView
 import com.prolificinteractive.materialcalendarview.format.ArrayWeekDayFormatter
 import com.prolificinteractive.materialcalendarview.format.MonthArrayTitleFormatter
-import java.time.ZoneId
+import kotlinx.coroutines.flow.Flow
 import java.util.Calendar
 import java.util.Date
 import java.util.Hashtable
@@ -58,7 +60,7 @@ import java.util.Hashtable
 @Composable
 fun MonthlyPageKT(
     monthlyViewModel: MonthlyViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    onNavigateToEditPage: (id: Int?, type: Plan.PlanType, date: Date?) -> Unit
+    onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
 ) {
 
     val custom_months = stringArrayResource(id = R.array.custom_months)
@@ -72,7 +74,7 @@ fun MonthlyPageKT(
     var planOfMonth: Hashtable<CalendarDay, List<Plan>> = planListToHash(uiState.plansOfMonth)
 
     var popupDate by remember { mutableStateOf(uiState.selectedDate) }
-    var popupPlan :Plan by remember { mutableStateOf(Schedule(-1,"", Date(),Date()))}
+    var popupPlan : Plan by remember { mutableStateOf(Schedule(-1, "", Date(), Date()))}
     var showListPopup by remember { mutableStateOf(false) }
     var showDetailPopup by remember { mutableStateOf(false) }
 
@@ -82,14 +84,14 @@ fun MonthlyPageKT(
         popupDate=selectedDate
         showListPopup = true
     }
-    fun openDetailPopup(plan:Plan)
+    fun openDetailPopup(plan: Plan)
     {
         popupPlan=plan
         showDetailPopup=true
     }
     fun openAddPlanPopup(selectedDate: CalendarDay)
     {
-        onNavigateToEditPage(null, Plan.PlanType.Schedule, selectedDate.toDate())
+        onNavigateToEditPage(null, PlanType.SCHEDULE, selectedDate.toDate())
     }
 
     fun onListPopupDismissed()

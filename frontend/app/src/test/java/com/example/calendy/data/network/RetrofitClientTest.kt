@@ -1,7 +1,5 @@
 package com.example.calendy.data.network
 
-import android.util.Log
-import com.example.calendy.data.MessageBody
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Test

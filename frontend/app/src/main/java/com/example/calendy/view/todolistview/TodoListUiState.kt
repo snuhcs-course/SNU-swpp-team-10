@@ -1,7 +1,6 @@
 package com.example.calendy.view.todolistview
 
-import com.example.calendy.data.plan.Todo
-import java.util.Calendar
+import com.example.calendy.data.maindb.plan.Todo
 
 data class TodoListUiState(
     val monthTodos: List<Todo> = emptyList(),

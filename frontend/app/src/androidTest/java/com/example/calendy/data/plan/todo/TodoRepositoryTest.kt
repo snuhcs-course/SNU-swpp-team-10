@@ -4,8 +4,9 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.example.calendy.data.CalendyDatabase
-import com.example.calendy.data.plan.Todo
+import com.example.calendy.data.maindb.CalendyDatabase
+import com.example.calendy.data.maindb.plan.Todo
+import com.example.calendy.data.maindb.plan.todo.TodoRepository
 import com.example.calendy.utils.DateHelper.getDate
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -60,7 +61,7 @@ class TodoRepositoryTest {
     )
 
     private suspend fun addOneTodo() {
-        todoRepository.insertTodo(todo1)
+        todoRepository.insert(todo1)
     }
 
     @Test
