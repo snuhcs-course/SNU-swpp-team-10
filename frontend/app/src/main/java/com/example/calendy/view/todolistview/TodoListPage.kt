@@ -121,7 +121,7 @@ fun OneMonthTodos(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Text("아직 Todo가 없습니다\nTodo를 추가해보세요!")
+                Text("아직 TODO가 없습니다\nTODO를 추가해보세요!")
             }
         } else {
             LazyColumn {
@@ -315,7 +315,7 @@ fun MonthSelectionSheet(
 fun hideToggle(viewModel: TodoListViewModel, uiState: TodoListUiState) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
-            text = "Hide completed Todos", color = Color.Blue, fontSize = 12.sp
+            text = "Hide Completed", color = Color.Blue, fontSize = 12.sp
         )
         Spacer(modifier = Modifier.width(8.dp))
         Switch(checked = uiState.hidedStatus, onCheckedChange = {
