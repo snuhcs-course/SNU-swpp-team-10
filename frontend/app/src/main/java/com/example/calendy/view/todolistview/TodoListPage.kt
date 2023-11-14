@@ -1,5 +1,6 @@
 package com.example.calendy.view.todolistview
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -11,209 +12,330 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.filled.ArrowLeft
+import androidx.compose.material.icons.filled.ArrowRight
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBar
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
-import com.example.calendy.data.dummy.DummyTodoRepository
-import com.example.calendy.data.plan.Plan
 import com.example.calendy.data.plan.Todo
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
+import com.example.calendy.view.popup.EditButton
+import com.example.calendy.view.popup.PlanDetailPopup
+import com.example.calendy.view.popup.PopupHeaderTitle
 import java.text.SimpleDateFormat
-import java.time.LocalDate
 import java.util.Calendar
 import java.util.Date
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ToDoListPage(
-    todoListViewModel: TodoListViewModel,
-    onNavigateToEditPage: (date: Date?) -> Unit
+    viewModel: TodoListViewModel, onNavigateToEditPage: (id: Int?, date: Date?) -> Unit
 ) {
-    val currentState: TodoListUiState by todoListViewModel.uiState.collectAsState()
-    val lazyListState = rememberLazyListState()
-
-    val coroutineScope = rememberCoroutineScope()
-
-    // 초기에 현재 날짜를 표시한 다음 미래 날짜를 로드
-    val currentDate = remember { Calendar.getInstance().time }
-    val todosForToday =
-        todoListViewModel.getTodosForDate(currentDate).collectAsState(initial = emptyList()).value
-
-    // snapshotFlow로 첫 번째 보이는 아이템 인덱스를 관찰
-    val firstVisibleItemIndexFlow = snapshotFlow { lazyListState.firstVisibleItemIndex }
-    val loadMorePast = remember { mutableStateOf(false) }
-    val loadMoreFuture = remember { mutableStateOf(false) }
-    // 과거 날짜의 데이터를 담을 상태 리스트
-    val pastDatesWithTodos = remember { mutableStateListOf<Pair<Date, List<Todo>>>() }
+    val uiState: TodoListUiState by viewModel.uiState.collectAsState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scope = rememberCoroutineScope()
+    var showBottomSheet by remember { mutableStateOf(false) }
 
 
-    LaunchedEffect(firstVisibleItemIndexFlow) {
-        firstVisibleItemIndexFlow.collect { firstVisibleItemIndex ->
-            if (firstVisibleItemIndex==0) {
-                // 상단에 스크롤됐을 때 과거 날짜를 로드하기 위한 flag 설정
-                loadMorePast.value = true
-                // 상단에 도달했을 때 과거 날짜를 추가
-                if (loadMorePast.value) {
-                    // 과거 날짜를 추가하는 함수
-                    suspend fun loadPastTodos() {
-                        // 현재 리스트의 첫 날짜를 가져옴
-                        val currentStartDate =
-                            pastDatesWithTodos.firstOrNull()?.first ?: currentDate
+    val onPreviousClick = {
+        if (uiState.month==1) {
+            viewModel.updateYear(uiState.year-1)
+            viewModel.updateMonth(12)
+        } else { viewModel.updateMonth(uiState.month-1) }
+    }
 
-                        // 과거 날짜 데이터를 가져올 Calendar 객체 설정
-                        val calendar = Calendar.getInstance()
-                        calendar.time = currentStartDate
-                        calendar.add(Calendar.DAY_OF_YEAR, -1)
+    val onNextClick = {
+        if (uiState.month==12) {
+            viewModel.updateYear(uiState.year+1)
+            viewModel.updateMonth(1)
+        } else { viewModel.updateMonth(uiState.month+1) }
+    }
 
-                        // 과거 날짜의 데이터를 로드
-                        val pastDate = calendar.time
-                        val todos =
-                            todoListViewModel.getTodosForDate(pastDate).first() // 첫 번째 데이터만 가져옴
-
-                        // 상태 리스트의 상단에 과거 날짜와 할 일 리스트 추가
-                        pastDatesWithTodos.add(0, Pair(pastDate, todos))
-
-                        // LazyColumn의 스크롤 위치를 현재 위치로 재조정
-                        coroutineScope.launch {
-                            lazyListState.scrollToItem(index = 0)
-                        }
-                    }
-                    // 과거 날짜 로드 함수 실행
-                    coroutineScope.launch {
-                        loadPastTodos()
-                    }
-                    // 플래그 리셋
-                    loadMorePast.value = false
-                }
+    val onTextClick = {showBottomSheet = true}
+    if (showBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = {showBottomSheet = false},
+            sheetState = sheetState
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 450.dp)
+            ) {
+                MonthSelectionSheet(
+                    selectedYear = uiState.year,
+                    selectedMonth = uiState.month,
+                    onMonthYearSelected = { newYear, newMonth ->
+                        viewModel.updateYear(newYear)
+                        viewModel.updateMonth(newMonth)
+                        showBottomSheet = false
+                    },
+                    onDismiss = { showBottomSheet = false }
+                )
             }
         }
+
     }
 
     Scaffold(topBar = {
-//            TopAppBar(
-//            title = { },
-//            actions = {
-//                // 오른쪽에 텍스트 버튼 추가
-//                TextButton(onClick = { /* TODO: 완료된 할 일 숨기기 기능 구현 */ }) {
-//                    Text(
-//                        text = "Hide completed Todos",
-//                        color = Color.Blue,
-//                        fontSize = 12.sp
-//                    )
-//                }
-//            }
-//        )
+        MediumTopAppBar(title = {
+            MonthSelector(
+                year = uiState.year,
+                month = uiState.month,
+                onPreviousClick = onPreviousClick,
+                onNextClick = onNextClick,
+                onTextClick = onTextClick
+            )
+        }, actions = { hideToggle(viewModel, uiState) })
     }, floatingActionButton = {
         FloatingActionButton(onClick = {
-            onNavigateToEditPage(null)
+            onNavigateToEditPage(null,Calendar.getInstance().apply {
+                set(Calendar.YEAR, uiState.year)
+                set(Calendar.MONTH, uiState.month - 1)
+            }.time)
         }) {
             Icon(Icons.Filled.Add, contentDescription = "Add")
         }
     }) { innerPadding ->
-        LazyColumn(state = lazyListState, modifier = Modifier.padding(innerPadding)) {
-
-
-            val calendar = Calendar.getInstance()
-            val endRange = (calendar.clone() as Calendar).apply {
-                add(Calendar.DAY_OF_YEAR, 30)
-            }
-            calendar.time = currentDate
-            item { OneDayTodos(date = currentDate, todos = todosForToday, todoListViewModel = todoListViewModel) }
-            calendar.add(Calendar.DAY_OF_YEAR, 1)
-
-            while (calendar.before(endRange)) {
-                val futureDate = calendar.time
-                item {
-                    val todos = todoListViewModel.getTodosForDate(futureDate)
-                        .collectAsState(initial = emptyList()).value
-                    OneDayTodos(date = futureDate, todos = todos, todoListViewModel = todoListViewModel)
-                }
-                calendar.add(Calendar.DAY_OF_YEAR, 1)
-            }
-
-        }
+        OneMonthTodos(Modifier.padding(innerPadding), viewModel, uiState, onNavigateToEditPage)
     }
 }
 
+
 @Composable
-fun OneDayTodos(date: Date, todos: List<Todo>, todoListViewModel: TodoListViewModel) {
-    Column {
+fun OneMonthTodos(
+    modifier: Modifier,
+    viewModel: TodoListViewModel,
+    uiState: TodoListUiState,
+    onNavigateToEditPage: (id: Int?,date: Date?) -> Unit
+) {
+    viewModel.updateMonthTodos()
+    Column(modifier) {
         Divider()
-        Text(
-            style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp),
-            text = if (isToday(date)) "Today"
-            else if (isTomorrow(date)) "Tomorrow"
-            else SimpleDateFormat("MM.dd", Locale.getDefault()).format(date)
-        )
-        todos.forEach { toDo ->
-            ToDoItem(toDo, todoListViewModel)
+        if(uiState.monthTodos.isEmpty()){
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("아직 TODO가 없습니다\nTODO를 추가해보세요!")
+            }
+        } else {
+            LazyColumn {
+                val filteredTodos = if (uiState.hidedStatus) {
+                    uiState.monthTodos.filter { !it.complete }
+                } else {
+                    uiState.monthTodos
+                }
+                items(filteredTodos) { todo ->
+                    ToDoItem(todo, viewModel, uiState, onNavigateToEditPage)
+                }
+            }
         }
     }
 }
 
+
 @Composable
-fun ToDoItem(todo: Todo, todoListViewModel: TodoListViewModel) {
-    var isChecked by remember { mutableStateOf(false) }
+fun ToDoItem(todo: Todo, viewModel: TodoListViewModel, uiState: TodoListUiState, onNavigateToEditPage: (id: Int?, date: Date?) -> Unit) {
+    var isChecked by remember(todo.complete) { mutableStateOf(todo.complete) }
+    var openDetailPopup by remember { mutableStateOf(false) }
+    if(openDetailPopup) {
+        PlanDetailPopup(
+            plan = todo,
+            header = { PopupHeaderTitle(todo.title)},
+            editButton = {
+                EditButton(
+                    plan = todo,
+                    onNavigateToEditPage = {_,_,_ -> onNavigateToEditPage(todo.id, null)},
+                    modifier=Modifier.align(Alignment.TopEnd)
+                )
+            },
+            onDismissed = { openDetailPopup = false })
+    }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Checkbox(checked = isChecked, onCheckedChange = {
-            isChecked = it
-            todoListViewModel.updateCompletionOfTodo(todo)
-        })
-        Spacer(modifier = Modifier.width(8.dp))
-        Column(modifier = Modifier.padding(3.dp)){
-            Text(
-                text = todo.title,
-                textDecoration = if (isChecked) TextDecoration.LineThrough else null,
-                color = if (isChecked) Color.Gray else LocalContentColor.current
-            )
-            Text(
-                text = formatToHourMinuteAmPm(todo.dueTime),
-                fontSize = 12.sp,
-                textDecoration = if (isChecked) TextDecoration.LineThrough else null,
-                color = if (isChecked) Color.Gray else LocalContentColor.current
+        Row(verticalAlignment = Alignment.CenterVertically){
+            Checkbox(checked = todo.complete, onCheckedChange = {
+                viewModel.updateCompletionOfTodo(todo, it)
+            })
+            Spacer(modifier = Modifier.width(8.dp))
+            Column(modifier = Modifier.padding(3.dp)) {
+                Text(
+                    text = todo.title,
+                    textDecoration = if (isChecked) TextDecoration.LineThrough else null,
+                    color = if (isChecked) Color.Gray else LocalContentColor.current
+                )
+                Text(
+                    text = formatToHourMinuteAmPm(todo.dueTime),
+                    fontSize = 12.sp,
+                    textDecoration = if (isChecked) TextDecoration.LineThrough else null,
+                    color = if (isChecked) Color.Gray else LocalContentColor.current
+                )
+            }
+        }
+        IconButton(onClick = {openDetailPopup = true})
+        {
+            Icon(
+                imageVector = Icons.Filled.MoreHoriz,
+                contentDescription = "view detail"
             )
         }
 
     }
 }
 
-fun isToday(date: Date): Boolean {
-    val calendarNow = Calendar.getInstance()
-    val calendarDate = Calendar.getInstance()
-    calendarDate.time = date
+@Composable
+fun MonthSelector(
+    year: Int, month: Int, onPreviousClick: () -> Unit, onNextClick: () -> Unit, onTextClick: () -> Unit
+) {
+    val typography = MaterialTheme.typography
+    val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+    val displayText = if (year == currentYear) {
+        "${month}월 TODO"
+    } else {
+        "${year}년 ${month}월 TODO"
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 25.dp, start = 4.dp, end = 16.dp, bottom = 5.dp),
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(
+            onClick = { onPreviousClick() },
+        ) {
+            Icon(
+                Icons.Filled.ArrowLeft, contentDescription = "Previous Month", tint = Color.Black
+            )
+        }
 
-    return calendarNow.get(Calendar.YEAR)==calendarDate.get(Calendar.YEAR) && calendarNow.get(
-        Calendar.DAY_OF_YEAR
-    )==calendarDate.get(Calendar.DAY_OF_YEAR)
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Text(text = displayText,
+             color = Color.Black,
+             style = typography.bodyMedium,
+             textDecoration = TextDecoration.Underline,
+             modifier = Modifier.clickable { onTextClick() })
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        IconButton(
+            onClick = { onNextClick() },
+        ) {
+            Icon(
+                Icons.Filled.ArrowRight, contentDescription = "Next Month", tint = Color.Black
+            )
+        }
+    }
 }
 
-fun isTomorrow(date: Date): Boolean {
-    val calendarNow = Calendar.getInstance()
-    val calendarDate = Calendar.getInstance()
-    calendarDate.time = date
-    calendarNow.add(Calendar.DAY_OF_YEAR, 1)
+@Composable
+fun MonthSelectionSheet(
+    selectedYear: Int,
+    selectedMonth: Int,
+    onMonthYearSelected: (Int, Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+    val years = (currentYear - 2..currentYear + 2).toList()
+    val months = (1..12).toList()
+    // (year,list) 형태의 리스트로 변환
+    val yearMonthCombinations = years.flatMap { year -> months.map { month -> year to month } }
 
-    return calendarNow.get(Calendar.YEAR)==calendarDate.get(Calendar.YEAR) && calendarNow.get(
-        Calendar.DAY_OF_YEAR
-    )==calendarDate.get(Calendar.DAY_OF_YEAR)
+    // LazyListState 생성
+    val listState = rememberLazyListState()
+    // 초기 스크롤 위치를 선택된 연도와 월에 기반하여 설정
+    val initialIndex = yearMonthCombinations.indexOfFirst { it.first == selectedYear && it.second == selectedMonth }
+    LaunchedEffect(key1 = initialIndex) {
+        listState.scrollToItem(initialIndex)
+    }
+
+
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "월 선택하기",
+                fontWeight = FontWeight.Bold ,
+                modifier = Modifier.align(Alignment.CenterVertically)
+            )
+            IconButton(onClick = { onDismiss() }) {
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = "Close"
+                )
+            }
+        }
+
+        LazyColumn(state = listState) {
+            items(yearMonthCombinations) { (year, month) ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onMonthYearSelected(year, month) }
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "${year}년 ${month}월",
+                        modifier = Modifier.weight(1f)
+                    )
+                    if (year == selectedYear && month == selectedMonth) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Selected",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+@Composable
+fun hideToggle(viewModel: TodoListViewModel, uiState: TodoListUiState) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = "Hide Completed", color = Color.Blue, fontSize = 12.sp
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Switch(checked = uiState.hidedStatus, onCheckedChange = {
+            viewModel.setHidedStatus(it)
+        }, thumbContent = if (uiState.hidedStatus) {
+            {
+                Icon(
+                    imageVector = Icons.Filled.Check,
+                    contentDescription = null,
+                    modifier = Modifier.size(SwitchDefaults.IconSize),
+                )
+            }
+        } else {
+            null
+        })
+    }
 }
 
 fun formatToHourMinuteAmPm(date: Date): String {
-    val formatter = SimpleDateFormat("hh:mm a")
+    val formatter = SimpleDateFormat("d일 a hh:mm")
     return formatter.format(date)
 }
 

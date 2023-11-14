@@ -10,6 +10,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.Date
@@ -21,29 +24,52 @@ class TodoListViewModel(
     private val _uiState = MutableStateFlow(TodoListUiState())
     val uiState: StateFlow<TodoListUiState> = _uiState.asStateFlow()
 
-    fun getTodosForDate(date: Date): Flow<List<Todo>> {
-        val calendar = Calendar.getInstance().apply {
-            time = date
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        val start: Date = calendar.time // beginning of the day
-
-        // Move the calendar to the end of the day
-        calendar.add(Calendar.DATE, 1)
-        calendar.add(Calendar.MILLISECOND, -1)
-        val end: Date = calendar.time // This represents 23:59:59 of the current day
-
-        return todoRepository.getTodosStream(start, end)
+    fun updateYear(newYear: Int) {
+        _uiState.value = _uiState.value.copy(year = newYear)
     }
 
-    fun updateCompletionOfTodo(todo: Todo) {
-        viewModelScope.launch{
-            todoRepository.updateTodo(todo.copy(complete = !todo.complete))
+    fun updateMonth(newMonth: Int) {
+        _uiState.value = _uiState.value.copy(month = newMonth)
+    }
+    fun updateCompletionOfTodo(todo: Todo, complete: Boolean) {
+        viewModelScope.launch {
+            val updatedTodo = todo.copy(complete = complete)
+            todoRepository.updateTodo(updatedTodo)
+            val updatedTodos = _uiState.value.monthTodos.map {
+                if (it.id == todo.id) updatedTodo else it
+            }
+            _uiState.value = _uiState.value.copy(monthTodos = updatedTodos)
         }
     }
 
+
+    fun updateMonthTodos() {
+        viewModelScope.launch {
+            val calendar = Calendar.getInstance().apply {
+                set(Calendar.YEAR, uiState.value.year)
+                set(Calendar.MONTH, uiState.value.month - 1) // Calendar.MONTH는 0부터 시작
+                set(Calendar.DAY_OF_MONTH, 1)
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            val start: Date = calendar.time // 월의 시작
+
+            // 월의 마지막 날로 이동
+            calendar.add(Calendar.MONTH, 1)
+            calendar.add(Calendar.MILLISECOND, -1)
+            val end: Date = calendar.time // 월의 마지막 날 23:59:59
+            val monthTodos = todoRepository.getTodosStream(start, end)
+            _uiState.update { currentState ->
+                val sortedTodos = monthTodos.first().sortedBy { it.dueTime }
+                currentState.copy(monthTodos = sortedTodos)
+            }
+        }
+    }
+
+    fun setHidedStatus(value: Boolean) {
+        _uiState.value = _uiState.value.copy(hidedStatus = value)
+    }
 
 }
