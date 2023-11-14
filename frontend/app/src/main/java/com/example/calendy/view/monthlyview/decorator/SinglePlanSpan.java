@@ -1,13 +1,11 @@
 package com.example.calendy.view.monthlyview.decorator;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.ColorSpace;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.text.style.LineBackgroundSpan;
 
-import com.example.calendy.data.PlanType;
+import com.example.calendy.data.maindb.plan.Plan;
+import com.example.calendy.data.maindb.plan.PlanType;
 
 import static androidx.compose.ui.graphics.ColorKt.Color;
 import static com.example.calendy.ui.theme.ColorKt.PriorityColor;
@@ -21,11 +19,11 @@ public class SinglePlanSpan implements LineBackgroundSpan {
     private final int textColor;
     private final String title;
     private final int index;
-    private final int planType;
+    private final PlanType planType;
     private final int dayLength;
     private final int dayOffset;
 
-    public SinglePlanSpan(int index, int priority, String title, int planType) {
+    public SinglePlanSpan(int index, int priority, String title, PlanType planType) {
         this.index = index;
         this.bgColor = PriorityColor(priority);
         if (priority > 3) this.textColor= 0xffffffff;
@@ -35,7 +33,7 @@ public class SinglePlanSpan implements LineBackgroundSpan {
         this.dayLength=1;
         this.dayOffset=0;
     }
-    public SinglePlanSpan(int index, int priority, String title, int planType, int dayLength, int dayOffset) {
+    public SinglePlanSpan(int index, int priority, String title, PlanType planType, int dayLength, int dayOffset) {
         this.index = index;
         this.bgColor = PriorityColor(priority);
         if (priority > 3) this.textColor= 0xffffffff;

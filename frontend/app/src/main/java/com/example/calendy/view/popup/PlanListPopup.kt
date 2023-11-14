@@ -52,9 +52,6 @@ import com.example.calendy.R
 import com.example.calendy.data.maindb.plan.Plan
 import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
-import com.example.calendy.data.plan.Plan
-import com.example.calendy.data.plan.Schedule
-import com.example.calendy.data.plan.Todo
 import com.example.calendy.ui.theme.PriorityColor
 import com.example.calendy.ui.theme.getColor
 import com.example.calendy.utils.dayOfWeek

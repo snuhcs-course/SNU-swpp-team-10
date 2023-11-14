@@ -2,8 +2,7 @@ package com.example.calendy.ui.theme
 
 import androidx.compose.ui.graphics.Color
 import com.example.calendy.R
-import com.example.calendy.data.plan.Plan
-import com.example.calendy.data.plan.Schedule
+import com.example.calendy.data.maindb.plan.Plan
 
 val Purple80 = Color(0xFFD0BCFF)
 val PurpleGrey80 = Color(0xFFCCC2DC)

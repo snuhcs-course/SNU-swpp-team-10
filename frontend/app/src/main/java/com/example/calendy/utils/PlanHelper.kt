@@ -1,15 +1,15 @@
 package com.example.calendy.utils
 
-import com.example.calendy.data.PlanType
-import com.example.calendy.data.plan.Plan
-import com.example.calendy.data.plan.Schedule
-import com.example.calendy.data.plan.Todo
+import com.example.calendy.data.maindb.plan.PlanType
+import com.example.calendy.data.maindb.plan.Plan
+import com.example.calendy.data.maindb.plan.Schedule
+import com.example.calendy.data.maindb.plan.Todo
 
 
-fun Plan.getPlanType(): Int {
+fun Plan.getPlanType(): PlanType {
     return when (this) {
         is Schedule -> PlanType.SCHEDULE
-        is Todo -> PlanType.TODO
+        is Todo     -> PlanType.TODO
     }
 }
 

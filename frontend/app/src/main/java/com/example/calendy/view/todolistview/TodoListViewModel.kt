@@ -34,7 +34,7 @@ class TodoListViewModel(
     fun updateCompletionOfTodo(todo: Todo, complete: Boolean) {
         viewModelScope.launch {
             val updatedTodo = todo.copy(complete = complete)
-            todoRepository.updateTodo(updatedTodo)
+            todoRepository.update(updatedTodo)
             val updatedTodos = _uiState.value.monthTodos.map {
                 if (it.id == todo.id) updatedTodo else it
             }

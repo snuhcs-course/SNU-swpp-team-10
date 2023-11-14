@@ -13,7 +13,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.calendy.AppViewModelProvider
 import com.example.calendy.R
-import com.example.calendy.data.plan.Plan
+import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.view.monthlyview.MonthlyPageUIState
 import com.example.calendy.view.monthlyview.decorator.OneDayDecorator
 import com.example.calendy.view.monthlyview.decorator.SaturdayDecorator
@@ -33,7 +33,7 @@ import java.util.Hashtable
 @Composable
 fun WeeklyPageKT (
 //    weeklyViewModel: WeeklyViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    onNavigateToEditPage: (id: Int?, type: Plan.PlanType, date: Date?) -> Unit = {_,_,_->}
+    onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit = { _, _, _->}
 ){
 
 

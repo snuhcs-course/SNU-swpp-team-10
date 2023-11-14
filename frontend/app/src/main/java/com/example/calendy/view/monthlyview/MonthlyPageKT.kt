@@ -171,7 +171,7 @@ fun MonthlyPageKT(
 
         //add button
         AddButton(
-            onButtonClick = {onNavigateToEditPage(null,Plan.PlanType.Schedule,popupDate.toDate())},
+            onButtonClick = {onNavigateToEditPage(null, PlanType.SCHEDULE,popupDate.toDate())},
             modifier = Modifier
                 .padding(16.dp)
                 .align(Alignment.BottomEnd)
@@ -186,7 +186,7 @@ fun MonthlyPageKT(
             onDismissed = ::onListPopupDismissed,
             addButton = {
                 AddButton(
-                    onButtonClick = {onNavigateToEditPage(null,Plan.PlanType.Schedule,popupDate.toDate())},
+                    onButtonClick = {onNavigateToEditPage(null,PlanType.SCHEDULE,popupDate.toDate())},
                     modifier = Modifier
                         .padding(8.dp)
                         .align(Alignment.BottomEnd)

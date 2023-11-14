@@ -4,7 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.text.style.LineBackgroundSpan;
 
-import com.example.calendy.data.PlanType;
+import com.example.calendy.data.maindb.plan.PlanType;
 
 import static com.example.calendy.ui.theme.ColorKt.PriorityColor;
 
@@ -17,9 +17,9 @@ public class MultiPlanSpan implements LineBackgroundSpan {
     private final int textColor;
     private final String title;
     private final int index;
-    private final int planType;
+    private final PlanType planType;
 
-    public MultiPlanSpan(int index, int priority, String title, int planType) {
+    public MultiPlanSpan(int index, int priority, String title, PlanType planType) {
         this.index = index;
         this.bgColor = PriorityColor(priority);
         if (priority > 3) this.textColor= 0xffffffff;

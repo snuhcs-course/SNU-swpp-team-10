@@ -3,7 +3,10 @@ package com.example.calendy.view.monthlyview.decorator;
 //import com.project.sample_calendar.R;
 import com.example.calendy.R;
 import com.example.calendy.data.maindb.plan.Plan;
+import com.example.calendy.data.maindb.plan.PlanType;
 import com.example.calendy.data.maindb.plan.Schedule;
+import com.example.calendy.utils.DateHelper;
+import com.example.calendy.utils.DateHelperKt;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.DayViewDecorator;
 import com.prolificinteractive.materialcalendarview.DayViewFacade;
@@ -34,11 +37,11 @@ public class TitleDecorator implements DayViewDecorator {
 //        view.addSpan(new DotSpan(6, color)); // 날자밑에 점
         int count=0;
         for(Plan p : planList){
-            int planType=getPlanType(p);
+            PlanType planType=getPlanType(p);
             if(planType== PlanType.SCHEDULE){
                 Schedule s=(Schedule)p;
                 int dayLength = DateHelper.INSTANCE.getDiffBetweenDates(s.getStartTime(),s.getEndTime()) + 1;
-                int dayOffset = DateHelper.INSTANCE.getDiffBetweenDates(s.getStartTime(),DateHelperKt.toDate(targetDay));
+                int dayOffset = DateHelper.INSTANCE.getDiffBetweenDates(s.getStartTime(), DateHelperKt.toDate(targetDay));
                 view.addSpan(new SinglePlanSpan(count++,p.getPriority(),p.getTitle(),planType,dayLength,dayOffset));
             }
             else{

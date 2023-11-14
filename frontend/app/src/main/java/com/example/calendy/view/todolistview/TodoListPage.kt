@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowLeft
 import androidx.compose.material.icons.filled.ArrowRight
@@ -30,7 +29,6 @@ import androidx.compose.ui.unit.sp
 import com.example.calendy.data.maindb.plan.Todo
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import com.example.calendy.data.plan.Todo
 import com.example.calendy.view.popup.EditButton
 import com.example.calendy.view.popup.PlanDetailPopup
 import com.example.calendy.view.popup.PopupHeaderTitle
