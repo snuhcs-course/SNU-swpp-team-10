@@ -6,7 +6,7 @@ sealed interface Plan {
     val memo: String
     val categoryId: Int?
     val repeatGroupId: Int?
-    val priority: Int?
+    val priority: Int
     val showInMonthlyView: Boolean
     val isOverridden: Boolean
 

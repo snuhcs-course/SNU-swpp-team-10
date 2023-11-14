@@ -50,7 +50,7 @@ interface IAppContainer {
 
 class AppContainer(private val context: Context) : IAppContainer {
     override val planRepository: IPlanRepository by lazy {
-        PlanRepository(scheduleRepository, todoRepository, categoryRepository)
+        PlanRepository(scheduleRepository, todoRepository)
     }
 
     override val scheduleRepository: IScheduleRepository by lazy {

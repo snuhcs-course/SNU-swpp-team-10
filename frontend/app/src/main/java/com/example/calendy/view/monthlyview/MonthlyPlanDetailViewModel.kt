@@ -36,7 +36,7 @@ class MonthlyDayPlanDetailViewModel(
     class Factory(val application: Application, val selectedId: Int, val planType: Plan.PlanType) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             val calendyContainer = (application as CalendyApplication).container
-            val planRepository = PlanRepository(calendyContainer.scheduleRepository,calendyContainer.todoRepository, calendyContainer.categoryRepository)
+            val planRepository = PlanRepository(calendyContainer.scheduleRepository,calendyContainer.todoRepository)
             return MonthlyDayPlanDetailViewModel(planRepository,selectedId, planType) as T
         }
     }

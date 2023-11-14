@@ -11,14 +11,12 @@ import java.util.Date
 
 // table name tod0(=t0do) in 'calendy_database.db'
 @Entity(
-    tableName = "todo", foreignKeys = [
-//        ForeignKey(
-//        entity = Category::class,
-//        parentColumns = ["id"],
-//        childColumns = ["category_id"],
-//        onDelete = ForeignKey.SET_NULL
-//    ),
-        ForeignKey(
+    tableName = "todo", foreignKeys = [ForeignKey(
+        entity = Category::class,
+        parentColumns = ["id"],
+        childColumns = ["category_id"],
+        onDelete = ForeignKey.SET_NULL
+    ), ForeignKey(
         entity = RepeatGroup::class,
         parentColumns = ["id"],
         childColumns = ["repeat_group_id"],
@@ -57,9 +55,9 @@ data class Todo(
     @ColumnInfo(name = "category_id", defaultValue = "NULL")
     @SerializedName("category_id")
     override val categoryId: Int? = null,
-    @ColumnInfo(name = "priority", defaultValue = "NULL")
+    @ColumnInfo(name = "priority", defaultValue = "3")
     @SerializedName("priority")
-    override val priority: Int? = null,
+    override val priority: Int = 3,
     @ColumnInfo(name = "show_in_monthly_view", defaultValue = "0")
     @SerializedName("show_in_monthly_view")
     override val showInMonthlyView: Boolean = false,
