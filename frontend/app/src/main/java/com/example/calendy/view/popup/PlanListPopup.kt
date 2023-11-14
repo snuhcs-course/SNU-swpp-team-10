@@ -2,6 +2,7 @@ package com.example.calendy.view.popup
 
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -51,7 +52,14 @@ import com.example.calendy.R
 import com.example.calendy.data.plan.Plan
 import com.example.calendy.data.plan.Schedule
 import com.example.calendy.data.plan.Todo
+import com.example.calendy.ui.theme.PriorityColor
+import com.example.calendy.ui.theme.getColor
 import com.example.calendy.utils.dayOfWeek
+import com.example.calendy.utils.equalDay
+import com.example.calendy.utils.getInfoText
+import com.example.calendy.utils.toAmPmString
+import com.example.calendy.utils.toDateTimeString
+import com.example.calendy.utils.toTimeString
 import java.util.Date
 
 @Composable
@@ -179,7 +187,7 @@ fun ListPopupBox(
             )
             LazyColumn(
                 modifier = Modifier
-                    .padding(start = 10.dp, end = 20.dp)
+//                    .padding(start = 10.dp, end = 20.dp)
                     .fillMaxWidth()
             ) {
                 items(planList!!) {
@@ -259,22 +267,45 @@ fun ScheduleListItem(
 ){
     Row(
         modifier= Modifier
+            .padding(vertical=5.dp, horizontal = 0.dp)
             .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.Top
     ) {
         Box(
             modifier = Modifier
                 .padding(vertical = 5.dp, horizontal = 0.dp)
                 .width(15.dp)
                 .height(15.dp)
-                .background(color = Color(0xFFACC7FA), shape = CircleShape)
+                .background(color = schedule.getColor(), shape = CircleShape)
         )
-        ClickableText(
-            text = AnnotatedString(schedule.title),
-            modifier = Modifier
-                .padding(horizontal = 10.dp),
-            onClick = {onItemClick(schedule)}
-        )
+        Column(
+            modifier=Modifier
+                .fillMaxWidth()
+                .clickable { onItemClick(schedule) }
+        ) {
+            Text(
+                text = schedule.title,
+                maxLines = 1,
+                style = TextStyle(
+                    fontSize = 16.sp,
+                    lineHeight = 18.sp,
+                    color = Color(0xFF000000),
+                    ),
+                modifier = Modifier
+                    .padding(horizontal = 10.dp),
+            )
+            Text(
+                text = schedule.getInfoText(),
+                maxLines = 1,
+                style = TextStyle(
+                    fontSize = 12.sp,
+                    lineHeight = 12.sp,
+                    color = Color(0xFF646464),
+                    ),
+                modifier = Modifier
+                    .padding(horizontal = 10.dp),
+            )
+        }
     }
 }
 
@@ -286,8 +317,9 @@ fun TodoListItem(
 ){
     Row(
         modifier= Modifier
+            .padding(vertical=5.dp, horizontal = 0.dp)
             .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.Top
     ) {
         Checkbox(
             checked = todo.complete!!,
@@ -298,17 +330,34 @@ fun TodoListItem(
                 .height(15.dp)
                 .scale(0.8f)
         )
-        ClickableText(
-            text = AnnotatedString(todo.title),
-            modifier = Modifier
-                .padding(horizontal = 10.dp),
-            onClick = {onItemClick(todo)},
-            style = if(todo.complete!!)
-                        TextStyle(textDecoration = TextDecoration.LineThrough, color = Color.Gray)
-                    else
-                        TextStyle(),
-
-        )
+        Column(
+            modifier=Modifier
+                .fillMaxWidth()
+                .clickable { onItemClick(todo) }
+        ) {
+            Text(
+                text = todo.title,
+                maxLines = 1,
+                style = TextStyle(
+                    fontSize = 16.sp,
+                    lineHeight = 18.sp,
+                    color = Color(0xFF000000),
+                ),
+                modifier = Modifier
+                    .padding(horizontal = 10.dp),
+            )
+            Text(
+                text = todo.getInfoText(),
+                maxLines = 1,
+                style = TextStyle(
+                    fontSize = 12.sp,
+                    lineHeight = 12.sp,
+                    color = Color(0xFF646464),
+                ),
+                modifier = Modifier
+                    .padding(horizontal = 10.dp),
+            )
+        }
     }
 }
 

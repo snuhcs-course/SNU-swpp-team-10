@@ -31,6 +31,7 @@ import com.example.calendy.data.plan.Plan
 import com.example.calendy.data.plan.Schedule
 import com.example.calendy.data.plan.Todo
 import com.example.calendy.utils.afterDays
+import com.example.calendy.utils.equalDay
 import com.example.calendy.utils.toCalendarDay
 import com.example.calendy.utils.toDate
 import com.example.calendy.view.monthlyview.decorator.OneDayDecorator
@@ -225,14 +226,27 @@ fun MonthlyPageKT(
 fun planListToHash(planList: List<Plan>): Hashtable<CalendarDay, List<Plan>> {
     val planOfMonth: Hashtable<CalendarDay, List<Plan>> = Hashtable()
     for (p in planList) {
-        val day: CalendarDay = when (p) {
-            is Schedule -> p.startTime.toCalendarDay()
-            is Todo     -> p.dueTime.toCalendarDay()
+        val days: List<CalendarDay> = when (p) {
+            is Schedule -> {
+                val start = p.startTime
+                val end = p.endTime.afterDays(1)
+                val days = mutableListOf<CalendarDay>()
+                var day = start
+                do {
+                    days.add(day.toCalendarDay())
+                    day = day.afterDays(1)
+                } while (!day.equalDay(end))
+                days
+            }
+            is Todo     -> List(1){p.dueTime.toCalendarDay()}
         }
-        if (!planOfMonth!!.containsKey(day)) planOfMonth[day] = mutableListOf()
+        for(day in days){
+            if (!planOfMonth!!.containsKey(day)) planOfMonth[day] = mutableListOf()
 
-        val list = planOfMonth[day] as MutableList
-        list!!.add(p)
+            val list = planOfMonth[day] as MutableList
+            list!!.add(p)
+        }
+
     }
     return planOfMonth
 }

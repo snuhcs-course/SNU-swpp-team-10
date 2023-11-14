@@ -1,49 +1,31 @@
 package com.example.calendy.view.monthlyview.decorator;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.ColorSpace;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.text.style.LineBackgroundSpan;
 
 import com.example.calendy.data.PlanType;
 
-import static androidx.compose.ui.graphics.ColorKt.Color;
 import static com.example.calendy.ui.theme.ColorKt.PriorityColor;
 
 /**
- * Span to draw a dot centered under a section of text
+ * Span to draw part of a
  */
-public class SinglePlanSpan implements LineBackgroundSpan {
+public class MultiPlanSpan implements LineBackgroundSpan {
 
     private final int bgColor;
     private final int textColor;
     private final String title;
     private final int index;
     private final int planType;
-    private final int dayLength;
-    private final int dayOffset;
 
-    public SinglePlanSpan(int index, int priority, String title, int planType) {
+    public MultiPlanSpan(int index, int priority, String title, int planType) {
         this.index = index;
         this.bgColor = PriorityColor(priority);
         if (priority > 3) this.textColor= 0xffffffff;
         else this.textColor = 0xff000000;
         this.title=title;
         this.planType=planType;
-        this.dayLength=1;
-        this.dayOffset=0;
-    }
-    public SinglePlanSpan(int index, int priority, String title, int planType, int dayLength, int dayOffset) {
-        this.index = index;
-        this.bgColor = PriorityColor(priority);
-        if (priority > 3) this.textColor= 0xffffffff;
-        else this.textColor = 0xff000000;
-        this.title=title;
-        this.planType=planType;
-        this.dayLength=dayLength;
-        this.dayOffset=dayOffset;
     }
 
     @Override
@@ -63,30 +45,26 @@ public class SinglePlanSpan implements LineBackgroundSpan {
         paint.setTextSize(24);
         paint.setTextAlign(Paint.Align.CENTER);
 
-        int w=(right-left);
+        int w=right-left;
         int h=40;
-        int width = w*dayLength;
-        int xPos = 0 +width/2 -w*dayOffset;
+        int xPos = 0 +w/2;
         int yPos = bottom + h/2 +h* (index) + 10;
         int p=4;
 
         //((textPaint.descent() + textPaint.ascent()) / 2) is the distance from the baseline to the center.
-        if(planType==PlanType.TODO) {
+        if(planType==PlanType.SCHEDULE)
+            canvas.drawRoundRect(left+p,bottom + h* (index) +p ,right-p,bottom +h* (index+1) -p,8,8,paint);
+        else if(planType==PlanType.TODO)
+        {
             paint.setStyle(Paint.Style.STROKE);
             paint.setStrokeWidth(5);
-        }
-        canvas.drawRoundRect(
-                left - w*dayOffset +2,
-                bottom + h* (index) +p ,
-                left +width - w*dayOffset -2,
-                bottom +h* (index+1) -p,
-                8,8,paint);
-        paint.setStyle(Paint.Style.FILL);
+            canvas.drawRoundRect(left+p,bottom + h* (index) +p ,right-p,bottom +h* (index+1) -p,8,8,paint);
+            paint.setStyle(Paint.Style.FILL);
 
 //            paint.setColor(-1);
 //            int stroke=5;
 //            canvas.drawRoundRect(left+2+stroke,bottom + h* (index) +2+stroke ,right-2-stroke,bottom +h* (index+1) -2-stroke,3,3,paint);
-
+        }
 
         paint.setColor(textColor);
 //        paint.setFakeBoldText(true);

@@ -44,6 +44,7 @@ import com.example.calendy.view.monthlyview.MonthlyPageKT
 import com.example.calendy.view.settingview.SettingPage
 import com.example.calendy.view.todolistview.ToDoListPage
 import com.example.calendy.view.todolistview.TodoListViewModel
+import com.example.calendy.view.weeklyview.WeeklyPageKT
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -79,7 +80,7 @@ fun MainScreenView() {
 @Composable
 fun BottomNavigation(navController: NavHostController) {
     val items = listOf(
-//        BottomNavItem.Week,
+        BottomNavItem.Week,
         BottomNavItem.Month,
         BottomNavItem.Todo,
         BottomNavItem.AiManager,
@@ -181,7 +182,8 @@ sealed class DestinationRoute(val route: String) {
 fun NavigationGraph(navController: NavHostController) {
     NavHost(navController = navController, startDestination = BottomNavItem.Month.screenRoute) {
         composable(BottomNavItem.Week.screenRoute) {
-            WeeklyPage()
+//            WeeklyPage()
+            WeeklyPageKT()
         }
         composable(BottomNavItem.Month.screenRoute) {
             MonthlyPageKT(onNavigateToEditPage = { id: Int?, type: Plan.PlanType, date: Date? ->
