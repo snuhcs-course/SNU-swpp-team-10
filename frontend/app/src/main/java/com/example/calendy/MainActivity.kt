@@ -127,11 +127,11 @@ fun BottomNavigation(navController: NavHostController) {
 sealed class BottomNavItem(
     val title: Int, val icon: Int, val screenRoute: String
 ) {
-    object Week : BottomNavItem(
-        title = R.string.text_weekly_view,
-        icon = R.drawable.outline_format_list_bulleted_24,
-        screenRoute = "Week"
-    )
+//    object Week : BottomNavItem(
+//        title = R.string.text_weekly_view,
+//        icon = R.drawable.outline_format_list_bulleted_24,
+//        screenRoute = "Week"
+//    )
 
     object Month : BottomNavItem(
         title = R.string.text_monthly_view,
@@ -180,9 +180,9 @@ sealed class DestinationRoute(val route: String) {
 @Composable
 fun NavigationGraph(navController: NavHostController) {
     NavHost(navController = navController, startDestination = BottomNavItem.Month.screenRoute) {
-        composable(BottomNavItem.Week.screenRoute) {
-            WeeklyPage()
-        }
+//        composable(BottomNavItem.Week.screenRoute) {
+//            WeeklyPage()
+//        }
         composable(BottomNavItem.Month.screenRoute) {
             MonthlyPageKT(onNavigateToEditPage = { id: Int?, type: Plan.PlanType, date: Date? ->
                 val route = if (id==null) {
