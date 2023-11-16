@@ -28,6 +28,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             )
         }
+        debug {
+            enableAndroidTestCoverage = true // TODO: local test will fail. Only android test will pass
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
