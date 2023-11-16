@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import com.example.calendy.data.maindb.category.Category
+import com.example.calendy.data.maindb.plan.Plan.Companion.PRIORITY_DEFAULT
 import com.example.calendy.data.maindb.repeatgroup.RepeatGroup
 import java.util.Date
 
@@ -39,7 +40,7 @@ data class Todo(
     @ColumnInfo(name = "category_id")
     override val categoryId: Int? = null,
     @ColumnInfo(name = "priority")
-    override val priority: Int = 3,
+    override val priority: Int = PRIORITY_DEFAULT,
     @ColumnInfo(name = "show_in_monthly_view")
     override val showInMonthlyView: Boolean = false,
     @ColumnInfo(name = "is_overridden")

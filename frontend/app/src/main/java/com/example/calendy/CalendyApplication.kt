@@ -45,7 +45,12 @@ class AppContainer(private val context: Context) : IAppContainer {
     val db: CalendyDatabase by lazy { CalendyDatabase.getDatabase(context) }
 
     override val planRepository: IPlanRepository by lazy {
-        PlanRepository(scheduleRepository, todoRepository)
+        PlanRepository(
+            scheduleRepository = scheduleRepository,
+            todoRepository = todoRepository,
+            categoryRepository = categoryRepository,
+            repeatGroupRepository = repeatGroupRepository
+        )
     }
 
     // TODO: Don't expose scheduleRepository
