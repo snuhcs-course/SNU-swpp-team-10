@@ -4,12 +4,14 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.example.calendy.data.maindb.CalendyDatabase
+import com.example.calendy.data.maindb.category.CategoryRepository
 import com.example.calendy.data.maindb.plan.Plan
 import com.example.calendy.data.maindb.plan.PlanRepository
 import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
 import com.example.calendy.data.maindb.plan.schedule.ScheduleRepository
 import com.example.calendy.data.maindb.plan.todo.TodoRepository
+import com.example.calendy.data.maindb.repeatgroup.RepeatGroupRepository
 import com.example.calendy.utils.DateHelper
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -38,14 +40,23 @@ class PlanRepositoryTest {
                 .allowMainThreadQueries().build()
 
             val todoDao = calendyDatabase.todoDao()
-            val todoLocalDataSource = TodoLocalDataSource(todoDao)
-            todoRepository = TodoRepository(todoLocalDataSource)
+            todoRepository = TodoRepository(todoDao)
 
             val scheduleDao = calendyDatabase.scheduleDao()
-            val scheduleLocalDataSource = ScheduleLocalDataSource(scheduleDao)
-            scheduleRepository = ScheduleRepository(scheduleLocalDataSource)
+            scheduleRepository = ScheduleRepository(scheduleDao)
 
-            planRepository = PlanRepository(scheduleRepository, todoRepository)
+            val categoryDao = calendyDatabase.categoryDao()
+            val categoryRepository = CategoryRepository(categoryDao)
+
+            val repeatGroupDao = calendyDatabase.repeatGroupDao()
+            val repeatGroupRepository = RepeatGroupRepository(repeatGroupDao)
+
+            planRepository = PlanRepository(
+                scheduleRepository = scheduleRepository,
+                todoRepository = todoRepository,
+                categoryRepository = categoryRepository,
+                repeatGroupRepository = repeatGroupRepository
+            )
         }
 
         createRepository()
@@ -58,7 +69,7 @@ class PlanRepositoryTest {
     }
 
 
-    private var schedule1 = Schedule(
+    private val schedule1 = Schedule(
         id = 1,
         title = "first",
         startTime = DateHelper.getDate(2023, 10, 9),
@@ -68,11 +79,11 @@ class PlanRepositoryTest {
         showInMonthlyView = false,
         isOverridden = false
     )
-    private var schedule2 = Schedule(
+    private val schedule2 = Schedule(
         id = 2,
         title = "second",
         startTime = DateHelper.getDate(2023, 10, 13, 12, 30),
-        endTime = DateHelper.getDate(2023,11,1),
+        endTime = DateHelper.getDate(2023, 11, 1),
         memo = "",
         priority = 2,
         showInMonthlyView = false,
@@ -80,23 +91,16 @@ class PlanRepositoryTest {
     )
 
     private suspend fun addTwoSchedule() {
-        scheduleRepository.insertSchedule(schedule1)
-        scheduleRepository.insertSchedule(schedule2)
+        scheduleRepository.insert(schedule1)
+        scheduleRepository.insert(schedule2)
     }
 
 
-    private var todo1 = Todo(
+    private val todo1 = Todo(
         id = 1, title = "Be happy",
         dueTime = DateHelper.getDate(
-            year = 2023,
-            monthZeroIndexed = 10,
-            day = 9,
-            hourOfDay = 20,
-            minute = 30
+            year = 2023, monthZeroIndexed = 10, day = 9, hourOfDay = 20, minute = 30
         ),
-        yearly = false,
-        monthly = false,
-        daily = false,
         complete = false,
         memo = "Realy",
         priority = 2,
