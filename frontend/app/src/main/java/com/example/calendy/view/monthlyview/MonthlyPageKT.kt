@@ -5,11 +5,6 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -23,17 +18,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.sqlite.db.SupportSQLiteQuery
 import com.example.calendy.AppViewModelProvider
 import com.example.calendy.R
 import com.example.calendy.data.dummy.DummyPlanRepository
-import com.example.calendy.data.maindb.plan.IPlanRepository
-import com.example.calendy.data.maindb.plan.Plan
 import com.example.calendy.data.maindb.plan.PlanType
-import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
 import com.example.calendy.utils.afterDays
 import com.example.calendy.utils.equalDay
+import com.example.calendy.utils.getPlanType
 import com.example.calendy.utils.toCalendarDay
 import com.example.calendy.utils.toDate
 import com.example.calendy.view.monthlyview.decorator.OneDayDecorator
@@ -42,20 +34,15 @@ import com.example.calendy.view.monthlyview.decorator.SelectedDayDecorator
 import com.example.calendy.view.monthlyview.decorator.SundayDecorator
 import com.example.calendy.view.monthlyview.decorator.TitleDecorator
 import com.example.calendy.view.popup.AddButton
-import com.example.calendy.view.popup.EditButton
-import com.example.calendy.view.popup.PlanDetailPopup
 import com.example.calendy.view.popup.PopupHeaderDate
-import com.example.calendy.view.popup.PopupHeaderTitle
 import com.example.calendy.view.popup.SwitchablePlanListPopup
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.CalendarMode
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView
 import com.prolificinteractive.materialcalendarview.format.ArrayWeekDayFormatter
 import com.prolificinteractive.materialcalendarview.format.MonthArrayTitleFormatter
-import kotlinx.coroutines.flow.Flow
 import java.util.Calendar
 import java.util.Date
-import java.util.Hashtable
 
 @Composable
 fun MonthlyPageKT(
@@ -71,12 +58,10 @@ fun MonthlyPageKT(
     var saturdayDecorator : SaturdayDecorator = SaturdayDecorator(uiState.currentMonth.month)
     var sundayDecorator : SundayDecorator = SundayDecorator(uiState.currentMonth.month)
 
-    var planOfMonth: Hashtable<CalendarDay, List<Plan>> = planListToHash(uiState.plansOfMonth)
+    val planLabelContainer = PlanLabelContainer().setPlans(uiState.plansOfMonth)
 
     var popupDate by remember { mutableStateOf(uiState.selectedDate) }
-    var popupPlan : Plan by remember { mutableStateOf(Schedule(-1, "", Date(), Date()))}
     var showListPopup by remember { mutableStateOf(false) }
-    var showDetailPopup by remember { mutableStateOf(false) }
 
 
     fun openListPopup(selectedDate: CalendarDay)
@@ -84,25 +69,14 @@ fun MonthlyPageKT(
         popupDate=selectedDate
         showListPopup = true
     }
-    fun openDetailPopup(plan: Plan)
-    {
-        popupPlan=plan
-        showDetailPopup=true
-    }
-    fun openAddPlanPopup(selectedDate: CalendarDay)
-    {
-        onNavigateToEditPage(null, PlanType.SCHEDULE, selectedDate.toDate())
-    }
+
 
     fun onListPopupDismissed()
     {
         showListPopup=false
 //        popupDate=uiState.selectedDate
     }
-    fun onDetailPopupDismissed()
-    {
-        showDetailPopup=false
-    }
+
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -130,7 +104,7 @@ fun MonthlyPageKT(
 
                 setOnDateChangedListener { widget, date, selected ->
 
-                    if (planOfMonth.size == 0) planOfMonth = planListToHash(uiState.plansOfMonth)
+//                    if (planOfMonth.size == 0) planOfMonth = planListToHash(uiState.plansOfMonth)
 
                     if (date == uiState.selectedDate) {
                         openListPopup(date)
@@ -155,6 +129,12 @@ fun MonthlyPageKT(
 
                 // selected day decorator initialization
                 mcv.removeDecorators()
+
+                // add title decorator
+                for((date, labelSlot) in planLabelContainer){
+                    mcv.addDecorator(TitleDecorator(date.toCalendarDay(), labelSlot))
+                }
+
                 selectedDayDecorator = SelectedDayDecorator(uiState.selectedDate, mcv.context)
                 mcv.addDecorators(
                     saturdayDecorator,
@@ -162,9 +142,7 @@ fun MonthlyPageKT(
                     OneDayDecorator(),
                     selectedDayDecorator
                 )
-                for (p in planOfMonth) {
-                    mcv.addDecorator(TitleDecorator(p.key, p.value))
-                }
+
                 Log.d("BANG", "mcv redraw")
             }
         )
@@ -178,8 +156,8 @@ fun MonthlyPageKT(
         )
     }
         //list popup
-    if (showListPopup && !showDetailPopup) {
-        val planList = planOfMonth[popupDate]
+    if (showListPopup) {
+        val planList = planLabelContainer.getPlansAt(popupDate.toDate())
         SwitchablePlanListPopup(
             planList = if (planList != null) planList else emptyList(),
             header = { PopupHeaderDate(popupDate.toDate()) },
@@ -192,7 +170,9 @@ fun MonthlyPageKT(
                         .align(Alignment.BottomEnd)
                 )
             },
-            onItemClick = ::openDetailPopup,
+            onItemClick = { plan ->
+                onNavigateToEditPage(plan.id, plan.getPlanType(), null)
+            },
             onCheckboxClicked =
             { plan, checked ->
                 val todo = plan as Todo
@@ -204,54 +184,9 @@ fun MonthlyPageKT(
         Log.d("BANG", "list popup opened")
     }
 
-
-    //detail popup
-    if(showDetailPopup){
-        PlanDetailPopup(
-            plan = popupPlan,
-            header = { PopupHeaderTitle(popupPlan.title)},
-            editButton = {
-                EditButton(
-                    plan = popupPlan,
-                    onNavigateToEditPage = onNavigateToEditPage,
-                    modifier=Modifier.align(Alignment.TopEnd)
-                )
-            },
-            onDismissed = ::onDetailPopupDismissed
-        )
-        Log.d("BANG","detail popup opened")
-    }
-
 }
 
 
-fun planListToHash(planList: List<Plan>): Hashtable<CalendarDay, List<Plan>> {
-    val planOfMonth: Hashtable<CalendarDay, List<Plan>> = Hashtable()
-    for (p in planList) {
-        val days: List<CalendarDay> = when (p) {
-            is Schedule -> {
-                val start = p.startTime
-                val end = p.endTime.afterDays(1)
-                val days = mutableListOf<CalendarDay>()
-                var day = start
-                do {
-                    days.add(day.toCalendarDay())
-                    day = day.afterDays(1)
-                } while (!day.equalDay(end))
-                days
-            }
-            is Todo     -> List(1){p.dueTime.toCalendarDay()}
-        }
-        for(day in days){
-            if (!planOfMonth!!.containsKey(day)) planOfMonth[day] = mutableListOf()
-
-            val list = planOfMonth[day] as MutableList
-            list!!.add(p)
-        }
-
-    }
-    return planOfMonth
-}
 
 
 @Preview(showBackground = false, name = "Monthly Calendar Preview")

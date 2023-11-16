@@ -4,6 +4,8 @@ import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.data.maindb.plan.Plan
 import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
+import com.prolificinteractive.materialcalendarview.CalendarDay
+import java.util.Hashtable
 
 
 fun Plan.getPlanType(): PlanType {
@@ -19,9 +21,9 @@ fun Schedule.getInfoText(): String {
     // time info
     if(!startTime.equalDay(endTime)){
         // long day plan
-        info.append(startTime.toDateTimeString())
+        info.append(startTime.toDateString(false))
         info.append(" - ")
-        info.append(endTime.toDateTimeString())
+        info.append(endTime.toDateString(false))
     }
     else{
         info.append(startTime.toTimeString(hour12 = true, showAmPm = true))
@@ -34,7 +36,7 @@ fun Schedule.getInfoText(): String {
 
     // memo info
     if(memo.isNotEmpty()){
-        info.append(memo)
+        info.append(" "+memo)
     }
     return info.toString()
 }
@@ -46,7 +48,7 @@ fun Todo.getInfoText():String{
 
     // memo info
     if(memo.isNotEmpty()){
-        info.append(memo)
+        info.append(" "+memo)
     }
     return info.toString()
 }

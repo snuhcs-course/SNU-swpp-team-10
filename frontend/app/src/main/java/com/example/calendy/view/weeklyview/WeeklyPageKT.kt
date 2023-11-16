@@ -20,7 +20,6 @@ import com.example.calendy.view.monthlyview.decorator.SaturdayDecorator
 import com.example.calendy.view.monthlyview.decorator.SelectedDayDecorator
 import com.example.calendy.view.monthlyview.decorator.SundayDecorator
 import com.example.calendy.view.monthlyview.decorator.TitleDecorator
-import com.example.calendy.view.monthlyview.planListToHash
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.CalendarMode
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView

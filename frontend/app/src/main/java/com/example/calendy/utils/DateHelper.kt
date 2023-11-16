@@ -121,14 +121,13 @@ object DateHelper {
      * number of days diff between two dates, no considering time
      *
      */
-    fun getDiffBetweenDates(startDate: Date, endDate: Date): Int {
-        val t1=startDate.time / (1000*60*60*24) //start date 00:00:00
-        val t2=endDate.time / (1000*60*60*24) //end date 00:00:00
-        return (t2-t1).toInt()
-    }
 
 }
-
+fun getDiffBetweenDates(startDate: Date, endDate: Date): Int {
+    val t1=startDate.time / (1000*60*60*24) //start date 00:00:00
+    val t2=endDate.time / (1000*60*60*24) //end date 00:00:00
+    return (t2-t1).toInt()
+}
 // extension for CalendarDay  and Date
 fun Date.dayOfWeek(): String {
     val sdf = SimpleDateFormat("EEEE", Locale.KOREA)
@@ -142,15 +141,23 @@ fun CalendarDay.toFirstDateOfMonth():Date = Date(year-1900,month,1)
 fun CalendarDay.toLastDateOfMonth():Date = Date(year - 1900, month,1).lastDayOfMonth()
 fun CalendarDay.getWeekDay(): String = toDate().dayOfWeek()
 fun CalendarDay.afterDays(amount:Int): CalendarDay=toDate().afterDays(amount).toCalendarDay()
+
 fun Date.toCalendarDay(): CalendarDay = CalendarDay.from(this)
+
+// remove time
+fun Date.dateOnly(): Date = Date(year, month, date)
 
 fun Date.toDateDayString(showYear:Boolean=false): String
     = toDateString(showYear) + " " + dayOfWeek()
+
 fun Date.toDateTimeString(showYear: Boolean = false): String
     = toDateString(showYear) + " " + toTimeString(hour12 = true, showAmPm = true)
+
 fun Date.toDateString(showYear: Boolean):String
     = if(showYear) String.format("%d년 %d월 %d일",year+1900,month+1,date) else String.format("%d월 %d일",month+1,date)
+
 fun Date.toAmPmString():String = if(hours<12) "오전" else "오후"
+
 fun Date.toTimeString(hour12:Boolean = false, showSeconds:Boolean=false, showAmPm:Boolean=false):String
 {
     val h = if(hour12)
@@ -162,9 +169,13 @@ fun Date.toTimeString(hour12:Boolean = false, showSeconds:Boolean=false, showAmP
     else
         return String.format("%d:%02d",h,minutes)
 }
+
 fun Date.isAm():Boolean = hours<12
+
 fun Date.isPm():Boolean = hours>=12
+
 fun Date.equalDay(date:Date): Boolean = year==date.year && month == date.month && this.date == date.date
+
 fun Date.afterDays(amount: Int):Date{
     val c = Calendar.getInstance()
     c.time=this

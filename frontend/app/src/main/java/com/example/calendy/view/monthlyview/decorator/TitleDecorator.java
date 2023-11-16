@@ -7,6 +7,10 @@ import com.example.calendy.data.maindb.plan.PlanType;
 import com.example.calendy.data.maindb.plan.Schedule;
 import com.example.calendy.utils.DateHelper;
 import com.example.calendy.utils.DateHelperKt;
+import com.example.calendy.utils.PlanHelperKt;
+import com.example.calendy.view.monthlyview.ILabel;
+import com.example.calendy.view.monthlyview.LabelSlot;
+import com.example.calendy.view.monthlyview.PlanLabel;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.DayViewDecorator;
 import com.prolificinteractive.materialcalendarview.DayViewFacade;
@@ -20,10 +24,10 @@ import static com.example.calendy.utils.PlanHelperKt.getPlanType;
 public class TitleDecorator implements DayViewDecorator {
 
     private CalendarDay targetDay;
-    private List<Plan> planList;
-    public TitleDecorator(CalendarDay day, List<Plan> plans) {
+    private LabelSlot<Plan> planLabel;
+    public TitleDecorator(CalendarDay day, LabelSlot<Plan> planSlot) {
         this.targetDay = day;
-        this.planList=plans;
+        this.planLabel=planSlot;
     }
 
     @Override
@@ -34,20 +38,30 @@ public class TitleDecorator implements DayViewDecorator {
 
     @Override
     public void decorate(DayViewFacade view) {
-//        view.addSpan(new DotSpan(6, color)); // 날자밑에 점
         int count=0;
-        for(Plan p : planList){
-            PlanType planType=getPlanType(p);
-            if(planType== PlanType.SCHEDULE){
-                Schedule s=(Schedule)p;
-                int dayLength = DateHelper.INSTANCE.getDiffBetweenDates(s.getStartTime(),s.getEndTime()) + 1;
-                int dayOffset = DateHelper.INSTANCE.getDiffBetweenDates(s.getStartTime(), DateHelperKt.toDate(targetDay));
-                view.addSpan(new SinglePlanSpan(count++,p.getPriority(),p.getTitle(),planType,dayLength,dayOffset));
-            }
-            else{
-                view.addSpan(new SinglePlanSpan(count++,p.getPriority(),p.getTitle(),planType));
-            }
-            if(count==4) break; //hardcoded max viewable plan count
+        int max=5;  //prevent rendering too many plans
+        for(ILabel label : planLabel){
+            PlanLabel pLabel=(PlanLabel)label;
+            Plan plan=pLabel.getItem();
+            int index=pLabel.getIndex();
+            PlanType type= PlanHelperKt.getPlanType(plan);
+            int length=pLabel.getWeight();
+            int offset=DateHelperKt.getDiffBetweenDates(pLabel.getStartDate(),DateHelperKt.toDate(targetDay));
+            Boolean completed=pLabel.getCompleted();
+            SinglePlanSpan span = new SinglePlanSpan(
+                    index,
+                    plan.getPriority(),
+                    plan.getTitle(),
+                    type,
+                    length,
+                    offset,
+                    completed
+                    );
+            view.addSpan(span);
+
+            count++;
+            if(count>=max) break;
         }
+
     }
 }
