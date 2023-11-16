@@ -11,50 +11,40 @@ plugins {
     id("com.google.devtools.ksp") version "1.8.10-1.0.9" apply false
     id("org.jetbrains.kotlin.android") version "1.8.10" apply false
 
-    java // If the Java plugin is also applied to your project, a new task named jacocoTestReport is created.
-    jacoco
+    id("io.github.gmazzo.test.aggregation.results") version "2.2.0"
+    id("io.github.gmazzo.test.aggregation.coverage") version "2.2.0"
 }
 
-dependencies {
-    testImplementation("junit:junit:4.13.2")
+testAggregation {
+    modules {
+//        include(projects.demoProject.app, projects.demoProject.domain, projects.demoProject.login)
+//        exclude(rootProject)
+    }
+    coverage {
+//        exclude("**/ContentMainBinding*")
+    }
 }
 
-
-jacoco {
-    // JaCoCo 버전
-    toolVersion = "0.8.11"
-//    applyTo(junitPlatformTest)
-
-//  테스트결과 리포트를 저장할 경로 변경
-//  default는 "${project.reporting.baseDir}/jacoco"
-    // reportsDirectory
-}
-
-tasks.jacocoTestReport {
+tasks.jacocoAggregatedReport {
     reports {
-        // 원하는 리포트를 켜고 끌 수 있습니다.
         html.required.set(true)
-        html.setDestination(file("$buildDir/jacocoHtml"))
-        xml.required.set(false)
-        csv.required.set(false)
     }
 }
 
-tasks.withType<Test> {
-    useJUnitPlatform()
-    extensions.configure(JacocoTaskExtension::class) {
-        setDestinationFile(file("$buildDir/jacoco/jacoco.exec"))
-        println(file("$buildDir/jacoco/jacoco.exec").absolutePath)
+tasks.jacocoAggregatedCoverageVerification {
+    violationRules {
+        rule {
+            limit {// current 19%
+                minimum = "0.19".toBigDecimal()
+            }
+            limit {// desired 80%
+                minimum = "0.8".toBigDecimal()
+                isFailOnViolation = false
+            }
+        }
     }
 }
 
-tasks.test {
-    useJUnitPlatform()
-    shouldRunAfter(tasks.jacocoTestCoverageVerification)
-    extensions.configure(JacocoTaskExtension::class) {
-        setDestinationFile(file("$buildDir/jacoco/jacoco.exec"))
-        println(file("$buildDir/jacoco/jacoco.exec").absolutePath)
-    }
-    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
-}
-
+//tasks.check {
+//    dependsOn(tasks.jacocoAggregatedCoverageVerification)
+//}
