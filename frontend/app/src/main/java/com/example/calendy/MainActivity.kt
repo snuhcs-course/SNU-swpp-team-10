@@ -36,14 +36,15 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.ui.theme.CalendyTheme
-import com.example.calendy.view.messagepage.MessagePage
+import com.example.calendy.view.messageview.MessagePage
 import com.example.calendy.view.editplanview.EditPlanPage
 import com.example.calendy.view.editplanview.EditPlanViewModel
 import com.example.calendy.view.monthlyview.MonthlyPageKT
 import com.example.calendy.view.settingview.SettingPage
 import com.example.calendy.view.todolistview.ToDoListPage
 import com.example.calendy.view.todolistview.TodoListViewModel
-import com.example.calendy.view.weeklyview.WeeklyPageKT
+import com.example.calendy.view.weeklyview.WeeklyPage
+import com.example.calendy.view.weeklyview.WeeklyViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -181,8 +182,21 @@ sealed class DestinationRoute(val route: String) {
 fun NavigationGraph(navController: NavHostController) {
     NavHost(navController = navController, startDestination = BottomNavItem.Month.screenRoute) {
         composable(BottomNavItem.Week.screenRoute) {
-//            WeeklyPage()
-            WeeklyPageKT()
+            val viewModel: WeeklyViewModel = viewModel(factory = AppViewModelProvider.Factory)
+            WeeklyPage(viewModel, onNavigateToEditPage = {id: Int?, type: PlanType, date: Date? ->
+                val route = if (id==null) {
+                    when (type) {
+                        PlanType.SCHEDULE -> DestinationRoute.AddSchedule(date= date?: Date()).route
+                        PlanType.TODO     -> DestinationRoute.AddTodo(date = date?: Date()).route
+                    }
+                } else {
+                    when (type) {
+                        PlanType.SCHEDULE -> DestinationRoute.EditSchedule(id = id).route
+                        PlanType.TODO     -> DestinationRoute.EditTodo(id = id).route
+                    }
+                }
+                navController.navigate(route)
+            })
         }
         composable(BottomNavItem.Month.screenRoute) {
             MonthlyPageKT(onNavigateToEditPage = { id: Int?, type: PlanType, date: Date? ->

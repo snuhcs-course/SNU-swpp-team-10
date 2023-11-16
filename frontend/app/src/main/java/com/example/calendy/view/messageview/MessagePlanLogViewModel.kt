@@ -1,10 +1,8 @@
-package com.example.calendy.view.messagepage
+package com.example.calendy.view.messageview
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.calendy.data.maindb.history.IHistoryRepository
-import com.example.calendy.data.maindb.history.SavedSchedule
-import com.example.calendy.data.maindb.history.SavedTodo
 import com.example.calendy.data.maindb.message.IMessageRepository
 import com.example.calendy.data.maindb.message.Message
 import com.example.calendy.data.maindb.plan.IPlanRepository

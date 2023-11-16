@@ -43,7 +43,6 @@ fun ToDoListPage(
 ) {
     val uiState: TodoListUiState by viewModel.uiState.collectAsState()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
 
 

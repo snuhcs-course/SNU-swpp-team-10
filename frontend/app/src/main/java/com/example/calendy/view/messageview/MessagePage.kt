@@ -1,4 +1,4 @@
-package com.example.calendy.view.messagepage
+package com.example.calendy.view.messageview
 
 import android.content.Intent
 import android.speech.RecognizerIntent

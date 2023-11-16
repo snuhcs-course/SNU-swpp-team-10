@@ -1,4 +1,4 @@
-package com.example.calendy.view.messagepage
+package com.example.calendy.view.messageview
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
