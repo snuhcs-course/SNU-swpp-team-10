@@ -152,7 +152,7 @@ class PlanRepositoryTest {
     }
 
     @Test
-    fun update() = runBlocking {
+        fun update() = runBlocking {
         val updatedSchedule = schedule1.copy(title = "updated", priority = 5, memo = "updated memo")
         planRepository.update(updatedSchedule)
 
@@ -191,13 +191,98 @@ class PlanRepositoryTest {
 
     @Test
     fun getPlansStream() = runBlocking {
-//        val planList: List<Plan> = planRepository.getPlansStream(
-//            DateHelper.getDate(year = 2023, monthZeroIndexed = 10, day = 5),
-//            DateHelper.getDate(year = 2023, monthZeroIndexed = 10, day = 11)
-//        ).first()
-//
-//        val expectedList = listOf(schedule1, todo1)
-//        assertEqualsWithoutOrder(expected = expectedList, actual = planList)
+        val planList: List<Plan> = planRepository.getPlansStream(
+            DateHelper.getDate(year = 2023, monthZeroIndexed = 10, day = 5),
+            DateHelper.getDate(year = 2023, monthZeroIndexed = 10, day = 11)
+        ).first()
+
+        val expectedList = listOf(schedule1, todo1)
+        assertEqualsWithoutOrder(expected = expectedList, actual = planList)
+
+
+        val schedule1105to1111 = schedule1.copy(
+            id = 3,
+            startTime = DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 5),
+            endTime = DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 11)
+        )
+        val schedule1109to1114 = schedule1.copy(
+            id = 4,
+            startTime = DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 9),
+            endTime = DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 14)
+        )
+        val schedule1112to1115 = schedule2.copy(
+            id = 5,
+            startTime = DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 12),
+            endTime = DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 15)
+        )
+        planRepository.insert(schedule1105to1111)
+        planRepository.insert(schedule1109to1114)
+        planRepository.insert(schedule1112to1115)
+
+
+        assertEqualsWithoutOrder(
+            expected = listOf(schedule1105to1111),
+            actual = planRepository.getPlansStream(
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 4),
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 8)
+            ).first()
+        )
+
+        assertEqualsWithoutOrder(
+            expected = listOf(schedule1105to1111, schedule1109to1114),
+            actual = planRepository.getPlansStream(
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 6),
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 10)
+            ).first()
+        )
+
+        assertEqualsWithoutOrder(
+            expected = listOf(schedule1105to1111, schedule1109to1114),
+            actual = planRepository.getPlansStream(
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 10),
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 10)
+            ).first()
+        )
+
+        assertEqualsWithoutOrder(
+            expected = listOf(schedule1105to1111, schedule1109to1114, schedule1112to1115),
+            actual = planRepository.getPlansStream(
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 9),
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 14)
+            ).first()
+        )
+
+        assertEqualsWithoutOrder(
+            expected = listOf(schedule1109to1114, schedule1112to1115),
+            actual = planRepository.getPlansStream(
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 12),
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 14)
+            ).first()
+        )
+
+        assertEqualsWithoutOrder(
+            expected = listOf(schedule1109to1114, schedule1112to1115),
+            actual = planRepository.getPlansStream(
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 13),
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 15)
+            ).first()
+        )
+
+        assertEqualsWithoutOrder(
+            expected = listOf(schedule1112to1115),
+            actual = planRepository.getPlansStream(
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 15),
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 18)
+            ).first()
+        )
+
+        assertEqualsWithoutOrder(
+            expected = listOf(),
+            actual = planRepository.getPlansStream(
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 16),
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 18)
+            ).first()
+        )
     }
 
     @Test

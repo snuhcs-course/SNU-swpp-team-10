@@ -35,9 +35,9 @@ data class Todo(
     val complete: Boolean = false,
     @ColumnInfo(name = "memo")
     override val memo: String = "",
-    @ColumnInfo(name = "repeat_group_id")
+    @ColumnInfo(name = "repeat_group_id", index = true)
     override val repeatGroupId: Int? = null,
-    @ColumnInfo(name = "category_id")
+    @ColumnInfo(name = "category_id", index = true)
     override val categoryId: Int? = null,
     @ColumnInfo(name = "priority")
     override val priority: Int = PRIORITY_DEFAULT,
