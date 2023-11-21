@@ -29,7 +29,7 @@ import com.example.calendy.data.maindb.message.Message
 import com.example.calendy.data.maindb.plan.Plan
 import com.example.calendy.data.maindb.plan.Todo
 import com.example.calendy.view.popup.PlanDetailPopup
-import com.example.calendy.view.popup.PlanListPopup
+import com.example.calendy.view.popup.PlanRevisionListPopup
 import java.util.Date
 
 @Composable
@@ -121,8 +121,7 @@ fun MessageContentManagerWithButton(
 
     //open tod0 list popup
     if (openListPopup && !openDetailPopup) {
-        PlanListPopup(
-            planList = logPlanList,
+        PlanRevisionListPopup(
             planPairList = planPairList,
             header = { Text(text = "일정 자세히 보기") },
             onDismissed = { openListPopup = false },

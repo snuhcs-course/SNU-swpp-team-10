@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.example.calendy.data.dummy.DummyCategoryRepository
+import com.example.calendy.data.dummy.DummyPlanRepository
 import com.example.calendy.data.dummy.DummyRepeatGroupRepository
 import com.example.calendy.data.dummy.DummyScheduleRepository
 import com.example.calendy.data.dummy.DummyTodoRepository
@@ -387,6 +388,7 @@ fun FieldWithLeadingText(
 @Composable
 fun TodoScreenPreview() {
     EditPlanPage(editPlanViewModel = EditPlanViewModel(
+        planRepository = DummyPlanRepository(),
         scheduleRepository = DummyScheduleRepository(),
         todoRepository = DummyTodoRepository(),
         categoryRepository = DummyCategoryRepository(),

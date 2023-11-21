@@ -1,19 +1,14 @@
 package com.example.calendy.view.editplanview
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
@@ -38,9 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -50,11 +43,11 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.calendy.utils.DateHelper
 import com.example.calendy.utils.DateHelper.extract
-import com.google.android.material.internal.ViewUtils.RelativePadding
+import com.example.calendy.utils.DateHelper.getDateFromUTCMillis
+import com.example.calendy.utils.DateHelper.timestampUTC
 import com.sd.lib.compose.wheel_picker.FVerticalWheelPicker
 import com.sd.lib.compose.wheel_picker.rememberFWheelPickerState
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -73,9 +66,6 @@ fun DateSelector(
     toggleIsDaily: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // TODO: Calendar 대신 uiState 날짜 사용
-    val calendar = Calendar.getInstance()
-
     // isDialogOpen: Daily Date Picker & Date And Time Picker
     var isDialogOpen by remember { mutableStateOf(false) }
     fun openDialog() {
@@ -87,153 +77,51 @@ fun DateSelector(
     }
 
     val (year, monthZeroIndexed, _, hour, minute) = dueTime.extract()
-    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = dueTime.time)
+    val datePickerState =
+        rememberDatePickerState(initialSelectedDateMillis = dueTime.timestampUTC())
     // if dueTime Change -> picker state is updated
-    datePickerState.setSelection(dueTime.time)
+    datePickerState.setSelection(dueTime.timestampUTC())
     // date state -> dueTime Change
-    fun updateDueTime(timeInMillis: Long?, hour: Int, minute: Int) {
-        calendar.timeInMillis = timeInMillis ?: calendar.timeInMillis
-        calendar.set(Calendar.HOUR_OF_DAY, hour)
-        calendar.set(Calendar.MINUTE, minute)
-        onSelectDueTime(calendar.time)
+    fun updateDueTime(timeInMillis: Long, hour: Int, minute: Int) {
+        val dueTime = DateHelper.getDateFromUTCMillis(
+            dateInUTCMillis = timeInMillis, hourOfDay = hour, minute = minute
+        )
+        onSelectDueTime(dueTime)
     }
 
     // TODO: Date Picker view month change when (year, month) change
     // Unavailable in Material3 DatePicker API
 
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        //region 3 Buttons
-        val shape = CircleShape
-        Row(
-            modifier = Modifier
-                .height(28.dp)
-                .clip(shape = shape)
-                .border(width = 1.dp, color = Color.Black, shape = shape)
-        ) {
-            listOf(
-                Triple("Yearly", isYearly, toggleIsYearly),
-                Triple("Monthly", isMonthly, toggleIsMonthly),
-                Triple("Daily", isDaily, toggleIsDaily),
-            ).forEach { (label, isSelected, onClick) ->
-                Button(
-                    onClick = { onClick() }, colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isSelected) Color(0xFF7986CB) else Color.Transparent,
-                        contentColor = Color.Black,
-                    ),
-                    shape = RectangleShape,
-                    contentPadding= PaddingValues(vertical = 0.dp, horizontal = 10.dp),
-                ) {
-                    Text(text = label)
-                }
-            }
-        }
-        //endregion
+    Button(
+        onClick = { openDialog() },
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Transparent, contentColor = Color.Black
+        ),
+    ) {
+        val formatter = SimpleDateFormat("yyyy.MM.dd HH:mm", Locale.getDefault())
+        val textString = formatter.format(dueTime)
+        Text(text = textString, style = TextStyle(fontSize = 20.sp))
+    }
 
-        Box(modifier = Modifier.requiredHeight(60.dp)) {
-            //region isYearly -> Pick Year
-            if (isYearly) {
-                YearPicker(
-                    currentValue = year,
-                    onValueChanged = {
-                        onSelectDueYear(it)
-                    },
+    if (isDialogOpen) {
+        DateTimePickerDialog(
+            datePickerState = datePickerState,
+            showTimePicker = true,
+            initialHour = hour,
+            initialMinute = minute,
+            onDismissRequest = {
+                closeDialog()
+            },
+            onConfirm = { datePickerState, hour, minute ->
+                closeDialog()
+                updateDueTime(
+                    timeInMillis = datePickerState.selectedDateMillis ?: 0L,
+                    hour = hour,
+                    minute = minute
                 )
-            }
-            //endregion
-            //region isMonthly -> Pick Year & Month
-            else if (isMonthly) {
-                Row(
-                    modifier = Modifier.align(Alignment.BottomCenter)
-                ) {
-                    YearPicker(
-                        currentValue = year,
-                        onValueChanged = {
-                            onSelectDueMonth(it, monthZeroIndexed)
-                        },
-                    )
-                    MonthPicker(
-                        currentValue = monthZeroIndexed,
-                        onValueChanged = {
-                            onSelectDueMonth(year, it)
-                        },
-                    )
-                }
-            }
-            //endregion
-            //region isDaily -> Date Picker
-            else if (isDaily) {
-                Button(
-                    onClick = { openDialog() },
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Transparent, contentColor = Color.Black
-                    ),
-                ) {
-                    val formatter = SimpleDateFormat("yyyy.MM.dd", Locale.getDefault())
-                    val textString = formatter.format(dueTime)
-                    Text(text = textString, style = TextStyle(fontSize = 20.sp))
-                }
-
-                if (isDialogOpen) {
-                    DateTimePickerDialog(
-                        datePickerState = datePickerState,
-                        showTimePicker = false,
-                        onDismissRequest = {
-                            closeDialog()
-                        },
-                        onConfirm = { datePickerState, _, _ ->
-                            closeDialog()
-                            updateDueTime(
-                                timeInMillis = datePickerState.selectedDateMillis,
-                                hour = hour,
-                                minute = minute
-                            )
-                        },
-                    )
-                }
-            }
-            //endregion
-            //region Date & Time Picker
-            else {
-                // Neither isYearly, isMonthly, isDaily
-                Button(
-                    onClick = { openDialog() },
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Transparent, contentColor = Color.Black
-                    ),
-                ) {
-                    val formatter = SimpleDateFormat("yyyy.MM.dd HH:mm", Locale.getDefault())
-                    val textString = formatter.format(dueTime)
-                    Text(text = textString, style = TextStyle(fontSize = 20.sp))
-                }
-
-                if (isDialogOpen) {
-                    DateTimePickerDialog(
-                        datePickerState = datePickerState,
-                        showTimePicker = true,
-                        initialHour = hour,
-                        initialMinute = minute,
-                        onDismissRequest = {
-                            closeDialog()
-                        },
-                        onConfirm = { datePickerState, hour, minute ->
-                            closeDialog()
-                            updateDueTime(
-                                timeInMillis = datePickerState.selectedDateMillis,
-                                hour = hour,
-                                minute = minute
-                            )
-                        },
-                    )
-                }
-            }
-            //endregion
-        }
+            },
+        )
     }
 }
 
@@ -295,8 +183,8 @@ private fun MonthPicker(currentValue: Int, onValueChanged: (value: Int) -> Unit)
 private fun HourMinutePicker(
     currentHour: Int, currentMinute: Int, onValueChanged: (hour: Int, minute: Int) -> Unit
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(bottom = 16.dp)
+    Row(
+        verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 16.dp)
     ) {
         VerticalWheelPickerWrapper(
             value = currentHour,
@@ -317,9 +205,8 @@ private fun HourMinutePicker(
                 fontSize = 20.sp, fontWeight = FontWeight.Normal,
             ),
             modifier = Modifier.padding(
-                start = 4.dp,
-                end = 4.dp,
-                bottom = 1.dp),
+                start = 4.dp, end = 4.dp, bottom = 1.dp
+            ),
         )
         VerticalWheelPickerWrapper(
             value = currentMinute,
@@ -332,8 +219,7 @@ private fun HourMinutePicker(
                 )
             },
             wheelItemHeight = 30.dp,
-            modifier = Modifier
-                .width(36.dp),
+            modifier = Modifier.width(36.dp),
         )
     }
 }
@@ -369,7 +255,7 @@ private fun DateTimePickerDialog(
                     state = datePickerState, showModeToggle = false,
                     headline = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            val date = DateHelper.getDateFromMillis(
+                            val date = DateHelper.getDateFromUTCMillis(
                                 datePickerState.selectedDateMillis ?: 0L
                             )
                             val (year, monthZeroIndexed, day, _, _) = date.extract()
@@ -378,8 +264,7 @@ private fun DateTimePickerDialog(
                                     "%d.%02d.%02d", year, monthZeroIndexed + 1, day,
                                 ),
                                 modifier = Modifier.padding(
-                                    start = 24.dp,
-                                    end = 12.dp
+                                    start = 24.dp, end = 12.dp
                                 ),
                             )
                             if (showTimePicker) {
@@ -434,30 +319,26 @@ fun DateRangeSelector(
         isDialogOpen = false
     }
 
-    // TODO: Calendar 대신 uiState 날짜 사용
-    val calendar = Calendar.getInstance()
     val dateRangePickerState = rememberDateRangePickerState()
     // if viewModel time Change -> picker state is updated
-    dateRangePickerState.setSelection(startTime.time, endTime.time)
+    // setSelection Needs UTC timestamp.
+    dateRangePickerState.setSelection(startTime.timestampUTC(), endTime.timestampUTC())
     // picker state -> viewModel time Change
     fun updateTimeRange(
-        startTimeInMillis: Long?,
+        startTimeInMillis: Long,
         startHour: Int,
         startMinute: Int,
-        endTimeInMillis: Long?,
+        endTimeInMillis: Long,
         endHour: Int,
         endMinute: Int,
     ) {
-        // TODO: Refactor me. maybe with helper function
-        calendar.timeInMillis = startTimeInMillis ?: calendar.timeInMillis
-        calendar.set(Calendar.HOUR_OF_DAY, startHour)
-        calendar.set(Calendar.MINUTE, startMinute)
-        val startDate = calendar.time
-
-        calendar.timeInMillis = endTimeInMillis ?: calendar.timeInMillis
-        calendar.set(Calendar.HOUR_OF_DAY, endHour)
-        calendar.set(Calendar.MINUTE, endMinute)
-        val endDate = calendar.time
+        // UTC Timestamp -> GMT Date
+        val startDate = getDateFromUTCMillis(
+            dateInUTCMillis = startTimeInMillis, hourOfDay = startHour, minute = startMinute
+        )
+        val endDate = getDateFromUTCMillis(
+            dateInUTCMillis = endTimeInMillis, hourOfDay = endHour, minute = endMinute
+        )
 
         onSelectTimeRange(startDate, endDate)
     }
@@ -517,8 +398,7 @@ fun DateRangeSelector(
             Surface(
                 modifier = Modifier
                     .width(360.dp)
-                    .wrapContentHeight()
-                    ,
+                    .wrapContentHeight(),
                 shape = RoundedCornerShape(24.dp)
             ) {
                 Column {
@@ -527,18 +407,15 @@ fun DateRangeSelector(
                         modifier = Modifier
                             .height(500.dp)
                             .padding(
-                                start = 16.dp,
-                                top = 24.dp,
-                                end = 16.dp,
-                                bottom = 24.dp
+                                start = 16.dp, top = 24.dp, end = 16.dp, bottom = 24.dp
                             ),
                         headline = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 // TODO: Refactor me (Maybe with DatePickerDialog too)
-                                val startDate = DateHelper.getDateFromMillis(
+                                val startDate = DateHelper.getDateFromUTCMillis(
                                     dateRangePickerState.selectedStartDateMillis ?: 0L
                                 )
-                                val endDate = DateHelper.getDateFromMillis(
+                                val endDate = DateHelper.getDateFromUTCMillis(
                                     dateRangePickerState.selectedEndDateMillis ?: 0L
                                 )
 
@@ -552,8 +429,7 @@ fun DateRangeSelector(
                                             startYear,
                                             startMonthZeroIndexed + 1,
                                             startDay,
-                                        ),
-                                        style = TextStyle(fontSize = 22.sp)
+                                        ), style = TextStyle(fontSize = 22.sp)
                                     )
                                     HourMinutePicker(
                                         currentHour = startHour,
@@ -568,9 +444,8 @@ fun DateRangeSelector(
                                     imageVector = Icons.Default.ArrowForward,
                                     contentDescription = "to",
                                     modifier = Modifier.padding(
-                                        start = 4.dp,
-                                        end = 4.dp,
-                                        top = 24.dp)
+                                        start = 4.dp, end = 4.dp, top = 24.dp
+                                    )
                                 )
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     Text(
@@ -579,8 +454,7 @@ fun DateRangeSelector(
                                             endYear,
                                             endMonthZeroIndexed + 1,
                                             endDay,
-                                        ),
-                                        style = TextStyle(fontSize = 22.sp)
+                                        ), style = TextStyle(fontSize = 22.sp)
                                     )
                                     HourMinutePicker(
                                         currentHour = endHour,
@@ -600,24 +474,24 @@ fun DateRangeSelector(
                         onClick = {
                             closeDialog()
                             updateTimeRange(
-                                startTimeInMillis = dateRangePickerState.selectedStartDateMillis,
+                                startTimeInMillis = dateRangePickerState.selectedStartDateMillis
+                                    ?: 0L,
                                 startHour = startHour,
                                 startMinute = startMinute,
-                                endTimeInMillis = dateRangePickerState.selectedEndDateMillis,
+                                endTimeInMillis = dateRangePickerState.selectedEndDateMillis ?: 0L,
                                 endHour = endHour,
                                 endMinute = endMinute
                             )
                         }, modifier = Modifier
                             .padding(
-                                end = 16.dp,
-                                bottom = 80.dp)
+                                end = 16.dp, bottom = 80.dp
+                            )
                             .align(Alignment.End)
                     ) {
                         Icon(
                             imageVector = Icons.Default.CheckCircle,
                             contentDescription = "Confirm",
-                            modifier = Modifier
-                                .size(40.dp)
+                            modifier = Modifier.size(40.dp)
                         )
                     }
                 }

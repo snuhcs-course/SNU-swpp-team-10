@@ -1,10 +1,12 @@
 package com.example.calendy.utils
 
+import android.util.Log
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 object DateHelper {
     /**
@@ -53,10 +55,20 @@ object DateHelper {
         this.time
     }
 
-    fun getDateFromMillis(dateInMillis: Long): Date {
-        val calendar = Calendar.getInstance()
-        calendar.timeInMillis = dateInMillis
-        return calendar.time
+    fun getDateFromUTCMillis(dateInUTCMillis: Long, hourOfDay: Int? = null, minute: Int? = null): Date {
+        val selectedUtc = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        val selectedLocal = Calendar.getInstance()
+
+        selectedUtc.timeInMillis = dateInUTCMillis
+        selectedLocal.clear()
+        selectedLocal.set(
+            selectedUtc.get(Calendar.YEAR),
+            selectedUtc.get(Calendar.MONTH),
+            selectedUtc.get(Calendar.DATE),
+            hourOfDay ?: selectedUtc.get(Calendar.HOUR_OF_DAY),
+            minute ?: selectedUtc.get(Calendar.MINUTE)
+        )
+        return selectedLocal.time
     }
 
     data class DateFields(
@@ -73,6 +85,22 @@ object DateHelper {
             hour = calendar.get(Calendar.HOUR_OF_DAY),
             minute = calendar.get(Calendar.MINUTE),
         )
+    }
+
+    fun Date.timestampUTC(): Long {
+        // treat GMT Date as UTC for DatePicker Library
+        val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        val (year, monthZeroIndexed, date, hour, minute) = extract()
+        calendar.set(
+            year,
+            monthZeroIndexed,
+            date,
+            hour,
+            minute
+        )
+        Log.d("GUN", this.toString())
+        Log.d("GUN", calendar.timeInMillis.toString())
+        return calendar.timeInMillis
     }
 
     /**
@@ -123,63 +151,70 @@ object DateHelper {
      */
 
 }
+
 fun getDiffBetweenDates(startDate: Date, endDate: Date): Int {
-    val t1=startDate.time / (1000*60*60*24) //start date 00:00:00
-    val t2=endDate.time / (1000*60*60*24) //end date 00:00:00
-    return (t2-t1).toInt()
+    val t1 = startDate.time / (1000 * 60 * 60 * 24) //start date 00:00:00
+    val t2 = endDate.time / (1000 * 60 * 60 * 24) //end date 00:00:00
+    return (t2 - t1).toInt()
 }
+
 // extension for CalendarDay  and Date
 fun Date.dayOfWeek(): String {
     val sdf = SimpleDateFormat("EEEE", Locale.KOREA)
 //    val yesterday: Date = Date(getTime() - 1000 * 60 * 60 * 24) // add one day. 요일이 하루씩 밀리는 문제가 있었음.
     return sdf.format(this)
 }
-fun CalendarDay.toDate(): Date = Date(year-1900, month, day)
-fun CalendarDay.toStartTime(): Date = Date(year-1900, month, day, 0, 0)
-fun CalendarDay.toEndTime(): Date = Date(year-1900, month, day, 23, 59)
-fun CalendarDay.toFirstDateOfMonth():Date = Date(year-1900,month,1)
-fun CalendarDay.toLastDateOfMonth():Date = Date(year - 1900, month,1).lastDayOfMonth()
+
+fun CalendarDay.toDate(): Date = Date(year - 1900, month, day)
+fun CalendarDay.toStartTime(): Date = Date(year - 1900, month, day, 0, 0)
+fun CalendarDay.toEndTime(): Date = Date(year - 1900, month, day, 23, 59)
+fun CalendarDay.toFirstDateOfMonth(): Date = Date(year - 1900, month, 1)
+fun CalendarDay.toLastDateOfMonth(): Date = Date(year - 1900, month, 1).lastDayOfMonth()
 fun CalendarDay.getWeekDay(): String = toDate().dayOfWeek()
-fun CalendarDay.afterDays(amount:Int): CalendarDay=toDate().afterDays(amount).toCalendarDay()
+fun CalendarDay.afterDays(amount: Int): CalendarDay = toDate().afterDays(amount).toCalendarDay()
 
 fun Date.toCalendarDay(): CalendarDay = CalendarDay.from(this)
 
 // remove time
 fun Date.dateOnly(): Date = Date(year, month, date)
 
-fun Date.toDateDayString(showYear:Boolean=false): String
-    = toDateString(showYear) + " " + dayOfWeek()
+fun Date.toDateDayString(showYear: Boolean = false): String =
+    toDateString(showYear) + " " + dayOfWeek()
 
-fun Date.toDateTimeString(showYear: Boolean = false): String
-    = toDateString(showYear) + " " + toTimeString(hour12 = true, showAmPm = true)
+fun Date.toDateTimeString(showYear: Boolean = false): String =
+    toDateString(showYear) + " " + toTimeString(hour12 = true, showAmPm = true)
 
-fun Date.toDateString(showYear: Boolean):String
-    = if(showYear) String.format("%d년 %d월 %d일",year+1900,month+1,date) else String.format("%d월 %d일",month+1,date)
+fun Date.toDateString(showYear: Boolean): String = if (showYear) String.format(
+    "%d년 %d월 %d일",
+    year + 1900,
+    month + 1,
+    date
+) else String.format("%d월 %d일", month + 1, date)
 
-fun Date.toAmPmString():String = if(hours<12) "오전" else "오후"
+fun Date.toAmPmString(): String = if (hours < 12) "오전" else "오후"
 
-fun Date.toTimeString(hour12:Boolean = false, showSeconds:Boolean=false, showAmPm:Boolean=false):String
-{
-    val h = if(hour12)
-                if(hours<=12) hours else hours-12
-            else
-                hours
-    if(showAmPm)
-        return String.format("%s %d:%02d",toAmPmString(),h,minutes)
-    else
-        return String.format("%d:%02d",h,minutes)
+fun Date.toTimeString(
+    hour12: Boolean = false,
+    showSeconds: Boolean = false,
+    showAmPm: Boolean = false
+): String {
+    val h = if (hour12) if (hours <= 12) hours else hours - 12
+    else hours
+    if (showAmPm) return String.format("%s %d:%02d", toAmPmString(), h, minutes)
+    else return String.format("%d:%02d", h, minutes)
 }
 
-fun Date.isAm():Boolean = hours<12
+fun Date.isAm(): Boolean = hours < 12
 
-fun Date.isPm():Boolean = hours>=12
+fun Date.isPm(): Boolean = hours >= 12
 
-fun Date.equalDay(date:Date): Boolean = year==date.year && month == date.month && this.date == date.date
+fun Date.equalDay(date: Date): Boolean =
+    year==date.year && month==date.month && this.date==date.date
 
-fun Date.afterDays(amount: Int):Date{
+fun Date.afterDays(amount: Int): Date {
     val c = Calendar.getInstance()
-    c.time=this
-    c.add(Calendar.DATE,amount)
+    c.time = this
+    c.add(Calendar.DATE, amount)
     return c.time
 }
 
@@ -188,8 +223,7 @@ fun Date.afterDays(amount: Int):Date{
 fun Date.lastDayOfMonth(): Date {
     val calendar = Calendar.getInstance()
     calendar.time = this
-    val lastDay = calendar
-        .getActualMaximum(Calendar.DAY_OF_MONTH)
+    val lastDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
     val lastDate = calendar.time
     lastDate.date = lastDay
     return lastDate

@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.calendy.data.maindb.category.Category
 import com.example.calendy.data.maindb.category.ICategoryRepository
+import com.example.calendy.data.maindb.plan.IPlanRepository
 import com.example.calendy.data.maindb.plan.Plan
+import com.example.calendy.data.maindb.plan.PlanRepository
 import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
@@ -30,6 +32,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 class EditPlanViewModel(
+    private val planRepository: IPlanRepository,
     private val scheduleRepository: IScheduleRepository,
     private val todoRepository: ITodoRepository,
     private val categoryRepository: ICategoryRepository,
@@ -69,16 +72,7 @@ class EditPlanViewModel(
             // fill in other values after db query
             viewModelScope.launch() {
                 withContext(Dispatchers.IO) {
-                    val plan = when (type) {
-                        PlanType.SCHEDULE -> {
-                            scheduleRepository.getScheduleById(id)
-                        }
-
-                        PlanType.TODO     -> {
-                            todoRepository.getTodoById(id)
-                        }
-                    }
-
+                    val plan = planRepository.getPlanById(id, type)
                     _uiState.value = fillIn(plan)
                 }
 

@@ -17,15 +17,13 @@ import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AddBox
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.FloatingActionButton
@@ -39,33 +37,24 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.example.calendy.R
 import com.example.calendy.data.maindb.plan.Plan
 import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
-import com.example.calendy.ui.theme.PriorityColor
 import com.example.calendy.ui.theme.getColor
 import com.example.calendy.utils.dayOfWeek
-import com.example.calendy.utils.equalDay
 import com.example.calendy.utils.getInfoText
-import com.example.calendy.utils.toAmPmString
-import com.example.calendy.utils.toDateTimeString
-import com.example.calendy.utils.toTimeString
 import java.util.Date
 
 @Composable
-fun PlanListPopup(
-    planList: List<Plan>? = emptyList(),
+fun PlanRevisionListPopup(
     planPairList: List<Pair<Plan?, Plan?>> = emptyList(),
     header: @Composable ()->Unit = {},
     addButton:  @Composable() (BoxScope.() -> Unit)={},
@@ -77,12 +66,40 @@ fun PlanListPopup(
         onDismissRequest =  onDismissed
     ) {
         ListPopupBox(
-            planList=planList,
-            planPairList = planPairList,
             header=header,
             addButton=addButton,
-            onItemClick=onItemClick,
-            onCheckboxClicked=onCheckboxClicked
+            content = {
+                items(planPairList) {
+                    Column(modifier = Modifier.border(1.dp, Color(0xFF000000))) {
+                        val (savedPlan, currentPlan) = it
+                        if (savedPlan != null) {
+                            when(savedPlan) {
+                                is Schedule -> ScheduleListItem(schedule = savedPlan, onItemClick)
+                                is Todo     -> TodoListItem(
+                                    todo = savedPlan,
+                                    onItemClick = onItemClick,
+                                    onChecked = onCheckboxClicked
+                                )
+                            }
+                        } else {
+                            Text("New Plan Inserted")
+                        }
+
+                        if (currentPlan != null) {
+                            when (currentPlan) {
+                                is Schedule -> ScheduleListItem(schedule = currentPlan, onItemClick)
+                                is Todo     -> TodoListItem(
+                                    todo = currentPlan,
+                                    onItemClick = onItemClick,
+                                    onChecked = onCheckboxClicked
+                                )
+                            }
+                        } else {
+                            Text("This Plan is currently deleted")
+                        }
+                    }
+                }
+            }
         )
     }
 }
@@ -127,11 +144,20 @@ fun SwitchablePlanListPopup(
                 )
             }
             ListPopupBox(
-                planList = planList,
                 header = header,
                 addButton = addButton,
-                onItemClick = onItemClick,
-                onCheckboxClicked = onCheckboxClicked
+                content = {
+                    items(planList!!) {
+                        when (it) {
+                            is Schedule -> ScheduleListItem(schedule = it, onItemClick)
+                            is Todo     -> TodoListItem(
+                                todo = it,
+                                onItemClick = onItemClick,
+                                onChecked = onCheckboxClicked
+                            )
+                        }
+                    }
+                }
             )
             IconButton(
                 onClick = onRightButton,
@@ -158,13 +184,9 @@ fun SwitchablePlanListPopup(
 
 @Composable
 fun ListPopupBox(
-    planList: List<Plan>? = emptyList(),
-    planPairList: List<Pair<Plan?, Plan?>> = emptyList(),
     header: @Composable ()->Unit = {},
     addButton:  @Composable() (BoxScope.() -> Unit),
-    onItemClick: (Plan) -> Unit = {},
-    onCheckboxClicked:(Plan, Boolean) -> Unit ={ plan, check->},
-    onDismissed:()->Unit={},
+    content: LazyListScope.() -> Unit
 ){
     Box(modifier = Modifier
         .width(300.dp)
@@ -192,46 +214,7 @@ fun ListPopupBox(
 //                    .padding(start = 10.dp, end = 20.dp)
                     .fillMaxWidth()
             ) {
-                items(planPairList) {
-                    Column(modifier = Modifier.border(1.dp, Color(0xFF000000))) {
-                        val (savedPlan, currentPlan) = it
-                        if (savedPlan != null) {
-                            when(savedPlan) {
-                                is Schedule -> ScheduleListItem(schedule = savedPlan, onItemClick)
-                                is Todo     -> TodoListItem(
-                                    todo = savedPlan,
-                                    onItemClick = onItemClick,
-                                    onChecked = onCheckboxClicked
-                                )
-                            }
-                        } else {
-                            Text("New Plan Inserted")
-                        }
-
-                        if (currentPlan != null) {
-                            when (currentPlan) {
-                                is Schedule -> ScheduleListItem(schedule = currentPlan, onItemClick)
-                                is Todo     -> TodoListItem(
-                                    todo = currentPlan,
-                                    onItemClick = onItemClick,
-                                    onChecked = onCheckboxClicked
-                                )
-                            }
-                        } else {
-                            Text("This Plan is currently deleted")
-                        }
-                    }
-                }
-//                items(planList!!) {
-//                    when (it) {
-//                        is Schedule -> ScheduleListItem(schedule = it, onItemClick)
-//                        is Todo     -> TodoListItem(
-//                            todo = it,
-//                            onItemClick = onItemClick,
-//                            onChecked = onCheckboxClicked
-//                        )
-//                    }
-//                }
+                this.content()
             }
         }
 
@@ -424,6 +407,31 @@ fun AddButton(
     }
 }
 
+
+@Preview
+@Composable
+fun PlanRevisionListPreview() {
+    val planPairList : MutableList<Pair<Plan?, Plan?>> = mutableListOf()
+    planPairList.add(Pair(Schedule(
+        id = 0,
+        title = "my schedule Before Revision",
+        startTime = Date(),
+        endTime = Date()
+    ), Schedule(id = 0, title = "my schedule Currently", startTime = Date(), endTime = Date())))
+    planPairList.add(Pair(Todo(id = 0, title = "my Todo Before Revision", dueTime = Date(), complete=false),
+                          Todo(id = 0, title = "my Todo Currently", dueTime = Date(), complete=false)))
+
+    PlanRevisionListPopup(
+        planPairList,
+        header = { PopupHeaderTitle("Added plans") },
+        addButton = {
+            AddButton(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+            )
+        }
+    )
+}
 
 @Preview
 @Composable
