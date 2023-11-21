@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
@@ -49,6 +50,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.calendy.utils.DateHelper
 import com.example.calendy.utils.DateHelper.extract
+import com.google.android.material.internal.ViewUtils.RelativePadding
 import com.sd.lib.compose.wheel_picker.FVerticalWheelPicker
 import com.sd.lib.compose.wheel_picker.rememberFWheelPickerState
 import java.text.SimpleDateFormat
@@ -69,7 +71,7 @@ fun DateSelector(
     toggleIsMonthly: () -> Unit,
     isDaily: Boolean,
     toggleIsDaily: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     // TODO: Calendar 대신 uiState 날짜 사용
     val calendar = Calendar.getInstance()
@@ -104,7 +106,7 @@ fun DateSelector(
         val shape = CircleShape
         Row(
             modifier = Modifier
-                .height(32.dp)
+                .height(28.dp)
                 .clip(shape = shape)
                 .border(width = 1.dp, color = Color.Black, shape = shape)
         ) {
@@ -162,7 +164,9 @@ fun DateSelector(
             else if (isDaily) {
                 Button(
                     onClick = { openDialog() },
-                    modifier = Modifier.align(Alignment.BottomCenter),
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Transparent, contentColor = Color.Black
                     ),
@@ -196,7 +200,9 @@ fun DateSelector(
                 // Neither isYearly, isMonthly, isDaily
                 Button(
                     onClick = { openDialog() },
-                    modifier = Modifier.align(Alignment.BottomCenter),
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Transparent, contentColor = Color.Black
                     ),
@@ -289,7 +295,9 @@ private fun MonthPicker(currentValue: Int, onValueChanged: (value: Int) -> Unit)
 private fun HourMinutePicker(
     currentHour: Int, currentMinute: Int, onValueChanged: (hour: Int, minute: Int) -> Unit
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(bottom = 16.dp)
+    ) {
         VerticalWheelPickerWrapper(
             value = currentHour,
             onValueChanged = { onValueChanged(it, currentMinute) },
@@ -297,19 +305,21 @@ private fun HourMinutePicker(
             wheelItem = { value ->
                 Text(
                     text = String.format("%02d", value),
-                    style = TextStyle(fontSize = 20.sp),
+                    style = TextStyle(fontSize = 22.sp),
                 )
             },
             wheelItemHeight = 30.dp,
+            modifier = Modifier.width(36.dp),
         )
         Text(
             ":",
             style = TextStyle(
-                fontSize = 30.sp, fontWeight = FontWeight.ExtraLight,
+                fontSize = 20.sp, fontWeight = FontWeight.Normal,
             ),
             modifier = Modifier.padding(
-                start = 4.dp, end = 4.dp, bottom = 1.dp,
-            ),
+                start = 4.dp,
+                end = 4.dp,
+                bottom = 1.dp),
         )
         VerticalWheelPickerWrapper(
             value = currentMinute,
@@ -318,10 +328,12 @@ private fun HourMinutePicker(
             wheelItem = { value ->
                 Text(
                     text = String.format("%02d", value),
-                    style = TextStyle(fontSize = 20.sp),
+                    style = TextStyle(fontSize = 22.sp),
                 )
             },
             wheelItemHeight = 30.dp,
+            modifier = Modifier
+                .width(36.dp),
         )
     }
 }
@@ -366,9 +378,8 @@ private fun DateTimePickerDialog(
                                     "%d.%02d.%02d", year, monthZeroIndexed + 1, day,
                                 ),
                                 modifier = Modifier.padding(
-                                    PaddingValues(
-                                        start = 24.dp, end = 12.dp,
-                                    ),
+                                    start = 24.dp,
+                                    end = 12.dp
                                 ),
                             )
                             if (showTimePicker) {
@@ -488,7 +499,7 @@ fun DateRangeSelector(
             Icon(
                 imageVector = Icons.Default.ArrowForward,
                 contentDescription = "to",
-                modifier = Modifier.padding(horizontal = 12.dp)
+                modifier = Modifier.padding(horizontal = 20.dp)
             )
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(text = "$endDateString", style = TextStyle(fontSize = 20.sp))
@@ -506,13 +517,21 @@ fun DateRangeSelector(
             Surface(
                 modifier = Modifier
                     .width(360.dp)
-                    .wrapContentHeight(),
+                    .wrapContentHeight()
+                    ,
                 shape = RoundedCornerShape(24.dp)
             ) {
                 Column {
                     DateRangePicker(
                         state = dateRangePickerState, showModeToggle = true,
-                        modifier = Modifier.height(600.dp),
+                        modifier = Modifier
+                            .height(500.dp)
+                            .padding(
+                                start = 16.dp,
+                                top = 24.dp,
+                                end = 16.dp,
+                                bottom = 24.dp
+                            ),
                         headline = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 // TODO: Refactor me (Maybe with DatePickerDialog too)
@@ -534,6 +553,7 @@ fun DateRangeSelector(
                                             startMonthZeroIndexed + 1,
                                             startDay,
                                         ),
+                                        style = TextStyle(fontSize = 22.sp)
                                     )
                                     HourMinutePicker(
                                         currentHour = startHour,
@@ -544,10 +564,13 @@ fun DateRangeSelector(
                                         },
                                     )
                                 }
-
                                 Icon(
                                     imageVector = Icons.Default.ArrowForward,
-                                    contentDescription = "to"
+                                    contentDescription = "to",
+                                    modifier = Modifier.padding(
+                                        start = 4.dp,
+                                        end = 4.dp,
+                                        top = 24.dp)
                                 )
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     Text(
@@ -557,6 +580,7 @@ fun DateRangeSelector(
                                             endMonthZeroIndexed + 1,
                                             endDay,
                                         ),
+                                        style = TextStyle(fontSize = 22.sp)
                                     )
                                     HourMinutePicker(
                                         currentHour = endHour,
@@ -584,13 +608,16 @@ fun DateRangeSelector(
                                 endMinute = endMinute
                             )
                         }, modifier = Modifier
-                            .padding(end = 16.dp)
+                            .padding(
+                                end = 16.dp,
+                                bottom = 80.dp)
                             .align(Alignment.End)
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.CheckCircle,
+                            imageVector = Icons.Default.CheckCircle,
                             contentDescription = "Confirm",
-                            modifier = Modifier.size(40.dp)
+                            modifier = Modifier
+                                .size(40.dp)
                         )
                     }
                 }

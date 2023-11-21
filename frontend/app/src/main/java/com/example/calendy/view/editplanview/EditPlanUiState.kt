@@ -3,6 +3,7 @@ package com.example.calendy.view.editplanview
 import com.example.calendy.data.maindb.category.Category
 import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.data.maindb.repeatgroup.RepeatGroup
+import androidx.compose.ui.graphics.Color
 import java.util.Date
 
 // default value is important for `initialize` in view model

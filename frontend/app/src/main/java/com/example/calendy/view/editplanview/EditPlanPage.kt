@@ -1,7 +1,9 @@
 package com.example.calendy.view.editplanview
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,15 +31,23 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -74,6 +84,11 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
     val isPageAdd = editPlanUiState.isAddPage
     val isPageEdit = !isPageAdd
 
+    val commonHeight = 50.dp // common height for the Repeat, Category, Priority, Memo, MonthlyViewSwitch regions
+
+    val selectedColor = Color(0xFFDBE2F6) // Color when selected
+    val unselectedColor = Color.Transparent // Color when not selected
+
     val verticalScrollState = rememberScrollState(initial = 0)
     Column(
         modifier = Modifier
@@ -97,7 +112,7 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
                             onNavigateBack()
                         }) {
                             Icon(
-                                imageVector = Icons.Default.Add, contentDescription = "Add",
+                                imageVector = Icons.Default.Check, contentDescription = "Add",
                             )
                         }
                     }
@@ -132,7 +147,8 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
         //region Type Buttons
         if (isPageAdd) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
             ) {
                 listOf(PlanType.SCHEDULE, PlanType.TODO).forEach {
@@ -142,10 +158,8 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
                             PlanType.TODO     -> "Todo"
                         }, isSelected = (editPlanUiState.entryType==it), onClick = {
                             editPlanViewModel.setType(it)
-                        }, modifier = Modifier.background(
-                            color = Color(0xFFDBE2F6), shape = RoundedCornerShape(size = 30.dp)
-                        )
-
+                        }, modifier = Modifier
+                            .weight(1f)
                     )
                 }
             }
@@ -154,7 +168,8 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
 
         //region Title Text Field & Checkbox
         Row(verticalAlignment = Alignment.CenterVertically) {
-            BasicTextField(value = editPlanUiState.titleField,
+            BasicTextField(
+                value = editPlanUiState.titleField,
 
                            onValueChange = { value -> editPlanViewModel.setTitle(value) },
                            modifier = Modifier
@@ -203,31 +218,32 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
                 onSelectTimeRange = editPlanViewModel::setTimeRange,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
                     .align(alignment = Alignment.CenterHorizontally)
             )
         }
         //endregion
 
         //region Repeat
-        FieldWithLeadingText(leadingText = "반복") {
-            SetRepeat(editPlanUiState, editPlanViewModel)
-        }
+       FieldWithLeadingText(leadingText = "반복", modifier = Modifier.height(commonHeight)) {
+        SetRepeat(editPlanUiState, editPlanViewModel)
+       }
         //endregion
 
         //region Category
-        FieldWithLeadingText(leadingText = "분류") {
-            CategorySelector(
-                currentCategory = editPlanUiState.category,
-                categoryList = categoryList,
-                onAddCategory = editPlanViewModel::addCategory,
-                onSelectCategory = editPlanViewModel::setCategory
-            )
-        }
+       FieldWithLeadingText(leadingText = "분류", modifier = Modifier.height(commonHeight)) {
+        CategorySelector(
+            currentCategory = editPlanUiState.category,
+            categoryList = categoryList,
+            onAddCategory = editPlanViewModel::addCategory,
+            onSelectCategory = editPlanViewModel::setCategory
+        )
+       }
         //endregion
 
         //region Priority
-        FieldWithLeadingText(leadingText = "중요도") {
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        FieldWithLeadingText(leadingText = "중요도", modifier = Modifier.height(commonHeight)) {
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
                 RatingBar(
                     value = editPlanUiState.priority.toFloat(),
                     onValueChange = { editPlanViewModel.setPriority(it.toInt()) },
@@ -239,31 +255,39 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
         //endregion
 
         //region Memo Text Field
-        FieldWithLeadingText(leadingText = "메모", alignment = Alignment.Top) {
-            BasicTextField(value = editPlanUiState.memoField,
-                           onValueChange = { value -> editPlanViewModel.setMemo(value) },
-                           modifier = Modifier.fillMaxWidth(),
-                           textStyle = TextStyle(fontSize = 16.sp),
-                           decorationBox = { innerTextField ->
-                               if (editPlanUiState.memoField.isEmpty()) {
-                                   Text(
-                                       text = "memo",
-                                       fontSize = 16.sp,
-                                       fontWeight = FontWeight.Normal,
-                                       color = Color.LightGray
-                                   )
-                               }
-                               innerTextField()
-                           })
+        FieldWithLeadingText(leadingText = "메모", modifier = Modifier.height(commonHeight), alignment = Alignment.Top) {
+            BasicTextField(
+                value = editPlanUiState.memoField,
+                onValueChange = { value -> editPlanViewModel.setMemo(value) },
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = TextStyle(fontSize = 16.sp),
+                decorationBox = {innerTextField->
+                    if (editPlanUiState.memoField.isEmpty()) {
+                        Text(
+                            text = "memo",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = Color.LightGray
+                        )
+                    }
+                    innerTextField()
+                }
+           )
         }
         //endregion
 
         //region Show In Monthly View Switch
         FieldWithLeadingText(
-            leadingText = "월별 캘린더에 표시", modifier = Modifier.fillMaxWidth(), textWidth = 240.dp
+            leadingText = "월별 캘린더에 표시",
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(commonHeight),
+            textWidth = 240.dp
         ) {
-            Checkbox(checked = editPlanUiState.showInMonthlyView,
-                     onCheckedChange = { editPlanViewModel.setShowInMonthlyView(it) })
+            Checkbox(
+                checked = editPlanUiState.showInMonthlyView,
+                onCheckedChange = { editPlanViewModel.setShowInMonthlyView(it) }
+            )
         }
         //endregion
 
@@ -299,19 +323,29 @@ fun TopAppBar(
 fun TypeButton(
     text: String, isSelected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier
 ) {
+    val backgroundColor = if (isSelected) Color(0xFFDBE2F6) else Color.White
+    val contentColor = if (isSelected) Color.Black else Color(0xFFB1B1B1)
+    val borderColor = if (isSelected) Color.Black else Color(0xFFB1B1B1)
+
     Button(
         onClick = { onClick() },
-        colors = ButtonDefaults.buttonColors(if (isSelected) Color(0xFFDBE2F6) else Color.Transparent),
+        // Set the containerColor for the selected/unselected state
+        colors = ButtonDefaults.buttonColors(containerColor = backgroundColor, contentColor = contentColor),
+        // Adjust padding as needed
         contentPadding = PaddingValues(0.dp),
         modifier = modifier
+            .height(40.dp)
+            .fillMaxWidth()
             .border(
-                width = 2.dp, color = Color(0xFF000000), shape = RoundedCornerShape(size = 30.dp)
+                width = 2.dp,
+                color = borderColor,
+                shape = RoundedCornerShape(size = 40.dp)
             )
-            .width(60.dp)
-            .height(25.dp)
     ) {
         Text(
-            text = text, fontSize = 16.sp, style = TextStyle(
+            text = text,
+            fontSize = 16.sp,
+            style = TextStyle(
                 fontSize = 14.sp,
                 lineHeight = 18.sp,
                 fontWeight = FontWeight(500),
