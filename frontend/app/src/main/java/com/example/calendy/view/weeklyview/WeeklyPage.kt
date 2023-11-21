@@ -134,44 +134,49 @@ fun WeekScreen(
     viewModel: WeeklyViewModel,
     modifier: Modifier = Modifier,
     scheduleContent: @Composable (schedule: Schedule) -> Unit = { ScheduleItem(schedule = it, onNavigateToEditPage = onNavigateToEditPage) },
-    todoContent: @Composable (todo: Todo) -> Unit = { TodoItem(todo = it) },
+    todoContent: @Composable (todo: Todo) -> Unit = { TodoItem(todo = it, onNavigateToEditPage = onNavigateToEditPage) },
     onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
 ) {
     viewModel.updateWeekPlans()
-    val dayWidth = 55.dp
     val hourHeight = 40.dp
     val verticalScrollState = rememberScrollState()
-    var sidebarWidth by remember { mutableStateOf(0) }
+    var sidebarWidth by remember { mutableStateOf(0.dp) }
 
-    Column(
-        modifier = modifier
-    ) {
-        WeekHeader(
-            startDate = uiState.currentWeek.first,
-            dayWidth = dayWidth,
-            modifier = Modifier
-                .padding(start = with(LocalDensity.current) {sidebarWidth.toDp()})
-        )
-        Row(modifier = Modifier
-            .weight(1f)
-            .verticalScroll(verticalScrollState)) {
-            WeekSidebar(hourHeight = hourHeight,
-                        modifier = Modifier
-                            .onGloballyPositioned { sidebarWidth = it.size.width }
-            )
-            WeeklyTable(
-                uiState = uiState,
+    BoxWithConstraints(modifier = modifier) {
+        val totalWidth = maxWidth
+        val density = LocalDensity.current
+        val dayWidth = (totalWidth - sidebarWidth) / 7
+        Column {
+            WeekHeader(
+                startDate = uiState.currentWeek.first,
                 dayWidth = dayWidth,
-                hourHeight = hourHeight,
-                scheduleContent = scheduleContent,
-                todoContent = todoContent,
-                onNavigateToEditPage = onNavigateToEditPage,
                 modifier = Modifier
-                    .weight(1f)
-
+                    .padding(start = sidebarWidth)
             )
+            Row(modifier = Modifier
+                .weight(1f)
+                .verticalScroll(verticalScrollState)) {
+                WeekSidebar(hourHeight = hourHeight,
+                            modifier = Modifier.onGloballyPositioned { layoutCoordinates ->
+                                // Update sidebarWidth within the context of the composable
+                                sidebarWidth = with(density) { layoutCoordinates.size.width.toDp() }
+                            }
+                )
+                WeeklyTable(
+                    uiState = uiState,
+                    dayWidth = dayWidth,
+                    hourHeight = hourHeight,
+                    scheduleContent = scheduleContent,
+                    todoContent = todoContent,
+                    onNavigateToEditPage = onNavigateToEditPage,
+                    modifier = Modifier
+                        .weight(1f)
+
+                )
+            }
         }
     }
+
 }
 
 @OptIn(ExperimentalFoundationApi::class)
