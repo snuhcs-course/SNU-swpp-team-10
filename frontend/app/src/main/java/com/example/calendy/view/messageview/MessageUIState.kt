@@ -1,4 +1,4 @@
-package com.example.calendy.view.messagepage
+package com.example.calendy.view.messageview
 
 import com.example.calendy.data.maindb.message.Message
 

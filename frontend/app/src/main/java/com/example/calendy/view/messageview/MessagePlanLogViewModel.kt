@@ -1,4 +1,4 @@
-package com.example.calendy.view.messagepage
+package com.example.calendy.view.messageview
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
