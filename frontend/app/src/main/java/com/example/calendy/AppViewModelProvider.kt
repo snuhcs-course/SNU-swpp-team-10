@@ -5,7 +5,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.calendy.view.editplanview.EditPlanViewModel
-import com.example.calendy.view.messageview.MessagePageViewModel
+import com.example.calendy.view.messagepage.MessagePageViewModel
 import com.example.calendy.view.messageview.MessagePlanLogViewModel
 import com.example.calendy.view.monthlyview.MonthlyViewModel
 import com.example.calendy.view.todolistview.TodoListViewModel
@@ -32,8 +32,7 @@ object AppViewModelProvider {
         initializer {
             getContainer().run {
                 WeeklyViewModel(
-                    scheduleRepository = scheduleRepository,
-                    todoRepository = todoRepository
+                    scheduleRepository = scheduleRepository, todoRepository = todoRepository
                 )
             }
         }

@@ -23,6 +23,7 @@ import com.example.calendy.data.maindb.plan.Todo
 import com.example.calendy.data.network.CalendyServerApi
 import com.example.calendy.data.network.MessageBody
 import com.example.calendy.data.rawsqldb.RawSqlDatabase
+import com.example.calendy.view.messageview.MessageUIState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
