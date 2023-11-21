@@ -236,7 +236,8 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
                     value = editPlanUiState.priority.toFloat(),
                     onValueChange = { editPlanViewModel.setPriority(it.toInt()) },
                     onRatingChanged = { },
-                    config = RatingBarConfig().size(30.dp)
+                    config = RatingBarConfig()
+                        .size(30.dp)
                 )
             }
         }
