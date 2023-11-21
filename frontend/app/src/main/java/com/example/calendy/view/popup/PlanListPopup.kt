@@ -2,6 +2,7 @@ package com.example.calendy.view.popup
 
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -65,6 +66,7 @@ import java.util.Date
 @Composable
 fun PlanListPopup(
     planList: List<Plan>? = emptyList(),
+    planPairList: List<Pair<Plan?, Plan?>> = emptyList(),
     header: @Composable ()->Unit = {},
     addButton:  @Composable() (BoxScope.() -> Unit)={},
     onItemClick: (Plan) -> Unit = {},
@@ -76,6 +78,7 @@ fun PlanListPopup(
     ) {
         ListPopupBox(
             planList=planList,
+            planPairList = planPairList,
             header=header,
             addButton=addButton,
             onItemClick=onItemClick,
@@ -112,7 +115,7 @@ fun SwitchablePlanListPopup(
                     .padding(5.dp)
                     .weight(1f)
                     .height(400.dp) //hard coded equal to popup box height
-                    .requiredWidthIn(min=50.dp,max=60.dp)
+                    .requiredWidthIn(min = 50.dp, max = 60.dp)
             ) {
                 Icon(
                     painter = painterResource(id = com.prolificinteractive.materialcalendarview.R.drawable.mcv_action_previous),
@@ -136,7 +139,7 @@ fun SwitchablePlanListPopup(
                     .padding(5.dp)
                     .weight(1f)
                     .height(400.dp) //hard coded equal to popup box height
-                    .requiredWidthIn(min=50.dp,max=60.dp)
+                    .requiredWidthIn(min = 50.dp, max = 60.dp)
             ) {
                 Icon(
                     painter = painterResource(id = com.prolificinteractive.materialcalendarview.R.drawable.mcv_action_next),
@@ -156,6 +159,7 @@ fun SwitchablePlanListPopup(
 @Composable
 fun ListPopupBox(
     planList: List<Plan>? = emptyList(),
+    planPairList: List<Pair<Plan?, Plan?>> = emptyList(),
     header: @Composable ()->Unit = {},
     addButton:  @Composable() (BoxScope.() -> Unit),
     onItemClick: (Plan) -> Unit = {},
@@ -166,9 +170,7 @@ fun ListPopupBox(
         .width(300.dp)
         .height(400.dp)
         .shadow(
-            elevation = 4.dp,
-            spotColor = Color(0x40000000),
-            ambientColor = Color(0x40000000)
+            elevation = 4.dp, spotColor = Color(0x40000000), ambientColor = Color(0x40000000)
         )
         .background(color = Color(0xFFF1F5FB), shape = RoundedCornerShape(size = 20.dp))
         .padding(25.dp)
@@ -190,16 +192,46 @@ fun ListPopupBox(
 //                    .padding(start = 10.dp, end = 20.dp)
                     .fillMaxWidth()
             ) {
-                items(planList!!) {
-                    when (it) {
-                        is Schedule -> ScheduleListItem(schedule = it, onItemClick)
-                        is Todo     -> TodoListItem(
-                            todo = it,
-                            onItemClick = onItemClick,
-                            onChecked = onCheckboxClicked
-                        )
+                items(planPairList) {
+                    Column(modifier = Modifier.border(1.dp, Color(0xFF000000))) {
+                        val (savedPlan, currentPlan) = it
+                        if (savedPlan != null) {
+                            when(savedPlan) {
+                                is Schedule -> ScheduleListItem(schedule = savedPlan, onItemClick)
+                                is Todo     -> TodoListItem(
+                                    todo = savedPlan,
+                                    onItemClick = onItemClick,
+                                    onChecked = onCheckboxClicked
+                                )
+                            }
+                        } else {
+                            Text("New Plan Inserted")
+                        }
+
+                        if (currentPlan != null) {
+                            when (currentPlan) {
+                                is Schedule -> ScheduleListItem(schedule = currentPlan, onItemClick)
+                                is Todo     -> TodoListItem(
+                                    todo = currentPlan,
+                                    onItemClick = onItemClick,
+                                    onChecked = onCheckboxClicked
+                                )
+                            }
+                        } else {
+                            Text("This Plan is currently deleted")
+                        }
                     }
                 }
+//                items(planList!!) {
+//                    when (it) {
+//                        is Schedule -> ScheduleListItem(schedule = it, onItemClick)
+//                        is Todo     -> TodoListItem(
+//                            todo = it,
+//                            onItemClick = onItemClick,
+//                            onChecked = onCheckboxClicked
+//                        )
+//                    }
+//                }
             }
         }
 
@@ -267,7 +299,7 @@ fun ScheduleListItem(
 ){
     Row(
         modifier= Modifier
-            .padding(vertical=5.dp, horizontal = 0.dp)
+            .padding(vertical = 5.dp, horizontal = 0.dp)
             .fillMaxWidth(),
         verticalAlignment = Alignment.Top
     ) {
@@ -279,7 +311,7 @@ fun ScheduleListItem(
                 .background(color = schedule.getColor(), shape = CircleShape)
         )
         Column(
-            modifier=Modifier
+            modifier= Modifier
                 .fillMaxWidth()
                 .clickable { onItemClick(schedule) }
         ) {
@@ -317,7 +349,7 @@ fun TodoListItem(
 ){
     Row(
         modifier= Modifier
-            .padding(vertical=5.dp, horizontal = 0.dp)
+            .padding(vertical = 5.dp, horizontal = 0.dp)
             .fillMaxWidth(),
         verticalAlignment = Alignment.Top
     ) {
@@ -331,7 +363,7 @@ fun TodoListItem(
                 .scale(0.8f)
         )
         Column(
-            modifier=Modifier
+            modifier= Modifier
                 .fillMaxWidth()
                 .clickable { onItemClick(todo) }
         ) {

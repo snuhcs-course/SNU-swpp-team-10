@@ -21,8 +21,8 @@ abstract class RawSqlDatabase : RoomDatabase() {
 
     // get RawSqlPlan then convert to Plan
     fun getAllPlans(): List<Plan> =
-        rawSqlScheduleDao().getAllSchedules().map { it.toSchedule() } +
-                rawSqlTodoDao().getAllTodos().map { it.toTodo() }
+        rawSqlScheduleDao().getAllRawSqlSchedules().map { it.toSchedule() } +
+                rawSqlTodoDao().getAllRawSqlTodos().map { it.toTodo() }
 
     suspend fun insertFromPlan(plan: Plan): Long = when (plan) {
         is Schedule -> rawSqlScheduleDao().insert(plan.toRawSqlSchedule())
@@ -30,8 +30,8 @@ abstract class RawSqlDatabase : RoomDatabase() {
     }
 
     fun deleteAll() {
-        rawSqlScheduleDao().deleteAllSchedules()
-        rawSqlTodoDao().deleteAllTodos()
+        rawSqlScheduleDao().deleteAllRawSqlSchedules()
+        rawSqlTodoDao().deleteAllRawSqlTodos()
     }
 
     private var writableDatabaseInstance: SupportSQLiteDatabase? = null

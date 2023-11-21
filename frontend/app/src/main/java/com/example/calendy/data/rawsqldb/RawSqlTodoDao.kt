@@ -7,8 +7,8 @@ import com.example.calendy.data.BaseDao
 @Dao
 interface RawSqlTodoDao : BaseDao<RawSqlTodo> {
     @Query("DELETE FROM todo")
-    fun deleteAllTodos()
+    fun deleteAllRawSqlTodos()
 
     @Query("SELECT * FROM todo")
-    fun getAllTodos(): List<RawSqlTodo>
+    fun getAllRawSqlTodos(): List<RawSqlTodo>
 }

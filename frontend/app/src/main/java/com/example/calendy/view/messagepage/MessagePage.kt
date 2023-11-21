@@ -1,8 +1,11 @@
 package com.example.calendy.view.messagepage
 
-import android.content.Intent
-import android.speech.RecognizerIntent
-import android.speech.SpeechRecognizer
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -39,6 +43,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.calendy.AppViewModelProvider
 import com.example.calendy.R
@@ -54,43 +59,23 @@ fun MessagePage(
     val messageUiState: MessageUIState by messagePageViewModel.uiState.collectAsState()
     val userInput = messageUiState.userInputText
     val messageLogList: List<Message> = messageUiState.messageLogs
-    val context = LocalContext.current
-
-
-    fun onMicButtonClicked() {
-
-        val speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
-        speechRecognizer.setRecognitionListener(messagePageViewModel.recognitionListener)
-
-        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
-        intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, context.packageName)
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ko-KR")
-        intent.putExtra(
-            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-        )
-        intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
-        speechRecognizer.startListening(intent)
-    }
-
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight()
     ) {
-
         MessageList(
             messageLogList, modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
         )
         MessageInputField(
-
             onValueChanged = messagePageViewModel::setUserInputText,
             onSendButtonClicked = messagePageViewModel::onSendButtonClicked,
-            onMicButtonClicked = ::onMicButtonClicked,
+            onMicButtonClicked = messagePageViewModel::onMicButtonClicked,
             text = userInput,
+            isListening = messageUiState.isMicButtonClicked,
         )
     }
 
@@ -100,21 +85,60 @@ fun MessagePage(
 @Composable
 fun MessageInputField(
     onSendButtonClicked: () -> Unit = {},
-    onMicButtonClicked: () -> Unit = {},
+    onMicButtonClicked: (Context) -> Unit = {},
     onValueChanged: (text: String) -> Unit = {},
     text: String = "",
+    isListening: Boolean = false,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+
+    // This is the launcher for permission request
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            // Permission Accepted: Do something
+            Log.d("GUN", "MIC PERMISSION GRANTED")
+
+        } else {
+            // Permission Denied: Do something
+            Log.d("GUN", "MIC PERMISSION DENIED")
+        }
+    }
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth()
             .background(color = Color(0xFFF1F1F1))
     ) {
-        IconButton(
-            onClick = onMicButtonClicked,
-        ) {
-            Icon(imageVector = Icons.Default.Mic, contentDescription = null)
+        IconButton(onClick = {
+            when (PackageManager.PERMISSION_GRANTED) { // Check permission
+                ContextCompat.checkSelfPermission(
+                    context, Manifest.permission.RECORD_AUDIO
+                )    -> {
+                    // Permission OK
+                    onMicButtonClicked(context)
+                }
+
+                else -> {
+                    // NO Permission
+                    // Use launcher to ask for permission
+                    launcher.launch(Manifest.permission.RECORD_AUDIO)
+                }
+            }
+        }) {
+            if (!isListening) {
+                Icon(
+                    imageVector = Icons.Default.Mic, contentDescription = "Start Speech Recognition"
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.MoreHoriz,
+                    contentDescription = "Cancel Speech Recognition"
+                )
+            }
         }
         BasicTextField(
             value = text,
@@ -126,8 +150,7 @@ fun MessageInputField(
                 .background(color = Color(0xFFFFFEFE), shape = RoundedCornerShape(size = 25.dp))
                 .then(Modifier.padding(horizontal = 12.dp, vertical = 5.dp)), // Remove padding
             textStyle = TextStyle(
-                color = Color.Black,
-                fontSize = 16.sp
+                color = Color.Black, fontSize = 16.sp
             ),
             maxLines = 5
         )
@@ -147,17 +170,13 @@ fun MessageInputField(
 
 @Composable
 fun MessageList(
-    chatLogList: List<Message> = emptyList(),
-    modifier: Modifier = Modifier
+    chatLogList: List<Message> = emptyList(), modifier: Modifier = Modifier
 ) {
     var prevDate: Date? = Date(0)
     LazyColumn(
-        reverseLayout = true,
-        modifier = modifier
-            .fillMaxWidth()
+        reverseLayout = true, modifier = modifier.fillMaxWidth()
 
-    )
-    {
+    ) {
         items(chatLogList) {
             var currDate = it.sentTime
             if (!prevDate!!.equalDay(currDate)) {
@@ -171,17 +190,15 @@ fun MessageList(
 
 @Composable
 fun MessageItem(messageLog: Message, modifier: Modifier = Modifier) {
-    val chatBackground =
-        when (messageLog.messageFromManager) {
-            true -> Color(0xFFACC7FA)
-            false -> Color(0xFFDBE2F6)
-        }
+    val chatBackground = when (messageLog.messageFromManager) {
+        true  -> Color(0xFFACC7FA)
+        false -> Color(0xFFDBE2F6)
+    }
     Row(
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
 
         horizontalArrangement = when (messageLog.messageFromManager) {
-            true -> Arrangement.Start
+            true  -> Arrangement.Start
             false -> Arrangement.End
         }
     ) {
@@ -195,7 +212,7 @@ fun MessageItem(messageLog: Message, modifier: Modifier = Modifier) {
                 .clip(shape = RoundedCornerShape(15.dp, 15.dp, 15.dp, 15.dp))
         ) {
             when (messageLog.messageFromManager) {
-                true -> MessageContentManager(messageLog)
+                true  -> MessageContentManager(messageLog)
                 false -> MessageContentUser(messageLog)
             }
         }
@@ -206,8 +223,7 @@ fun MessageItem(messageLog: Message, modifier: Modifier = Modifier) {
 
 @Composable
 fun DateDivider(
-    date: Date? = null,
-    modifier: Modifier = Modifier
+    date: Date? = null, modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
@@ -225,8 +241,7 @@ fun DateDivider(
         )
         Text(
             text = date!!.toDateDayString(),
-            modifier = Modifier
-                .padding(horizontal = 10.dp),
+            modifier = Modifier.padding(horizontal = 10.dp),
             fontSize = 12.sp,
             color = Color.Gray
         )
@@ -267,11 +282,7 @@ fun MessageItemPreview() {
         )
         MessageItem(
             Message(
-                1,
-                Date(),
-                true,
-                "how can i help you",
-                hasRevision = true
+                1, Date(), true, "how can i help you", hasRevision = true
             )
         )
     }
