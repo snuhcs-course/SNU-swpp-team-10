@@ -1,6 +1,7 @@
 package com.example.calendy.data.maindb.history
 
 import com.example.calendy.data.maindb.plan.Plan
+import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
 
@@ -12,10 +13,28 @@ class HistoryRepository(
     override suspend fun insertHistory(managerHistory: ManagerHistory): Long =
         managerHistoryDao.insert(managerHistory)
 
-    override suspend fun insertSavedPlanFromPlan(plan: Plan): Long = when(plan) {
+    override suspend fun insertSavedPlanFromPlan(plan: Plan): Long = when (plan) {
         is Schedule -> savedScheduleDao.insert(plan.toSavedSchedule())
         is Todo     -> savedTodoDao.insert(plan.toSavedTodo())
     }
 
-    override fun getSavedPlansByMessageId(messageId: Int): List<ManagerHistory> = managerHistoryDao.getHistoriesByMessageId(messageId)
+    override fun getSavedPlansByMessageId(messageId: Int): List<ManagerHistory> =
+        managerHistoryDao.getHistoriesByMessageId(messageId)
+
+    // return (isSchedule: Boolean, (savedPlanId: Int?, currentPlanId: Int?))
+    override fun getRevisionHistoriesByMessageId(messageId: Int): List<Pair<PlanType, Pair<Int?, Int?>>> {
+        val historyList = managerHistoryDao.getHistoriesByMessageId(messageId)
+
+        return historyList.map {
+            when (it.isSchedule) {
+                true  -> Pair(PlanType.SCHEDULE, Pair(it.savedScheduleId, it.currentScheduleId))
+                false -> Pair(PlanType.TODO, Pair(it.savedTodoId, it.currentTodoId))
+            }
+        }
+    }
+
+    override fun getSavedPlanById(savedPlanId: Int, planType: PlanType): Plan = when (planType) {
+        PlanType.SCHEDULE -> savedScheduleDao.getSavedScheduleById(savedPlanId).toSchedule()
+        PlanType.TODO     -> savedTodoDao.getSavedTodoById(savedPlanId).toTodo()
+    }
 }

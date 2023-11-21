@@ -1,7 +1,10 @@
 package com.example.calendy.view.messagepage
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.speech.RecognitionListener
+import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -74,6 +77,110 @@ class MessagePageViewModel(
         addUserMessage(userInput)
         sendQuery(userInput)
         setUserInputText("")
+    }
+
+    // Created when getSpeechRecognizer is called
+    private var speechRecognizer: SpeechRecognizer? = null
+
+    // Event Listener for speech recognizer
+    private val recognitionListener: RecognitionListener = object : RecognitionListener {
+        private fun activateSpeechRecognition() {
+            _uiState.update { currentState ->
+                currentState.copy(isMicButtonClicked = true)
+            }
+        }
+
+        private fun deactivateSpeechRecognition() {
+            _uiState.update { currentState ->
+                currentState.copy(isMicButtonClicked = false)
+            }
+        }
+
+        // 말하기 시작할 준비가되면 호출
+        override fun onReadyForSpeech(params: Bundle) {
+
+        }
+
+        // 말하기 시작했을 때 호출
+        override fun onBeginningOfSpeech() {
+            activateSpeechRecognition()
+        }
+
+        // 입력받는 소리의 크기를 알려줌
+        override fun onRmsChanged(rmsdB: Float) {}
+
+        // 말을 시작하고 인식이 된 audio stream을 buffer에 담는다
+        override fun onBufferReceived(buffer: ByteArray) {}
+
+        // 말하기를 중지하면 호출
+        override fun onEndOfSpeech() {
+
+        }
+
+        // 오류 발생했을 때 호출
+        override fun onError(error: Int) {
+            val message = when (error) {
+                SpeechRecognizer.ERROR_AUDIO                    -> "오디오 에러"
+                SpeechRecognizer.ERROR_CLIENT                   -> "클라이언트 에러"
+                SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "퍼미션 없음"
+                SpeechRecognizer.ERROR_NETWORK                  -> "네트워크 에러"
+                SpeechRecognizer.ERROR_NETWORK_TIMEOUT          -> "네트웍 타임아웃"
+                SpeechRecognizer.ERROR_NO_MATCH                 -> "찾을 수 없음"
+                SpeechRecognizer.ERROR_RECOGNIZER_BUSY          -> "RECOGNIZER 가 바쁨"
+                SpeechRecognizer.ERROR_SERVER                   -> "서버가 이상함"
+                SpeechRecognizer.ERROR_SPEECH_TIMEOUT           -> "말하는 시간초과"
+                else                                            -> "알 수 없는 오류임"
+            }
+            setUserInputText("Speech Recognition ERROR: $message")
+            deactivateSpeechRecognition()
+        }
+
+        // 인식 결과가 준비되면 호출
+        override fun onResults(results: Bundle) {
+            val matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+            // Note: matches[1]은 더 확률이 낮은 인식 결과이다
+            setUserInputText(matches?.firstOrNull() ?: "")
+            onSendButtonClicked()
+            deactivateSpeechRecognition()
+        }
+
+        // 부분 인식 결과를 사용할 수 있을 때 호출
+        override fun onPartialResults(partialResults: Bundle) {
+            val matches = partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+            // Note: matches[1]은 더 확률이 낮은 인식 결과이다
+            setUserInputText(matches?.firstOrNull() ?: "")
+        }
+
+        // 향후 이벤트를 추가하기 위해 예약
+        override fun onEvent(eventType: Int, params: Bundle) {}
+    }
+
+    private fun getSpeechRecognizer(context: Context): SpeechRecognizer {
+        return speechRecognizer ?: SpeechRecognizer.createSpeechRecognizer(context).apply {
+            setRecognitionListener(recognitionListener)
+        }.also {
+            speechRecognizer = it
+        }
+    }
+
+
+    fun onMicButtonClicked(context: Context) {
+        // Permission is already granted
+
+        // Toggle Speech Recognition
+        if (uiState.value.isMicButtonClicked) {
+            getSpeechRecognizer(context).stopListening()
+        } else {
+            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+            intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, context.packageName)
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ko-KR")
+            intent.putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+            )
+            intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+
+            getSpeechRecognizer(context).startListening(intent)
+        }
     }
 
     private fun addUserMessage(userContent: String) {
@@ -350,70 +457,4 @@ class MessagePageViewModel(
         }
     }
 
-    // TODO: UiState에 통합하기
-    val speechRecognizerState = MutableStateFlow("")
-
-    // Code from Tistory. Event Listener for speech recognizer
-    val recognitionListener: RecognitionListener = object : RecognitionListener {
-        // 말하기 시작할 준비가되면 호출
-        override fun onReadyForSpeech(params: Bundle) {
-
-        }
-
-        // 말하기 시작했을 때 호출
-        override fun onBeginningOfSpeech() {
-            speechRecognizerState.value = "Start Speech"
-        }
-
-        // 입력받는 소리의 크기를 알려줌
-        override fun onRmsChanged(rmsdB: Float) {}
-
-        // 말을 시작하고 인식이 된 audio stream을 buffer에 담는다
-        override fun onBufferReceived(buffer: ByteArray) {}
-
-        // 말하기를 중지하면 호출
-        override fun onEndOfSpeech() {
-            speechRecognizerState.value = "End Speech"
-        }
-
-        // 오류 발생했을 때 호출
-        override fun onError(error: Int) {
-            val message = when (error) {
-                SpeechRecognizer.ERROR_AUDIO                    -> "오디오 에러"
-                SpeechRecognizer.ERROR_CLIENT                   -> "클라이언트 에러"
-                SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "퍼미션 없음"
-                SpeechRecognizer.ERROR_NETWORK                  -> "네트워크 에러"
-                SpeechRecognizer.ERROR_NETWORK_TIMEOUT          -> "네트웍 타임아웃"
-                SpeechRecognizer.ERROR_NO_MATCH                 -> "찾을 수 없음"
-                SpeechRecognizer.ERROR_RECOGNIZER_BUSY          -> "RECOGNIZER 가 바쁨"
-                SpeechRecognizer.ERROR_SERVER                   -> "서버가 이상함"
-                SpeechRecognizer.ERROR_SPEECH_TIMEOUT           -> "말하는 시간초과"
-                else                                            -> "알 수 없는 오류임"
-            }
-            speechRecognizerState.value = "ERROR: $message"
-        }
-
-        // 인식 결과가 준비되면 호출
-        override fun onResults(results: Bundle) {
-            val matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-            // matches[1]은 더 확률이 낮은 인식 결과이다
-            speechRecognizerState.value = matches?.firstOrNull() ?: ""
-
-            // 인식 결과를 Send Query하기
-            _uiState.update { currentState ->
-                currentState.copy(userInputText = matches?.firstOrNull() ?: "")
-            }
-            onSendButtonClicked()
-        }
-
-        // 부분 인식 결과를 사용할 수 있을 때 호출
-        override fun onPartialResults(partialResults: Bundle) {
-            val matches = partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-            Log.d("GUN", "OnPartialResults")
-            for (i in matches!!.indices) Log.d("GUN", matches[i])
-        }
-
-        // 향후 이벤트를 추가하기 위해 예약
-        override fun onEvent(eventType: Int, params: Bundle) {}
-    }
 }

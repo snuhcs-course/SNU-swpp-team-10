@@ -14,7 +14,7 @@ interface ScheduleDao : BaseDao<Schedule> {
     @Query("SELECT * FROM schedule")
     fun getAllSchedulesStream(): Flow<List<Schedule>>
 
-    @Query("SELECT * FROM schedule WHERE start_time < :endTime OR end_time > :startTime")
+    @Query("SELECT * FROM schedule WHERE end_time >= :startTime AND start_time <= :endTime")
     fun getSchedulesStream(startTime: Date, endTime: Date): Flow<List<Schedule>>
 
     @Query("SELECT * FROM schedule WHERE id = :id")

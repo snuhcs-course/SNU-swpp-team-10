@@ -9,4 +9,8 @@ sealed interface Plan {
     val priority: Int
     val showInMonthlyView: Boolean
     val isOverridden: Boolean
+
+    companion object {
+        const val PRIORITY_DEFAULT = 3
+    }
 }

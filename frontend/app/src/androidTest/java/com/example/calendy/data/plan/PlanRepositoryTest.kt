@@ -2,29 +2,109 @@ package com.example.calendy.data.plan
 
 import android.content.Context
 import androidx.room.Room
+import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.test.core.app.ApplicationProvider
 import com.example.calendy.data.maindb.CalendyDatabase
+import com.example.calendy.data.maindb.category.CategoryRepository
 import com.example.calendy.data.maindb.plan.Plan
 import com.example.calendy.data.maindb.plan.PlanRepository
+import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
 import com.example.calendy.data.maindb.plan.schedule.ScheduleRepository
 import com.example.calendy.data.maindb.plan.todo.TodoRepository
+import com.example.calendy.data.maindb.repeatgroup.RepeatGroupRepository
 import com.example.calendy.utils.DateHelper
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
-import org.junit.Assert
+import org.junit.Assert.assertEquals
+import org.junit.Assert.fail
 import org.junit.Before
-
 import org.junit.Test
 
 class PlanRepositoryTest {
     private lateinit var planRepository: PlanRepository
-    private lateinit var todoRepository: TodoRepository
-    private lateinit var scheduleRepository: ScheduleRepository
     private lateinit var calendyDatabase: CalendyDatabase
 
+
+    // Schedule: 10.9 - 10.9, 10.13 - 10.15
+    // Tod0: 10.9, 10.12 (Actually November)
+    //region TestData
+    private val schedule1 = Schedule(
+        id = 1, title = "first", startTime = DateHelper.getDate(
+            year = 2023, monthZeroIndexed = 10, day = 9, hourOfDay = 16, minute = 0
+        ), endTime = DateHelper.getDate(
+            year = 2023, monthZeroIndexed = 10, day = 9, hourOfDay = 20, minute = 30
+        ), memo = "", priority = 1, showInMonthlyView = false, isOverridden = false
+    )
+    private val schedule2 = Schedule(
+        id = 2,
+        title = "second",
+        startTime = DateHelper.getDate(
+            year = 2023, monthZeroIndexed = 10, day = 13, hourOfDay = 12, minute = 30
+        ),
+        endTime = DateHelper.getDate(year = 2023, monthZeroIndexed = 10, day = 15),
+        memo = "",
+        priority = 2,
+        showInMonthlyView = false,
+        isOverridden = false
+    )
+
+
+    private val todo1 = Todo(
+        id = 1, title = "Be happy",
+        dueTime = DateHelper.getDate(
+            year = 2023, monthZeroIndexed = 10, day = 9, hourOfDay = 20, minute = 30
+        ),
+        complete = false,
+        memo = "Realy",
+        priority = 2,
+        showInMonthlyView = false,
+        isOverridden = false,
+    )
+    private val todo2 = Todo(
+        id = 2, title = "Test This",
+        dueTime = DateHelper.getDate(
+            year = 2023, monthZeroIndexed = 10, day = 12, hourOfDay = 20, minute = 30
+        ),
+        complete = true,
+        memo = "Second",
+        priority = 4,
+        showInMonthlyView = false,
+        isOverridden = false,
+    )
+
+    private suspend fun addTwoSchedule() {
+        planRepository.insert(schedule1)
+        planRepository.insert(schedule2)
+    }
+
+
+    private suspend fun addTwoTodo() {
+        planRepository.insert(todo1)
+        planRepository.insert(todo2)
+    }
+    //endregion
+
+    // TODO: Should be general for other tests
+    fun <T> assertEqualsWithoutOrder(expected: Collection<T>, actual: Collection<T>) {
+        val shouldNotBeInActual = actual - expected.toSet()
+        val missingInActual = expected - actual.toSet()
+
+        if (shouldNotBeInActual.isNotEmpty() || missingInActual.isNotEmpty()) {
+            val errorMessage = buildString {
+                appendLine("Assertion failed!")
+                if (missingInActual.isNotEmpty()) {
+                    appendLine("Missing from actual: $missingInActual")
+                }
+                if (shouldNotBeInActual.isNotEmpty()) {
+                    appendLine("Should not be present: $shouldNotBeInActual")
+                }
+            }
+            fail(errorMessage)
+        }
+    }
 
     @Before
     fun setUp() {
@@ -38,17 +118,31 @@ class PlanRepositoryTest {
                 .allowMainThreadQueries().build()
 
             val todoDao = calendyDatabase.todoDao()
-            val todoLocalDataSource = TodoLocalDataSource(todoDao)
-            todoRepository = TodoRepository(todoLocalDataSource)
+            val todoRepository = TodoRepository(todoDao)
 
             val scheduleDao = calendyDatabase.scheduleDao()
-            val scheduleLocalDataSource = ScheduleLocalDataSource(scheduleDao)
-            scheduleRepository = ScheduleRepository(scheduleLocalDataSource)
+            val scheduleRepository = ScheduleRepository(scheduleDao)
 
-            planRepository = PlanRepository(scheduleRepository, todoRepository)
+            val categoryDao = calendyDatabase.categoryDao()
+            val categoryRepository = CategoryRepository(categoryDao)
+
+            val repeatGroupDao = calendyDatabase.repeatGroupDao()
+            val repeatGroupRepository = RepeatGroupRepository(repeatGroupDao)
+
+            planRepository = PlanRepository(
+                scheduleRepository = scheduleRepository,
+                todoRepository = todoRepository,
+                categoryRepository = categoryRepository,
+                repeatGroupRepository = repeatGroupRepository
+            )
         }
 
         createRepository()
+
+        runBlocking {
+            addTwoSchedule()
+            addTwoTodo()
+        }
     }
 
     @After
@@ -57,66 +151,182 @@ class PlanRepositoryTest {
         calendyDatabase.close()
     }
 
+    @Test
+        fun update() = runBlocking {
+        val updatedSchedule = schedule1.copy(title = "updated", priority = 5, memo = "updated memo")
+        planRepository.update(updatedSchedule)
 
-    private var schedule1 = Schedule(
-        id = 1,
-        title = "first",
-        startTime = DateHelper.getDate(2023, 10, 9),
-        endTime = DateHelper.getDate(2023, 10, 11),
-        memo = "",
-        priority = 1,
-        showInMonthlyView = false,
-        isOverridden = false
-    )
-    private var schedule2 = Schedule(
-        id = 2,
-        title = "second",
-        startTime = DateHelper.getDate(2023, 10, 13, 12, 30),
-        endTime = DateHelper.getDate(2023,11,1),
-        memo = "",
-        priority = 2,
-        showInMonthlyView = false,
-        isOverridden = false
-    )
+        // Then
+        val actual = planRepository.getPlanById(id = 1, PlanType.SCHEDULE)
+        assertEquals(updatedSchedule, actual)
 
-    private suspend fun addTwoSchedule() {
-        scheduleRepository.insertSchedule(schedule1)
-        scheduleRepository.insertSchedule(schedule2)
+
+        val updatedTodo = todo1.copy(title = "updated", priority = 5, memo = "updated memo")
+        planRepository.update(updatedTodo)
+
+        // Then
+        val actual2 = planRepository.getPlanById(id = 1, PlanType.TODO)
+        assertEquals(updatedTodo, actual2)
     }
 
+    @Test
+    fun delete() = runBlocking {
+        planRepository.delete(schedule1)
+        planRepository.delete(todo1)
 
-    private var todo1 = Todo(
-        id = 1, title = "Be happy",
-        dueTime = DateHelper.getDate(
-            year = 2023,
-            monthZeroIndexed = 10,
-            day = 9,
-            hourOfDay = 20,
-            minute = 30
-        ),
-        yearly = false,
-        monthly = false,
-        daily = false,
-        complete = false,
-        memo = "Realy",
-        priority = 2,
-        showInMonthlyView = false,
-        isOverridden = false,
-    )
+        // Then
+        val actual = planRepository.getAllPlansStream().first()
+        val expected = listOf(schedule2, todo2)
+        assertEqualsWithoutOrder(expected = expected, actual = actual)
+    }
 
-    private suspend fun addOneTodo() {
-        todoRepository.insert(todo1)
+    //region GET
+    @Test
+    fun getAllPlansStream() = runBlocking {
+        val planList: List<Plan> = planRepository.getAllPlansStream().first()
+
+        val expectedList = listOf(schedule1, schedule2, todo1, todo2)
+        assertEqualsWithoutOrder(expected = expectedList, actual = planList)
     }
 
     @Test
     fun getPlansStream() = runBlocking {
-        addTwoSchedule()
-        addOneTodo()
-
         val planList: List<Plan> = planRepository.getPlansStream(
             DateHelper.getDate(year = 2023, monthZeroIndexed = 10, day = 5),
-            DateHelper.getDate(year = 2023, monthZeroIndexed = 10, day = 12)
+            DateHelper.getDate(year = 2023, monthZeroIndexed = 10, day = 11)
         ).first()
-        Assert.assertEquals(planList.size, 3)
+
+        val expectedList = listOf(schedule1, todo1)
+        assertEqualsWithoutOrder(expected = expectedList, actual = planList)
+
+
+        val schedule1105to1111 = schedule1.copy(
+            id = 3,
+            startTime = DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 5),
+            endTime = DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 11)
+        )
+        val schedule1109to1114 = schedule1.copy(
+            id = 4,
+            startTime = DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 9),
+            endTime = DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 14)
+        )
+        val schedule1112to1115 = schedule2.copy(
+            id = 5,
+            startTime = DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 12),
+            endTime = DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 15)
+        )
+        planRepository.insert(schedule1105to1111)
+        planRepository.insert(schedule1109to1114)
+        planRepository.insert(schedule1112to1115)
+
+
+        assertEqualsWithoutOrder(
+            expected = listOf(schedule1105to1111),
+            actual = planRepository.getPlansStream(
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 4),
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 8)
+            ).first()
+        )
+
+        assertEqualsWithoutOrder(
+            expected = listOf(schedule1105to1111, schedule1109to1114),
+            actual = planRepository.getPlansStream(
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 6),
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 10)
+            ).first()
+        )
+
+        assertEqualsWithoutOrder(
+            expected = listOf(schedule1105to1111, schedule1109to1114),
+            actual = planRepository.getPlansStream(
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 10),
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 10)
+            ).first()
+        )
+
+        assertEqualsWithoutOrder(
+            expected = listOf(schedule1105to1111, schedule1109to1114, schedule1112to1115),
+            actual = planRepository.getPlansStream(
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 9),
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 14)
+            ).first()
+        )
+
+        assertEqualsWithoutOrder(
+            expected = listOf(schedule1109to1114, schedule1112to1115),
+            actual = planRepository.getPlansStream(
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 12),
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 14)
+            ).first()
+        )
+
+        assertEqualsWithoutOrder(
+            expected = listOf(schedule1109to1114, schedule1112to1115),
+            actual = planRepository.getPlansStream(
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 13),
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 15)
+            ).first()
+        )
+
+        assertEqualsWithoutOrder(
+            expected = listOf(schedule1112to1115),
+            actual = planRepository.getPlansStream(
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 15),
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 18)
+            ).first()
+        )
+
+        assertEqualsWithoutOrder(
+            expected = listOf(),
+            actual = planRepository.getPlansStream(
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 16),
+                DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 18)
+            ).first()
+        )
     }
+
+    @Test
+    fun getPlanById() = runBlocking {
+        val plan1: Plan = planRepository.getPlanById(id = 1, type = PlanType.SCHEDULE)
+        assertEquals(schedule1, plan1)
+
+        val plan2: Plan = planRepository.getPlanById(id = 2, type = PlanType.SCHEDULE)
+        assertEquals(schedule2, plan2)
+
+        val plan3: Plan = planRepository.getPlanById(id = 1, type = PlanType.TODO)
+        assertEquals(todo1, plan3)
+    }
+
+    @Test
+    fun getPlanByIds() = runBlocking {
+        val planList: List<Plan> = planRepository.getPlansByIds(
+            scheduleIDs = listOf(1), todoIDs = listOf(1)
+        )
+
+        val expectedList = listOf(schedule1, todo1)
+        assertEqualsWithoutOrder(expected = expectedList, actual = planList)
+    }
+
+    @Test
+    fun getSchedulesViaQuery() = runBlocking {
+        val calendySelectQuery = SimpleSQLiteQuery(
+            "SELECT * FROM schedule WHERE id=1",
+        )
+        val planList: List<Schedule> = planRepository.getSchedulesViaQuery(calendySelectQuery)
+
+        val expected = listOf(schedule1)
+        assertEqualsWithoutOrder(expected = expected, actual = planList)
+    }
+
+    @Test
+    fun getTodosViaQuery() = runBlocking {
+        val calendySelectQuery = SimpleSQLiteQuery(
+            "SELECT * FROM todo WHERE id=2",
+        )
+        val planList: List<Todo> = planRepository.getTodosViaQuery(calendySelectQuery)
+
+        val expected = listOf(todo2)
+        assertEqualsWithoutOrder(expected = expected, actual = planList)
+    }
+    //endregion
 }

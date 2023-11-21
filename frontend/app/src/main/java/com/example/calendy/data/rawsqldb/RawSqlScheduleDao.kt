@@ -7,8 +7,8 @@ import com.example.calendy.data.BaseDao
 @Dao
 interface RawSqlScheduleDao : BaseDao<RawSqlSchedule> {
     @Query("DELETE FROM schedule")
-    fun deleteAllSchedules()
+    fun deleteAllRawSqlSchedules()
 
     @Query("SELECT * FROM schedule")
-    fun getAllSchedules(): List<RawSqlSchedule>
+    fun getAllRawSqlSchedules(): List<RawSqlSchedule>
 }

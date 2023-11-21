@@ -35,10 +35,9 @@ import java.util.Date
 @Composable
 fun MessageContentUser(
     messageLog: Message
-){
+) {
     Text(
-        text = messageLog.content,
-        modifier = Modifier
+        text = messageLog.content, modifier = Modifier
             .wrapContentSize()
             .padding(10.dp)
     )
@@ -47,9 +46,8 @@ fun MessageContentUser(
 @Composable
 fun MessageContentManager(
     messageLog: Message
-){
-    when(messageLog.hasRevision)
-    {
+) {
+    when (messageLog.hasRevision) {
         false -> MessageContentManagerDefault(messageLog)
         true  -> MessageContentManagerWithButton(messageLog)
     }
@@ -58,38 +56,37 @@ fun MessageContentManager(
 @Composable
 fun MessageContentManagerDefault(
     messageLog: Message
-){
+) {
     Text(
-        text = messageLog.content,
-        modifier = Modifier
+        text = messageLog.content, modifier = Modifier
             .wrapContentSize()
             .padding(10.dp)
     )
 }
+
 @Composable
 fun MessageContentManagerWithButton(
     messageLog: Message,
     messageContentViewModel: MessagePlanLogViewModel = viewModel(factory = AppViewModelProvider.Factory)
-){
-    val logPlanList:List<Plan> by messageContentViewModel.modifiedPlans.collectAsState()
+) {
+    val logPlanList: List<Plan> by messageContentViewModel.modifiedPlans.collectAsState()
+    val planPairList: List<Pair<Plan?, Plan?>> by messageContentViewModel.modifiedPlanList.collectAsState()
 
-    var openListPopup : Boolean by remember { mutableStateOf(false)   }
-    var openDetailPopup : Boolean by remember { mutableStateOf(false) }
-    var selectedPlan : Plan by remember { mutableStateOf(Todo(-1, "", Date()))     }
+    var openListPopup: Boolean by remember { mutableStateOf(false) }
+    var openDetailPopup: Boolean by remember { mutableStateOf(false) }
+    var selectedPlan: Plan by remember { mutableStateOf(Todo(-1, "", Date())) }
 
 
-
-    fun onButtonClick () {
+    fun onButtonClick() {
         // TODO: make popup global scope
         openListPopup = true
         messageContentViewModel.onMessageSelected(messageLog)
     }
     Column(
 
-    ){
+    ) {
         Text(
-            text = messageLog.content,
-            modifier = Modifier
+            text = messageLog.content, modifier = Modifier
                 .wrapContentSize()
                 .padding(10.dp)
         )
@@ -98,7 +95,7 @@ fun MessageContentManagerWithButton(
             onClick = ::onButtonClick,
             colors = ButtonDefaults.buttonColors(Color(0xFFF1F1F1)),
             contentPadding = PaddingValues(0.dp),
-            modifier= Modifier
+            modifier = Modifier
                 .padding(horizontal = 15.dp, vertical = 5.dp)
                 .fillMaxWidth()
                 .wrapContentHeight()
@@ -121,34 +118,31 @@ fun MessageContentManagerWithButton(
             )
         }
     }
-    
+
     //open tod0 list popup
-    if(openListPopup && !openDetailPopup)
-    {
+    if (openListPopup && !openDetailPopup) {
         PlanListPopup(
             planList = logPlanList,
+            planPairList = planPairList,
             header = { Text(text = "일정 자세히 보기") },
             onDismissed = { openListPopup = false },
-            onItemClick =
-            { plan ->
+            onItemClick = { plan ->
                 selectedPlan = plan
                 openDetailPopup = true
             },
-            onCheckboxClicked =
-            { plan, checked ->
+            onCheckboxClicked = { plan, checked ->
 
             },
         )
     }
 
-    if(openDetailPopup)
-    {
+    if (openDetailPopup) {
         PlanDetailPopup(
             plan = selectedPlan,
             header = { selectedPlan.title },
             onDismissed = { openDetailPopup = false },
 
-        )
+            )
     }
 
 
