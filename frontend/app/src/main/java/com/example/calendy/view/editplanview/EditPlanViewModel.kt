@@ -67,18 +67,21 @@ class EditPlanViewModel(
             _uiState.value = EditPlanUiState(isAddPage = false, id = id, entryType = type)
 
             // fill in other values after db query
-            viewModelScope.launch {
-                val plan = when (type) {
-                    PlanType.SCHEDULE -> {
-                        scheduleRepository.getScheduleById(id)
+            viewModelScope.launch() {
+                withContext(Dispatchers.IO) {
+                    val plan = when (type) {
+                        PlanType.SCHEDULE -> {
+                            scheduleRepository.getScheduleById(id)
+                        }
+
+                        PlanType.TODO     -> {
+                            todoRepository.getTodoById(id)
+                        }
                     }
 
-                    PlanType.TODO     -> {
-                        todoRepository.getTodoById(id)
-                    }
+                    _uiState.value = fillIn(plan)
                 }
 
-                _uiState.value = fillIn(plan)
             }
         }
     }

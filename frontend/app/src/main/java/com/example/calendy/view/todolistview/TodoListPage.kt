@@ -87,14 +87,9 @@ fun ToDoListPage(
     }
 
     Scaffold(topBar = {
-        MediumTopAppBar(title = {
-            MonthSelector(
-                year = uiState.year,
-                month = uiState.month,
-                onPreviousClick = onPreviousClick,
-                onNextClick = onNextClick,
-                onTextClick = onTextClick
-            )
+        TopAppBar(title = {
+           Text(text= "TODO List")
+
         }, actions = { hideToggle(viewModel, uiState) })
     }, floatingActionButton = {
         FloatingActionButton(onClick = {
@@ -106,20 +101,31 @@ fun ToDoListPage(
             Icon(Icons.Filled.Add, contentDescription = "Add")
         }
     }) { innerPadding ->
-        OneMonthTodos(Modifier.padding(innerPadding), viewModel, uiState, onNavigateToEditPage)
+        Column(
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            MonthSelector(
+                year = uiState.year,
+                month = uiState.month,
+                onPreviousClick = onPreviousClick,
+                onNextClick = onNextClick,
+                onTextClick = onTextClick
+            )
+            OneMonthTodos( viewModel, uiState, onNavigateToEditPage)
+        }
+
     }
 }
 
 
 @Composable
 fun OneMonthTodos(
-    modifier: Modifier,
     viewModel: TodoListViewModel,
     uiState: TodoListUiState,
     onNavigateToEditPage: (id: Int?,date: Date?) -> Unit
 ) {
     viewModel.updateMonthTodos()
-    Column(modifier) {
+    Column {
         Divider()
         if(uiState.monthTodos.isEmpty()){
             Box(
@@ -206,14 +212,14 @@ fun MonthSelector(
     val typography = MaterialTheme.typography
     val currentYear = Calendar.getInstance().get(Calendar.YEAR)
     val displayText = if (year == currentYear) {
-        "${month}월 TODO"
+        "${month}월"
     } else {
-        "${year}년 ${month}월 TODO"
+        "${year}년 ${month}월"
     }
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 25.dp, start = 4.dp, end = 16.dp, bottom = 5.dp),
+            .padding(top = 5.dp, start = 4.dp, end = 16.dp, bottom = 5.dp),
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
