@@ -4,13 +4,14 @@ const bodyParser = require('body-parser');
 const axios= require('axios');
 const app = express();
 const port = 3000;
+const config=require('./config.json');
 
 app.set("port", port);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
 const OPENAI_API_URL= 'https://api.openai.com/v1/chat/completions'
-const OPENAI_API_KEY='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';
+const OPENAI_API_KEY=config.openai_api_key;
 
 
 app.get('/', (req, res) => {
@@ -30,60 +31,104 @@ const connection = mysql.createConnection({
 });
 
 
+
+const assistant_exemplars=[
+    {
+        "role": "user",
+        "content": "23년 11월 18일 컴퓨터구조 과제 삭제해줘"
+    },
+    {
+        "role": "assistant",
+        "content": `""DELETE FROM todo WHERE id=133 AND date(due_time)='2023-11-18';"`
+    },
+    {
+        "role": "user",
+        "content": "23년 11월 6일 컴구 과제 삭제"
+    },
+    {
+        "role": "assistant",
+        "content": `"DELETE FROM todo WHERE id=133 AND date(due_time)='2023-11-06';"`
+    },
+    {
+        "role": "user",
+        "content": "23년11월 매주 화요일에 헬스하기 추가해줘"
+    },
+    {
+        "role": "assistant",
+        "content": `"INSERT INTO TODO(title, due_time) VALUES('헬스하기', '2023-11-07 23:59:59'), ('헬스하기', '2023-11-14 23:59:59'), ('헬스하기', '2023-11-21 23:59:59'), ('헬스하기', '2023-11-28 23:59:59');”`
+    },
+    {
+        "role": "user",
+        "content": "과제 카테고리 금요일로 옮겨줘"
+    },
+    {
+        "role": "assistant",
+        "content": `"UPDATE TODO SET due_time = date(due_time, 'weekday 5') || substr(due_time, 11) WHERE category_id=1;"`
+    },
+    {
+        "role": "user",
+        "content": "23년 9월 12일 과제 모두 삭제"
+    },
+    {
+        "role": "assistant",
+        "content": `"DELETE FROM TODO WHERE category_id=1 AND date(due_time)='2023-09-12';"`
+    }
+]
+
 app.post('/manager/send', async (req, res) => {
     const userMessage = req.body.message;
     const category_list = req.body.category;
     const todo_list = req.body.todo;
     const schedule_list=req.body.schedule;
     const time = req.body.time;
+    const systemPrompt = `Your job is to convert user commands into sql queries in sqlite and return single string. Make the query as short as possible. Do not specify and default values when inserting. Do NOT include any other text.
 
-    console.log(category_list, todo_list, schedule_list, time);
-    const systemPrompt = `In sqlite, given two tables:
-    schedule(id INTEGER, title TEXT, start_time TEXT, end_time TEXT, memo TEXT DEFAULT NULL, repeat_group_id=INTEGER DEFAULT NULL, category_id DEFAULT NULL, priority INTEGER DEFAULT 3, show_in_monthly_view INTEGER DEFAULT 1)
-    todo(id INTEGER, title TEXT, due_time TEXT, memo TEXT DEFAULT NULL, repeat_group_id=INTEGER DEFAULT NULL, category_id DEFAULT NULL, priority INTEGER DEFAULT 3, show_in_monthly_view INTEGER DEFAULT 0, is_overridden DEFAULT 0)
+    In the database, three tables exist:
+    SCHEDULE(id INTEGER, title TEXT, start_time TEXT, end_time TEXT, memo TEXT DEFAULT NULL, repeat_group_id=INTEGER DEFAULT NULL, category_id DEFAULT NULL, priority INTEGER DEFAULT NULL, show_in_monthly_view INTEGER DEFAULT 1)
+    TODO(id INTEGER, title TEXT, due_time TEXT, memo TEXT DEFAULT NULL, repeat_group_id=INTEGER DEFAULT NULL, category_id DEFAULT NULL, priority INTEGER DEFAULT NULL, show_in_monthly_view INTEGER DEFAULT 0, is_overridden DEFAULT 0)
+    CATEGORY(id INTEGER, title TEXT, priority INTEGER)
+    
+    SCHEDULE is an event that has both start time & end time. TODO is a task that only has due time. The term PLAN includes both TODO and SCHEDULE. In PLAN tables, category_id is a foreign key referencing CATEGORY.id.  
+    
+    You will be given (id, title) tuples of existing records in each table.
+    
+    Current time is ${time}. follow the same format for time. Keep in mind current time is different from the time in past conversations. When modifying time attributes partially, for example only changing the date, use substr() and concatenation.
+    
+    -------------------------------------------------------------------------
+    #Conversion Instructions
+    
+    First, determine the type of the query as one of the four types given: INSERT/DELETE/UPDATE/SELECT
+    When the command is unclear about inserting or updating, consider the type INSERT. Only consider the type as UPDATE when explicitly commanded to do so.
+    
+    After the query type has been determined, determine whether the PLAN type is SCHEDULE or TODO. If the determined query type is INSERT, the PLAN type should be TODO by default. Only when the time span is explicitly given by specifying both the start time and end time explicitly one-by-one, it becomes SCHEDULE. For example, specifying only single date means PLAN type is TODO, and due_time is 23:59:59 of that day.  For query types other than INSERT, if uncertain whether command is referring to todo or schedule, include queries for both.
+    
+    When the type is INSERT, find the matching category id from the data given.
+    
+    For a command including conditional clause on category, search for the id of the category with matching title in CATEGORY and use the id in query. ONLY when there is no matching CATEGORY record, it is a condition on title. NEVER use WHERE condition on title. Instead, search for the id of records with matching title and use id explicitly in query. If there is no match in both schedule and todo, output "NO_SUCH_PLAN;" in place of that query. Even when you find the matching id, NEVER forget to include WHERE conditions on time.
+    
+    ------------------------------------------------------------------------------
+    #Input Data
+    CATEGORY(id, title): ${category_list}
+    TODO(id, title): ${todo_list}
+    SCHEDULE(id, title): ${schedule_list}`
+    const messages=[
+        {
+            role: "system",
+            content: systemPrompt 
+        }]
 
-current time is [${time}]. follow the same format. 
-when modifying time attributes partially, for example only changing the date, use substr() and concatenation.
-
-
-Convert user command into sql queries and return single string. make the query as short as possible. do NOT include any other text.
-
-Schedules are events that have both start time & end time. Todo's are tasks that only have due time. If uncertain whether command is referring to todo or schedule, include queries for both.
-
-given data below on title and id's of category, todo, schedule:
-
-for condition on category, search for the id and use in query. 
-
-ONLY when there is no matching category, it is a condition on title. NEVER use WHERE condition on title. Instead, search for the id's from the below data and use id explicitly in query. If there is no match in both schedule and todo, use "NO_SUCH_PLAN;" in place of that query. Even when you find the matching id, NEVER forget to include WHERE conditions on time.
-
-category(id, title): ${category_list}
-
-todo(id, title): ${todo_list}
-
-schedule(id, title): ${schedule_list}`
+    Array.prototype.push.apply(messages, assistant_exemplars);
+    messages.push({
+        role: "user",
+        content: userMessage 
+    })
+    
 
 
     try {
         const response = await axios.post(OPENAI_API_URL, {
             model: "gpt-4",
-            messages: [
-                {
-                    role: "system",
-                    content: systemPrompt 
-                },
-                // {
-                //     role: "assistant",
-                //     content: assistantPrompt 
-                // },
-                //contains past responses. provide example responses for better accuracy
-    
-                {
-                    role: "user",
-                    content: userMessage 
-                }
-            ],
-            // top_p:0.1,
-            // max_tokens:500,
+            messages: messages,
             temperature: 0
         }, {
             headers: {
@@ -102,61 +147,76 @@ schedule(id, title): ${schedule_list}`
     }
 });
 
-// app.post('/user/write', (req, res) => {
-//     console.log(req.body);
-//     const userName = req.body.userName;
-//     const userId = req.body.userId;
+app.post('/manager/send/turbo', async (req, res) => {
+    const userMessage = req.body.message;
+    const category_list = req.body.category;
+    const todo_list = req.body.todo;
+    const schedule_list=req.body.schedule;
+    const time = req.body.time;
+    const systemPrompt = `Your job is to convert user commands into sql queries in sqlite and return single string. Make the query as short as possible. Do not specify and default values when inserting. Do NOT include any other text.
 
-//     const sql = 'INSERT INTO Users (UserName, UserId) VALUES (?, ?)';
-//     const params = [userName, userId];
+    In the database, three tables exist:
+    SCHEDULE(id INTEGER, title TEXT, start_time TEXT, end_time TEXT, memo TEXT DEFAULT NULL, repeat_group_id=INTEGER DEFAULT NULL, category_id DEFAULT NULL, priority INTEGER DEFAULT NULL, show_in_monthly_view INTEGER DEFAULT 1)
+    TODO(id INTEGER, title TEXT, due_time TEXT, memo TEXT DEFAULT NULL, repeat_group_id=INTEGER DEFAULT NULL, category_id DEFAULT NULL, priority INTEGER DEFAULT NULL, show_in_monthly_view INTEGER DEFAULT 0, is_overridden DEFAULT 0)
+    CATEGORY(id INTEGER, title TEXT, priority INTEGER)
+    
+    SCHEDULE is an event that has both start time & end time. TODO is a task that only has due time. The term PLAN includes both TODO and SCHEDULE. In PLAN tables, category_id is a foreign key referencing CATEGORY.id.  
+    
+    You will be given (id, title) tuples of existing records in each table.
+    
+    Current time is ${time}. follow the same format for time. 
+    When modifying time attributes partially, for example only changing the date, use substr() and concatenation.
+    
+    -------------------------------------------------------------------------
+    #Conversion Instructions
+    
+    First, determine the type of the query as one of the four types given: INSERT/DELETE/UPDATE/SELECT
+    When the command is unclear about inserting or updating, consider the type INSERT. Only consider the type as UPDATE when explicitly commanded to do so.
+    
+    After the query type has been determined, determine whether the PLAN type is SCHEDULE or TODO. If the determined query type is INSERT, the PLAN type should be TODO by default. Only when the time span is explicitly given by specifying both the start time and end time explicitly one-by-one, it becomes SCHEDULE. For example, specifying only single date means PLAN type is TODO, and due_time is 23:59:59 of that day.  For query types other than INSERT, if uncertain whether command is referring to todo or schedule, include queries for both.
+    
+    When the type is INSERT, find the matching category id from the data given.
+    
+    For a command including conditional clause on category, search for the id of the category with matching title in CATEGORY and use the id in query. ONLY when there is no matching CATEGORY record, it is a condition on title. NEVER use WHERE condition on title. Instead, search for the id of records with matching title and use id explicitly in query. If there is no match in both schedule and todo, output "NO_SUCH_PLAN;" in place of that query. Even when you find the matching id, NEVER forget to include WHERE conditions on time.
+    
+    ------------------------------------------------------------------------------
+    #Input Data
+    CATEGORY(id, title): ${category_list}
+    TODO(id, title): ${todo_list}
+    SCHEDULE(id, title): ${schedule_list}`
+    const messages=[
+        {
+            role: "system",
+            content: systemPrompt 
+        }]
+    
+    
+    Array.prototype.push.apply(messages, assistant_exemplars);
+    messages.push({
+        role: "user",
+        content: userMessage 
+    })
+    
 
-//     connection.query(sql, params, (err, result) => {
-//         let resultCode = 404;
-//         let message = 'Error occured';
 
-//         if (err) {
-//             console.log(err);
-//         } else {
-//             resultCode = 200;
-//             message = 'Write Success';
-//             console.log(message);
-//         }
+    try {
+        const response = await axios.post(OPENAI_API_URL, {
+            model: "gpt-4-1106-preview",
+            messages: messages,
+            temperature: 0
+        }, {
+            headers: {
+                'Authorization': `Bearer ${OPENAI_API_KEY}`,
+                'Content-Type': 'application/json'
+            }
+        });
 
-//         res.json({
-//             'code': resultCode,
-//             'message': message
-//         });
-//     });
-// });
+        const gptResponse = response.data.choices[0].message.content;
+        //gptResponse is a string-formatted json with array of string sql queries in attribute "queries"
+        res.send(gptResponse); 
 
-// app.post('/user/read', (req, res) => {
-//     console.log(req.body);
-//     const userName = req.body.userName;
-//     const sql = 'select * from Users where UserName = ?';
-//     const params = [userName];
-
-//     connection.query(sql, params, (err, result) => {
-//         let resultCode = 404;
-//         let message = 'Error occured';
-//         let userId = -1;
-
-//         if (err) {
-//             console.log(err);
-//         } else {
-//             if (result.length === 0) {
-//                 resultCode = 404;
-//                 message = "User '" + userName + "' does not exist";
-//                 userId = "0000-00000";
-//             } else {
-//                 resultCode = 200;
-//                 message = 'Read Success';
-//                 userId = result[0].UserId;
-//             }
-//         }
-//         res.json({
-//             'code': resultCode,
-//             'message': message,
-//             'userId' : userId,
-//         });
-//     })
-// });
+    } catch (error) {
+        console.error('Error querying OpenAI:', error.response.data);
+        res.status(500).json({ error: 'Failed to get a response from OpenAI' });
+    }
+});
