@@ -35,15 +35,15 @@ const connection = mysql.createConnection({
 const assistant_exemplars=[
     {
         "role": "user",
-        "content": "23년 11월 18일 컴퓨터구조 과제 삭제해줘"
+        "content": "내일 컴퓨터구조 과제 삭제해줘"
     },
     {
         "role": "assistant",
-        "content": `""DELETE FROM todo WHERE id=133 AND date(due_time)='2023-11-18';"`
+        "content": `"DELETE FROM todo WHERE id=133 AND date(due_time)='2023-11-05';"`
     },
     {
         "role": "user",
-        "content": "23년 11월 6일 컴구 과제 삭제"
+        "content": "내일 모레 컴구 과제 삭제"
     },
     {
         "role": "assistant",
@@ -51,7 +51,7 @@ const assistant_exemplars=[
     },
     {
         "role": "user",
-        "content": "23년11월 매주 화요일에 헬스하기 추가해줘"
+        "content": "남은 11월 매주 화요일에 헬스하기 추가해줘"
     },
     {
         "role": "assistant",
@@ -67,11 +67,11 @@ const assistant_exemplars=[
     },
     {
         "role": "user",
-        "content": "23년 9월 12일 과제 모두 삭제"
+        "content": "내일 과제 모두 삭제"
     },
     {
         "role": "assistant",
-        "content": `"DELETE FROM TODO WHERE category_id=1 AND date(due_time)='2023-09-12';"`
+        "content": `"DELETE FROM TODO WHERE category_id=1 AND date(due_time)='2023-11-04';"`
     }
 ]
 
@@ -92,7 +92,7 @@ app.post('/manager/send', async (req, res) => {
     
     You will be given (id, title) tuples of existing records in each table.
     
-    Current time is ${time}. follow the same format for time. Keep in mind current time is different from the time in past conversations. When modifying time attributes partially, for example only changing the date, use substr() and concatenation.
+    Current time is ${time}. follow the same format for time. When modifying time attributes partially, for example only changing the date, use substr() and concatenation.  '오전 12시' means 00:00.
     
     -------------------------------------------------------------------------
     #Conversion Instructions
