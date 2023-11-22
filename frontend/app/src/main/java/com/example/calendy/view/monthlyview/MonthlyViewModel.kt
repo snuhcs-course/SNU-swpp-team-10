@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.calendy.data.maindb.plan.IPlanRepository
 import com.example.calendy.data.maindb.plan.Plan
+import com.example.calendy.utils.afterDays
 import com.example.calendy.utils.toFirstDateOfMonth
 import com.example.calendy.utils.toLastDateOfMonth
 import com.prolificinteractive.materialcalendarview.CalendarDay
@@ -31,6 +32,7 @@ class MonthlyViewModel(
     fun setCurrentMonth(month : CalendarDay)
     {
         _uiState.update { current -> current.copy(currentMonth = month) }
+        getPlansOfMonth(month, month) // update plans
     }
     fun setSelectedDate(day :CalendarDay){
         _uiState.update { current -> current.copy(selectedDate = day) }
@@ -43,9 +45,10 @@ class MonthlyViewModel(
             started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000)
         )
     }
-    fun getPlansOfMonth(startDate:CalendarDay,endDate:CalendarDay)
+    private fun getPlansOfMonth(startDate:CalendarDay, endDate:CalendarDay)
     {
-        val flow = planRepository.getPlansStream(startDate.toFirstDateOfMonth(),endDate.toLastDateOfMonth())
+        val flow = planRepository.getPlansStream(startDate.toFirstDateOfMonth().afterDays(-14),
+                                                 endDate.toLastDateOfMonth().afterDays(14))
         job?.cancel()
         job = viewModelScope.launch {
             flow.collect{
