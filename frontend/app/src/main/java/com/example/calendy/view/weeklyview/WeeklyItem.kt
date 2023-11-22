@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -36,7 +34,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.ParentDataModifier
-import androidx.compose.ui.layout.Placeable
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -49,6 +47,7 @@ import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
 import com.example.calendy.ui.theme.getColor
+import java.lang.Integer.max
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -114,7 +113,7 @@ fun TodoItem(
                 val strokeWidth = 8.dp.toPx() // 선의 두께
                 val y = center.y // 선을 그릴 y 위치
                 drawLine(
-                    color = todo.getColor(), // 선의 색상
+                    color = todo.getColor().copy(alpha = 0.6f), // 선의 색상
                     start = Offset(strokeWidth, y), // 시작 위치
                     end = Offset(size.width - strokeWidth, y), // 끝 위치
                     strokeWidth = strokeWidth,
@@ -125,7 +124,7 @@ fun TodoItem(
         }
         Card(
             shape = shape,
-            colors = CardDefaults.cardColors(containerColor = todo.getColor()),
+            colors = CardDefaults.cardColors(containerColor = todo.getColor().copy(alpha = 0.6f)),
             modifier = modifier
                 .fillMaxWidth()
                 .clickable(onClick = clickAction)
@@ -162,7 +161,7 @@ fun TodoItem(
                 val strokeWidth = 8.dp.toPx() // 선의 두께
                 val y = center.y // 선을 그릴 y 위치
                 drawLine(
-                    color = todo.getColor(), // 선의 색상
+                    color = todo.getColor().copy(alpha = 0.6f), // 선의 색상
                     start = Offset(strokeWidth, y), // 시작 위치
                     end = Offset(size.width - strokeWidth, y), // 끝 위치
                     strokeWidth = strokeWidth,
@@ -251,9 +250,15 @@ fun WeeklyTable(
 
     Layout(
         content = {
-            schedules.sortedBy(Schedule::startTime).forEach { item ->
-                Box(modifier = Modifier.scheduleData(schedule = item)) {
-                    scheduleContent(item)
+            schedules.sortedBy(Schedule::startTime).forEach { originalSchedule ->
+                // 일정을 날짜별로 분할
+                val splitSchedules = splitScheduleByDays(originalSchedule, uiState.currentWeek.first, uiState.currentWeek.second)
+
+                // 각 분할된 일정에 대해 scheduleContent를 호출
+                splitSchedules.forEach { schedule ->
+                    Box(modifier = Modifier.scheduleData(schedule = schedule)) {
+                        scheduleContent(schedule)
+                    }
                 }
             }
             todos.sortedBy(Todo::dueTime).forEach { todo ->
@@ -304,8 +309,6 @@ fun WeeklyTable(
                 constraints.copy(
                     minWidth = dayWidth.roundToPx(),
                     maxWidth = dayWidth.roundToPx(),
-                    minHeight = (hourHeight.toPx() * 1.5).roundToInt(),
-                    maxHeight = (hourHeight.toPx() * 1.5).roundToInt()
                 )
             )
             Pair(placeable, todo)
@@ -343,7 +346,7 @@ fun WeeklyTable(
                 val itemOffsetDays =
                     TimeUnit.MILLISECONDS.toDays(startDayCalendar.timeInMillis - startOfWeekCalendar.timeInMillis)
                         .toInt()
-                val itemX = itemOffsetDays * dayWidth.roundToPx()
+                var itemX = itemOffsetDays * dayWidth.roundToPx()
                 placeable.place(itemX, itemY)
             }
             placeableWithTodos.forEach{(placeable, todo) ->
@@ -370,7 +373,7 @@ fun WeeklyTable(
                 val itemY = if(dueTimeCheck){
                     ((itemOffsetMinutes / 60f) * hourHeight.toPx()).roundToInt()
                 } else {
-                    (((itemOffsetMinutes / 60f) - 1.5) * hourHeight.toPx()).roundToInt()
+                    (((itemOffsetMinutes / 60f)) * hourHeight.toPx()).roundToInt() - placeable.height
                 }
                 // todo객체 x 좌표 정하기
                 val startOfWeekCalendar = Calendar.getInstance().apply {
@@ -464,6 +467,40 @@ fun balloonShape(
             return Outline.Generic(path)
         }
     }
+}
+
+// 기존 Schedule 객체를 날짜별로 분할하는 함수
+fun splitScheduleByDays(schedule: Schedule, weekStart: Date, weekEnd: Date): List<Schedule> {
+    val splitSchedules = mutableListOf<Schedule>()
+    val startCalendar = Calendar.getInstance().apply { time = schedule.startTime }
+    val endCalendar = Calendar.getInstance().apply { time = schedule.endTime }
+
+    while (!startCalendar.after(endCalendar)) {
+        val nextDayCalendar = startCalendar.clone() as Calendar
+        nextDayCalendar.add(Calendar.DATE, 1)
+        nextDayCalendar.set(Calendar.HOUR_OF_DAY, 0)
+        nextDayCalendar.set(Calendar.MINUTE, 0)
+        nextDayCalendar.set(Calendar.SECOND, 0)
+        nextDayCalendar.set(Calendar.MILLISECOND, 0)
+
+
+        val partEnd = if (endCalendar.before(nextDayCalendar)) endCalendar.time else nextDayCalendar.time
+
+        // 일정이 주 내에 있는 경우에만 추가
+        if (!(startCalendar.time.before(weekStart) && partEnd.after(weekEnd))) {
+            splitSchedules.add(
+                schedule.copy(
+                    startTime = startCalendar.time,
+                    endTime = partEnd
+                )
+            )
+        }
+
+        // 다음 날짜로 이동
+        startCalendar.time = nextDayCalendar.time
+    }
+
+    return splitSchedules
 }
 
 
