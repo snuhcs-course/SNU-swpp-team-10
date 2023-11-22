@@ -475,6 +475,16 @@ fun splitScheduleByDays(schedule: Schedule, weekStart: Date, weekEnd: Date): Lis
     val startCalendar = Calendar.getInstance().apply { time = schedule.startTime }
     val endCalendar = Calendar.getInstance().apply { time = schedule.endTime }
 
+
+
+    val weekEndCalendar = Calendar.getInstance()
+    weekEndCalendar.time = weekEnd
+    weekEndCalendar.add(Calendar.DATE, 1)
+    weekEndCalendar.set(Calendar.HOUR_OF_DAY, 0)
+    weekEndCalendar.set(Calendar.MINUTE, 0)
+    weekEndCalendar.set(Calendar.SECOND, 0)
+    weekEndCalendar.set(Calendar.MILLISECOND,1)
+
     while (!startCalendar.after(endCalendar)) {
         val nextDayCalendar = startCalendar.clone() as Calendar
         nextDayCalendar.add(Calendar.DATE, 1)
@@ -487,7 +497,7 @@ fun splitScheduleByDays(schedule: Schedule, weekStart: Date, weekEnd: Date): Lis
         val partEnd = if (endCalendar.before(nextDayCalendar)) endCalendar.time else nextDayCalendar.time
 
         // 일정이 주 내에 있는 경우에만 추가
-        if (!(startCalendar.time.before(weekStart) && partEnd.after(weekEnd))) {
+        if (!startCalendar.time.before(weekStart) && partEnd.before(weekEndCalendar.time)) {
             splitSchedules.add(
                 schedule.copy(
                     startTime = startCalendar.time,
@@ -495,7 +505,6 @@ fun splitScheduleByDays(schedule: Schedule, weekStart: Date, weekEnd: Date): Lis
                 )
             )
         }
-
         // 다음 날짜로 이동
         startCalendar.time = nextDayCalendar.time
     }

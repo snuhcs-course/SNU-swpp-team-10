@@ -48,6 +48,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -138,6 +139,13 @@ fun WeekScreen(
     val hourHeight = 40.dp
     val verticalScrollState = rememberScrollState()
     var sidebarWidth by remember { mutableStateOf(0.dp) }
+    // table 시작 시간 설정
+    val dpValue = hourHeight * 7
+    val pixelValue = with(LocalDensity.current) { dpValue.toPx() }
+    LaunchedEffect(Unit) {
+        // 이미 계산된 픽셀 값으로 스크롤 이동
+        verticalScrollState.scrollTo(pixelValue.roundToInt())
+    }
 
     BoxWithConstraints(modifier = modifier) {
         val totalWidth = maxWidth
