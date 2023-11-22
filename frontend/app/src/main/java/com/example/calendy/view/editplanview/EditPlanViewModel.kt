@@ -290,7 +290,7 @@ class EditPlanViewModel(
                             withContext(Dispatchers.IO) {
                                 val repeatGroupId: Int = repeatGroupRepository.insert(repeatGroup).toInt()
                                 val endDate = repeatGroup.endDate
-                                    ?: Date(currentState.endTime.time + 10L *365 * 24 * 60 * 60 * 1000) // 10 year later
+                                    ?: Date(currentState.endTime.time + 3L *365 * 24 * 60 * 60 * 1000)
 
                                 var start = currentState.startTime
                                 var end = currentState.endTime

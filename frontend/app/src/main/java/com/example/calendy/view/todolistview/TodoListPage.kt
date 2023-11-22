@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.data.maindb.plan.Todo
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -153,21 +154,10 @@ fun OneMonthTodos(
 @Composable
 fun ToDoItem(todo: Todo, viewModel: TodoListViewModel, uiState: TodoListUiState, onNavigateToEditPage: (id: Int?, date: Date?) -> Unit) {
     var isChecked by remember(todo.complete) { mutableStateOf(todo.complete) }
-    var openDetailPopup by remember { mutableStateOf(false) }
-    if(openDetailPopup) {
-        PlanDetailPopup(
-            plan = todo,
-            header = { PopupHeaderTitle(todo.title)},
-            editButton = {
-                EditButton(
-                    plan = todo,
-                    onNavigateToEditPage = {_,_,_ -> onNavigateToEditPage(todo.id, null)},
-                    modifier=Modifier.align(Alignment.TopEnd)
-                )
-            },
-            onDismissed = { openDetailPopup = false })
-    }
 
+    val clickAction = {
+        onNavigateToEditPage(todo.id, null)
+    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -175,10 +165,11 @@ fun ToDoItem(todo: Todo, viewModel: TodoListViewModel, uiState: TodoListUiState,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically){
-            Checkbox(checked = todo.complete, onCheckedChange = {
-                viewModel.updateCompletionOfTodo(todo, it)
-            })
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.clickable(onClick = clickAction ).weight(1f)
+        ){
+
             Spacer(modifier = Modifier.width(8.dp))
             Column(modifier = Modifier.padding(3.dp)) {
                 Text(
@@ -194,13 +185,9 @@ fun ToDoItem(todo: Todo, viewModel: TodoListViewModel, uiState: TodoListUiState,
                 )
             }
         }
-        IconButton(onClick = {openDetailPopup = true})
-        {
-            Icon(
-                imageVector = Icons.Filled.MoreHoriz,
-                contentDescription = "view detail"
-            )
-        }
+        Checkbox(checked = todo.complete, onCheckedChange = {
+            viewModel.updateCompletionOfTodo(todo, it)
+        })
 
     }
 }

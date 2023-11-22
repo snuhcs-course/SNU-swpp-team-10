@@ -1,33 +1,49 @@
 package com.example.calendy.view.weeklyview
 
 import android.util.Log
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.ParentDataModifier
+import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.data.maindb.plan.Schedule
@@ -50,54 +66,111 @@ fun ScheduleItem(
     val clickAction = {
         onNavigateToEditPage(schedule.id, PlanType.SCHEDULE, null)
     }
-
-//    val formatter = SimpleDateFormat("h:mm a", Locale.getDefault())
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
-            .background(schedule.getColor())
+            .background(schedule.getColor().copy(alpha = 0.6f))
             .clickable(onClick = clickAction)
-            .padding()
+            .padding(),
+        contentAlignment = Alignment.Center
     ) {
-//        Text(
-//            text = "${formatter.format(schedule.startTime)} - ${formatter.format(schedule.endTime)}",
-//            style = MaterialTheme.typography.labelSmall,
-//        )
-
         Text(
             text = schedule.title,
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
+            overflow = TextOverflow.Ellipsis
         )
-
     }
 }
 
 @Composable
 fun TodoItem(
-    todo: Todo,
     modifier: Modifier = Modifier,
+    todo: Todo,
+    tailHeight: Dp = 10.dp,
     onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
 ) {
     val clickAction = {
         onNavigateToEditPage(todo.id, PlanType.TODO, null)
     }
-    Column() {
-
+    // duetime이 자정 ~ am 1:30인 경우 말풍선을 밑쪽으로 배치
+    val calendar = Calendar.getInstance().apply {
+        time = todo.dueTime
     }
-    Card(
-        shape = RoundedCornerShape(4.dp),
-        modifier = modifier
-            .padding(horizontal = 4.dp, vertical = 2.dp)
-            .clickable(onClick = clickAction)
-            .background(todo.getColor())
-    ) {
-        Text(
-            text = todo.title,
-            modifier = Modifier.padding(8.dp),
-        )
+    val tailDirectionUp = when (calendar.get(Calendar.HOUR_OF_DAY)) {
+        0    -> true // Between AM 0:00 and AM 0:59
+        1    -> calendar.get(Calendar.MINUTE) <= 20 // Between AM 1:00 and AM 1:20
+        else -> false
     }
 
+    val shape = balloonShape(tailHeight = tailHeight, tailDirectionUp = tailDirectionUp)
+
+    Column {
+        if(tailDirectionUp) {
+            Canvas(modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp) // 선의 높이
+                .padding(horizontal = 1.dp)) { // 좌우 패딩
+                val strokeWidth = 8.dp.toPx() // 선의 두께
+                val y = center.y // 선을 그릴 y 위치
+                drawLine(
+                    color = todo.getColor(), // 선의 색상
+                    start = Offset(strokeWidth, y), // 시작 위치
+                    end = Offset(size.width - strokeWidth, y), // 끝 위치
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round // 라운드 모양의 선 끝 처리
+                )
+            }
+            Spacer(modifier = Modifier.height(5.dp))
+        }
+        Card(
+            shape = shape,
+            colors = CardDefaults.cardColors(containerColor = todo.getColor()),
+            modifier = modifier
+                .fillMaxWidth()
+                .clickable(onClick = clickAction)
+                .height(40.dp)
+
+        ) {
+            Box(
+                contentAlignment = Alignment.Center, // Box 내부에서 컨텐츠를 중앙 정렬
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 100.dp - tailHeight) // 꼬리 높이를 뺀 나머지 높이
+                    .then(
+                        if (tailDirectionUp) {
+                            Modifier.padding(top = tailHeight) // 꼬리가 위쪽인 경우 위쪽에 패딩을 추가
+                        } else {
+                            Modifier.padding(bottom = tailHeight) // 꼬리가 아래쪽인 경우 아래쪽에 패딩을 추가
+                        }
+                    )
+            ){
+                Text(
+                    text = todo.title,
+                    modifier = Modifier.padding(1.dp),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+        }
+        if(!tailDirectionUp) {
+            Spacer(modifier = Modifier.height(5.dp))
+            Canvas(modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp) // 선의 높이
+                .padding(horizontal = 1.dp)) { // 좌우 패딩
+                val strokeWidth = 8.dp.toPx() // 선의 두께
+                val y = center.y // 선을 그릴 y 위치
+                drawLine(
+                    color = todo.getColor(), // 선의 색상
+                    start = Offset(strokeWidth, y), // 시작 위치
+                    end = Offset(size.width - strokeWidth, y), // 끝 위치
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round // 라운드 모양의 선 끝 처리
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -183,11 +256,11 @@ fun WeeklyTable(
                     scheduleContent(item)
                 }
             }
-//            todos.sortedBy(Todo::dueTime).forEach { todo ->
-//                Box(modifier = Modifier.todoData(todo = todo)) {
-//                    todoContent(todo)
-//                }
-//            }
+            todos.sortedBy(Todo::dueTime).forEach { todo ->
+                Box(modifier = Modifier.todoData(todo = todo)) {
+                    todoContent(todo)
+                }
+            }
         },
         modifier = modifier.drawBehind {
                 repeat(23) {
@@ -214,20 +287,15 @@ fun WeeklyTable(
         val todoMeasureables = measureables.filter { it.parentData is Todo }
         val placeableWithSchedules = scheduleMeasureables.map { measurable ->
             val schedule = measurable.parentData as Schedule
-            val itemDurationMinutes =
-                TimeUnit.MILLISECONDS.toMinutes(schedule.endTime.time - schedule.startTime.time)
-            if (itemDurationMinutes < 0) {
-                Log.e("ScheduleError", "Negative duration found in schedule: $schedule")
-            }
-            val itemHeight = ((itemDurationMinutes / 60f) * hourHeight.toPx()).roundToInt()
+            val itemHeight = ((TimeUnit.MILLISECONDS.toMinutes(schedule.endTime.time - schedule.startTime.time) / 60f) * hourHeight.toPx()).roundToInt()
             val placeable = measurable.measure(
-                constraints.copy(
-                    minWidth = dayWidth.roundToPx(),
-                    maxWidth = dayWidth.roundToPx(),
-                    minHeight = itemHeight,
-                    maxHeight = itemHeight
+                    constraints.copy(
+                        minWidth = dayWidth.roundToPx(),
+                        maxWidth = dayWidth.roundToPx(),
+                        minHeight = itemHeight,
+                        maxHeight = itemHeight
+                    )
                 )
-            )
             Pair(placeable, schedule)
         }
         val placeableWithTodos = todoMeasureables.map { measurable ->
@@ -236,26 +304,27 @@ fun WeeklyTable(
                 constraints.copy(
                     minWidth = dayWidth.roundToPx(),
                     maxWidth = dayWidth.roundToPx(),
+                    minHeight = (hourHeight.toPx() * 1.5).roundToInt(),
+                    maxHeight = (hourHeight.toPx() * 1.5).roundToInt()
                 )
             )
             Pair(placeable, todo)
         }
         layout(width, height) {
             placeableWithSchedules.forEach { (placeable, schedule) ->
-                // schedule y좌표 정하기
-                val calendar = Calendar.getInstance().apply {
+                // schedule 객체 y 좌표 정하기
+                val startDayMidnight = Calendar.getInstance().apply {
                     time = schedule.startTime
                     set(Calendar.HOUR_OF_DAY, 0)
                     set(Calendar.MINUTE, 0)
                     set(Calendar.SECOND, 0)
                     set(Calendar.MILLISECOND, 0)
                 }
-                val midnight = calendar.time
                 val itemOffsetMinutes =
-                    TimeUnit.MILLISECONDS.toMinutes(schedule.startTime.time - midnight.time)
+                    TimeUnit.MILLISECONDS.toMinutes(schedule.startTime.time - startDayMidnight.time.time)
                 val itemY = ((itemOffsetMinutes / 60f) * hourHeight.toPx()).roundToInt()
 
-                // scheule x 좌표 정하기
+                // schedule 객체 x 좌표 정하기
                 val startOfWeekCalendar = Calendar.getInstance().apply {
                     time = uiState.currentWeek.first
                     set(Calendar.HOUR_OF_DAY, 0)
@@ -263,21 +332,46 @@ fun WeeklyTable(
                     set(Calendar.SECOND, 0)
                     set(Calendar.MILLISECOND, 0)
                 }
-                val scheduleStartCalendar = Calendar.getInstance().apply {
+                val startDayCalendar = Calendar.getInstance().apply {
                     time = schedule.startTime
                     set(Calendar.HOUR_OF_DAY, 0)
                     set(Calendar.MINUTE, 0)
                     set(Calendar.SECOND, 0)
                     set(Calendar.MILLISECOND, 0)
                 }
+
                 val itemOffsetDays =
-                    TimeUnit.MILLISECONDS.toDays(scheduleStartCalendar.timeInMillis - startOfWeekCalendar.timeInMillis)
+                    TimeUnit.MILLISECONDS.toDays(startDayCalendar.timeInMillis - startOfWeekCalendar.timeInMillis)
                         .toInt()
                 val itemX = itemOffsetDays * dayWidth.roundToPx()
-                // x,y 좌표 기반 배치
                 placeable.place(itemX, itemY)
             }
             placeableWithTodos.forEach{(placeable, todo) ->
+                // todo y좌표 정하기
+                val calendar = Calendar.getInstance().apply {
+                    time = todo.dueTime
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+                val dueTime = Calendar.getInstance().apply {
+                    time = todo.dueTime
+                }
+                val dueTimeCheck = when (dueTime.get(Calendar.HOUR_OF_DAY)) {
+                    0    -> true // Between AM 0:00 and AM 0:59
+                    1    -> calendar.get(Calendar.MINUTE) <= 20 // Between AM 1:00 and AM 1:20
+                    else -> false
+                }
+                val midnight = calendar.time
+                val itemOffsetMinutes =
+                    TimeUnit.MILLISECONDS.toMinutes(todo.dueTime.time - midnight.time)
+
+                val itemY = if(dueTimeCheck){
+                    ((itemOffsetMinutes / 60f) * hourHeight.toPx()).roundToInt()
+                } else {
+                    (((itemOffsetMinutes / 60f) - 1.5) * hourHeight.toPx()).roundToInt()
+                }
                 // todo객체 x 좌표 정하기
                 val startOfWeekCalendar = Calendar.getInstance().apply {
                     time = uiState.currentWeek.first
@@ -300,7 +394,7 @@ fun WeeklyTable(
                 val itemX = itemOffsetDays * dayWidth.roundToPx()
 
                 // x,y 좌표 기반 배치
-
+                placeable.place(itemX, itemY)
             }
         }
     }
@@ -320,6 +414,57 @@ private class TodoDataModifier(
 }
 
 private fun Modifier.todoData(todo: Todo) = this.then(TodoDataModifier(todo))
+
+@Composable
+fun balloonShape(
+    tailDirectionUp: Boolean = false,
+    cornerRadius: Dp = 5.dp, // 모서리의 둥근 정도
+    tailWidth: Dp = 10.dp, // 꼬리의 너비
+    tailHeight: Dp = 10.dp, // 꼬리의 높이
+    tailPositionPercent: Float = 0.5f // 꼬리 위치 비율, 0.0 ~ 1.0 사이의 값
+): Shape {
+
+    return object : Shape {
+        override fun createOutline(
+            size: Size,
+            layoutDirection: LayoutDirection,
+            density: Density
+        ): Outline {
+
+            val path = Path()
+            val cornerRadiusPx = with(density) { cornerRadius.toPx() }
+            val tailWidthPx = with(density) { tailWidth.toPx() }
+            val tailHeightPx = with(density) { tailHeight.toPx() }
+            val tailPositionPx = size.width * tailPositionPercent
+
+            // 사각형 상단 좌우 둥근 부분 그리기
+            path.addRoundRect(
+                RoundRect(
+                    left = 0f,
+                    top = if (tailDirectionUp) tailHeightPx else 0f,
+                    right = size.width,
+                    bottom = if (tailDirectionUp) size.height else size.height - tailHeightPx,
+                    cornerRadius = CornerRadius(cornerRadiusPx)
+                )
+            )
+
+            // 꼬리 그리기
+            if (tailDirectionUp) {
+                // 꼬리가 위쪽을 향할 때
+                path.moveTo(tailPositionPx - tailWidthPx / 2, tailHeightPx)
+                path.lineTo(tailPositionPx, 0f)
+                path.lineTo(tailPositionPx + tailWidthPx / 2, tailHeightPx)
+            } else {
+                // 꼬리가 아래쪽을 향할 때
+                path.moveTo(tailPositionPx - tailWidthPx / 2, size.height - tailHeightPx)
+                path.lineTo(tailPositionPx, size.height)
+                path.lineTo(tailPositionPx + tailWidthPx / 2, size.height - tailHeightPx)
+            }
+
+            return Outline.Generic(path)
+        }
+    }
+}
 
 
 @Preview(showBackground = true, name = "WeekHeader Preview")
