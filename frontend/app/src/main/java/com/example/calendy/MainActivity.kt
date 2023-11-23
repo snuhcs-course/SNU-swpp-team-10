@@ -162,7 +162,7 @@ sealed class BottomNavItem(
 sealed class DestinationRoute(val route: String) {
 
     companion object {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
         // Helper method to convert a Date to a String
         fun dateToString(date: Date): String {
             return dateFormat.format(date)
@@ -250,6 +250,7 @@ fun NavigationGraph(navController: NavHostController) {
                 }
             )
         ) { entry ->
+            /* TODO Should not show bottom navigation */
             Log.d("GUN", "Recompose")
             Log.d("GUN", entry.arguments?.toString() ?: "Empty Argument")
 

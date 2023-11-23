@@ -1,9 +1,8 @@
 package com.example.calendy.view.editplanview
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.interaction.InteractionSource
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,7 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
@@ -32,47 +30,30 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.sqlite.db.SupportSQLiteQuery
 import com.example.calendy.data.dummy.DummyCategoryRepository
 import com.example.calendy.data.dummy.DummyPlanRepository
 import com.example.calendy.data.dummy.DummyRepeatGroupRepository
 import com.example.calendy.data.dummy.DummyScheduleRepository
 import com.example.calendy.data.dummy.DummyTodoRepository
 import com.example.calendy.data.maindb.category.Category
-import com.example.calendy.data.maindb.category.ICategoryRepository
 import com.example.calendy.data.maindb.plan.PlanType
-import com.example.calendy.data.maindb.plan.Schedule
-import com.example.calendy.data.maindb.plan.Todo
-import com.example.calendy.data.maindb.plan.schedule.IScheduleRepository
-import com.example.calendy.data.maindb.plan.todo.ITodoRepository
-import com.example.calendy.data.maindb.repeatgroup.IRepeatGroupRepository
-import com.example.calendy.data.maindb.repeatgroup.RepeatGroup
 import com.gowtham.ratingbar.RatingBar
 import com.gowtham.ratingbar.RatingBarConfig
-import kotlinx.coroutines.flow.Flow
-import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,20 +67,21 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
     val isPageAdd = editPlanUiState.isAddPage
     val isPageEdit = !isPageAdd
 
-    val commonHeight = 50.dp // common height for the Repeat, Category, Priority, Memo, MonthlyViewSwitch regions
-
-    val selectedColor = Color(0xFFDBE2F6) // Color when selected
-    val unselectedColor = Color.Transparent // Color when not selected
+    val commonHeight =
+        50.dp // common height for the Repeat, Category, Priority, Memo, MonthlyViewSwitch regions
 
     val verticalScrollState = rememberScrollState(initial = 0)
     Column(
         modifier = Modifier
             .verticalScroll(verticalScrollState)
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+            .padding(16.dp)
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = {
+                    Log.d("GUN Edit", "Tapped Outside")
+                })
+            }, verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        /* TODO Should not show bottom navigation */
         //region Top Bar
         TopAppBar(
             showBackButton = true,
@@ -149,8 +131,7 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
         //region Type Buttons
         if (isPageAdd) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
             ) {
                 listOf(PlanType.SCHEDULE, PlanType.TODO).forEach {
@@ -160,8 +141,7 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
                             PlanType.TODO     -> "Todo"
                         }, isSelected = (editPlanUiState.entryType==it), onClick = {
                             editPlanViewModel.setType(it)
-                        }, modifier = Modifier
-                            .weight(1f)
+                        }, modifier = Modifier.weight(1f)
                     )
                 }
             }
@@ -170,9 +150,7 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
 
         //region Title Text Field & Checkbox
         Row(verticalAlignment = Alignment.CenterVertically) {
-            BasicTextField(
-                value = editPlanUiState.titleField,
-
+            BasicTextField(value = editPlanUiState.titleField,
                            onValueChange = { value -> editPlanViewModel.setTitle(value) },
                            modifier = Modifier
                                .weight(1f)
@@ -198,25 +176,16 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
 
         //region Date Selector
         if (isPageTodo) {
-            DateSelector(
-                dueTime = editPlanUiState.dueTime,
-                onSelectDueTime = editPlanViewModel::setDueTime,
-                onSelectDueYear = editPlanViewModel::setDueYear,
-                onSelectDueMonth = editPlanViewModel::setDueMonth,
-                isYearly = editPlanUiState.isYearly,
-                toggleIsYearly = editPlanViewModel::toggleIsYearly,
-                isMonthly = editPlanUiState.isMonthly,
-                toggleIsMonthly = editPlanViewModel::toggleIsMonthly,
-                isDaily = editPlanUiState.isDaily,
-                toggleIsDaily = editPlanViewModel::toggleIsDaily,
+            OneDateSelectorButton(
+                time = editPlanUiState.dueTime,
+                onSelectTime = editPlanViewModel::setDueTime,
                 modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
             )
         }
         if (isPageSchedule) {
-            DateRangeSelector(
+            TwoDateSelectorButton(
                 startTime = editPlanUiState.startTime,
                 endTime = editPlanUiState.endTime,
-                isAllDay = editPlanUiState.isAllDay,
                 onSelectTimeRange = editPlanViewModel::setTimeRange,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -227,20 +196,20 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
         //endregion
 
         //region Repeat
-       FieldWithLeadingText(leadingText = "반복", modifier = Modifier.height(commonHeight)) {
-        SetRepeat(editPlanUiState, editPlanViewModel)
-       }
+        FieldWithLeadingText(leadingText = "반복", modifier = Modifier.height(commonHeight)) {
+            SetRepeat(editPlanUiState, editPlanViewModel)
+        }
         //endregion
 
         //region Category
-       FieldWithLeadingText(leadingText = "분류", modifier = Modifier.height(commonHeight)) {
-        CategorySelector(
-            currentCategory = editPlanUiState.category,
-            categoryList = categoryList,
-            onAddCategory = editPlanViewModel::addCategory,
-            onSelectCategory = editPlanViewModel::setCategory
-        )
-       }
+        FieldWithLeadingText(leadingText = "분류", modifier = Modifier.height(commonHeight)) {
+            CategorySelector(
+                currentCategory = editPlanUiState.category,
+                categoryList = categoryList,
+                onAddCategory = editPlanViewModel::addCategory,
+                onSelectCategory = editPlanViewModel::setCategory
+            )
+        }
         //endregion
 
         //region Priority
@@ -257,24 +226,24 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
         //endregion
 
         //region Memo Text Field
-        FieldWithLeadingText(leadingText = "메모", modifier = Modifier.height(commonHeight), alignment = Alignment.Top) {
-            BasicTextField(
-                value = editPlanUiState.memoField,
-                onValueChange = { value -> editPlanViewModel.setMemo(value) },
-                modifier = Modifier.fillMaxWidth(),
-                textStyle = TextStyle(fontSize = 16.sp),
-                decorationBox = {innerTextField->
-                    if (editPlanUiState.memoField.isEmpty()) {
-                        Text(
-                            text = "memo",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Normal,
-                            color = Color.LightGray
-                        )
-                    }
-                    innerTextField()
-                }
-           )
+        FieldWithLeadingText(
+            leadingText = "메모", modifier = Modifier.height(commonHeight), alignment = Alignment.Top
+        ) {
+            BasicTextField(value = editPlanUiState.memoField,
+                           onValueChange = { value -> editPlanViewModel.setMemo(value) },
+                           modifier = Modifier.fillMaxWidth(),
+                           textStyle = TextStyle(fontSize = 16.sp),
+                           decorationBox = { innerTextField ->
+                               if (editPlanUiState.memoField.isEmpty()) {
+                                   Text(
+                                       text = "memo",
+                                       fontSize = 16.sp,
+                                       fontWeight = FontWeight.Normal,
+                                       color = Color.LightGray
+                                   )
+                               }
+                               innerTextField()
+                           })
         }
         //endregion
 
@@ -286,10 +255,8 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
                 .height(commonHeight),
             textWidth = 240.dp
         ) {
-            Checkbox(
-                checked = editPlanUiState.showInMonthlyView,
-                onCheckedChange = { editPlanViewModel.setShowInMonthlyView(it) }
-            )
+            Checkbox(checked = editPlanUiState.showInMonthlyView,
+                     onCheckedChange = { editPlanViewModel.setShowInMonthlyView(it) })
         }
         //endregion
 
@@ -332,22 +299,19 @@ fun TypeButton(
     Button(
         onClick = { onClick() },
         // Set the containerColor for the selected/unselected state
-        colors = ButtonDefaults.buttonColors(containerColor = backgroundColor, contentColor = contentColor),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = backgroundColor, contentColor = contentColor
+        ),
         // Adjust padding as needed
         contentPadding = PaddingValues(0.dp),
+        shape = RoundedCornerShape(40.dp),
+        border = BorderStroke(2.dp, borderColor),
         modifier = modifier
-            .height(40.dp)
-            .fillMaxWidth()
-            .border(
-                width = 2.dp,
-                color = borderColor,
-                shape = RoundedCornerShape(size = 40.dp)
-            )
+            .height(48.dp)
+            .fillMaxWidth(),
     ) {
         Text(
-            text = text,
-            fontSize = 16.sp,
-            style = TextStyle(
+            text = text, fontSize = 16.sp, style = TextStyle(
                 fontSize = 14.sp,
                 lineHeight = 18.sp,
                 fontWeight = FontWeight(500),

@@ -98,8 +98,6 @@ object DateHelper {
             hour,
             minute
         )
-        Log.d("GUN", this.toString())
-        Log.d("GUN", calendar.timeInMillis.toString())
         return calendar.timeInMillis
     }
 
