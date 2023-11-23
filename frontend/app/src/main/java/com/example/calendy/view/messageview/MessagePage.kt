@@ -1,5 +1,6 @@
 package com.example.calendy.view.messageview
 
+import LoadingAnimation2
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
@@ -24,7 +25,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -48,6 +48,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.calendy.AppViewModelProvider
 import com.example.calendy.R
 import com.example.calendy.data.maindb.message.Message
+import com.example.calendy.ui.theme.Blue3
 import com.example.calendy.utils.equalDay
 import com.example.calendy.utils.toDateDayString
 import com.example.calendy.view.messagepage.MessagePageViewModel
@@ -135,15 +136,24 @@ fun MessageInputField(
                     imageVector = Icons.Default.Mic, contentDescription = "Start Speech Recognition"
                 )
             } else {
-                Icon(
-                    imageVector = Icons.Default.MoreHoriz,
-                    contentDescription = "Cancel Speech Recognition"
+//                Icon(
+//                    imageVector = Icons.Default.MoreHoriz,
+//                    contentDescription = "Cancel Speech Recognition"
+//                )
+                LoadingAnimation2(
+                    circleColor= Blue3,
+                    circleSize= 8.dp,
+                    spaceBetween=4.dp,
+                    animationDelay= 400,
+                    initialAlpha= 0.3f
                 )
             }
         }
+
         BasicTextField(
             value = text,
             onValueChange = onValueChanged,
+            enabled= !isListening,
             modifier = modifier
                 .padding(top = 10.dp, bottom = 10.dp, start = 10.dp)
                 .fillMaxWidth()
@@ -155,6 +165,7 @@ fun MessageInputField(
             ),
             maxLines = 5
         )
+
         IconButton(
             onClick = onSendButtonClicked,
             modifier = Modifier
@@ -171,53 +182,87 @@ fun MessageInputField(
 
 @Composable
 fun MessageList(
-    chatLogList: List<Message> = emptyList(), modifier: Modifier = Modifier
+    messageLogList: List<Message> = emptyList(), modifier: Modifier = Modifier
 ) {
-    var prevDate: Date? = Date(0)
+    var prevDate: Date? = null
+
+    if (!messageLogList.isEmpty()) {
+        prevDate = messageLogList[0].sentTime
+    }
+
+    // wrap content with ListItemWrapper, and add time divider if needed
+    val listItems = mutableListOf<ListItemWrapper>()
+    for( msg in messageLogList){
+        var currDate = msg.sentTime
+        if ( prevDate != null && !(prevDate!!.equalDay(currDate))) {
+            listItems.add(ListItemWrapper { DateDivider(prevDate) }) // since messages are sorted in descending order, add prevDate
+            prevDate = currDate
+        }
+        listItems.add(ListItemWrapper { MessageItem(msg) })
+    }
+    if (prevDate != null) {
+        // first date divider
+        listItems.add(ListItemWrapper { DateDivider(prevDate) })
+    }
+    
     LazyColumn(
         reverseLayout = true, modifier = modifier.fillMaxWidth()
 
     ) {
-        items(chatLogList) {
-            var currDate = it.sentTime
-            if (!prevDate!!.equalDay(currDate)) {
-                prevDate = currDate
-                DateDivider(currDate)
-            }
-            MessageItem(it)
+        items(listItems) {
+            it.content()
         }
     }
 }
 
 @Composable
 fun MessageItem(messageLog: Message, modifier: Modifier = Modifier) {
-    val chatBackground = when (messageLog.messageFromManager) {
+    val fromManager= messageLog.messageFromManager
+    val chatBackground = when (fromManager) {
         true  -> Color(0xFFACC7FA)
         false -> Color(0xFFDBE2F6)
     }
     Row(
         modifier = modifier.fillMaxWidth(),
 
-        horizontalArrangement = when (messageLog.messageFromManager) {
+        horizontalArrangement = when (fromManager) {
             true  -> Arrangement.Start
             false -> Arrangement.End
         }
     ) {
-        Box(
+        Row(
+            verticalAlignment = Alignment.Bottom,
             modifier = Modifier
-                .widthIn(20.dp, 320.dp)
-                .wrapContentWidth()
-                .padding(10.dp)
-                .background(color = chatBackground, shape = RoundedCornerShape(size = 15.dp))
-                //            .border(width = 2.dp, color = Color.Black, shape = RoundedCornerShape(15.dp, 15.dp, 15.dp, 15.dp))
-                .clip(shape = RoundedCornerShape(15.dp, 15.dp, 15.dp, 15.dp))
-        ) {
-            when (messageLog.messageFromManager) {
-                true  -> MessageContentManager(messageLog)
-                false -> MessageContentUser(messageLog)
+                .padding(5.dp)
+        ){
+            if (!fromManager) {
+                SentTime(messageLog)
             }
+            Box(
+                modifier = Modifier
+                    .widthIn(20.dp, 320.dp)
+                    .wrapContentWidth()
+                    .padding(vertical = 10.dp, horizontal =5.dp)
+                    .background(
+                        color = chatBackground,
+                        shape = RoundedCornerShape(size = 15.dp)
+                    )
+                    //            .border(width = 2.dp, color = Color.Black, shape = RoundedCornerShape(15.dp, 15.dp, 15.dp, 15.dp))
+                    .clip(shape = RoundedCornerShape(15.dp))
+            ) {
+                when (fromManager) {
+                    true -> MessageContentManager(messageLog)
+                    false -> MessageContentUser(messageLog)
+                }
+            }
+
+            if (fromManager) {
+                SentTime(messageLog)
+            }
+
         }
     }
+
 
 }
 
@@ -265,7 +310,7 @@ fun DateDivider(
 @Preview(showBackground = false, name = "chatbar preview")
 @Composable
 fun MessageInputPreview() {
-    MessageInputField()
+    MessageInputField(isListening=true)
 }
 
 
@@ -279,11 +324,12 @@ fun MessageItemPreview() {
                 Date(),
                 false,
                 "ooooooooxoxoxooxoxooxooxoxoxooxoxoxooxoxxoxoxoxoxoxoxoxoxo",
+                false
             )
         )
         MessageItem(
             Message(
-                1, Date(), true, "how can i help you", hasRevision = true
+                1, Date(), true, "AI_THINKING", hasRevision = true
             )
         )
     }

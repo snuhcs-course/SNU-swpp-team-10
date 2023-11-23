@@ -1,0 +1,56 @@
+apply plugin: 'com.android.library'
+apply plugin: 'maven-publish'
+
+android {
+    namespace 'com.prolificinteractive.materialcalendarview'
+    compileSdkVersion rootProject.ext.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+
+        versionCode 1
+        versionName rootProject.ext.version
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+
+    implementation 'androidx.annotation:annotation-jvm:1.7.0'
+    implementation 'androidx.viewpager:viewpager:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    rootProject.ext.testDep.each { testImplementation it }
+    rootProject.ext.androidTestDep.each { androidTestImplementation it }
+}
+
+tasks.withType(Javadoc) {
+    options.addStringOption('Xdoclint:none', '-quiet')
+    options.addStringOption('encoding', 'UTF-8')
+    options.addStringOption('charSet', 'UTF-8')
+}
+
+android.libraryVariants.all { variant ->
+    task("generate${variant.name.capitalize()}Javadoc", type: Javadoc) {
+        title "Material CalendarView ${version}"
+        description "Generates Javadoc for $variant.name."
+        source = variant.javaCompiler.source
+        doFirst {
+            classpath = files(variant.javaCompiler.classpath.files, project.android.getBootClasspath())
+        }
+        exclude '**/BuildConfig.java'
+        exclude '**/R.java'
+        options {
+            links "http://docs.oracle.com/javase/7/docs/api/"
+            linksOffline "http://d.android.com/reference", "${android.sdkDirectory}/docs/reference"
+        }
+    }
+}
