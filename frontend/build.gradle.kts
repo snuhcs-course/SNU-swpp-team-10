@@ -4,6 +4,15 @@ buildscript {
     extra.apply {
         set("room_version", "2.5.0")
     }
+
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("com.android.tools.build:gradle:3.3.0")
+        classpath("com.github.dcendents:android-maven-gradle-plugin:2.1")
+    }
 }
 
 plugins {
@@ -44,6 +53,9 @@ tasks.jacocoAggregatedCoverageVerification {
         }
     }
 }
+
+
+apply(from= rootProject.file("dependencies.gradle"))
 
 //tasks.check {
 //    dependsOn(tasks.jacocoAggregatedCoverageVerification)
