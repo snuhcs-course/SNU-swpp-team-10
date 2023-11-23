@@ -35,23 +35,15 @@ const connection = mysql.createConnection({
 const assistant_exemplars=[
     {
         "role": "user",
-        "content": "내일 컴퓨터구조 과제 삭제해줘"
+        "content": "모든 투두 화요일로 옮겨줘"
     },
     {
         "role": "assistant",
-        "content": `"DELETE FROM todo WHERE id=133 AND date(due_time)='2023-11-05';"`
+        "content": `"UPDATE TODO SET due_time = date(due_time, 'weekday 2') || substr(due_time, 11);"`
     },
     {
         "role": "user",
-        "content": "내일 모레 컴구 과제 삭제"
-    },
-    {
-        "role": "assistant",
-        "content": `"DELETE FROM todo WHERE id=133 AND date(due_time)='2023-11-06';"`
-    },
-    {
-        "role": "user",
-        "content": "남은 11월 매주 화요일에 헬스하기 추가해줘"
+        "content": "23년 11월 매주 화요일에 헬스하기 추가해줘"
     },
     {
         "role": "assistant",
@@ -59,19 +51,19 @@ const assistant_exemplars=[
     },
     {
         "role": "user",
-        "content": "과제 카테고리 금요일로 옮겨줘"
+        "content": "23년 12월 3일 과제 모두 삭제"
     },
     {
         "role": "assistant",
-        "content": `"UPDATE TODO SET due_time = date(due_time, 'weekday 5') || substr(due_time, 11) WHERE category_id=1;"`
+        "content": `"DELETE FROM todo WHERE category_id=1 AND date(due_time)='2023-11-04';”`
     },
     {
         "role": "user",
-        "content": "내일 과제 모두 삭제"
+        "content": "내일 모레 꿹똠뿍 하기 삭제"
     },
     {
         "role": "assistant",
-        "content": `"DELETE FROM TODO WHERE category_id=1 AND date(due_time)='2023-11-04';"`
+        "content": `"NO_SUCH_PLAN;"`
     }
 ]
 
