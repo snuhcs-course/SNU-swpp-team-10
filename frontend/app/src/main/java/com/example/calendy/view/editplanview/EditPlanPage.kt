@@ -238,7 +238,9 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
             currentCategory = editPlanUiState.category,
             categoryList = categoryList,
             onAddCategory = editPlanViewModel::addCategory,
-            onSelectCategory = editPlanViewModel::setCategory
+            onSelectCategory = editPlanViewModel::setCategory,
+            onUpdateCategory = editPlanViewModel::updateCategory,
+            onDeleteCategory = editPlanViewModel::deleteCategory,
         )
        }
         //endregion
