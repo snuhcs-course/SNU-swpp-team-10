@@ -249,7 +249,7 @@ class MessagePageViewModel(
                     messageRepository.update(
 //                        gptOriginalMessage.copy(content = "AI 매니저가 살펴보고 있어요")
                         //TODO: Refactor string as constant variable or message type
-                        gptOriginalMessage.copy(content = "AI_THINKING")
+                        gptFirstMessage.copy(content = "AI_THINKING")
                     )
 
                     val resultFromServer = calendyServerApi.sendMessageToServer(

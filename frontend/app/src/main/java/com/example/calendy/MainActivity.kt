@@ -40,7 +40,6 @@ import com.example.calendy.ui.theme.CalendyTheme
 import com.example.calendy.view.messageview.MessagePage
 import com.example.calendy.view.editplanview.EditPlanPage
 import com.example.calendy.view.editplanview.EditPlanViewModel
-import com.example.calendy.view.messagepage.MessagePage
 import com.example.calendy.view.messagepage.MessagePageViewModel
 import com.example.calendy.view.monthlyview.MonthlyPageKT
 import com.example.calendy.view.settingview.SettingPage
