@@ -111,7 +111,15 @@ class MessagePageViewModel(
         override fun onRmsChanged(rmsdB: Float) {}
 
         // 말을 시작하고 인식이 된 audio stream을 buffer에 담는다
-        override fun onBufferReceived(buffer: ByteArray) {}
+        override fun onBufferReceived(buffer: ByteArray) {
+            // TODO: Need Test
+            _uiState.update{
+                currentState ->
+                    var prevText = currentState.userInputText
+                    prevText += buffer.toString()
+                    currentState.copy(userInputText = prevText)
+            }
+        }
 
         // 말하기를 중지하면 호출
         override fun onEndOfSpeech() {
@@ -232,7 +240,9 @@ class MessagePageViewModel(
             withContext(Dispatchers.IO) {
                 try {
                     messageRepository.update(
-                        gptOriginalMessage.copy(content = "AI 매니저가 살펴보고 있어요")
+//                        gptOriginalMessage.copy(content = "AI 매니저가 살펴보고 있어요")
+                        //TODO: Refactor string as constant variable or message type
+                        gptOriginalMessage.copy(content = "AI_THINKING")
                     )
 
                     val resultFromServer = calendyServerApi.sendMessageToServer(

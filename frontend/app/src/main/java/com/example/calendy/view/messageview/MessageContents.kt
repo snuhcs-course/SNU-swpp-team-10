@@ -1,11 +1,17 @@
 package com.example.calendy.view.messageview
 
+import LoadingAnimation1
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -21,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -28,6 +35,9 @@ import com.example.calendy.AppViewModelProvider
 import com.example.calendy.data.maindb.message.Message
 import com.example.calendy.data.maindb.plan.Plan
 import com.example.calendy.data.maindb.plan.Todo
+import com.example.calendy.ui.theme.Blue1
+import com.example.calendy.ui.theme.Blue3
+import com.example.calendy.utils.toTimeString
 import com.example.calendy.view.popup.PlanDetailPopup
 import com.example.calendy.view.popup.PlanListPopup
 import java.util.Date
@@ -39,7 +49,9 @@ fun MessageContentUser(
     Text(
         text = messageLog.content, modifier = Modifier
             .wrapContentSize()
-            .padding(10.dp)
+            .padding(10.dp),
+        fontSize = 14.sp,
+
     )
 }
 
@@ -47,10 +59,33 @@ fun MessageContentUser(
 fun MessageContentManager(
     messageLog: Message
 ) {
+//    when (messageLog.hasRevision) {
+//        false -> MessageContentManagerDefault(messageLog)
+//        true  -> MessageContentManagerWithButton(messageLog)
+//    }
+    // OnProgress...
     when (messageLog.hasRevision) {
-        false -> MessageContentManagerDefault(messageLog)
-        true  -> MessageContentManagerWithButton(messageLog)
+        false -> when (messageLog.content == "AI_THINKING") {
+            true -> MessageContentManagerThinking()
+            false -> MessageContentManagerDefault(messageLog)
+        }
+
+        true -> MessageContentManagerWithButton(messageLog)
     }
+}
+
+@Composable
+fun SentTime(
+    messageLog: Message
+){
+    Text(
+        text = messageLog.sentTime.toTimeString(),
+        modifier = Modifier
+            .wrapContentSize()
+            .padding( vertical = 10.dp),
+        fontSize = 10.sp,
+        color = Color.Gray
+    )
 }
 
 @Composable
@@ -60,10 +95,39 @@ fun MessageContentManagerDefault(
     Text(
         text = messageLog.content, modifier = Modifier
             .wrapContentSize()
-            .padding(10.dp)
+            .padding(10.dp),
+        fontSize = 14.sp,
+
     )
 }
+@Composable
+fun MessageContentManagerThinking(){
+    Box(
+        modifier = Modifier
+            .wrapContentWidth()
+            .wrapContentHeight()
+            .padding(5.dp),
+        contentAlignment = Alignment.Center
+    ) {
+//          //OnProgress...
+//        LoadingAnimation1(
+//            modifier=Modifier
+//                .width(90.dp)
+//                .height(30.dp),
+//            circleColor = Blue1,
+//            circleSize = 3.dp,
+//            spaceBetween = 5.dp,
+//        )
+        Text(
+            text = "AI 매니저가 살펴보고 있어요...",
+            modifier = Modifier
+                .wrapContentSize()
+                .padding(10.dp),
+            fontSize = 14.sp,
 
+            )
+    }
+}
 @Composable
 fun MessageContentManagerWithButton(
     messageLog: Message,
@@ -83,12 +147,16 @@ fun MessageContentManagerWithButton(
         messageContentViewModel.onMessageSelected(messageLog)
     }
     Column(
+        modifier = Modifier
+            .clickable { onButtonClick() },
+//        horizontalAlignment = Alignment.End
 
     ) {
         Text(
             text = messageLog.content, modifier = Modifier
                 .wrapContentSize()
-                .padding(10.dp)
+                .padding(top = 10.dp,bottom=5.dp, end =10.dp, start = 10.dp),
+            fontSize = 14.sp,
         )
         // TODO: 위아래 padding 조절
         Button(
@@ -106,9 +174,9 @@ fun MessageContentManagerWithButton(
                 text = "해당 일정 자세히 보기",
                 color = Color.Black,
                 modifier = Modifier.padding(0.dp),
-                fontSize = 12.sp,
+                fontSize = 14.sp,
                 style = TextStyle(
-                    fontSize = 12.sp,
+                    fontSize = 14.sp,
                     lineHeight = 14.sp,
                     fontWeight = FontWeight(500),
                     color = Color(0xFF000000),
@@ -117,6 +185,15 @@ fun MessageContentManagerWithButton(
                 )
             )
         }
+//        Text(
+//            text = "자세히",
+//            modifier = Modifier
+//                .wrapContentHeight()
+//                .padding(end = 10.dp, bottom = 5.dp),
+//            fontSize = 12.sp,
+//            color = Color.DarkGray,
+//            textAlign = TextAlign.End,
+//        )
     }
 
     //open tod0 list popup
@@ -144,6 +221,18 @@ fun MessageContentManagerWithButton(
 
             )
     }
+}
 
-
+@Preview
+@Composable
+fun MessageContentManagerPreview() {
+    MessageContentManager(
+        Message(
+            0,
+            Date(),
+            true,
+            "AI_THINKING",
+            false,
+        )
+    )
 }
