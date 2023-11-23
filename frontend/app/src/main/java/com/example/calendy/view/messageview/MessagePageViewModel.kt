@@ -13,7 +13,6 @@ import androidx.sqlite.db.SimpleSQLiteQuery
 import com.example.calendy.data.maindb.category.ICategoryRepository
 import com.example.calendy.data.maindb.history.IHistoryRepository
 import com.example.calendy.data.maindb.history.ManagerHistory
-import com.example.calendy.data.maindb.history.RevisionType
 import com.example.calendy.data.maindb.message.IMessageRepository
 import com.example.calendy.data.maindb.message.Message
 import com.example.calendy.data.maindb.plan.IPlanRepository
@@ -37,6 +36,14 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+enum class QueryType {
+    INSERT,
+    UPDATE,
+    DELETE,
+    SELECT,
+    NOT_FOUND,
+    UNEXPECTED
+}
 class MessagePageViewModel(
     val planRepository: IPlanRepository,
     val messageRepository: IMessageRepository,
@@ -111,7 +118,15 @@ class MessagePageViewModel(
         override fun onRmsChanged(rmsdB: Float) {}
 
         // 말을 시작하고 인식이 된 audio stream을 buffer에 담는다
-        override fun onBufferReceived(buffer: ByteArray) {}
+        override fun onBufferReceived(buffer: ByteArray) {
+            // TODO: Need Test
+            _uiState.update{
+                currentState ->
+                    var prevText = currentState.userInputText
+                    prevText += buffer.toString()
+                    currentState.copy(userInputText = prevText)
+            }
+        }
 
         // 말하기를 중지하면 호출
         override fun onEndOfSpeech() {
@@ -199,7 +214,7 @@ class MessagePageViewModel(
         viewModelScope.launch {
             Log.d("GUN", "send to server $requestMessage")
 
-            val gptOriginalMessage = Message(
+            val gptFirstMessage = Message(
                 id = 0,
                 sentTime = Date(),
                 messageFromManager = true,
@@ -232,7 +247,9 @@ class MessagePageViewModel(
             withContext(Dispatchers.IO) {
                 try {
                     messageRepository.update(
-                        gptOriginalMessage.copy(content = "AI 매니저가 살펴보고 있어요")
+//                        gptOriginalMessage.copy(content = "AI 매니저가 살펴보고 있어요")
+                        //TODO: Refactor string as constant variable or message type
+                        gptFirstMessage.copy(content = "AI_THINKING")
                     )
 
                     val resultFromServer = calendyServerApi.sendMessageToServer(
@@ -252,37 +269,54 @@ class MessagePageViewModel(
                     // handle result
                     // TODO: Flag - NO_SUCH_TODO 등
                     // TODO: memo에 ; 가 들어가면, GPT가 SQL Injection이나 버그를 유발하는 SQL Query를 반환한다.
-                    val queries = resultFromServer.split(";")
-                    for (query in queries) {
-                        // 가끔 GPT가 "INSERT ... ;" 처럼 쌍따옴표를 붙이기 때문에
-                        if (query.trim('"').isNotBlank()) {
-                            sqlExecute(query.trim().trim('"'), gptOriginalMessage)
+                    var queries = resultFromServer.trim('"').split(";").dropLast(1)
+
+                    sqlExecute(queries[0].trim(), gptFirstMessage)
+                    for (query in queries.drop(1)) {
+                        val gptMessage = Message(
+                            id = 0,
+                            sentTime = Date(),
+                            messageFromManager = true,
+                            content = "AI가 생성 중입니다. 잠시만 기다려주세요."
+                        ).let {
+                            val messageId: Int = messageRepository.insert(it).toInt()
+                            it.copy(id = messageId)
                         }
+                        //gpt가 처리한 후에 이후 message들을 띄우는게 낫지만, 일단은 sqlExecute이 이미 존재하는 message를 처리하므로 이렇게 한다.
+                        sqlExecute(query.trim(), gptMessage)
                     }
                 } catch (e: Throwable) {
+                    //message 여러개 생성 후에 error날 경우 첫번째만 바꾸게될 것 같은데, 추후 수정 필
                     Log.e("GUN", e.stackTraceToString())
                     messageRepository.update(
-                        gptOriginalMessage.copy(content = "Send Query 에서 에러가 나타났다")
+                        gptFirstMessage.copy(content = "Send Query 에서 에러가 나타났다")
                     )
                 }
             }
         }
     }
 
-    // should update information to gptOriginalMessage
-    private suspend fun sqlExecute(gptQuery: String, gptOriginalMessage: Message) {
+    // should update information to gptMessage
+    private suspend fun sqlExecute(gptQuery: String, gptMessage: Message) {
         // TODO: Refactor Me
         Log.d("GUN", "Query Start: $gptQuery")
-        val isInsert = gptQuery.startsWith("INSERT", ignoreCase = true)
-        val isUpdate = gptQuery.startsWith("UPDATE", ignoreCase = true)
-        val isDelete = gptQuery.startsWith("DELETE", ignoreCase = true)
+        val startsWith = gptQuery.takeWhile{ it != ' '}.uppercase()
+        val queryType = when(startsWith){
+            "INSERT" -> QueryType.INSERT
+            "UPDATE" -> QueryType.UPDATE
+            "DELETE" -> QueryType.DELETE
+            "SELECT" -> QueryType.SELECT
+            "NO_SUCH_PLAN" -> QueryType.NOT_FOUND
+            else -> QueryType.UNEXPECTED
+        }
+
 
         // if isSchedule is false, should query tod0 db
         val isSchedule = gptQuery.split(" ").run {
             // there is "SCHEDULE" at second or third word
             // INSERT INTO table, UPDATE table, DELETE table, DELETE FROM table
             listOf(this.getOrNull(1), this.getOrNull(2)).any {
-                it.equals("SCHEDULE", ignoreCase = true)
+                it?.startsWith("SCHEDULE", ignoreCase = true) ?: false
             }
         }
         val queryTable = if (isSchedule) "schedule" else "todo"
@@ -306,156 +340,167 @@ class MessagePageViewModel(
                 false -> planRepository.getTodosViaQuery(calendySelectQuery)
             }
         }
+        suspend fun insertHistory(gptMessage: Message, isSchedule: Boolean, queryType: QueryType, currentId: Int? = null, savedId: Int? = null){
+            if(isSchedule){
+                historyRepository.insertHistory(
+                    ManagerHistory(
+                        messageId = gptMessage.id,
+                        isSchedule = isSchedule,
+                        revisionType = queryType,
+                        currentScheduleId = currentId,
+                        savedScheduleId= savedId
+                    )
+                )
 
+            }else{
+                historyRepository.insertHistory(
+                    ManagerHistory(
+                        messageId = gptMessage.id,
+                        isSchedule = isSchedule,
+                        revisionType = queryType,
+                        currentTodoId = currentId,
+                        savedTodoId = savedId
+                    )
+                )
+            }
+
+
+        }
+        suspend fun updateGptResponseMessage(gptMessage: Message, planListSize: Int, queryType: QueryType, isSchedule: Boolean) {
+            var messageString: String
+            var hasRevision= true
+            if(QueryType.NOT_FOUND==queryType){
+                hasRevision=false
+                messageString= "찾으시는 플랜이 없어요"
+            } else{
+                messageString = "AI 매니저가 "
+                if (isSchedule) messageString += "일정 "
+                else messageString += "할 일 "
+                when (queryType) {
+                    QueryType.INSERT    -> messageString += "${planListSize}개를 추가했어요"
+                    QueryType.UPDATE    -> messageString += "${planListSize}개를 수정했어요"
+                    QueryType.DELETE    -> messageString += "${planListSize}개를 삭제했어요"
+//                    QueryType.NOT_FOUND -> {messageString = "찾으시는 플랜이 없어요"
+//                        hasRevision=false
+//                    }
+                    else                -> {messageString = "죄송해요. 잘 이해하지 못했어요."
+                        hasRevision=false
+                    }
+                }
+                if(planListSize<=0) hasRevision=false
+
+            }
+            messageRepository.update(
+                gptMessage.copy(
+                    content = messageString, hasRevision = hasRevision
+                )
+            )
+        }
         // 우선 기존 data를 모두 삭제해둔다.
         rawSqlDatabase.deleteAll()
 
         try {
-            if (isInsert) {
-                // RawSqlDB에 INSERT sqlQuery 실행
-                rawSqlDatabase.execSql(gptQuery)
-                // RawSqlDB에서 Select All
-                val planList = rawSqlDatabase.getAllPlans()
+            val planListSize: Int
+            when(queryType){
+                QueryType.INSERT -> {
+                    // RawSqlDB에 INSERT sqlQuery 실행
+                    rawSqlDatabase.execSql(gptQuery)
+                    // RawSqlDB에서 Select All
+                    val planList = rawSqlDatabase.getAllPlans()
 
-                for (plan in planList) {
-                    // 그 결과를 MainDB에 삽입
-                    val newPlanId = planRepository.insert(plan).toInt()
+                    for (plan in planList) {
+                        // 그 결과를 MainDB에 삽입
+                        val newPlanId = planRepository.insert(plan).toInt()
 
-                    // Manager가 변경한 사항을 기록
-                    when (plan) {
-                        is Schedule -> historyRepository.insertHistory(
-                            ManagerHistory(
-                                messageId = gptOriginalMessage.id,
-                                isSchedule = true,
-                                revisionType = RevisionType.INSERT,
-                                currentScheduleId = newPlanId,
-                            )
-                        )
+                        // Manager가 변경한 사항을 기록
 
-                        is Todo     -> historyRepository.insertHistory(
-                            ManagerHistory(
-                                messageId = gptOriginalMessage.id,
-                                isSchedule = false,
-                                revisionType = RevisionType.INSERT,
-                                currentTodoId = newPlanId,
-                            )
-                        )
+                        insertHistory(gptMessage, isSchedule, queryType, currentId=newPlanId)
                     }
+
+                    //initialize planListSize for updating message
+
+                    planListSize= planList.size
                 }
+                QueryType.UPDATE -> {
+                    val originalPlanList = getAffectedPlansFromGptQuery()
 
-                // Message DB에 Message 넣어주기
-                messageRepository.update(
-                    gptOriginalMessage.copy(
-                        content = "AI 매니저가 일정 ${planList.size}개를 추가했어요", hasRevision = true
-                    )
-                )
-            } else if (isUpdate) {
-                val originalPlanList = getAffectedPlansFromGptQuery()
+                    // RawSqlDB에 복사
+                    for (plan in originalPlanList) {
+                        val originalPlanId = plan.id
 
-                // RawSqlDB에 복사
-                for (plan in originalPlanList) {
-                    val originalPlanId = plan.id
+                        // Saved Plan에 변경되기 전의 plan 저장하기
+                        val savedPlanId = historyRepository.insertSavedPlanFromPlan(plan).toInt()
 
-                    // Saved Plan에 변경되기 전의 plan 저장하기
-                    val savedPlanId = historyRepository.insertSavedPlanFromPlan(plan).toInt()
+                        // 결과를 Empty DB에 삽입. 이때 plan의 id가 유지된다.
+                        rawSqlDatabase.insertFromPlan(plan)
 
-                    // 결과를 Empty DB에 삽입. 이때 plan의 id가 유지된다.
-                    rawSqlDatabase.insertFromPlan(plan)
-
-                    // Manager가 변경할 예정인 사항을 기록
-                    when (plan) {
-                        is Schedule -> historyRepository.insertHistory(
-                            ManagerHistory(
-                                messageId = gptOriginalMessage.id,
-                                isSchedule = true,
-                                revisionType = RevisionType.UPDATE,
-                                currentScheduleId = originalPlanId,
-                                savedScheduleId = savedPlanId,
-                            )
-                        )
-
-                        is Todo     -> historyRepository.insertHistory(
-                            ManagerHistory(
-                                messageId = gptOriginalMessage.id,
-                                isSchedule = false,
-                                revisionType = RevisionType.UPDATE,
-                                currentTodoId = originalPlanId,
-                                savedTodoId = savedPlanId,
-                            )
-                        )
+                        // Manager가 변경할 예정인 사항을 기록
+                        insertHistory(gptMessage, isSchedule, QueryType.UPDATE, currentId = originalPlanId, savedId = savedPlanId)
                     }
-                }
 
-                // RawSqlDB에 update sqlQuery 실행
-                rawSqlDatabase.execSql(gptQuery)
-                // RawSqlDB에 Select All
-                val planList = rawSqlDatabase.getAllPlans()
-                // 그 결과를 MainDB에 반영하기
-                for (plan in planList) {
-                    planRepository.update(plan)
-                }
-
-                // Message DB에 Message 넣어주기
-                messageRepository.update(
-                    gptOriginalMessage.copy(
-                        content = "AI 매니저가 일정 ${planList.size}개를 수정했어요", hasRevision = true
-                    )
-                )
-            } else if (isDelete) {
-                val originalPlanList = getAffectedPlansFromGptQuery()
-
-                // MainDB에서 삭제
-                for (plan in originalPlanList) {
-                    // Saved Plan에 변경되기 전의 plan 저장하기
-                    val savedPlanId = historyRepository.insertSavedPlanFromPlan(plan).toInt()
-
-                    // 결과를 Calendy DB에서 삭제
-                    planRepository.delete(plan)
-
-                    // Manager가 변경한 사항을 기록
-                    when (plan) {
-                        is Schedule -> historyRepository.insertHistory(
-                            ManagerHistory(
-                                messageId = gptOriginalMessage.id,
-                                isSchedule = true,
-                                revisionType = RevisionType.DELETE,
-                                currentScheduleId = null,
-                                savedScheduleId = savedPlanId,
-                            )
-                        )
-
-                        is Todo     -> historyRepository.insertHistory(
-                            ManagerHistory(
-                                messageId = gptOriginalMessage.id,
-                                isSchedule = false,
-                                revisionType = RevisionType.DELETE,
-                                currentTodoId = null,
-                                savedTodoId = savedPlanId,
-                            )
-                        )
+                    // RawSqlDB에 update sqlQuery 실행
+                    rawSqlDatabase.execSql(gptQuery)
+                    // RawSqlDB에 Select All
+                    val planList = rawSqlDatabase.getAllPlans()
+                    // 그 결과를 MainDB에 반영하기
+                    for (plan in planList) {
+                        planRepository.update(plan)
                     }
+
+                    //initialize planListSize for updating message
+                    planListSize= planList.size
+
+                }
+                QueryType.DELETE ->{
+                    val originalPlanList = getAffectedPlansFromGptQuery()
+
+                    // MainDB에서 삭제
+                    for (plan in originalPlanList) {
+                        // Saved Plan에 변경되기 전의 plan 저장하기
+                        val savedPlanId = historyRepository.insertSavedPlanFromPlan(plan).toInt()
+
+                        // 결과를 Calendy DB에서 삭제
+                        planRepository.delete(plan)
+
+                        // Manager가 변경한 사항을 기록
+                        insertHistory(gptMessage, isSchedule, QueryType.DELETE, savedId = savedPlanId)
+                    }
+
+                    //initialize planListSize for updating message
+                    planListSize= originalPlanList.size
+                }
+                QueryType.SELECT->{
+                    // RawSqlDB에 INSERT sqlQuery 실행
+                    rawSqlDatabase.execSql(gptQuery)
+                    // RawSqlDB에서 Select All
+                    val planList = rawSqlDatabase.getAllPlans()
+
+                    //initialize planListSize for updating message
+                    planListSize= planList.size
+                }
+                QueryType.NOT_FOUND->{
+                    planListSize=0;
+
+                }
+                else -> {
+                    // if invalid request, say sorry
+                    planListSize=-1;
+
                 }
 
-                // Message DB에 Message 넣어주기
-                messageRepository.update(
-                    gptOriginalMessage.copy(
-                        content = "AI 매니저가 일정 ${originalPlanList.size}개를 삭제했어요", hasRevision = true
-                    )
-                )
-            } else {
-                // if invalid request, say sorry
-                messageRepository.update(
-                    gptOriginalMessage.copy(content = "죄송해요. 잘 이해하지 못했어요.", hasRevision = false)
-                )
 
             }
+            // Message DB에 Message 넣어주기
+            updateGptResponseMessage(gptMessage, planListSize, queryType, isSchedule)
+
         } catch (e: Throwable) {
             // Catching all throwable may not be good
             Log.e("GUN", e.stackTraceToString())
             messageRepository.update(
-                gptOriginalMessage.copy(content = "으악! 에러다!", hasRevision = false)
+                gptMessage.copy(content = "으악! 에러다!", hasRevision = false)
             )
         }
+
     }
 
 }

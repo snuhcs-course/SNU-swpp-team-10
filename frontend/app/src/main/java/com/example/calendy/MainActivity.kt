@@ -34,11 +34,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.ui.theme.CalendyTheme
 import com.example.calendy.view.messageview.MessagePage
 import com.example.calendy.view.editplanview.EditPlanPage
 import com.example.calendy.view.editplanview.EditPlanViewModel
+import com.example.calendy.view.messagepage.MessagePageViewModel
 import com.example.calendy.view.monthlyview.MonthlyPageKT
 import com.example.calendy.view.settingview.SettingPage
 import com.example.calendy.view.todolistview.ToDoListPage
@@ -168,6 +170,7 @@ sealed class DestinationRoute(val route: String) {
             return dateFormat.format(date)
         }
     }
+
     class AddSchedule(date: Date) : DestinationRoute("EditPage/schedule?date=${dateToString(date)}")
 
     class AddTodo(date: Date) : DestinationRoute("EditPage/todo?date=${dateToString(date)}")
@@ -199,11 +202,17 @@ fun NavigationGraph(navController: NavHostController) {
             })
         }
         composable(BottomNavItem.Month.screenRoute) {
+            for (t in navController.backQueue) {
+                Log.d("GUN", t.destination.toString())
+            }
             MonthlyPageKT(onNavigateToEditPage = { id: Int?, type: PlanType, date: Date? ->
                 val route = if (id==null) {
                     when (type) {
-                        PlanType.SCHEDULE -> DestinationRoute.AddSchedule(date= date?: Date()).route
-                        PlanType.TODO     -> DestinationRoute.AddTodo(date = date?: Date()).route
+                        PlanType.SCHEDULE -> DestinationRoute.AddSchedule(
+                            date = date ?: Date()
+                        ).route
+
+                        PlanType.TODO     -> DestinationRoute.AddTodo(date = date ?: Date()).route
                     }
                 } else {
                     when (type) {
@@ -227,28 +236,45 @@ fun NavigationGraph(navController: NavHostController) {
                 }
             } )
         }
-        composable(BottomNavItem.AiManager.screenRoute) {
-            MessagePage()
+        composable(
+            route = "${BottomNavItem.AiManager.screenRoute}?query={query}", arguments = listOf(
+                navArgument("query") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+            ), deepLinks = listOf(navDeepLink {
+                uriPattern = "calendy://query/{query}"
+            })
+        ) { entry ->
+            for (t in navController.backQueue) {
+                Log.d("GUN", t.destination.toString())
+            }
+            val messagePageViewModel: MessagePageViewModel =
+                viewModel(factory = AppViewModelProvider.Factory)
+
+            val userQuery = entry.arguments?.getString("query")
+            if (userQuery!=null) {
+                messagePageViewModel.setUserInputText(userQuery)
+                messagePageViewModel.onSendButtonClicked()
+            }
+            MessagePage(messagePageViewModel)
         }
         composable(BottomNavItem.Setting.screenRoute) {
             SettingPage()
         }
-        composable(
-            route = "EditPage/{type}?id={id}&date={date}", arguments = listOf(
-                navArgument("type") {
-                    type = NavType.StringType
-                },
-                navArgument("id") {
-                    type = NavType.StringType
-                    nullable = true
-                    defaultValue = null
-                },
-                navArgument("date") {
-                    type = NavType.StringType
-                    nullable = true
-                    defaultValue = null
-                }
-            )
+        composable(route = "EditPage/{type}?id={id}&date={date}",
+                   arguments = listOf(navArgument("type") {
+                       type = NavType.StringType
+                   }, navArgument("id") {
+                       type = NavType.StringType
+                       nullable = true
+                       defaultValue = null
+                   }, navArgument("date") {
+                       type = NavType.StringType
+                       nullable = true
+                       defaultValue = null
+                   })
         ) { entry ->
             /* TODO Should not show bottom navigation */
             Log.d("GUN", "Recompose")
@@ -267,7 +293,7 @@ fun NavigationGraph(navController: NavHostController) {
                 date = date
             )
 
-            EditPlanPage(viewModel, onNavigateBack = { navController.popBackStack()})
+            EditPlanPage(viewModel, onNavigateBack = { navController.popBackStack() })
         }
     }
 }

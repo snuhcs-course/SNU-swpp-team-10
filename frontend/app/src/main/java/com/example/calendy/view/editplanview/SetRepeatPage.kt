@@ -282,6 +282,7 @@ fun SetRepeatDialog(
     //SetRepeatDialog 종료시 ui에 맞는 repeatGroup 객체를 넘겨줌
     fun exitDialog() {
         val endDate : Date? = if(durationRadioGroup.value == "noEndTime") null else Date(endPlanDate.value)
+        val repeatInt = if(repeatInterval.value.isBlank()) 1 else repeatInterval.value.toInt()
         if (repeatGroup==null) {
             val newRepeatGroup: RepeatGroup? = when (repeatRadioGroup.value) {
                 "noRepeat" -> null
@@ -290,7 +291,7 @@ fun SetRepeatDialog(
                     week = false,
                     month = false,
                     year = false,
-                    repeatInterval = repeatInterval.value.toInt(),
+                    repeatInterval = repeatInt,
                     repeatRule = null,
                     endDate = endDate
                 )
@@ -300,7 +301,7 @@ fun SetRepeatDialog(
                     week = true,
                     month = false,
                     year = false,
-                    repeatInterval = repeatInterval.value.toInt(),
+                    repeatInterval = repeatInt,
                     repeatRule = getRepeatRuleFromWeeklyRule(weeklyRule),
                     endDate = endDate
                 )
@@ -310,7 +311,7 @@ fun SetRepeatDialog(
                     week = false,
                     month = true,
                     year = false,
-                    repeatInterval = repeatInterval.value.toInt(),
+                    repeatInterval = repeatInt,
                     repeatRule = getRepeatRuleFromMonthlyRule(monthlyRule),
                     endDate = endDate
                 )
@@ -320,7 +321,7 @@ fun SetRepeatDialog(
                     week = false,
                     month = false,
                     year = true,
-                    repeatInterval = repeatInterval.value.toInt(),
+                    repeatInterval = repeatInt,
                     repeatRule = null,
                     endDate = endDate
                 )
@@ -335,7 +336,7 @@ fun SetRepeatDialog(
                         repeatGroup.week = false
                         repeatGroup.month = false
                         repeatGroup.year = false
-                        repeatGroup.repeatInterval = repeatInterval.value.toInt()
+                        repeatGroup.repeatInterval = repeatInt
                         repeatGroup.repeatRule = null
                         repeatGroup.endDate = endDate
                     }
@@ -345,7 +346,7 @@ fun SetRepeatDialog(
                         repeatGroup.week = true
                         repeatGroup.month = false
                         repeatGroup.year = false
-                        repeatGroup.repeatInterval = repeatInterval.value.toInt()
+                        repeatGroup.repeatInterval = repeatInt
                         repeatGroup.repeatRule = getRepeatRuleFromWeeklyRule(weeklyRule)
                         repeatGroup.endDate = endDate
                     }
@@ -355,7 +356,7 @@ fun SetRepeatDialog(
                         repeatGroup.week = false
                         repeatGroup.month = true
                         repeatGroup.year = false
-                        repeatGroup.repeatInterval = repeatInterval.value.toInt()
+                        repeatGroup.repeatInterval = repeatInt
                         repeatGroup.repeatRule = getRepeatRuleFromMonthlyRule(monthlyRule)
                         repeatGroup.endDate = endDate
                     }
@@ -365,7 +366,7 @@ fun SetRepeatDialog(
                         repeatGroup.week = false
                         repeatGroup.month = false
                         repeatGroup.year = true
-                        repeatGroup.repeatInterval = repeatInterval.value.toInt()
+                        repeatGroup.repeatInterval = repeatInt
                         repeatGroup.repeatRule = null
                         repeatGroup.endDate = endDate
                     }
@@ -394,7 +395,7 @@ fun SetRepeatDialog(
                 }
                 item {
                     Text(
-                        text = "반복 선택",
+                        text = "  반복 선택",
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )

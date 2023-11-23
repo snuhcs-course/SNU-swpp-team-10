@@ -202,14 +202,16 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
         //endregion
 
         //region Category
-        FieldWithLeadingText(leadingText = "분류", modifier = Modifier.height(commonHeight)) {
-            CategorySelector(
-                currentCategory = editPlanUiState.category,
-                categoryList = categoryList,
-                onAddCategory = editPlanViewModel::addCategory,
-                onSelectCategory = editPlanViewModel::setCategory
-            )
-        }
+       FieldWithLeadingText(leadingText = "분류", modifier = Modifier.height(commonHeight)) {
+        CategorySelector(
+            currentCategory = editPlanUiState.category,
+            categoryList = categoryList,
+            onAddCategory = editPlanViewModel::addCategory,
+            onSelectCategory = editPlanViewModel::setCategory,
+            onUpdateCategory = editPlanViewModel::updateCategory,
+            onDeleteCategory = editPlanViewModel::deleteCategory,
+        )
+       }
         //endregion
 
         //region Priority

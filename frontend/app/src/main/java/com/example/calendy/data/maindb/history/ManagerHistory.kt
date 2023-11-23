@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 import com.example.calendy.data.maindb.message.Message
 import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
+import com.example.calendy.view.messagepage.QueryType
 
 @Entity(
     tableName = "manager_history", foreignKeys = [ForeignKey(
@@ -45,7 +46,7 @@ data class ManagerHistory(
     @ColumnInfo(name = "is_schedule")
     val isSchedule: Boolean,
     @ColumnInfo(name = "revision_type")
-    val revisionType: RevisionType, // insert. update. delete
+    val revisionType: QueryType, // insert. update. delete
     @ColumnInfo(name = "saved_schedule_id", index = true)
     val savedScheduleId: Int? = null, // previous plan before revision. may be null
     @ColumnInfo(name = "saved_todo_id", index = true)
@@ -55,7 +56,3 @@ data class ManagerHistory(
     @ColumnInfo(name = "current_todo_id", index = true)
     val currentTodoId: Int? = null,
 )
-
-enum class RevisionType {
-    INSERT, UPDATE, DELETE
-}

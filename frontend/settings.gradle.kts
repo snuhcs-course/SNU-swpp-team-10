@@ -17,4 +17,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "Calendy"
 include(":app")
+include(":library")
+
  

@@ -90,7 +90,7 @@ app.post('/manager/send', async (req, res) => {
     #Conversion Instructions
     
     First, determine the type of the query as one of the four types given: INSERT/DELETE/UPDATE/SELECT
-    When the command is unclear about inserting or updating, consider the type INSERT. Only consider the type as UPDATE when explicitly commanded to do so.
+    NEVER consider the type as UPDATE unless when explicitly commanded to do so such as "바꿔, 수정".  Otherwise, INSERT a new plan.
     
     After the query type has been determined, determine whether the PLAN type is SCHEDULE or TODO. If the determined query type is INSERT, the PLAN type should be TODO by default. Only when the time span is explicitly given by specifying both the start time and end time explicitly one-by-one, it becomes SCHEDULE. For example, specifying only single date means PLAN type is TODO, and due_time is 23:59:59 of that day.  
     

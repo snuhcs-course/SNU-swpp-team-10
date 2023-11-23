@@ -1,9 +1,11 @@
 package com.example.calendy.view.editplanview
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -13,8 +15,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -30,13 +35,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.example.calendy.R
 import com.example.calendy.data.maindb.category.Category
-import com.example.calendy.utils.bottomBorder
 import com.gowtham.ratingbar.RatingBar
 import com.gowtham.ratingbar.RatingBarConfig
 
@@ -45,7 +50,9 @@ fun CategorySelector(
     currentCategory: Category?,
     categoryList: List<Category>,
     onSelectCategory: (Category?) -> Unit,
-    onAddCategory: (String, Int) -> Unit
+    onAddCategory: (String, Int) -> Unit,
+    onUpdateCategory: (String, Int, Category) -> Unit,
+    onDeleteCategory: (Category) -> Unit,
 ) {
     var showCategoryPickerDialog by remember { mutableStateOf(false) }
     fun closeCategoryDialog() {
@@ -79,6 +86,8 @@ fun CategorySelector(
             closeCategoryDialog = { closeCategoryDialog() },
             onSelectCategory = onSelectCategory,
             onAddCategory = onAddCategory,
+            onUpdateCategory = onUpdateCategory,
+            onDeleteCategory = onDeleteCategory
         )
     }
 }
@@ -89,9 +98,12 @@ private fun CategoryPickerDialog(
     closeCategoryDialog: () -> Unit,
     onSelectCategory: (Category) -> Unit,
     onAddCategory: (String, Int) -> Unit,
+    onUpdateCategory: (String, Int, Category) -> Unit,
+    onDeleteCategory: (Category) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var showAddDialog by remember { mutableStateOf(false) }
+    var showEditDialog by remember { mutableStateOf(false) }
+    var selectedCategory by remember { mutableStateOf<Category?>(null) }
 
     Dialog(properties = DialogProperties(usePlatformDefaultWidth = false),
            onDismissRequest = { closeCategoryDialog() }) {
@@ -102,7 +114,10 @@ private fun CategoryPickerDialog(
                           onBackPressed = { closeCategoryDialog() },
                           title = { Text("Category") },
                           trailingContent = {
-                              IconButton(onClick = { showAddDialog = true }) {
+                              IconButton(onClick = {
+                                  showEditDialog = true
+                                  selectedCategory = null
+                              }) {
                                   Icon(
                                       imageVector = Icons.Default.Add,
                                       contentDescription = "Add Category",
@@ -123,32 +138,54 @@ private fun CategoryPickerDialog(
                                 .padding(8.dp)
                                 .fillMaxWidth()
                         ) {
-                            Column {
-                                Text(text = category.title)
-                                // 감싸는 Box에 clickable 수정자 적용
-                                Box(modifier = Modifier
-                                    .clickable {
-                                        onSelectCategory(category)
-                                        closeCategoryDialog()
+                            Row(
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(text = category.title)
+                                    // 감싸는 Box에 clickable 수정자 적용
+                                    Box(modifier = Modifier
+                                        .clickable {
+                                            onSelectCategory(category)
+                                            closeCategoryDialog()
+                                        }
+                                        .fillMaxWidth()) {
+                                        RatingBar(value = category.defaultPriority.toFloat(),
+                                                  onValueChange = {},
+                                                  onRatingChanged = {
+                                                      onSelectCategory(category)
+                                                      closeCategoryDialog()
+                                                  })
                                     }
-                                    .fillMaxWidth()) {
-                                    RatingBar(value = category.defaultPriority.toFloat(),
-                                              onValueChange = {},
-                                              onRatingChanged = {
-                                                  onSelectCategory(category)
-                                                  closeCategoryDialog()
-                                              })
+                                }
+                                IconButton(
+                                    onClick = {
+                                        showEditDialog = true
+                                        selectedCategory = category
+                                    },
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.edit_plan_button),
+                                        contentDescription = "카테고리 수정/삭제"
+                                    )
                                 }
                             }
+
                         }
                     }
                 }
             }
 
-            if (showAddDialog) {
-                CategoryAddDialog(
-                    closeAddCategoryDialog = { showAddDialog = false },
-                    onAddCategory = onAddCategory
+            if (showEditDialog) {
+                CategoryEditDialog(
+                    closeCategoryEditDialog = {
+                        showEditDialog = false
+                        selectedCategory = null
+                    },
+                    onAddCategory = onAddCategory,
+                    onUpdateCategory = onUpdateCategory,
+                    onDeleteCategory = onDeleteCategory,
+                    category = selectedCategory
                 )
             }
         }
@@ -156,13 +193,22 @@ private fun CategoryPickerDialog(
 }
 
 @Composable
-private fun CategoryAddDialog(
-    closeAddCategoryDialog: () -> Unit,
+private fun CategoryEditDialog(
+    closeCategoryEditDialog: () -> Unit,
     onAddCategory: (String, Int) -> Unit,
-    modifier: Modifier = Modifier
+    onUpdateCategory: (String, Int, Category) -> Unit,
+    onDeleteCategory: (Category) -> Unit,
+    modifier: Modifier = Modifier,
+    category: Category?
 ) {
-    var newCategoryTitle by remember { mutableStateOf("") }
+    var isAdd: Boolean = (category == null)
+    var newCategoryTitle by remember { mutableStateOf("" )}
     var newCategoryPriority by remember { mutableStateOf(3) }
+
+    if(!isAdd) {
+        newCategoryTitle = category?.title ?: ""
+        newCategoryPriority = category?.defaultPriority ?: 3
+    }
 
     fun resetToDefault() {
         newCategoryTitle = ""
@@ -171,7 +217,7 @@ private fun CategoryAddDialog(
 
 
     Dialog(onDismissRequest = {
-        closeAddCategoryDialog()
+        closeCategoryEditDialog()
         resetToDefault()
     }) {
         Card {
@@ -191,20 +237,61 @@ private fun CategoryAddDialog(
                     config = RatingBarConfig().size(40.dp),
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
+                if(isAdd) {
+                    IconButton(onClick = {
+                        if(newCategoryTitle.isBlank()) {
+                            onAddCategory("Untitled", newCategoryPriority)
+                        } else {
+                            onAddCategory(newCategoryTitle, newCategoryPriority)
+                        }
+                        resetToDefault()
+                        closeCategoryEditDialog()
+                    }, modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .align(Alignment.End)) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Edit Category Confirm",
+                        )
+                    }
+                } else {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        IconButton(onClick = {
+                            category?.let { onDeleteCategory(it) }
+                            resetToDefault()
+                            closeCategoryEditDialog()
+                        }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "delete Category Confirm",
+                            )
+                        }
+                        IconButton(onClick = {
+                            category?.let {
+                                if(newCategoryTitle.isBlank()) {
+                                    onUpdateCategory("Untitled", newCategoryPriority, it)
+                                } else {
+                                    onUpdateCategory(newCategoryTitle, newCategoryPriority, it)
+                                }
+                            }
+                            resetToDefault()
+                            closeCategoryEditDialog()
+                        }, modifier = Modifier
+                            .padding(horizontal = 8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Save,
+                                contentDescription = "Update Category Confirm",
+                            )
+                        }
+                    }
 
-                IconButton(onClick = {
-                    onAddCategory(newCategoryTitle, newCategoryPriority)
-                    resetToDefault()
-                    closeAddCategoryDialog()
-                }, modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .align(Alignment.End)) {
-                    Icon(
-                        imageVector = Icons.Default.CheckCircle,
-                        contentDescription = "Add Category Confirm",
-                        modifier = Modifier.size(36.dp)
-                    )
                 }
+
             }
         }
     }

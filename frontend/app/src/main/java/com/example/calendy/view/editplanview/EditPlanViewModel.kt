@@ -184,6 +184,20 @@ class EditPlanViewModel(
             categoryRepository.insert(Category(title = title, defaultPriority = defaultPriority))
         }
     }
+    fun updateCategory(title: String, defaultPriority: Int, category: Category) {
+        viewModelScope.launch {
+            val updatedCategory = category.copy(
+                title = title,
+                defaultPriority = defaultPriority
+            )
+            categoryRepository.update(updatedCategory)
+        }
+    }
+    fun deleteCategory(category: Category) {
+        viewModelScope.launch {
+            categoryRepository.delete(category)
+        }
+    }
 
     //region Repeat Group
     fun setRepeatGroup(repeatGroup: RepeatGroup?) {
