@@ -1,5 +1,6 @@
 package com.example.calendy.view.monthlyview
 
+import android.util.Log
 import com.example.calendy.data.maindb.plan.Plan
 import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.data.maindb.plan.Schedule
@@ -33,6 +34,18 @@ class PlanLabelContainer : Iterable<Pair<Date, LabelSlot<Plan>>> {
         // sort plan labels
         // higher priority, heavier weight first
         planLabels.sortDescending()
+        Log.d("GUN PlanLabel", planLabels.size.toString())
+        Log.d("GUN PlanLabel", "Plan")
+        for (plan in plans) {
+            when (plan) {
+                is Schedule -> Log.d("GUN PlanLabel", "${plan.startTime} - ${plan.endTime}")
+                is Todo     -> Log.d("GUN PlanLabel", "TODO - ${plan.dueTime}")
+            }
+        }
+        Log.d("GUN PlanLabel", "PlanLabel")
+        for (planLabel in planLabels) {
+            Log.d("GUN PlanLabel", "${planLabel.getStartDate()} - ${planLabel.getEndDate()}")
+        }
 
         // add plan labels to slots
         // find smallest index that does not have a plan label, for all date of plan period
@@ -53,6 +66,7 @@ class PlanLabelContainer : Iterable<Pair<Date, LabelSlot<Plan>>> {
             // get date list between start and end date
             val dateList = mutableListOf<Date>()
             var currentDate = startTime.dateOnly()
+            Log.d("GUN PlanLabel", currentDate.toString())
             val endDate = endTime.afterDays(1).dateOnly()
             do {
                 // add label to slot

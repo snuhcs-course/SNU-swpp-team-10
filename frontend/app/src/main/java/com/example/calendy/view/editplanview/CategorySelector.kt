@@ -5,18 +5,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Save
@@ -37,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -63,20 +61,20 @@ fun CategorySelector(
     Row(modifier = Modifier.fillMaxWidth()) {
         TextButton(
             onClick = { showCategoryPickerDialog = true }, modifier = Modifier.weight(1f)
-//                .padding(end = 20.dp)
-//                .bottomBorder(1.dp, color = Color.Gray)
         ) {
             Text(
-                text = currentCategory?.title ?: "No Category",
+                text = currentCategory?.title ?: "분류 없음",
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Left
             )
         }
-        IconButton(onClick = { onSelectCategory(null) }) {
-            Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = "Deselect Category",
-            )
+        if (currentCategory!=null) {
+            IconButton(onClick = { onSelectCategory(null) }) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Deselect Category",
+                )
+            }
         }
     }
 
@@ -96,7 +94,7 @@ fun CategorySelector(
 private fun CategoryPickerDialog(
     categoryList: List<Category>,
     closeCategoryDialog: () -> Unit,
-    onSelectCategory: (Category) -> Unit,
+    onSelectCategory: (Category?) -> Unit,
     onAddCategory: (String, Int) -> Unit,
     onUpdateCategory: (String, Int, Category) -> Unit,
     onDeleteCategory: (Category) -> Unit,
@@ -127,6 +125,26 @@ private fun CategoryPickerDialog(
 
                 // Display Category List
                 LazyColumn(modifier = Modifier.padding(16.dp)) {
+                    item {
+                        OutlinedButton(
+                            onClick = {
+                                onSelectCategory(null)
+                                closeCategoryDialog()
+                            },
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp, vertical = 2.dp)
+                                .fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(text = "분류 없음")
+                                }
+                            }
+                        }
+                    }
                     this.items(items = categoryList) { category ->
                         OutlinedButton(
                             onClick = {
@@ -201,11 +219,11 @@ private fun CategoryEditDialog(
     modifier: Modifier = Modifier,
     category: Category?
 ) {
-    var isAdd: Boolean = (category == null)
-    var newCategoryTitle by remember { mutableStateOf("" )}
+    var isAdd: Boolean = (category==null)
+    var newCategoryTitle by remember { mutableStateOf("") }
     var newCategoryPriority by remember { mutableStateOf(3) }
 
-    if(!isAdd) {
+    if (!isAdd) {
         newCategoryTitle = category?.title ?: ""
         newCategoryPriority = category?.defaultPriority ?: 3
     }
@@ -225,7 +243,7 @@ private fun CategoryEditDialog(
                 TextField(value = newCategoryTitle,
                           onValueChange = { newCategoryTitle = it },
                           placeholder = {
-                              Text(text = "Title")
+                              Text(text = "카테고리 이름")
                           },
                           modifier = Modifier.padding(bottom = 8.dp)
                 )
@@ -237,9 +255,9 @@ private fun CategoryEditDialog(
                     config = RatingBarConfig().size(40.dp),
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
-                if(isAdd) {
+                if (isAdd) {
                     IconButton(onClick = {
-                        if(newCategoryTitle.isBlank()) {
+                        if (newCategoryTitle.isBlank()) {
                             onAddCategory("Untitled", newCategoryPriority)
                         } else {
                             onAddCategory(newCategoryTitle, newCategoryPriority)
@@ -256,32 +274,30 @@ private fun CategoryEditDialog(
                     }
                 } else {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
+                        modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End
                     ) {
                         IconButton(onClick = {
                             category?.let { onDeleteCategory(it) }
                             resetToDefault()
                             closeCategoryEditDialog()
-                        }
-                        ) {
+                        }) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
                                 contentDescription = "delete Category Confirm",
                             )
                         }
-                        IconButton(onClick = {
-                            category?.let {
-                                if(newCategoryTitle.isBlank()) {
-                                    onUpdateCategory("Untitled", newCategoryPriority, it)
-                                } else {
-                                    onUpdateCategory(newCategoryTitle, newCategoryPriority, it)
+                        IconButton(
+                            onClick = {
+                                category?.let {
+                                    if (newCategoryTitle.isBlank()) {
+                                        onUpdateCategory("Untitled", newCategoryPriority, it)
+                                    } else {
+                                        onUpdateCategory(newCategoryTitle, newCategoryPriority, it)
+                                    }
                                 }
-                            }
-                            resetToDefault()
-                            closeCategoryEditDialog()
-                        }, modifier = Modifier
-                            .padding(horizontal = 8.dp)
+                                resetToDefault()
+                                closeCategoryEditDialog()
+                            }, modifier = Modifier.padding(horizontal = 8.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Save,
@@ -295,4 +311,23 @@ private fun CategoryEditDialog(
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun CategoryPickerDialogPreview() {
+    CategoryPickerDialog(
+        categoryList = listOf(
+            Category(title = "카테고리1", defaultPriority = 1),
+            Category(title = "카테고리2", defaultPriority = 2),
+            Category(title = "카테고리3", defaultPriority = 3),
+            Category(title = "카테고리4", defaultPriority = 4),
+            Category(title = "카테고리5", defaultPriority = 5),
+        ),
+        closeCategoryDialog = {},
+        onSelectCategory = {},
+        onAddCategory = { _, _ -> },
+        onUpdateCategory = { _, _, _ -> },
+        onDeleteCategory = { },
+    )
 }

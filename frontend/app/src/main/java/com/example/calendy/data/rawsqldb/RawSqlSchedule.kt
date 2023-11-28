@@ -28,8 +28,8 @@ data class RawSqlSchedule(
     override val categoryId: Int? = null,
     @ColumnInfo(name = "priority", defaultValue = "0") // 0 = raw-sql without priority specified
     override val priority: Int = 3,
-    @ColumnInfo(name = "show_in_monthly_view", defaultValue = "0")
-    override val showInMonthlyView: Boolean = false,
+    @ColumnInfo(name = "show_in_monthly_view", defaultValue = "1")
+    override val showInMonthlyView: Boolean = true,
     @ColumnInfo(name = "is_overridden", defaultValue = "0")
     override val isOverridden: Boolean = false
 ) : RawSqlPlan {

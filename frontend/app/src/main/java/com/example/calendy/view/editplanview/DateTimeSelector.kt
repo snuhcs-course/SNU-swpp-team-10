@@ -1,6 +1,7 @@
 package com.example.calendy.view.editplanview
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -255,6 +256,8 @@ fun TwoDateSelectorButton(
     startTime: Date,
     endTime: Date,
     onSelectTimeRange: (Date, Date) -> Unit,
+    timePickerOpen: Boolean,
+    setTimePickerOpen: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var selectingStart by remember { mutableStateOf(false) }
@@ -263,7 +266,6 @@ fun TwoDateSelectorButton(
     val utcTime = if (selectingStart) startTime.timestampUTC() else endTime.timestampUTC()
 
     var dateDialogOpen by remember { mutableStateOf(false) }
-    var timePickerOpen by remember { mutableStateOf(false) }
     var forceRecompose by remember { mutableStateOf(0) }
 
     fun openDateDialog(isStart: Boolean) {
@@ -277,9 +279,9 @@ fun TwoDateSelectorButton(
 
     fun toggleTimePicker(isStart: Boolean) {
         if (selectingStart==isStart) {
-            timePickerOpen = !timePickerOpen
+            setTimePickerOpen(!timePickerOpen)
         } else {
-            timePickerOpen = true
+            setTimePickerOpen(true)
         }
         selectingStart = isStart
     }
@@ -290,17 +292,31 @@ fun TwoDateSelectorButton(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
     ) {
-        DateTimeSelectButton(currentTime = startTime,
-                             openDateDialog = { openDateDialog(true); },
-                             toggleTimePicker = { toggleTimePicker(true); },
-                             isVertical = true
-        )
+        Box(
+            modifier = if ((dateDialogOpen || timePickerOpen) && selectingStart) Modifier.border(
+                width = 1.dp, color = Color.Black
+            ) else Modifier
+        ) {
+            DateTimeSelectButton(
+                currentTime = startTime,
+                openDateDialog = { openDateDialog(true); },
+                toggleTimePicker = { toggleTimePicker(true); },
+                isVertical = true,
+            )
+        }
         Icon(imageVector = Icons.Filled.ArrowRightAlt, contentDescription = null)
-        DateTimeSelectButton(currentTime = endTime,
-                             openDateDialog = { openDateDialog(false); },
-                             toggleTimePicker = { toggleTimePicker(false); },
-                             isVertical = true
-        )
+        Box(
+            modifier = if ((dateDialogOpen || timePickerOpen) && !selectingStart) Modifier.border(
+                width = 1.dp, color = Color.Black
+            ) else Modifier
+        ) {
+            DateTimeSelectButton(
+                currentTime = endTime,
+                openDateDialog = { openDateDialog(false); },
+                toggleTimePicker = { toggleTimePicker(false); },
+                isVertical = true,
+            )
+        }
     }
 
 
@@ -375,7 +391,7 @@ fun TwoDateSelectorButton(
                     currentHour = hour,
                     currentMinute = minute,
                     onValueChanged = { newHour, newMinute ->
-                        if (hour != newHour || minute != newMinute) {
+                        if (hour!=newHour || minute!=newMinute) {
                             updateTime(newHour, newMinute)
                             forceRecompose = 1
                         } else {
@@ -404,5 +420,7 @@ fun DateRangeSelectorPreview() {
         startTime = Date(),
         endTime = Date(),
         onSelectTimeRange = { _, _ -> },
+        timePickerOpen = true,
+        setTimePickerOpen = { },
     )
 }

@@ -328,6 +328,8 @@ fun SetRepeatDialog(
             }
             onRepeatGroup(newRepeatGroup)
         } else {
+            // repeatgroup != null인 경우
+            // TODO: 그냥 한 번에 해도 될 것 같다.
             if (repeatRadioGroup.value=="noRepeat") onRepeatGroup(null)
             else {
                 when (repeatRadioGroup.value) {
