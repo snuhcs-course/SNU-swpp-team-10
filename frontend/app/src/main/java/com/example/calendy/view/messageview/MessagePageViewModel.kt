@@ -309,7 +309,8 @@ class MessagePageViewModel(
         val isSchedule = gptQuery.split(" ").run {
             // there is "SCHEDULE" at second or third word
             // INSERT INTO table, UPDATE table, DELETE table, DELETE FROM table
-            listOf(this.getOrNull(1), this.getOrNull(2)).any {
+            // SELECT * FROM table
+            listOf(this.getOrNull(1), this.getOrNull(2), this.getOrNull(3)).any {
                 it?.startsWith("SCHEDULE", ignoreCase = true) ?: false
             }
         }
@@ -371,8 +372,7 @@ class MessagePageViewModel(
                 val planType = if (isSchedule) "일정" else "할 일"
                 messageString = when (queryType) {
                     QueryType.INSERT    -> "말씀하신 ${planType}을 추가하지 못했어요."
-                    QueryType.UPDATE    -> "말씀하신 ${planType}을 찾지 못했어요."
-                    QueryType.DELETE    -> "말씀하신 ${planType}을 찾지 못했어요."
+                    QueryType.UPDATE, QueryType.DELETE, QueryType.SELECT    -> "말씀하신 ${planType}을 찾지 못했어요."
                     else                -> "죄송해요. 잘 이해하지 못했어요. "
                 }
                 hasRevision=false
@@ -386,6 +386,7 @@ class MessagePageViewModel(
                     QueryType.INSERT    -> messageString += "${planListSize}개를 추가했어요"
                     QueryType.UPDATE    -> messageString += "${planListSize}개를 수정했어요"
                     QueryType.DELETE    -> messageString += "${planListSize}개를 삭제했어요"
+                    QueryType.SELECT    -> messageString += "${planListSize}개를 발견했어요"
 //                    QueryType.NOT_FOUND -> {messageString = "찾으시는 플랜이 없어요"
 //                        hasRevision=false
 //                    }
@@ -476,10 +477,12 @@ class MessagePageViewModel(
                     planListSize= originalPlanList.size
                 }
                 QueryType.SELECT->{
-                    // RawSqlDB에 INSERT sqlQuery 실행
-                    rawSqlDatabase.execSql(gptQuery)
-                    // RawSqlDB에서 Select All
-                    val planList = rawSqlDatabase.getAllPlans()
+                    // SELECT 문에 의해 영향을 받는 planList 받기
+                    val planList = getAffectedPlansFromGptQuery()
+
+                    for (plan in planList) {
+                        insertHistory(gptMessage, isSchedule, QueryType.SELECT, currentId = plan.id)
+                    }
 
                     //initialize planListSize for updating message
                     planListSize= planList.size

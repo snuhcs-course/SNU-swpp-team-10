@@ -555,7 +555,8 @@ fun PlanModifiedItem(
             }
             QueryType.DELETE     ->
                 DropdownMenuItem(text = { Text(text="삭제된 일정 보기") }, onClick = { openDetailOf(modifiedPlanItem.planBefore!!)})
-            QueryType.SELECT     -> TODO()
+            QueryType.SELECT     -> 
+                DropdownMenuItem(text = { Text(text="발견한 일정 보기") }, onClick = { openDetailOf(modifiedPlanItem.planAfter!!)})
             else                 -> {}
         }
 

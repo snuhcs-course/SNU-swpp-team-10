@@ -59,8 +59,6 @@ object AppViewModelProvider {
             getContainer().run {
                 EditPlanViewModel(
                     planRepository = planRepository,
-                    scheduleRepository = scheduleRepository,
-                    todoRepository = todoRepository,
                     categoryRepository = categoryRepository,
                     repeatGroupRepository = repeatGroupRepository
                 )

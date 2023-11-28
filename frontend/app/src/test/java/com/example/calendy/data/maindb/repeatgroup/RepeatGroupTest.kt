@@ -17,12 +17,22 @@ class RepeatGroupTest {
             repeatRule = "MONWEDFRI",
             endDate = null
         )
-        repeatGroup.toIterable(DateHelper.getDate(2023, 11 - 1, 7)).forEach {
-            val (year, month, day, _, _) = it.extract()
-            val repeatedDate = it.applyTime(20, 56)
-            if (repeatedDate < it) {
-                println("${it.toString()} -> ${repeatedDate.toString()}")
+
+        var previousDate = DateHelper.getDate(2023, 11 - 1, 5)
+
+        for (startDateOnly in repeatGroup.toIterable(
+            startDate = DateHelper.getDate(
+                2023, 11 - 1, 7
+            )
+        )) {
+            // Iterator returns Date Only without time information.
+            val repeatedDate = startDateOnly.applyTime(10, 56)
+            if (!(previousDate < repeatedDate)) {
+                println("Previous: $previousDate -> Current: $repeatedDate")
+            } else if (repeatedDate.hours != 10 || repeatedDate.minutes != 56) {
+                println("Current: $repeatedDate")
             }
+            previousDate = repeatedDate
         }
     }
 }

@@ -337,7 +337,7 @@ fun NavigationGraph(
         }
         composable(
             // TODO: Specify Route & Query랑 일치하게 만들기
-            route = "${BottomNavItem.AiManager.screenRoute}?time={timeScope}", arguments = listOf(
+            route = "BriefingRoute?time={timeScope}", arguments = listOf(
                 navArgument("timeScope") {
                     type = NavType.StringType
                     nullable = true

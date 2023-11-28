@@ -29,7 +29,7 @@ android {
             )
         }
         debug {
-            enableAndroidTestCoverage = true // TODO: local test will fail. Only android test will pass
+//            enableAndroidTestCoverage = true // TODO: local test will fail. Only android test will pass
         }
     }
     compileOptions {

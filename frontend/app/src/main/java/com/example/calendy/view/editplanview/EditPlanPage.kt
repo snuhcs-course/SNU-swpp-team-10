@@ -1,6 +1,5 @@
 package com.example.calendy.view.editplanview
 
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.gestures.GestureCancellationException
 import androidx.compose.foundation.gestures.PressGestureScope
@@ -64,8 +63,6 @@ import androidx.compose.ui.unit.sp
 import com.example.calendy.data.dummy.DummyCategoryRepository
 import com.example.calendy.data.dummy.DummyPlanRepository
 import com.example.calendy.data.dummy.DummyRepeatGroupRepository
-import com.example.calendy.data.dummy.DummyScheduleRepository
-import com.example.calendy.data.dummy.DummyTodoRepository
 import com.example.calendy.data.maindb.category.Category
 import com.example.calendy.data.maindb.plan.PlanType
 import com.gowtham.ratingbar.RatingBar
@@ -377,8 +374,6 @@ fun FieldWithLeadingText(
 fun TodoScreenPreview() {
     EditPlanPage(editPlanViewModel = EditPlanViewModel(
         planRepository = DummyPlanRepository(),
-        scheduleRepository = DummyScheduleRepository(),
-        todoRepository = DummyTodoRepository(),
         categoryRepository = DummyCategoryRepository(),
         repeatGroupRepository = DummyRepeatGroupRepository()
     ), onNavigateBack = { })

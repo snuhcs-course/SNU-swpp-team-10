@@ -10,8 +10,6 @@ import com.example.calendy.data.maindb.plan.Plan
 import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
-import com.example.calendy.data.maindb.plan.schedule.IScheduleRepository
-import com.example.calendy.data.maindb.plan.todo.ITodoRepository
 import com.example.calendy.data.maindb.repeatgroup.IRepeatGroupRepository
 import com.example.calendy.data.maindb.repeatgroup.RepeatGroup
 import com.example.calendy.utils.DateHelper.extract
@@ -33,8 +31,6 @@ import kotlin.math.min
 
 class EditPlanViewModel(
     private val planRepository: IPlanRepository,
-    private val scheduleRepository: IScheduleRepository,
-    private val todoRepository: ITodoRepository,
     private val categoryRepository: ICategoryRepository,
     private val repeatGroupRepository: IRepeatGroupRepository
 ) : ViewModel() {
@@ -277,9 +273,18 @@ class EditPlanViewModel(
                     val scheduleDuration = currentState.endTime.time - currentState.startTime.time
                     val (_, _, _, hour, minute) = currentState.startTime.extract()
 
+                    var previousDate = currentState.startTime // TODO: TESTING
+
                     for (startDateOnly in repeatGroup.toIterable(currentState.startTime)) {
                         // Iterator returns Date Only without time information.
                         val repeatedDate = startDateOnly.applyTime(hour, minute)
+
+                        if (!(previousDate < repeatedDate)) {
+                            Log.e("GUN EditPlanViewModel", "Previous: $previousDate -> Current: $repeatedDate")
+                        } else if (repeatedDate.hours != hour || repeatedDate.minutes != minute) {
+                            Log.e("GUN EditPlanViewModel", "Current: $repeatedDate")
+                        }
+                        previousDate = repeatedDate
 
                         val newPlan = when (currentState.entryType) {
                             PlanType.SCHEDULE -> Schedule(
