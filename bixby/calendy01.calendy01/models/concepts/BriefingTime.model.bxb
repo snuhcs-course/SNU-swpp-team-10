@@ -1,0 +1,16 @@
+enum (BriefingTime) {
+  description (브리핑의 대상이 되는 Time Scope)
+  symbol (오늘)
+  symbol (내일)
+  symbol (월요일)
+  symbol (화요일)
+  symbol (수요일)
+  symbol (목요일)
+  symbol (금요일)
+  symbol (토요일)
+  symbol (일요일)
+  symbol (이번 주)
+  symbol (다음 주)
+  symbol (이번 달)
+  symbol (다음 달)
+}

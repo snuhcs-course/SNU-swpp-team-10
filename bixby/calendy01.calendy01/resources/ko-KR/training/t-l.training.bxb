@@ -1,0 +1,16 @@
+train (t-lm6ots1ahvi3zdjfge9ksj4c9) {
+  utterance ("[g:UserQuery] (내일 과제 모두 삭제)[v:UserQuery]")
+  last-modified (1701007025679)
+}
+train (t-lv7zb94q606y2b27sii2sol4a) {
+  utterance ("[g:UserQuery] (내일 컴퓨터구조 과제 삭제해줘)[v:UserQuery]")
+  last-modified (1701007069778)
+}
+train (t-l0ctnj64nfnqo4z8j9ocm4prg) {
+  utterance ("[g:UserQuery] (과제 카테고리 금요일로 옮겨줘)[v:UserQuery]")
+  last-modified (1701006969831)
+}
+train (t-lnjsfu4xdom49qp1ehgrrwdfh) {
+  utterance ("[g:BriefingTime] (다음달)[v:BriefingTime:'다음 달'] 일정을 브리핑해줘")
+  last-modified (1701042722748)
+}

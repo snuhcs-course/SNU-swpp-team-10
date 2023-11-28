@@ -1,0 +1,8 @@
+train (t-j854vzwe7ara6ui0jrtimzazi) {
+  utterance ("[g:UserQuery] (아냐 안만날래)[v:UserQuery]")
+  last-modified (1701006981047)
+}
+train (t-j0mmz9yqtlqkupotieumucv0q) {
+  utterance ("[g:BriefingTime] (월요일)[v:BriefingTime:월요일] 요약")
+  last-modified (1701042332816)
+}

@@ -1,0 +1,13 @@
+train (t-0ygs5fb9sh8crgb3fz94cbyrh) {
+  utterance ("[g:BriefingTime] (이번 주)[v:BriefingTime:'이번 주'] 브리핑")
+  plan (Y2BiUEhOzEnNS6k0MNRDsJyKMlPTMvPSQzJzU4lQwQiEDAycQMwExEA2AA==)
+  last-modified (1701006532518)
+}
+train (t-0kii29vn9pwmu0x53ttqt4u82) {
+  utterance ("[g:UserQuery] (7시에 민지랑 데이트 추가해줘)[v:UserQuery]")
+  last-modified (1701006835971)
+}
+train (t-0u8wp5j73rlwrisrp2116r5kn) {
+  utterance ("[g:BriefingTime] (다음 주)[v:BriefingTime:'다음 주'] 일정을 브리핑해줘")
+  last-modified (1701042698020)
+}

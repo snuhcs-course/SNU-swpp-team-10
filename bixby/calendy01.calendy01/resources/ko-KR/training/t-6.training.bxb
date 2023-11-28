@@ -1,0 +1,8 @@
+train (t-6jd9bh0sbqzsgcrs4e0kfwzte) {
+  utterance ("[g:UserQuery] (내일 치킨 안 먹을래)[v:UserQuery]")
+  last-modified (1701006849475)
+}
+train (t-6j2669ghj8o8ynuqjicq3w16e) {
+  utterance ("[g:BriefingTime] (수요일)[v:BriefingTime:수요일] 일정을 브리핑해줘")
+  last-modified (1701042312543)
+}

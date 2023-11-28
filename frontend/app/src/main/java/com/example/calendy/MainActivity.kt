@@ -295,6 +295,28 @@ fun NavigationGraph(navController: NavHostController) {
 
             EditPlanPage(viewModel, onNavigateBack = { navController.popBackStack() })
         }
+        composable(
+            // TODO: Specify Route & Query랑 일치하게 만들기
+            route = "${BottomNavItem.AiManager.screenRoute}?time={timeScope}", arguments = listOf(
+                navArgument("timeScope") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+            ), deepLinks = listOf(navDeepLink {
+                uriPattern = "calendy://briefing/{timeScope}"
+            })
+        ) { entry ->
+            val messagePageViewModel: MessagePageViewModel =
+                viewModel(factory = AppViewModelProvider.Factory)
+
+            val timeScope = entry.arguments?.getString("timeScope")
+            if (timeScope!=null) {
+                Log.d("GUN Main", timeScope.toString())
+//                messagePageViewModel.setUserInputText(timeScope)
+//                messagePageViewModel.onSendButtonClicked()
+            }
+        }
     }
 }
 
