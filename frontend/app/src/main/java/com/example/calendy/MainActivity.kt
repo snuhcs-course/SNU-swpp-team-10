@@ -19,6 +19,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -27,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -37,10 +41,10 @@ import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.ui.theme.CalendyTheme
-import com.example.calendy.view.messageview.MessagePage
 import com.example.calendy.view.editplanview.EditPlanPage
 import com.example.calendy.view.editplanview.EditPlanViewModel
 import com.example.calendy.view.messagepage.MessagePageViewModel
+import com.example.calendy.view.messageview.MessagePage
 import com.example.calendy.view.monthlyview.MonthlyPageKT
 import com.example.calendy.view.settingview.SettingPage
 import com.example.calendy.view.todolistview.ToDoListPage
@@ -56,7 +60,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            CalendyTheme {
+            CalendyTheme(darkTheme = false, dynamicColor = false) {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
@@ -72,15 +76,39 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreenView() {
     val navController = rememberNavController()
-    Scaffold(bottomBar = { BottomNavigation(navController = navController) }) {
+
+    var showBottomNavigation by remember { mutableStateOf(true) }
+
+    Scaffold(bottomBar = {
+        if (showBottomNavigation) BottomNavigation(
+            navController = navController,
+        )
+    }) {
         Box(Modifier.padding(it)) {
-            NavigationGraph(navController = navController)
+            NavigationGraph(
+                navController = navController,
+                showBottomNavigation = { shouldShow -> showBottomNavigation = shouldShow },
+            )
         }
     }
 }
 
+fun NavController.navigateToBottom(bottomNav: BottomNavItem) {
+    navigate(bottomNav.screenRoute) {
+        popUpTo(graph.id) {
+            // pop start destination too, so that back button quits app
+            inclusive = true
+//            saveState = true
+        }
+        launchSingleTop = true
+//        restoreState = true
+    }
+}
+
 @Composable
-fun BottomNavigation(navController: NavHostController) {
+fun BottomNavigation(
+    navController: NavHostController
+) {
     val items = listOf(
         BottomNavItem.Week,
         BottomNavItem.Month,
@@ -96,33 +124,29 @@ fun BottomNavigation(navController: NavHostController) {
         val currentRoute = navBackStackEntry?.destination?.route
 
         items.forEach { item ->
-            NavigationBarItem(icon = {
-                Icon(
-                    painter = painterResource(id = item.icon),
-                    contentDescription = stringResource(id = item.title),
-                    modifier = Modifier
-                        .width(26.dp)
-                        .height(26.dp)
-                )
-            },
-                              label = { Text(stringResource(id = item.title), fontSize = 9.sp) },
-                              selected = currentRoute==item.screenRoute,
-                              colors = NavigationBarItemDefaults.colors(
-                                  selectedIconColor = Color.Cyan,
-                                  unselectedIconColor = Color.Gray,
-                                  selectedTextColor = Color.Black,
-                                  unselectedTextColor = Color.Black
-                              ),
-                              alwaysShowLabel = true,
-                              onClick = {
-                                  navController.navigate(item.screenRoute) {
-                                      navController.graph.startDestinationRoute?.let {
-                                          popUpTo(it) { saveState = true }
-                                      }
-                                      launchSingleTop = true
-                                      restoreState = true
-                                  }
-                              })
+            NavigationBarItem(
+                icon = {
+                    Icon(
+                        painter = painterResource(id = item.icon),
+                        contentDescription = stringResource(id = item.title),
+                        modifier = Modifier
+                            .width(26.dp)
+                            .height(26.dp),
+                    )
+                },
+                label = { Text(stringResource(id = item.title), fontSize = 9.sp) },
+                selected = currentRoute==item.screenRoute,
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = Color.Cyan,
+                    unselectedIconColor = Color.Gray,
+                    selectedTextColor = Color.Black,
+                    unselectedTextColor = Color.Black,
+                ),
+                alwaysShowLabel = true,
+                onClick = {
+                    navController.navigateToBottom(item)
+                },
+            )
         }
     }
 }
@@ -161,63 +185,71 @@ sealed class BottomNavItem(
     )
 }
 
-sealed class DestinationRoute(val route: String) {
-
+sealed class EditPageRoute(val route: String) {
     companion object {
+        const val baseRoute = "EditPage"
+
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+
         // Helper method to convert a Date to a String
         fun dateToString(date: Date): String {
             return dateFormat.format(date)
         }
     }
 
-    class AddSchedule(date: Date) : DestinationRoute("EditPage/schedule?date=${dateToString(date)}")
+    class AddSchedule(date: Date) : EditPageRoute("$baseRoute/schedule?date=${dateToString(date)}")
 
-    class AddTodo(date: Date) : DestinationRoute("EditPage/todo?date=${dateToString(date)}")
+    class AddTodo(date: Date) : EditPageRoute("$baseRoute/todo?date=${dateToString(date)}")
 
-    class EditSchedule(id: Int) : DestinationRoute("EditPage/schedule?id=$id")
+    class EditSchedule(id: Int) : EditPageRoute("$baseRoute/schedule?id=$id")
 
-    class EditTodo(id: Int) : DestinationRoute("EditPage/todo?id=$id")
+    class EditTodo(id: Int) : EditPageRoute("$baseRoute/todo?id=$id")
 }
 
 
 @Composable
-fun NavigationGraph(navController: NavHostController) {
+fun NavigationGraph(
+    navController: NavHostController,
+    showBottomNavigation: (Boolean) -> Unit
+) {
     NavHost(navController = navController, startDestination = BottomNavItem.Month.screenRoute) {
+        // region Bottom Navigation Routes
         composable(BottomNavItem.Week.screenRoute) {
+            showBottomNavigation(true)
             val viewModel: WeeklyViewModel = viewModel(factory = AppViewModelProvider.Factory)
-            WeeklyPage(viewModel, onNavigateToEditPage = {id: Int?, type: PlanType, date: Date? ->
+            WeeklyPage(viewModel, onNavigateToEditPage = { id: Int?, type: PlanType, date: Date? ->
                 val route = if (id==null) {
                     when (type) {
-                        PlanType.SCHEDULE -> DestinationRoute.AddSchedule(date= date?: Date()).route
-                        PlanType.TODO     -> DestinationRoute.AddTodo(date = date?: Date()).route
+                        PlanType.SCHEDULE -> EditPageRoute.AddSchedule(
+                            date = date ?: Date()
+                        ).route
+
+                        PlanType.TODO     -> EditPageRoute.AddTodo(date = date ?: Date()).route
                     }
                 } else {
                     when (type) {
-                        PlanType.SCHEDULE -> DestinationRoute.EditSchedule(id = id).route
-                        PlanType.TODO     -> DestinationRoute.EditTodo(id = id).route
+                        PlanType.SCHEDULE -> EditPageRoute.EditSchedule(id = id).route
+                        PlanType.TODO     -> EditPageRoute.EditTodo(id = id).route
                     }
                 }
                 navController.navigate(route)
             })
         }
         composable(BottomNavItem.Month.screenRoute) {
-            for (t in navController.backQueue) {
-                Log.d("GUN", t.destination.toString())
-            }
+            showBottomNavigation(true)
             MonthlyPageKT(onNavigateToEditPage = { id: Int?, type: PlanType, date: Date? ->
                 val route = if (id==null) {
                     when (type) {
-                        PlanType.SCHEDULE -> DestinationRoute.AddSchedule(
+                        PlanType.SCHEDULE -> EditPageRoute.AddSchedule(
                             date = date ?: Date()
                         ).route
 
-                        PlanType.TODO     -> DestinationRoute.AddTodo(date = date ?: Date()).route
+                        PlanType.TODO     -> EditPageRoute.AddTodo(date = date ?: Date()).route
                     }
                 } else {
                     when (type) {
-                        PlanType.SCHEDULE -> DestinationRoute.EditSchedule(id = id).route
-                        PlanType.TODO     -> DestinationRoute.EditTodo(id = id).route
+                        PlanType.SCHEDULE -> EditPageRoute.EditSchedule(id = id).route
+                        PlanType.TODO     -> EditPageRoute.EditTodo(id = id).route
                     }
                 }
 
@@ -225,63 +257,46 @@ fun NavigationGraph(navController: NavHostController) {
             })
         }
         composable(BottomNavItem.Todo.screenRoute) {
-            val viewModel : TodoListViewModel  = viewModel(factory = AppViewModelProvider.Factory)
-            ToDoListPage(viewModel, onNavigateToEditPage = { id: Int? ,date: Date? ->
-                if(id != null){
-                    val route = DestinationRoute.EditTodo(id = id).route
+            showBottomNavigation(true)
+            val viewModel: TodoListViewModel = viewModel(factory = AppViewModelProvider.Factory)
+            ToDoListPage(viewModel, onNavigateToEditPage = { id: Int?, date: Date? ->
+                if (id!=null) {
+                    val route = EditPageRoute.EditTodo(id = id).route
                     navController.navigate(route)
                 } else {
-                    val route = DestinationRoute.AddTodo(date = date?: Date()).route
+                    val route = EditPageRoute.AddTodo(date = date ?: Date()).route
                     navController.navigate(route)
                 }
-            } )
-        }
-        composable(
-            route = "${BottomNavItem.AiManager.screenRoute}?query={query}", arguments = listOf(
-                navArgument("query") {
-                    type = NavType.StringType
-                    nullable = true
-                    defaultValue = null
-                },
-            ), deepLinks = listOf(navDeepLink {
-                uriPattern = "calendy://query/{query}"
             })
-        ) { entry ->
-            for (t in navController.backQueue) {
-                Log.d("GUN", t.destination.toString())
-            }
-            val messagePageViewModel: MessagePageViewModel =
-                viewModel(factory = AppViewModelProvider.Factory)
-
-            val userQuery = entry.arguments?.getString("query")
-            if (userQuery!=null) {
-                messagePageViewModel.setUserInputText(userQuery)
-                messagePageViewModel.onSendButtonClicked()
-            }
-            MessagePage(messagePageViewModel)
+        }
+        composable(BottomNavItem.AiManager.screenRoute) {
+            showBottomNavigation(true)
+            MessagePage()
         }
         composable(BottomNavItem.Setting.screenRoute) {
+            showBottomNavigation(true)
             SettingPage()
         }
-        composable(route = "EditPage/{type}?id={id}&date={date}",
-                   arguments = listOf(navArgument("type") {
-                       type = NavType.StringType
-                   }, navArgument("id") {
-                       type = NavType.StringType
-                       nullable = true
-                       defaultValue = null
-                   }, navArgument("date") {
-                       type = NavType.StringType
-                       nullable = true
-                       defaultValue = null
-                   })
+        //endregion
+        composable(
+            route = "${EditPageRoute.baseRoute}/{type}?id={id}&date={date}",
+            arguments = listOf(navArgument("type") {
+                type = NavType.StringType
+            }, navArgument("id") {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            }, navArgument("date") {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            })
         ) { entry ->
-            /* TODO Should not show bottom navigation */
-            Log.d("GUN", "Recompose")
-            Log.d("GUN", entry.arguments?.toString() ?: "Empty Argument")
+            showBottomNavigation(false)
+            Log.d("GUN MainActivity", "Recompose")
 
             val dateString = entry.arguments?.getString("date")
-            val date = dateString?.let { DestinationRoute.dateFormat.parse(it) }
+            val date = dateString?.let { EditPageRoute.dateFormat.parse(it) }
 
             val viewModel: EditPlanViewModel = viewModel(factory = AppViewModelProvider.Factory)
             viewModel.initialize(
@@ -293,7 +308,31 @@ fun NavigationGraph(navController: NavHostController) {
                 date = date
             )
 
-            EditPlanPage(viewModel, onNavigateBack = { navController.popBackStack() })
+            EditPlanPage(viewModel, onNavigateBack = navController::popBackStack )
+        }
+        composable(
+            route = "QueryRoute?query={query}", arguments = listOf(
+                navArgument("query") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+            ), deepLinks = listOf(navDeepLink {
+                uriPattern = "calendy://query/{query}"
+            })
+        ) { entry ->
+            // QueryRoute do not have a page. It just navigate to AiManager
+            val messagePageViewModel: MessagePageViewModel =
+                viewModel(factory = AppViewModelProvider.Factory)
+
+            val userQuery = entry.arguments?.getString("query")
+            if (userQuery!=null) {
+                messagePageViewModel.setUserInputText(userQuery)
+                messagePageViewModel.onSendButtonClicked()
+            }
+
+            // Navigate To ManagerPage
+            navController.navigateToBottom(BottomNavItem.AiManager)
         }
     }
 }

@@ -216,6 +216,27 @@ fun Date.afterDays(amount: Int): Date {
     return c.time
 }
 
+fun Date.afterMonths(amount: Int): Date {
+    val c = Calendar.getInstance()
+    c.time = this
+    c.add(Calendar.MONTH, amount)
+    return c.time
+}
+
+fun Date.afterYears(amount: Int): Date {
+    val c = Calendar.getInstance()
+    c.time = this
+    c.add(Calendar.YEAR, amount)
+    return c.time
+}
+
+fun Date.applyTime(hourOfDay: Int, minute: Int): Date {
+    val c = Calendar.getInstance()
+    c.time = this
+    c.set(Calendar.HOUR_OF_DAY, hourOfDay)
+    c.set(Calendar.MINUTE, minute)
+    return c.time
+}
 
 @Suppress("deprecation")
 fun Date.lastDayOfMonth(): Date {

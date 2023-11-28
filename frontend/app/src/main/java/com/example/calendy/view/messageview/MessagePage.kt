@@ -56,7 +56,7 @@ import java.util.Date
 
 @Composable
 fun MessagePage(
-    messagePageViewModel: MessagePageViewModel,
+    messagePageViewModel: MessagePageViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val messageUiState: MessageUIState by messagePageViewModel.uiState.collectAsState()
     val userInput = messageUiState.userInputText

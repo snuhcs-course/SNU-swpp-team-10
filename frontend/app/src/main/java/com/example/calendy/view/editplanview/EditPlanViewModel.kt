@@ -15,9 +15,9 @@ import com.example.calendy.data.maindb.plan.todo.ITodoRepository
 import com.example.calendy.data.maindb.repeatgroup.IRepeatGroupRepository
 import com.example.calendy.data.maindb.repeatgroup.RepeatGroup
 import com.example.calendy.utils.DateHelper.extract
-import com.example.calendy.utils.DateHelper.getDate
-import com.example.calendy.utils.dateOnly
+import com.example.calendy.utils.applyTime
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -71,8 +71,6 @@ class EditPlanViewModel(
             )
         } else {
             // edit existing plan
-            // TODO: _uiState.value is set. but it is suspended because of db query
-            // TODO: 임시 값 넣어놓기?
             _uiState.value = EditPlanUiState(isAddPage = false, id = id, entryType = type)
 
             // fill in other values after db query
@@ -152,8 +150,13 @@ class EditPlanViewModel(
     }
 
     //region DateSelector
+    // Invariance: startTime == dueTime (Imposed for addPlan & User Experience)
     fun setDueTime(inputDate: Date) {
-        _uiState.update { currentState -> currentState.copy(dueTime = inputDate) }
+        _uiState.update { currentState ->
+            currentState.copy(
+                dueTime = inputDate, startTime = inputDate, endTime = inputDate
+            )
+        }
     }
 
     fun setTimeRange(startDate: Date, endDate: Date) {
@@ -161,13 +164,13 @@ class EditPlanViewModel(
             // startDate < endDate
             _uiState.update { currentState ->
                 currentState.copy(
-                    startTime = startDate, endTime = endDate
+                    startTime = startDate, endTime = endDate, dueTime = startDate
                 )
             }
         } else {
             _uiState.update { currentState ->
                 currentState.copy(
-                    startTime = startDate, endTime = startDate
+                    startTime = startDate, endTime = startDate, dueTime = startDate
                 )
             }
         }
@@ -184,15 +187,16 @@ class EditPlanViewModel(
             categoryRepository.insert(Category(title = title, defaultPriority = defaultPriority))
         }
     }
+
     fun updateCategory(title: String, defaultPriority: Int, category: Category) {
         viewModelScope.launch {
             val updatedCategory = category.copy(
-                title = title,
-                defaultPriority = defaultPriority
+                title = title, defaultPriority = defaultPriority
             )
             categoryRepository.update(updatedCategory)
         }
     }
+
     fun deleteCategory(category: Category) {
         viewModelScope.launch {
             categoryRepository.delete(category)
@@ -233,150 +237,13 @@ class EditPlanViewModel(
             _uiState.update { currentState -> currentState.copy(titleField = "Untitled") }
         }
         val currentState = _uiState.value
-        when (currentState.entryType) {
-            PlanType.SCHEDULE -> {
-                val repeatGroup = currentState.repeatGroup
-                if (repeatGroup!=null) {
-                    viewModelScope.launch {
-                        try {
-                            // Switch to the IO dispatcher for database operations
-                            withContext(Dispatchers.IO) {
-                                val repeatGroupId: Int =
-                                    repeatGroupRepository.insert(repeatGroup).toInt()
-                                val endDate = repeatGroup.endDate
-                                    ?: Date(currentState.endTime.time + 3L * 365 * 24 * 60 * 60 * 1000)
 
-                                var start = currentState.startTime
-                                var end = currentState.endTime
-                                if (repeatGroup.day) {
-                                    while (end.before(endDate)) {
-                                        val newSchedule = Schedule(
-                                            title = currentState.titleField,
-                                            startTime = start,
-                                            endTime = end,
-                                            memo = currentState.memoField,
-                                            repeatGroupId = repeatGroupId,
-                                            categoryId = currentState.category?.id,
-                                            priority = currentState.priority,
-                                            showInMonthlyView = currentState.showInMonthlyView,
-                                            isOverridden = false
-                                        )
-                                        // Insert the schedule into the database
-                                        scheduleRepository.insert(newSchedule)
-
-                                        // Calculate the next start and end times
-                                        start =
-                                            Date(start.time + repeatGroup.repeatInterval * 24L * 60 * 60 * 1000)
-                                        end =
-                                            Date(end.time + repeatGroup.repeatInterval * 24L * 60 * 60 * 1000)
-                                    }
-                                } else if (repeatGroup.week) {
-                                    val repeatDays = parseRepeatDays(repeatGroup.repeatRule ?: "")
-                                    val calendar = Calendar.getInstance()
-                                    val initialStart = start
-                                    while (end.before(endDate)) {
-                                        for (repeatDay in repeatDays) {
-                                            calendar.time = start
-                                            calendar.set(Calendar.DAY_OF_WEEK, repeatDay)
-                                            if (calendar.time.before(initialStart)) continue
-                                            val newStart = calendar.time
-                                            val newEnd = Date(newStart.time + end.time - start.time)
-                                            if (newEnd.after(endDate)) continue
-                                            // Create and insert new schedule
-                                            val newSchedule = Schedule(
-                                                title = currentState.titleField,
-                                                startTime = newStart,
-                                                endTime = newEnd,
-                                                memo = currentState.memoField,
-                                                repeatGroupId = repeatGroupId,
-                                                categoryId = currentState.category?.id,
-                                                priority = currentState.priority,
-                                                showInMonthlyView = currentState.showInMonthlyView,
-                                                isOverridden = false
-                                            )
-                                            scheduleRepository.insert(newSchedule)
-                                        }
-                                        // Move to the next interval
-                                        start =
-                                            Date(start.time + repeatGroup.repeatInterval * 7L * 24 * 60 * 60 * 1000)
-                                        end =
-                                            Date(end.time + repeatGroup.repeatInterval * 7L * 24 * 60 * 60 * 1000)
-                                    }
-                                } else if (repeatGroup.month) {
-                                    val repeatDates =
-                                        repeatGroup.repeatRule?.chunked(2)?.map { it.toInt() }
-                                            ?: listOf()
-                                    val calendar = Calendar.getInstance()
-                                    val initialStart = start
-                                    val duration = end.time - start.time
-
-                                    while (end.before(endDate)) {
-                                        for (dayOfMonth in repeatDates) {
-                                            calendar.time = start
-                                            // Ensure the dayOfMonth is within the current month's maximum day
-                                            val maxDayInMonth =
-                                                calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
-                                            if (dayOfMonth <= maxDayInMonth) {
-                                                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-                                                val newStart = calendar.time
-                                                val newEnd = Date(newStart.time + duration)
-
-                                                if (newEnd.before(endDate) && newStart.after(
-                                                        initialStart
-                                                    )
-                                                ) {
-                                                    // Create and insert new schedule
-                                                    val newSchedule = Schedule(
-                                                        title = currentState.titleField,
-                                                        startTime = newStart,
-                                                        endTime = newEnd,
-                                                        memo = currentState.memoField,
-                                                        repeatGroupId = repeatGroupId,
-                                                        categoryId = currentState.category?.id,
-                                                        priority = currentState.priority,
-                                                        showInMonthlyView = currentState.showInMonthlyView,
-                                                        isOverridden = false
-                                                    )
-                                                    // Insert the schedule into the database
-                                                    scheduleRepository.insert(newSchedule)
-                                                }
-                                            }
-                                        }
-                                        // Increment start date by one month
-                                        calendar.add(Calendar.MONTH, repeatGroup.repeatInterval)
-                                        calendar.set(Calendar.DAY_OF_MONTH, 1)
-                                        start = calendar.time
-                                        end = Date(start.time + duration)
-                                    }
-                                } else { //repeatGroup.year
-                                    val newSchedule = Schedule(
-                                        title = currentState.titleField,
-                                        startTime = start,
-                                        endTime = end,
-                                        memo = currentState.memoField,
-                                        repeatGroupId = repeatGroupId,
-                                        categoryId = currentState.category?.id,
-                                        priority = currentState.priority,
-                                        showInMonthlyView = currentState.showInMonthlyView,
-                                        isOverridden = false
-                                    )
-                                    // Insert the schedule into the database
-                                    scheduleRepository.insert(newSchedule)
-
-                                    // Calculate the next start and end times
-                                    start =
-                                        Date(start.time + repeatGroup.repeatInterval * 365L * 24 * 60 * 60 * 1000)
-                                    end =
-                                        Date(end.time + repeatGroup.repeatInterval * 365L * 24L * 60 * 60 * 1000)
-                                }
-                            }
-                        } catch (e: Exception) {
-                            Log.e("AddPlan", "Error adding plan: ${e.localizedMessage}")
-                        }
-                    }
-
-                } else {
-                    val newSchedule = Schedule(
+        // GlobalScope may be bad!
+        GlobalScope.launch(context = Dispatchers.IO) {
+            val repeatGroup = currentState.repeatGroup
+            if (repeatGroup==null) {
+                val newPlan = when (currentState.entryType) {
+                    PlanType.SCHEDULE -> Schedule(
                         title = currentState.titleField,
                         startTime = currentState.startTime,
                         endTime = currentState.endTime,
@@ -387,137 +254,8 @@ class EditPlanViewModel(
                         showInMonthlyView = currentState.showInMonthlyView,
                         isOverridden = false
                     )
-                    viewModelScope.launch { scheduleRepository.insert(newSchedule) }
-                }
 
-            }
-
-            PlanType.TODO     -> {
-                val repeatGroup = currentState.repeatGroup
-                if (repeatGroup!=null) {
-                    viewModelScope.launch {
-                        try {
-                            withContext(Dispatchers.IO) {
-                                val repeatGroupId: Int =
-                                    repeatGroupRepository.insert(repeatGroup).toInt()
-                                val endDate = repeatGroup.endDate
-                                    ?: Date(currentState.dueTime.time + 10L * 365 * 24 * 60 * 60 * 1000) // 1 year later
-                                var dueTime = currentState.dueTime
-                                if (repeatGroup.day) {
-                                    while (dueTime < endDate) {
-                                        val newTodo = Todo(
-                                            title = currentState.titleField,
-                                            dueTime = dueTime,
-                                            memo = currentState.memoField,
-                                            complete = currentState.isComplete,
-                                            repeatGroupId = repeatGroupId,
-                                            categoryId = currentState.category?.id,
-                                            priority = currentState.priority,
-                                            showInMonthlyView = currentState.showInMonthlyView,
-                                            isOverridden = false
-                                        )
-                                        todoRepository.insert(newTodo)
-                                        dueTime =
-                                            Date(dueTime.time + repeatGroup.repeatInterval * 24L * 60 * 60 * 1000)
-                                    }
-                                } else if (repeatGroup.week) {
-                                    val repeatDays = parseRepeatDays(repeatGroup.repeatRule ?: "")
-                                    val calendar = Calendar.getInstance()
-                                    val initialDue = dueTime
-                                    while (dueTime.before(endDate)) {
-                                        for (repeatDay in repeatDays) {
-                                            calendar.time = dueTime
-                                            calendar.set(Calendar.DAY_OF_WEEK, repeatDay)
-                                            if (calendar.time.before(initialDue) || calendar.time.after(
-                                                    endDate
-                                                )
-                                            ) continue
-                                            val newDue = calendar.time
-                                            // Create and insert new schedule
-                                            val newTodo = Todo(
-                                                title = currentState.titleField,
-                                                dueTime = newDue,
-                                                memo = currentState.memoField,
-                                                complete = currentState.isComplete,
-                                                repeatGroupId = repeatGroupId,
-                                                categoryId = currentState.category?.id,
-                                                priority = currentState.priority,
-                                                showInMonthlyView = currentState.showInMonthlyView,
-                                                isOverridden = false
-                                            )
-                                            todoRepository.insert(newTodo)
-                                        }
-                                        // Move to the next interval
-                                        dueTime =
-                                            Date(dueTime.time + repeatGroup.repeatInterval * 7L * 24 * 60 * 60 * 1000)
-                                    }
-                                } else if (repeatGroup.month) {
-                                    val repeatDates =
-                                        repeatGroup.repeatRule?.chunked(2)?.map { it.toInt() }
-                                            ?: listOf()
-                                    val calendar = Calendar.getInstance()
-                                    val initialDue = dueTime
-
-                                    while (dueTime.before(endDate)) {
-                                        for (dayOfMonth in repeatDates) {
-                                            calendar.time = dueTime
-                                            // Ensure the dayOfMonth is within the current month's maximum day
-                                            val maxDayInMonth =
-                                                calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
-                                            if (dayOfMonth <= maxDayInMonth) {
-                                                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-                                                val newDue = calendar.time
-
-                                                if (newDue.before(endDate) && newDue.after(
-                                                        initialDue
-                                                    )
-                                                ) {
-                                                    // Create and insert new todo
-                                                    val newTodo = Todo(
-                                                        title = currentState.titleField,
-                                                        dueTime = newDue,
-                                                        memo = currentState.memoField,
-                                                        complete = currentState.isComplete,
-                                                        repeatGroupId = repeatGroupId,
-                                                        categoryId = currentState.category?.id,
-                                                        priority = currentState.priority,
-                                                        showInMonthlyView = currentState.showInMonthlyView,
-                                                        isOverridden = false
-                                                    )
-                                                    todoRepository.insert(newTodo)
-                                                }
-                                            }
-                                        }
-                                        // Increment due date by one month
-                                        calendar.add(Calendar.MONTH, repeatGroup.repeatInterval)
-                                        calendar.set(Calendar.DAY_OF_MONTH, 1)
-                                        dueTime = calendar.time
-                                    }
-                                } else { //repeatGroup.year
-                                    while (dueTime < endDate) {
-                                        val newTodo = Todo(
-                                            title = currentState.titleField,
-                                            dueTime = dueTime,
-                                            memo = currentState.memoField,
-                                            complete = currentState.isComplete,
-                                            repeatGroupId = repeatGroupId,
-                                            categoryId = currentState.category?.id,
-                                            priority = currentState.priority,
-                                            showInMonthlyView = currentState.showInMonthlyView,
-                                            isOverridden = false
-                                        )
-                                        todoRepository.insert(newTodo)
-                                        dueTime =
-                                            Date(dueTime.time + repeatGroup.repeatInterval * 365L * 24 * 60 * 60 * 1000)
-                                    }
-                                }
-                            }
-                        } catch (e: Exception) {
-                            Log.e("AddPlan", "Error adding plan: ${e.localizedMessage}")
-                        }
-                    }
-                } else {
-                    val newTodo = Todo(
+                    PlanType.TODO     -> Todo(
                         title = currentState.titleField,
                         dueTime = currentState.dueTime,
                         memo = currentState.memoField,
@@ -528,9 +266,53 @@ class EditPlanViewModel(
                         showInMonthlyView = currentState.showInMonthlyView,
                         isOverridden = false
                     )
-                    viewModelScope.launch { todoRepository.insert(newTodo) }
                 }
+                // Insert the plan into the database
+                planRepository.insert(newPlan)
+            } else {
+                try {
+                    val repeatGroupId: Int = repeatGroupRepository.insert(repeatGroup).toInt()
 
+                    // Invariance: startTime == dueTime (Imposed by setDueTime, setTimeRange)
+                    val scheduleDuration = currentState.endTime.time - currentState.startTime.time
+                    val (_, _, _, hour, minute) = currentState.startTime.extract()
+
+                    for (startDateOnly in repeatGroup.toIterable(currentState.startTime)) {
+                        // Iterator returns Date Only without time information.
+                        val repeatedDate = startDateOnly.applyTime(hour, minute)
+
+                        val newPlan = when (currentState.entryType) {
+                            PlanType.SCHEDULE -> Schedule(
+                                title = currentState.titleField,
+                                startTime = repeatedDate,
+                                endTime = Date(repeatedDate.time + scheduleDuration),
+                                memo = currentState.memoField,
+                                repeatGroupId = repeatGroupId,
+                                categoryId = currentState.category?.id,
+                                priority = currentState.priority,
+                                showInMonthlyView = currentState.showInMonthlyView,
+                                isOverridden = false
+                            )
+
+                            PlanType.TODO     -> Todo(
+                                title = currentState.titleField,
+                                dueTime = repeatedDate,
+                                memo = currentState.memoField,
+                                complete = currentState.isComplete,
+                                repeatGroupId = repeatGroupId,
+                                categoryId = currentState.category?.id,
+                                priority = currentState.priority,
+                                showInMonthlyView = currentState.showInMonthlyView,
+                                isOverridden = false
+                            )
+                        }
+                        Log.d("AddPlan", "newPlan: $newPlan")
+                        planRepository.insert(newPlan)
+                    }
+                } catch (e: Exception) {
+                    Log.e("AddPlan", "Error adding plan: ${e.localizedMessage}")
+                    Log.e("AddPlan", e.stackTraceToString())
+                }
             }
         }
     }
@@ -542,19 +324,19 @@ class EditPlanViewModel(
         val currentState = _uiState.value
 
         if (currentState.id==null) {
-            // TODO: Report Error
-            Log.e("GUN", "id should not be null")
+            Log.e("Edit Plan View Model - updatePlan", "id should not be null")
             return
         }
 
-        if (currentState.repeatGroupId!=null) {
-            deletePlan()
-            addPlan()
-        } else {
-            // id: Int? is smart casted into type Int
-            when (currentState.entryType) {
-                PlanType.SCHEDULE -> {
-                    val updatedSchedule = Schedule(
+        GlobalScope.launch(context = Dispatchers.IO) {
+            if (currentState.repeatGroupId!=null) {
+                deletePlan()
+                // TODO: Start Date가 달라져버려서 망한다.
+                addPlan()
+            } else {
+                // id: Int? is smart casted into type Int
+                val updatedPlan = when (currentState.entryType) {
+                    PlanType.SCHEDULE -> Schedule(
                         id = currentState.id,
                         title = currentState.titleField,
                         startTime = currentState.startTime,
@@ -566,11 +348,8 @@ class EditPlanViewModel(
                         showInMonthlyView = currentState.showInMonthlyView,
                         isOverridden = false
                     )
-                    viewModelScope.launch { scheduleRepository.update(updatedSchedule) }
-                }
 
-                PlanType.TODO     -> {
-                    val updatedTodo = Todo(
+                    PlanType.TODO     -> Todo(
                         id = currentState.id,
                         title = currentState.titleField,
                         dueTime = currentState.dueTime,
@@ -582,8 +361,8 @@ class EditPlanViewModel(
                         showInMonthlyView = currentState.showInMonthlyView,
                         isOverridden = false
                     )
-                    viewModelScope.launch { todoRepository.update(updatedTodo) }
                 }
+                planRepository.update(updatedPlan)
             }
         }
 
@@ -594,51 +373,32 @@ class EditPlanViewModel(
         val currentState = _uiState.value
 
         if (currentState.id==null) {
-            // TODO: Report Error
-            Log.e("GUN", "id should not be null")
+            Log.e("Edit Plan View Model - deletePlan", "id should not be null")
             return
         }
-        viewModelScope.launch {
+
+        GlobalScope.launch(context = Dispatchers.IO) {
             if (currentState.repeatGroupId!=null) {
+                // Delete repeat group -> cascade delete
                 repeatGroupRepository.deleteRepeatGroupById(currentState.repeatGroupId)
             } else {
-                // id: Int? is smart casted into type Int
-                when (currentState.entryType) {
-                    PlanType.SCHEDULE -> {
+                val deletedPlan = when (currentState.entryType) {
+                    PlanType.SCHEDULE -> Schedule(
+                        id = currentState.id,
+                        title = currentState.titleField,
+                        startTime = currentState.startTime,
+                        endTime = currentState.endTime,
+                    )
 
-                        val deletedSchedule = Schedule(
-                            id = currentState.id,
-                            title = currentState.titleField,
-                            startTime = currentState.startTime,
-                            endTime = currentState.endTime,
-                        )
-                        scheduleRepository.delete(deletedSchedule)
-                    }
-
-                    PlanType.TODO     -> {
-                        val deletedTodo = Todo(
-                            id = currentState.id,
-                            title = currentState.titleField,
-                            dueTime = currentState.dueTime,
-                        )
-                        todoRepository.delete(deletedTodo)
-                    }
+                    PlanType.TODO     -> Todo(
+                        id = currentState.id,
+                        title = currentState.titleField,
+                        dueTime = currentState.dueTime,
+                    )
                 }
+                planRepository.delete(deletedPlan)
             }
-
-        }
-
-
-    }
-
-    private fun parseRepeatDays(repeatRule: String): List<Int> {
-        val daysOfWeek = listOf("MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN")
-
-        return daysOfWeek.mapIndexedNotNull { index, day ->
-            if (repeatRule.contains(day)) {
-                val calendarDay = index + 2
-                if (calendarDay > 7) 1 else calendarDay
-            } else null
         }
     }
+
 }

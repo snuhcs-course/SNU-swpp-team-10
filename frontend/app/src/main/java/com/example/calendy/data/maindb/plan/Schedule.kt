@@ -44,7 +44,7 @@ data class Schedule(
     @ColumnInfo(name = "priority")
     override val priority: Int = PRIORITY_DEFAULT,
     @ColumnInfo(name = "show_in_monthly_view")
-    override val showInMonthlyView: Boolean = false,
+    override val showInMonthlyView: Boolean = true,
     @ColumnInfo(name = "is_overridden")
     override val isOverridden: Boolean = false
 ) : Plan
