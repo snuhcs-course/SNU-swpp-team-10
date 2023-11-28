@@ -2,6 +2,7 @@ package com.example.calendy
 
 import android.os.Bundle
 import android.util.Log
+import android.window.SplashScreen
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
@@ -26,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -47,6 +49,7 @@ import com.example.calendy.view.todolistview.ToDoListPage
 import com.example.calendy.view.todolistview.TodoListViewModel
 import com.example.calendy.view.weeklyview.WeeklyPage
 import com.example.calendy.view.weeklyview.WeeklyViewModel
+
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -55,6 +58,7 @@ import java.util.Locale
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        installSplashScreen()
         setContent {
             CalendyTheme {
                 // A surface container using the 'background' color from the theme
@@ -71,6 +75,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreenView() {
+
     val navController = rememberNavController()
     Scaffold(bottomBar = { BottomNavigation(navController = navController) }) {
         Box(Modifier.padding(it)) {
@@ -86,7 +91,7 @@ fun BottomNavigation(navController: NavHostController) {
         BottomNavItem.Month,
         BottomNavItem.Todo,
         BottomNavItem.AiManager,
-        BottomNavItem.Setting
+//        BottomNavItem.Setting
     )
 
     NavigationBar(
@@ -154,11 +159,11 @@ sealed class BottomNavItem(
         screenRoute = "AiManager"
     )
 
-    object Setting : BottomNavItem(
-        title = R.string.setting_view,
-        icon = R.drawable.outline_app_settings_alt_24,
-        screenRoute = "Setting"
-    )
+//    object Setting : BottomNavItem(
+//        title = R.string.setting_view,
+//        icon = R.drawable.outline_app_settings_alt_24,
+//        screenRoute = "Setting"
+//    )
 }
 
 sealed class DestinationRoute(val route: String) {
@@ -260,9 +265,9 @@ fun NavigationGraph(navController: NavHostController) {
             }
             MessagePage(messagePageViewModel)
         }
-        composable(BottomNavItem.Setting.screenRoute) {
-            SettingPage()
-        }
+//        composable(BottomNavItem.Setting.screenRoute) {
+//            SettingPage()
+//        }
         composable(route = "EditPage/{type}?id={id}&date={date}",
                    arguments = listOf(navArgument("type") {
                        type = NavType.StringType

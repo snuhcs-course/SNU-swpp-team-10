@@ -6,4 +6,10 @@
         <item name="android:background">@drawable/white_round</item>
     </style>
 
+    <style name="Theme.Calendy.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="windowSplashScreenAnimationDuration">3000</item>
+        <item name="postSplashScreenTheme">@style/Theme.Calendy</item>
+    </style>
+
 </resources>
