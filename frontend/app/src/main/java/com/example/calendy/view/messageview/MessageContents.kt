@@ -36,10 +36,9 @@ import com.example.calendy.data.maindb.message.Message
 import com.example.calendy.data.maindb.plan.Plan
 import com.example.calendy.data.maindb.plan.Todo
 import com.example.calendy.ui.theme.Blue1
-import com.example.calendy.ui.theme.Blue3
 import com.example.calendy.utils.toTimeString
 import com.example.calendy.view.popup.PlanDetailPopup
-import com.example.calendy.view.popup.PlanRevisionListPopup
+import com.example.calendy.view.popup.PlanModifiedListPopup
 import java.util.Date
 
 @Composable
@@ -82,7 +81,7 @@ fun SentTime(
         text = messageLog.sentTime.toTimeString(),
         modifier = Modifier
             .wrapContentSize()
-            .padding( vertical = 10.dp),
+            .padding(vertical = 10.dp),
         fontSize = 10.sp,
         color = Color.Gray
     )
@@ -109,23 +108,24 @@ fun MessageContentManagerThinking(){
             .padding(5.dp),
         contentAlignment = Alignment.Center
     ) {
-//          //OnProgress...
-//        LoadingAnimation1(
-//            modifier=Modifier
-//                .width(90.dp)
-//                .height(30.dp),
-//            circleColor = Blue1,
-//            circleSize = 3.dp,
-//            spaceBetween = 5.dp,
-//        )
-        Text(
-            text = "AI 매니저가 살펴보고 있어요...",
-            modifier = Modifier
-                .wrapContentSize()
-                .padding(10.dp),
-            fontSize = 14.sp,
-
-            )
+          //OnProgress...
+        LoadingAnimation1(
+            modifier=Modifier
+                .width(90.dp)
+                .height(30.dp),
+            circleColor = Blue1,
+            circleSize = 8.dp,
+            spaceBetween = 8.dp,
+            travelDistance = 10.dp
+        )
+//        Text(
+//            text = "AI 매니저가 살펴보고 있어요...",
+//            modifier = Modifier
+//                .wrapContentSize()
+//                .padding(10.dp),
+//            fontSize = 14.sp,
+//
+//            )
     }
 }
 @Composable
@@ -133,12 +133,10 @@ fun MessageContentManagerWithButton(
     messageLog: Message,
     messageContentViewModel: MessagePlanLogViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    val logPlanList: List<Plan> by messageContentViewModel.modifiedPlans.collectAsState()
-    val planPairList: List<Pair<Plan?, Plan?>> by messageContentViewModel.modifiedPlanList.collectAsState()
+//    val logPlanList: List<Plan> by messageContentViewModel.modifiedPlans.collectAsState()
+    val modifiedPlanItems: List<ModifiedPlanItem> by messageContentViewModel.modifiedPlanItems.collectAsState()
 
     var openListPopup: Boolean by remember { mutableStateOf(false) }
-    var openDetailPopup: Boolean by remember { mutableStateOf(false) }
-    var selectedPlan: Plan by remember { mutableStateOf(Todo(-1, "", Date())) }
 
 
     fun onButtonClick() {
@@ -155,7 +153,7 @@ fun MessageContentManagerWithButton(
         Text(
             text = messageLog.content, modifier = Modifier
                 .wrapContentSize()
-                .padding(top = 10.dp,bottom=5.dp, end =10.dp, start = 10.dp),
+                .padding(top = 10.dp, bottom = 5.dp, end = 10.dp, start = 10.dp),
             fontSize = 14.sp,
         )
         // TODO: 위아래 padding 조절
@@ -197,29 +195,16 @@ fun MessageContentManagerWithButton(
     }
 
     //open tod0 list popup
-    if (openListPopup && !openDetailPopup) {
-        PlanRevisionListPopup(
-            planPairList = planPairList,
-            header = { Text(text = "일정 자세히 보기") },
-            onDismissed = { openListPopup = false },
-            onItemClick = { plan ->
-                selectedPlan = plan
-                openDetailPopup = true
-            },
-            onCheckboxClicked = { plan, checked ->
+    if (openListPopup) {
 
-            },
+        PlanModifiedListPopup(
+            headerMessage = "일정 변경 사항",
+            modifiedPlanItems = modifiedPlanItems,
+            onDismissed = { openListPopup = false },
+            viewModel= messageContentViewModel
         )
     }
 
-    if (openDetailPopup) {
-        PlanDetailPopup(
-            plan = selectedPlan,
-            header = { selectedPlan.title },
-            onDismissed = { openDetailPopup = false },
-
-            )
-    }
 }
 
 @Preview

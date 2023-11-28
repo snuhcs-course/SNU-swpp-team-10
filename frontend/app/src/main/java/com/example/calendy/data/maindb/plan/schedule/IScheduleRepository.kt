@@ -12,4 +12,5 @@ interface IScheduleRepository : BaseRepository<Schedule> {
     fun getScheduleById(id: Int): Schedule
     fun getSchedulesViaQuery(query: SupportSQLiteQuery): List<Schedule>
     fun getSchedulesByIds(ids: List<Int>): List<Schedule>
+    fun getMonthlySchedulesStream(startTime: Date, endTime: Date): Flow<List<Schedule>>
 }

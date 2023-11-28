@@ -163,6 +163,15 @@ class PlanRepository(
         }
     }
 
+    override fun getMonthlyPlansStream(startTime: Date, endTime: Date): Flow<List<Plan>> {
+        val schedulesStream = scheduleRepository.getMonthlySchedulesStream(startTime, endTime)
+        val todosStream = todoRepository.getMonthlyTodosStream(startTime, endTime)
+        return combine(schedulesStream, todosStream) { scheduleList, todoList ->
+            val result = scheduleList + todoList
+            result
+        }
+    }
+
     // Usage: getPlanById(id = 3, type = Plan.PlanType.Schedule)
     override fun getPlanById(id: Int, type: PlanType): Plan = when (type) {
         PlanType.SCHEDULE -> scheduleRepository.getScheduleById(id)

@@ -18,6 +18,9 @@ val Blue3 = Color(0xFF80ACFF)
 val Blue4 = Color(0xFF337AFF)
 val Blue5 = Color(0xFF0058FF)
 
+val Light_Gray = Color(0xFF737373)
+val Light_Green = Color(0xFFF4BC574)
+
 fun PriorityColor(priority: Int): Int {
     // Not working properly with other methods
     return when (priority) {

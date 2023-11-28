@@ -184,7 +184,7 @@ fun Date.toDateTimeString(showYear: Boolean = false): String =
 
 fun Date.toDateString(showYear: Boolean): String = if (showYear) String.format(
     "%d년 %d월 %d일",
-    year + 1900,
+    year+1900,
     month + 1,
     date
 ) else String.format("%d월 %d일", month + 1, date)
@@ -215,6 +215,10 @@ fun Date.afterDays(amount: Int): Date {
     c.add(Calendar.DATE, amount)
     return c.time
 }
+
+fun Date.isStartOfDay(): Boolean = hours == 0 && minutes == 0
+
+fun Date.isEndOfDay(): Boolean = hours == 23 && minutes == 59
 
 
 @Suppress("deprecation")

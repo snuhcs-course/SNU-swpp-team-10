@@ -17,7 +17,8 @@ class ScheduleRepository(private val scheduleDao: ScheduleDao) : IScheduleReposi
 
     override fun getSchedulesStream(startTime: Date, endTime: Date): Flow<List<Schedule>> =
         scheduleDao.getSchedulesStream(startTime, endTime)
-
+    override fun getMonthlySchedulesStream(startTime: Date, endTime: Date): Flow<List<Schedule>> =
+        scheduleDao.getMonthlySchedulesStream(startTime, endTime)
     override fun getScheduleById(id: Int): Schedule = scheduleDao.getScheduleById(id)
 
 

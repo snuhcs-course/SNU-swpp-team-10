@@ -22,7 +22,7 @@ class HistoryRepository(
         managerHistoryDao.getHistoriesByMessageId(messageId)
 
     // return (isSchedule: Boolean, (savedPlanId: Int?, currentPlanId: Int?))
-    override fun getRevisionHistoriesByMessageId(messageId: Int): List<Pair<PlanType, Pair<Int?, Int?>>> {
+    override fun getRevisionPlanListsByMessageId(messageId: Int): List<Pair<PlanType, Pair<Int?, Int?>>> {
         val historyList = managerHistoryDao.getHistoriesByMessageId(messageId)
 
         return historyList.map {
@@ -33,8 +33,21 @@ class HistoryRepository(
         }
     }
 
+    override fun getRevisionHistoriesByMessageId(messageId: Int): List<ManagerHistory> =
+        managerHistoryDao.getHistoriesByMessageId(messageId)
+
+    override suspend fun deleteHistoryById(historyId: Int) {
+        managerHistoryDao.deleteHistoryById(historyId)
+    }
+
+    override suspend fun deleteSavedPlan(savedPlan: Plan) = when (savedPlan) {
+        is Schedule -> savedScheduleDao.delete(savedPlan.toSavedSchedule())
+        is Todo     -> savedTodoDao.delete(savedPlan.toSavedTodo())
+    }
+
     override fun getSavedPlanById(savedPlanId: Int, planType: PlanType): Plan = when (planType) {
         PlanType.SCHEDULE -> savedScheduleDao.getSavedScheduleById(savedPlanId).toSchedule()
         PlanType.TODO     -> savedTodoDao.getSavedTodoById(savedPlanId).toTodo()
     }
+
 }

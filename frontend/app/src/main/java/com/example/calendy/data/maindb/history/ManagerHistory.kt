@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 import com.example.calendy.data.maindb.message.Message
 import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
-import com.example.calendy.view.messagepage.QueryType
+import com.example.calendy.view.messageview.QueryType
 
 @Entity(
     tableName = "manager_history", foreignKeys = [ForeignKey(

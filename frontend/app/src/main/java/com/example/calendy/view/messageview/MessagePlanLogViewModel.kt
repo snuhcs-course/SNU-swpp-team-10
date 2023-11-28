@@ -7,12 +7,13 @@ import com.example.calendy.data.maindb.message.IMessageRepository
 import com.example.calendy.data.maindb.message.Message
 import com.example.calendy.data.maindb.plan.IPlanRepository
 import com.example.calendy.data.maindb.plan.Plan
+import com.example.calendy.data.maindb.plan.PlanType
+import com.example.calendy.utils.getPlanType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.LinkedList
 
 class MessagePlanLogViewModel(
     val messageRepository: IMessageRepository,
@@ -25,6 +26,8 @@ class MessagePlanLogViewModel(
     // modified plans
     var modifiedPlans = MutableStateFlow(emptyList<Plan>())
     val modifiedPlanList: MutableStateFlow<List<Pair<Plan?, Plan?>>> = MutableStateFlow(emptyList())
+
+    val modifiedPlanItems: MutableStateFlow<List<ModifiedPlanItem>> = MutableStateFlow(emptyList())
 
     // call on message show popup button clicked
     fun onMessageSelected(message: Message) {
@@ -52,20 +55,66 @@ class MessagePlanLogViewModel(
 //                val modifiedResults = planRepository.getPlansByIds(scheduleIDs, todoIDs)
 //                modifiedPlans.update { modifiedResults }
 
-                val revisionList = historyRepository.getRevisionHistoriesByMessageId(message.id)
-                val modifiedList = revisionList.map { (planType, idPair) ->
-                    val (savedPlanId, currentPlanId) = idPair
+
+                val histories = historyRepository.getRevisionHistoriesByMessageId(message.id)
+                val modifiedItems = histories.map { history ->
+                    val savedPlanId = when (history.isSchedule) {
+                        true  -> history.savedScheduleId
+                        false -> history.savedTodoId
+                    }
+                    val currentPlanId = when (history.isSchedule) {
+                        true  -> history.currentScheduleId
+                        false -> history.currentTodoId
+                    }
+                    val planType = when (history.isSchedule) {
+                        true  -> PlanType.SCHEDULE
+                        false -> PlanType.TODO
+                    }
 
                     val savedPlan: Plan? = savedPlanId?.let {
-                        historyRepository.getSavedPlanById(savedPlanId, planType)
+                        historyRepository.getSavedPlanById(savedPlanId,planType)
                     }
                     val currentPlan: Plan? = currentPlanId?.let {
                         planRepository.getPlanById(currentPlanId, planType)
                     }
 
-                    Pair(savedPlan, currentPlan)
+                    ModifiedPlanItem(
+                        history.id,
+                        savedPlan,
+                        currentPlan,
+                        history.revisionType
+                    )
+
+
                 }
-                modifiedPlanList.update { modifiedList }
+                modifiedPlanItems.update { modifiedItems }
+            }
+        }
+    }
+
+    fun undoModify(modifiedPlanItem: ModifiedPlanItem) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val savedPlan :Plan? = modifiedPlanItem.planBefore
+                val currentPlan :Plan? = modifiedPlanItem.planAfter
+
+                // 1. delete current plan from plan table (UPDATE or INSERT)
+                // 2. insert saved plan to plan table (UPDATE or DELETE)
+                // 3. delete saved plan from saved plan table (UPDATE or DELETE)
+                // 4. delete history from history table (all)
+
+                if(modifiedPlanItem.queryType == QueryType.UPDATE || modifiedPlanItem.queryType == QueryType.INSERT)
+                    if (currentPlan!=null) planRepository.delete(currentPlan)
+
+                if (modifiedPlanItem.queryType == QueryType.UPDATE || modifiedPlanItem.queryType == QueryType.DELETE){
+                    if(savedPlan != null) planRepository.insert(savedPlan)
+                    if(savedPlan != null) historyRepository.deleteSavedPlan(savedPlan)
+                }
+
+
+                historyRepository.deleteHistoryById(modifiedPlanItem.historyId)
+
+
             }
         }
     }

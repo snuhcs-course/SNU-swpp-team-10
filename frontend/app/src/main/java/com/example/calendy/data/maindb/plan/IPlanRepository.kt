@@ -15,4 +15,5 @@ interface IPlanRepository : BaseRepository<Plan> {
     //TODO : check if this suspend is validn
     // Comment from GUN: suspend 없앴습니다
     fun getPlansByIds(scheduleIDs: List<Int>, todoIDs: List<Int>): List<Plan>
+    fun getMonthlyPlansStream(startTime: Date, endTime: Date): Flow<List<Plan>>
 }

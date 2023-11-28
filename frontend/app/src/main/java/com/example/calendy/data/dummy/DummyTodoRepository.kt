@@ -27,6 +27,10 @@ class DummyTodoRepository : ITodoRepository {
         TODO("Not yet implemented")
     }
 
+    override fun getMonthlyTodosStream(startTime: Date, endTime: Date): Flow<List<Todo>> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun insert(entity: Todo): Long {
         TODO("Not yet implemented")
     }
