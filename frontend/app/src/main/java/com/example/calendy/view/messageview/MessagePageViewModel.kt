@@ -23,6 +23,7 @@ import com.example.calendy.data.network.CalendyServerApi
 import com.example.calendy.data.network.MessageBody
 import com.example.calendy.data.rawsqldb.RawSqlDatabase
 import com.example.calendy.view.messageview.MessageUIState
+import com.example.calendy.view.messageview.QueryType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,14 +37,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-enum class QueryType {
-    INSERT,
-    UPDATE,
-    DELETE,
-    SELECT,
-    NOT_FOUND,
-    UNEXPECTED
-}
+
 class MessagePageViewModel(
     val planRepository: IPlanRepository,
     val messageRepository: IMessageRepository,
@@ -372,7 +366,19 @@ class MessagePageViewModel(
             if(QueryType.NOT_FOUND==queryType){
                 hasRevision=false
                 messageString= "찾으시는 플랜이 없어요"
-            } else{
+            }
+            else if(planListSize==0){
+                val planType = if (isSchedule) "일정" else "할 일"
+                messageString = when (queryType) {
+                    QueryType.INSERT    -> "말씀하신 ${planType}을 추가하지 못했어요."
+                    QueryType.UPDATE    -> "말씀하신 ${planType}을 찾지 못했어요."
+                    QueryType.DELETE    -> "말씀하신 ${planType}을 찾지 못했어요."
+                    else                -> "죄송해요. 잘 이해하지 못했어요. "
+                }
+                hasRevision=false
+
+            }
+            else{
                 messageString = "AI 매니저가 "
                 if (isSchedule) messageString += "일정 "
                 else messageString += "할 일 "

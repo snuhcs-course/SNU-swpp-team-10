@@ -34,6 +34,10 @@ class DummyPlanRepository : IPlanRepository {
         TODO("Not yet implemented")
     }
 
+    override fun getMonthlyPlansStream(startTime: Date, endTime: Date): Flow<List<Plan>> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun insert(entity: Plan): Long {
         TODO("Not yet implemented")
     }

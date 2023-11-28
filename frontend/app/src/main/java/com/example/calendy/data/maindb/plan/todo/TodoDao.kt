@@ -26,4 +26,7 @@ interface TodoDao : BaseDao<Todo> {
 
     @Query("SELECT * FROM todo WHERE id IN (:iDs)")
     fun getTodosByIds(iDs: List<Int>): List<Todo>
+
+    @Query("SELECT * FROM todo WHERE show_in_monthly_view > 0 AND due_time BETWEEN :startTime AND :endTime")
+    fun getMonthlyTodosStream(startTime: Date, endTime: Date): Flow<List<Todo>>
 }

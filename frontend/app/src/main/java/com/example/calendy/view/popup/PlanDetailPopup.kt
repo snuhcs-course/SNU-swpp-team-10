@@ -34,7 +34,9 @@ import com.example.calendy.data.maindb.plan.Plan
 import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
+import com.example.calendy.ui.theme.Light_Gray
 import com.example.calendy.utils.equalDay
+import com.example.calendy.utils.getPriorityString
 import com.example.calendy.utils.toAmPmString
 import com.example.calendy.utils.toDateTimeString
 import com.example.calendy.utils.toTimeString
@@ -55,9 +57,7 @@ fun PlanDetailPopup(
             .width(300.dp)
             .height(400.dp)
             .shadow(
-                elevation = 4.dp,
-                spotColor = Color(0x40000000),
-                ambientColor = Color(0x40000000)
+                elevation = 4.dp, spotColor = Color(0x40000000), ambientColor = Color(0x40000000)
             )
             .background(color = Color(0xFFF1F5FB), shape = RoundedCornerShape(size = 20.dp))
             .padding(25.dp)
@@ -73,20 +73,22 @@ fun PlanDetailPopup(
                         .padding(horizontal = 0.dp, vertical = 8.dp)
                 )
 
-                //show times
+
+                // times
                 when(plan){
                     is Schedule -> {
+                        // TODO: use PlanHelper->getTimeInfo()
                         val sameDay = plan.startTime.equalDay(plan.endTime)
                         var startTimeString =plan.startTime.toDateTimeString()
-                        val endTimeString ="~ " +  plan.endTime.toDateTimeString()
+                        val endTimeString = " ~ ${plan.endTime.toDateTimeString()}"
                         if(sameDay)
                         {
                             val isSameAMPM = plan.startTime.toAmPmString().equals( plan.endTime.toAmPmString())
-                            val ampmString = if(isSameAMPM) "" else plan.endTime.toAmPmString() + " "
-                            startTimeString += " \n~ " + ampmString + plan.endTime.toTimeString()
+                            val ampmString = if(isSameAMPM) "" else "${plan.endTime.toAmPmString()} "
+                            startTimeString += " ~ " + ampmString + plan.endTime.toTimeString(hour12=true)
                         }
                         else
-                            startTimeString ="  " + startTimeString
+                            startTimeString = "  $startTimeString"
                                     Text(
                             text = startTimeString,
                             style = TextStyle(
@@ -118,43 +120,38 @@ fun PlanDetailPopup(
                     }
                 }
 
-                //memo
-                Text(
-                    text = if(plan.memo.isNullOrEmpty()) "메모 없음 ..." else plan.memo,
-                    style = TextStyle(
-                        fontSize = 15.sp,
-                        lineHeight = 25.sp,
-                        color = Color(0xFF737373),
-                    ),
-                    maxLines=5,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier
-                        .padding(top = 10.dp)
-                        .fillMaxWidth()
+                // memo
+                BasicInfoText(if(plan.memo.isNullOrEmpty()) "메모 없음 ..." else plan.memo  )
 
-                )
-                //location
+                // complete
+                if(plan is Todo)
+                    BasicInfoText(if(plan.complete) "완료" else "미완료")
 
-                //memo
-                Text(
-                    text = /*TODO*/ "위치 정보 없음 ...",
-                    style = TextStyle(
-                        fontSize = 15.sp,
-                        lineHeight = 25.sp,
-                        color = Color(0xFF737373),
-                    ),
-                    maxLines=5,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier
-                        .padding(top = 10.dp)
-                        .fillMaxWidth()
-
-                )
             }
 
             editButton()
         }
     }
+}
+
+@Composable
+fun BasicInfoText(
+    text: String=""
+){
+    Text(
+        text = text,
+        style = TextStyle(
+            fontSize = 15.sp,
+            lineHeight = 25.sp,
+            color = Light_Gray,
+        ),
+        maxLines=5,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier
+            .padding(top = 10.dp)
+            .fillMaxWidth()
+
+    )
 }
 
 
