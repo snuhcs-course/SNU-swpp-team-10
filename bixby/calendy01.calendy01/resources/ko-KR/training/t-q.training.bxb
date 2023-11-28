@@ -1,0 +1,8 @@
+train (t-ql8pyks8tepjlxbv76k25ji21) {
+  utterance ("[g:UserQuery] (데이트 취소해줘)[v:UserQuery]")
+  last-modified (1701006790832)
+}
+train (t-q9w9lpehl0npcn0qb5xzx7spa) {
+  utterance ("[g:UserQuery] (크리스마스 저녁에 민지랑 데이트 추가해줘)[v:UserQuery]")
+  last-modified (1701006796541)
+}

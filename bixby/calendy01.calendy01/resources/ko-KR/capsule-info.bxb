@@ -1,0 +1,11 @@
+capsule-info {
+  display-name (Example Name)
+  developer-name (Example Developer)
+  description ("Example capsule description")
+  dispatch-name (캘린디)
+  // Set your own image for your capsule's icon
+  icon-asset (images/icons/bixby_launcher.png)
+  search-keywords {
+    keyword ("Calendy")
+  }
+}

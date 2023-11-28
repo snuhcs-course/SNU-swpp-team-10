@@ -1,0 +1,12 @@
+train (t-exgmztb6cgjpeufprm0dot0va) {
+  utterance ("[g:UserQuery] (다음 주 토요일에 축구 하러 갈 거 같아)[v:UserQuery]")
+  last-modified (1701006961471)
+}
+train (t-efym6viwxp4o7bxy1qepjzm5l) {
+  utterance ("[g:UserQuery] (11월 14일에 시험 일정 추가해줘)[v:UserQuery]")
+  last-modified (1701006931487)
+}
+train (t-ei2e3xcpkv3xbsqewteic47z2) {
+  utterance ("[g:BriefingTime] (금요일)[v:BriefingTime:금요일]에는 무슨 일이 있니")
+  last-modified (1701042281431)
+}
