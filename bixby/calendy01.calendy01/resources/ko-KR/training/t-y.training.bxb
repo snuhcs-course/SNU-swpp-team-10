@@ -1,0 +1,5 @@
+train (t-ys7nhxzpk3blrth2q86p19oe9) {
+  utterance ("[g:BriefingTime] (오늘)[v:BriefingTime:오늘] 일정 요약해줘")
+  plan (Y2BiUEhOzEnNS6k0MNRDsJyKMlPTMvPSQzJzU4lQwQiEDAycQMwExEA2AA==)
+  last-modified (1701006334670)
+}

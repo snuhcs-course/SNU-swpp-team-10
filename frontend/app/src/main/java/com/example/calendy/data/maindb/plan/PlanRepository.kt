@@ -153,7 +153,6 @@ class PlanRepository(
         }
     }
 
-    // TODO: not tested. should test both stream update
     override fun getPlansStream(startTime: Date, endTime: Date): Flow<List<Plan>> {
         val schedulesStream = scheduleRepository.getSchedulesStream(startTime, endTime)
         val todosStream = todoRepository.getTodosStream(startTime, endTime)

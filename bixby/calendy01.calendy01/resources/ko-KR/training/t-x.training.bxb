@@ -1,0 +1,8 @@
+train (t-x9c18gbp4htn45fb8r500jat5) {
+  utterance ("[g:BriefingTime] (내일)[v:BriefingTime:내일] 일정 알려줘")
+  last-modified (1701007757482)
+}
+train (t-x3slrdn7sy58mht6w6e5im8l6) {
+  utterance ("[g:BriefingTime] (다음주)[v:BriefingTime:'다음 주'] 일정을 브리핑해줘")
+  last-modified (1701042714948)
+}

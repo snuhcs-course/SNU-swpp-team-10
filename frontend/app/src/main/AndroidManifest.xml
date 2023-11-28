@@ -32,7 +32,9 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="calendy" android:host="query" />
+                <data android:scheme="calendy"/>
+                <data android:host="query"/>
+                <data android:host="briefing"/>
             </intent-filter>
         </activity>
     </application>
