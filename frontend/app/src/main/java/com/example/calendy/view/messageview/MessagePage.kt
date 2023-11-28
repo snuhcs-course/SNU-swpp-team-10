@@ -191,18 +191,18 @@ fun MessageList(
     }
 
     // wrap content with ListItemWrapper, and add time divider if needed
-    val listItems = mutableListOf<ListItemWrapper>()
+    val listItems = mutableListOf<@Composable ()->Unit>()
     for( msg in messageLogList){
         var currDate = msg.sentTime
         if ( prevDate != null && !(prevDate!!.equalDay(currDate))) {
-            listItems.add(ListItemWrapper { DateDivider(prevDate) }) // since messages are sorted in descending order, add prevDate
+            listItems.add { DateDivider(prevDate) } // since messages are sorted in descending order, add prevDate
             prevDate = currDate
         }
-        listItems.add(ListItemWrapper { MessageItem(msg) })
+        listItems.add { MessageItem(msg) }
     }
     if (prevDate != null) {
         // first date divider
-        listItems.add(ListItemWrapper { DateDivider(prevDate) })
+        listItems.add { DateDivider(prevDate) }
     }
     
     LazyColumn(
@@ -210,7 +210,7 @@ fun MessageList(
 
     ) {
         items(listItems) {
-            it.content()
+            it()
         }
     }
 }

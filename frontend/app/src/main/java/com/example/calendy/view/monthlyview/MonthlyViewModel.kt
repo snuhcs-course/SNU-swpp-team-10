@@ -47,7 +47,7 @@ class MonthlyViewModel(
     }
     private fun getPlansOfMonth(startDate:CalendarDay, endDate:CalendarDay)
     {
-        val flow = planRepository.getPlansStream(startDate.toFirstDateOfMonth().afterDays(-14),
+        val flow = planRepository.getMonthlyPlansStream(startDate.toFirstDateOfMonth().afterDays(-14),
                                                  endDate.toLastDateOfMonth().afterDays(14))
         job?.cancel()
         job = viewModelScope.launch {

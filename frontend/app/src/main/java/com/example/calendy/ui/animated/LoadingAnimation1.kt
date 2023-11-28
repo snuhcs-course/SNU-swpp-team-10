@@ -5,6 +5,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -34,11 +35,11 @@ fun LoadingAnimation1(
                 targetValue = 1f,
                 animationSpec = infiniteRepeatable(
                     animation = keyframes {
-                        durationMillis = 1200
+                        durationMillis = 2000
                         0.0f at 0 with LinearOutSlowInEasing
-                        1.0f at 300 with LinearOutSlowInEasing
-                        0.0f at 600 with LinearOutSlowInEasing
-                        0.0f at 1200 with LinearOutSlowInEasing
+                        1.0f at 500 with LinearOutSlowInEasing
+                        0.0f at 1000 with LinearOutSlowInEasing
+                        0.0f at 2000 with LinearOutSlowInEasing
                     },
                     repeatMode = RepeatMode.Restart
                 )
@@ -51,14 +52,15 @@ fun LoadingAnimation1(
 
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(spaceBetween)
+        horizontalArrangement = Arrangement.spacedBy(spaceBetween, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         circleValues.forEach { value ->
             Box(
                 modifier = Modifier
                     .size(circleSize)
                     .graphicsLayer {
-                        translationY = -value * distance
+                        translationY = -value * distance +0.5f * distance
                     }
                     .background(
                         color = circleColor,

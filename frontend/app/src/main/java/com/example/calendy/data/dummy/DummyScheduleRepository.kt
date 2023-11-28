@@ -27,6 +27,10 @@ class DummyScheduleRepository : IScheduleRepository {
         TODO("Not yet implemented")
     }
 
+    override fun getMonthlySchedulesStream(startTime: Date, endTime: Date): Flow<List<Schedule>> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun insert(entity: Schedule): Long {
         TODO("Not yet implemented")
     }

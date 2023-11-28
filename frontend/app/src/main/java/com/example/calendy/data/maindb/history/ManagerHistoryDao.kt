@@ -8,4 +8,6 @@ import com.example.calendy.data.BaseDao
 interface ManagerHistoryDao : BaseDao<ManagerHistory> {
     @Query("SELECT * FROM MANAGER_HISTORY WHERE message_id=:messageId")
     fun getHistoriesByMessageId(messageId: Int): List<ManagerHistory>
+    @Query("DELETE FROM MANAGER_HISTORY WHERE id=:historyId")
+    fun deleteHistoryById(historyId: Int)
 }

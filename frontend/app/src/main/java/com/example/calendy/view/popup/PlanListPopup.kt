@@ -1,5 +1,6 @@
 package com.example.calendy.view.popup
 
+import android.widget.Toast
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -25,20 +26,31 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -48,9 +60,14 @@ import androidx.compose.ui.window.DialogProperties
 import com.example.calendy.data.maindb.plan.Plan
 import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
+import com.example.calendy.ui.theme.Light_Gray
+import com.example.calendy.ui.theme.Light_Green
 import com.example.calendy.ui.theme.getColor
 import com.example.calendy.utils.dayOfWeek
 import com.example.calendy.utils.getInfoText
+import com.example.calendy.view.messageview.MessagePlanLogViewModel
+import com.example.calendy.view.messageview.ModifiedPlanItem
+import com.example.calendy.view.messageview.QueryType
 import java.util.Date
 
 @Composable
@@ -101,6 +118,50 @@ fun PlanRevisionListPopup(
                 }
             }
         )
+    }
+}
+
+@Composable
+fun PlanModifiedListPopup(
+    headerMessage:String = "Modified Plans",
+    modifiedPlanItems: List<ModifiedPlanItem> = emptyList(),
+    onDismissed:()->Unit={},
+    viewModel:MessagePlanLogViewModel
+){
+    var recomposeTrigger by remember { mutableStateOf(1) }
+    fun forceRecompose(){
+        recomposeTrigger = -recomposeTrigger
+    }
+
+    key(recomposeTrigger) {
+        Dialog(
+            onDismissRequest = onDismissed
+        ) {
+            ListPopupBox(header = { PopupHeaderTitle(headerMessage) }, addButton = {}) {
+                items(modifiedPlanItems) {
+                    if(it.isValid)
+                        PlanModifiedItem(
+                            it,
+                            openEditPlan = {},
+                            undoModify =
+                            { modifiedPlanItem ->
+                                viewModel.undoModify(modifiedPlanItem)
+                            },
+                            forceRecompose = ::forceRecompose
+                        )
+                }
+                if (modifiedPlanItems.isEmpty()) items(1) {
+                    Text(
+                        text = "모든 변경 사항을 되돌렸어요!",
+                        style = TextStyle(
+                            fontSize = 12.sp,
+                            lineHeight = 18.sp,
+                            color = Light_Gray,
+                        ),
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -232,8 +293,8 @@ fun PopupHeaderTitle(
     Text(
         text = title,
         style = TextStyle(
-            fontSize = 34.sp,
-            lineHeight = 41.sp,
+            fontSize = 28.sp,
+            lineHeight = 32.sp,
             fontWeight = FontWeight(700),
             color = Color(0xFF000000),
             letterSpacing = 0.37.sp,
@@ -343,12 +404,18 @@ fun TodoListItem(
                 .padding(vertical = 5.dp, horizontal = 0.dp)
                 .width(15.dp)
                 .height(15.dp)
-                .scale(0.8f)
+                .scale(0.8f),
+            colors = CheckboxDefaults.colors(
+                checkedColor = todo.getColor(),
+                uncheckedColor = todo.getColor(),
+                checkmarkColor = Color.White
+            )
         )
         Column(
             modifier= Modifier
                 .fillMaxWidth()
-                .clickable { onItemClick(todo) }
+                .clickable( onClick = { onItemClick(todo) })
+
         ) {
             Text(
                 text = todo.title,
@@ -356,23 +423,244 @@ fun TodoListItem(
                 style = TextStyle(
                     fontSize = 16.sp,
                     lineHeight = 18.sp,
-                    color = Color(0xFF000000),
+                    color = if (todo.complete!!) Color(0xFF646464) else Color(0xFF000000),
+                    textDecoration = if (todo.complete!!) TextDecoration.LineThrough else TextDecoration.None,
                 ),
                 modifier = Modifier
                     .padding(horizontal = 10.dp),
             )
-            Text(
-                text = todo.getInfoText(),
-                maxLines = 1,
-                style = TextStyle(
-                    fontSize = 12.sp,
-                    lineHeight = 12.sp,
-                    color = Color(0xFF646464),
-                ),
-                modifier = Modifier
-                    .padding(horizontal = 10.dp),
+            val todoText=todo.getInfoText()
+            if(todoText.isNotEmpty())
+                Text(
+                    text = todoText,
+                    maxLines = 1,
+                    style = TextStyle(
+                        fontSize = 12.sp,
+                        lineHeight = 12.sp,
+                        color = Color(0xFF646464),
+                        textDecoration = if (todo.complete!!) TextDecoration.LineThrough else TextDecoration.None,
+                    ),
+                    modifier = Modifier
+                        .padding(horizontal = 10.dp),
             )
         }
+    }
+}
+
+enum class ModifiedTextType {
+    ADD, DELETE
+}
+@Composable
+fun PlanModifiedItem(
+    modifiedPlanItem: ModifiedPlanItem,
+    openEditPlan: (Plan) -> Unit ={},
+    undoModify: (ModifiedPlanItem) -> Unit ={},
+    forceRecompose : ()->Unit = {} // to force recompose of parent
+) {
+    val titlePlan:Plan = modifiedPlanItem.titlePlan
+    val modifiedBeforeText: String = modifiedPlanItem.beforeText
+    val modifiedAfterText: String = modifiedPlanItem.afterText
+    val type = modifiedPlanItem.queryType
+
+    val context = LocalContext.current
+
+    var expandMenu :Boolean by remember {mutableStateOf(false)}
+    var openDetail :Boolean by remember {mutableStateOf(false)} // detail popup for logged plan
+    var detailPlan :Plan by remember {mutableStateOf(titlePlan)}
+    fun openDetailOf(plan:Plan){
+        detailPlan = plan
+        openDetail = true
+    }
+
+    Column(
+        modifier = when(modifiedPlanItem.isValid){
+            false -> Modifier
+                .fillMaxWidth()
+                .padding(vertical = 5.dp, horizontal = 0.dp)
+            true -> Modifier
+                .fillMaxWidth()
+                .padding(vertical = 5.dp, horizontal = 0.dp)
+                .clickable { expandMenu = true }
+        }
+    ) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.Top,
+        ) {
+            // color of circle set to plan after
+            when(titlePlan){
+                is Schedule -> Box(
+                    modifier = Modifier
+                        .padding(vertical = 5.dp, horizontal = 0.dp)
+                        .width(15.dp)
+                        .height(15.dp)
+                        .background(color = titlePlan.getColor(), shape = CircleShape)
+                )
+                is Todo -> Checkbox(
+                    checked = titlePlan.complete!!,
+                    onCheckedChange = {},
+                    enabled=false,
+                    modifier = Modifier
+                        .padding(vertical = 5.dp, horizontal = 0.dp)
+                        .width(15.dp)
+                        .height(15.dp)
+                        .scale(0.8f),
+                    colors = CheckboxDefaults.colors(
+                        disabledCheckedColor = titlePlan.getColor(),
+                        disabledUncheckedColor = titlePlan.getColor(),
+                        checkmarkColor = Color.White
+                    )
+                )
+            }
+            // title set to plan after
+            Text(
+                text = titlePlan.title,
+                maxLines = 1,
+                style = TextStyle(
+                    fontSize = 16.sp,
+                    lineHeight = 18.sp,
+                    color = Color(0xFF000000),
+                ),
+                modifier = Modifier.padding(horizontal = 10.dp),
+            )
+        }
+
+        Column(modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight(),
+            verticalArrangement = Arrangement.spacedBy(0.dp),
+
+        ) {
+            if(!modifiedBeforeText.isNullOrEmpty())
+                ModifiedText(ModifiedTextType.DELETE, modifiedBeforeText)
+            if(!modifiedAfterText.isNullOrEmpty())
+                ModifiedText(ModifiedTextType.ADD, modifiedAfterText)
+        }
+    }
+
+
+    DropdownMenu(
+        //TODO : connect edit plan page
+        expanded = expandMenu,
+        onDismissRequest = { expandMenu=false }) {
+        when(type){
+            QueryType.INSERT     ->
+                DropdownMenuItem(text = { Text(text="추가된 일정 보기") }, onClick = { openDetailOf(modifiedPlanItem.planAfter!!) })
+            QueryType.UPDATE     ->
+            {
+                DropdownMenuItem(text = { Text(text="수정 전 일정 보기") }, onClick = { openDetailOf(modifiedPlanItem.planBefore!!) })
+                DropdownMenuItem(text = { Text(text="수정 후 일정 보기") }, onClick = { openDetailOf(modifiedPlanItem.planAfter!!) })
+            }
+            QueryType.DELETE     ->
+                DropdownMenuItem(text = { Text(text="삭제된 일정 보기") }, onClick = { openDetailOf(modifiedPlanItem.planBefore!!)})
+            QueryType.SELECT     -> TODO()
+            else                 -> {}
+        }
+
+        if(type != QueryType.SELECT)
+            DropdownMenuItem(
+                text = { Text(text="되돌리기") },
+                onClick = {
+                    undoModify(modifiedPlanItem)
+                    expandMenu=false
+                    modifiedPlanItem.isValid=false
+                    Toast.makeText(context, "변경 사항을 되돌렸습니다.", Toast.LENGTH_SHORT).show()
+                    forceRecompose()
+                })
+    }
+
+    if(openDetail){
+        PlanDetailPopup(
+            plan = detailPlan,
+            header = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    PopupHeaderTitle(detailPlan.title)
+
+                    when(detailPlan){
+                        is Schedule -> Box(
+                            modifier = Modifier
+                                .padding(vertical = 5.dp, horizontal = 0.dp)
+                                .width(25.dp)
+                                .height(25.dp)
+                                .background(color = detailPlan.getColor(), shape = CircleShape)
+                        )
+                        is Todo -> Checkbox(
+                            checked = (detailPlan as Todo).complete!!,
+                            onCheckedChange = {},
+                            enabled=false,
+                            modifier = Modifier
+                                .padding(vertical = 5.dp, horizontal = 0.dp)
+                                .width(25.dp)
+                                .height(25.dp)
+                                .scale(0.8f),
+                            colors = CheckboxDefaults.colors(
+                                disabledCheckedColor = detailPlan.getColor(),
+                                disabledUncheckedColor = detailPlan.getColor(),
+                                checkmarkColor = Color.White
+                            )
+                        )
+                    }
+                }
+             },
+            onDismissed = {openDetail=false}
+        )
+    }
+}
+
+
+@Composable
+private fun ModifiedText(
+    type: ModifiedTextType,
+    
+    modifiedBeforeText: String
+) {
+    val label = when (type) {
+        ModifiedTextType.ADD -> "+"
+        ModifiedTextType.DELETE -> "–"
+    }
+
+    val textColor = when (type) {
+        ModifiedTextType.ADD -> Light_Green
+        ModifiedTextType.DELETE -> Light_Gray
+    }
+
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(5.dp)
+    ) {
+
+        // before
+        Text(
+            text = label,
+            maxLines = 1,
+            style = TextStyle(
+                fontSize = 12.sp,
+                lineHeight = 12.sp,
+                color = textColor,
+                textAlign = TextAlign.End,
+            ),
+            modifier = Modifier.width(20.dp),
+        )
+        Text(
+            text = modifiedBeforeText,
+            maxLines = 3,
+            style = TextStyle(
+                fontSize = 12.sp,
+                lineHeight = 12.sp,
+                color = textColor,
+                textDecoration = if (type == ModifiedTextType.DELETE) TextDecoration.LineThrough else TextDecoration.None,
+            ),
+            modifier = Modifier.padding(end = 10.dp),
+        )
     }
 }
 
@@ -408,7 +696,7 @@ fun AddButton(
 }
 
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun PlanRevisionListPreview() {
     val planPairList : MutableList<Pair<Plan?, Plan?>> = mutableListOf()
@@ -434,6 +722,7 @@ fun PlanRevisionListPreview() {
 }
 
 @Preview
+@Preview(showBackground = true)
 @Composable
 fun ListPopupPreview(){
     var planList : ArrayList<Plan> = ArrayList()
@@ -452,32 +741,58 @@ fun ListPopupPreview(){
     )
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun ScheduleListPreview(){
     ScheduleListItem(schedule = Schedule(0,"my schedule",Date(), Date()))
 }
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun TodoListPreview(){
     TodoListItem(todo = Todo(0,"my schedule",Date(),complete=false))
 }
-@Preview
+@Preview(showBackground = true)
+@Composable
+fun ModifiedListPreview(){
+
+    Column{
+        
+        PlanModifiedItem(
+            ModifiedPlanItem(
+                historyId=-1,
+                planBefore = Schedule(0,"my schedule",Date(2023,10,12,2,0), Date(2023,10,12,4,0)),
+                planAfter = Schedule(0,"me schedule",Date(2023,10,14,2,0), Date(2023,10,14,4,0)),
+                queryType = QueryType.UPDATE
+            ),
+            openEditPlan={}
+        )
+        PlanModifiedItem(
+            ModifiedPlanItem(
+                historyId=-1,
+                planBefore = Todo(0,"my todo",Date(2023,10,12,2,0),false),
+                planAfter = Todo(0,"me todo",Date(2023,10,14,2,0), true),
+                queryType = QueryType.UPDATE
+            ),
+            openEditPlan={}
+        )
+    }
+}
+@Preview(showBackground = true)
 @Composable
 fun PopupHeaderPreview(){
     PopupHeaderTitle("Added Plans")
 }
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun PopupHeaderDatePreview(){
     PopupHeaderDate()
 }
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun EditButtonPreview(){
     EditButton(Todo(0, "Todo", Date()), { id, plan, date->})
 }
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun AddButtonPreview(){
     AddButton( )

@@ -25,4 +25,6 @@ interface ScheduleDao : BaseDao<Schedule> {
 
     @Query("SELECT * FROM schedule WHERE id IN (:id)")
     fun getSchedulesByIds(id: List<Int>): List<Schedule>
+    @Query("SELECT * FROM schedule WHERE show_in_monthly_view > 0 AND end_time >= :startTime AND start_time <= :endTime")
+    fun getMonthlySchedulesStream(startTime: Date, endTime: Date): Flow<List<Schedule>>
 }

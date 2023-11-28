@@ -7,7 +7,10 @@ interface IHistoryRepository {
     suspend fun insertHistory(managerHistory: ManagerHistory): Long
 
     suspend fun insertSavedPlanFromPlan(plan: Plan): Long
-    fun getSavedPlansByMessageId(messageId: Int): List<ManagerHistory> // Will be deleted
-    fun getRevisionHistoriesByMessageId(messageId: Int): List<Pair<PlanType, Pair<Int?, Int?>>>
+    fun getSavedPlansByMessageId(messageId: Int): List<ManagerHistory>
+    fun getRevisionPlanListsByMessageId(messageId: Int): List<Pair<PlanType, Pair<Int?, Int?>>>
     fun getSavedPlanById(savedPlanId: Int, planType: PlanType): Plan
+    fun getRevisionHistoriesByMessageId(messageId: Int): List<ManagerHistory>
+    suspend fun deleteHistoryById(historyId: Int)
+    suspend fun deleteSavedPlan(savedPlan: Plan)
 }

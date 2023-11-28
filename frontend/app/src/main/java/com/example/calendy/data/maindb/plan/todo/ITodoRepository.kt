@@ -12,4 +12,5 @@ interface ITodoRepository : BaseRepository<Todo> {
     fun getTodoById(id: Int): Todo
     fun getTodosViaQuery(query: SupportSQLiteQuery): List<Todo>
     fun getTodosByIds(iDs: List<Int>): List<Todo>
+    fun getMonthlyTodosStream(startTime: Date, endTime: Date): Flow<List<Todo>>
 }
