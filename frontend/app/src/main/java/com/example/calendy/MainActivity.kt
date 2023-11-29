@@ -1,24 +1,17 @@
 package com.example.calendy
 
 import android.os.Bundle
-import android.text.Layout.Alignment
 import android.util.Log
-import android.window.SplashScreen
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.FloatingActionButtonElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -40,7 +33,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -59,11 +51,11 @@ import com.example.calendy.view.editplanview.EditPlanViewModel
 import com.example.calendy.view.messagepage.MessagePageViewModel
 import com.example.calendy.view.messageview.MessagePage
 import com.example.calendy.view.monthlyview.MonthlyPageKT
-import com.example.calendy.view.settingview.SettingPage
 import com.example.calendy.view.todolistview.ToDoListPage
 import com.example.calendy.view.todolistview.TodoListViewModel
 import com.example.calendy.view.weeklyview.WeeklyPage
 import com.example.calendy.view.weeklyview.WeeklyViewModel
+import kotlinx.coroutines.delay
 
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -71,16 +63,17 @@ import java.util.Locale
 
 
 class MainActivity : ComponentActivity() {
+    private var isMainScreenLoaded = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        installSplashScreen()
+        installSplashScreen().setKeepOnScreenCondition {!isMainScreenLoaded}
         setContent {
             CalendyTheme(darkTheme = false, dynamicColor = false) {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
-                    MainScreenView()
+                    MainScreenView(onLoaded = {isMainScreenLoaded = true})
                 }
             }
         }
@@ -89,12 +82,15 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun MainScreenView() {
+fun MainScreenView(onLoaded: () -> Unit) {
 
     val navController = rememberNavController()
 
     var showBottomNavigation by remember { mutableStateOf(true) }
 
+    LaunchedEffect(Unit) {
+        onLoaded()
+    }
     Scaffold(bottomBar = {
         if (showBottomNavigation) {
             BottomNavigation(
@@ -418,10 +414,3 @@ fun NavigationGraph(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun MainPreview() {
-    CalendyTheme {
-        MainScreenView()
-    }
-}
