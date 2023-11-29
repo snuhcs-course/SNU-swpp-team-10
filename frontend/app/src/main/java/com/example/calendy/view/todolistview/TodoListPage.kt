@@ -49,39 +49,40 @@ fun ToDoListPage(
 
     val onPreviousClick = {
         if (uiState.month==1) {
-            viewModel.updateYear(uiState.year-1)
+            viewModel.updateYear(uiState.year - 1)
             viewModel.updateMonth(12)
-        } else { viewModel.updateMonth(uiState.month-1) }
+        } else {
+            viewModel.updateMonth(uiState.month - 1)
+        }
     }
 
     val onNextClick = {
         if (uiState.month==12) {
-            viewModel.updateYear(uiState.year+1)
+            viewModel.updateYear(uiState.year + 1)
             viewModel.updateMonth(1)
-        } else { viewModel.updateMonth(uiState.month+1) }
+        } else {
+            viewModel.updateMonth(uiState.month + 1)
+        }
     }
 
-    val onTextClick = {showBottomSheet = true}
+    val onTextClick = { showBottomSheet = true }
     if (showBottomSheet) {
         ModalBottomSheet(
-            onDismissRequest = {showBottomSheet = false},
-            sheetState = sheetState
+            onDismissRequest = { showBottomSheet = false }, sheetState = sheetState
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(max = 450.dp)
             ) {
-                MonthSelectionSheet(
-                    selectedYear = uiState.year,
-                    selectedMonth = uiState.month,
-                    onMonthYearSelected = { newYear, newMonth ->
-                        viewModel.updateYear(newYear)
-                        viewModel.updateMonth(newMonth)
-                        showBottomSheet = false
-                    },
-                    onDismiss = { showBottomSheet = false }
-                )
+                MonthSelectionSheet(selectedYear = uiState.year,
+                                    selectedMonth = uiState.month,
+                                    onMonthYearSelected = { newYear, newMonth ->
+                                        viewModel.updateYear(newYear)
+                                        viewModel.updateMonth(newMonth)
+                                        showBottomSheet = false
+                                    },
+                                    onDismiss = { showBottomSheet = false })
             }
         }
 
@@ -89,18 +90,14 @@ fun ToDoListPage(
 
     Scaffold(topBar = {
         TopAppBar(title = {
-           Text(text= "TODO List")
+            Text(
+                text = "TODO List",
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleLarge
+            )
 
         }, actions = { hideToggle(viewModel, uiState) })
-    }, floatingActionButton = {
-        FloatingActionButton(onClick = {
-            onNavigateToEditPage(null,Calendar.getInstance().apply {
-                set(Calendar.YEAR, uiState.year)
-                set(Calendar.MONTH, uiState.month - 1)
-            }.time)
-        }) {
-            Icon(Icons.Filled.Add, contentDescription = "Add")
-        }
+
     }) { innerPadding ->
         Column(
             modifier = Modifier.padding(innerPadding)
@@ -112,7 +109,7 @@ fun ToDoListPage(
                 onNextClick = onNextClick,
                 onTextClick = onTextClick
             )
-            OneMonthTodos( viewModel, uiState, onNavigateToEditPage)
+            OneMonthTodos(viewModel, uiState, onNavigateToEditPage)
         }
 
     }
@@ -123,17 +120,19 @@ fun ToDoListPage(
 fun OneMonthTodos(
     viewModel: TodoListViewModel,
     uiState: TodoListUiState,
-    onNavigateToEditPage: (id: Int?,date: Date?) -> Unit
+    onNavigateToEditPage: (id: Int?, date: Date?) -> Unit
 ) {
     viewModel.updateMonthTodos()
     Column {
         Divider()
-        if(uiState.monthTodos.isEmpty()){
+        if (uiState.monthTodos.isEmpty()) {
             Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+                modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
             ) {
-                Text("아직 TODO가 없습니다\nTODO를 추가해보세요!")
+                Text(
+                    text = "아직 TODO가 없습니다\nTODO를 추가해보세요!",
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
         } else {
             LazyColumn {
@@ -152,7 +151,12 @@ fun OneMonthTodos(
 
 
 @Composable
-fun ToDoItem(todo: Todo, viewModel: TodoListViewModel, uiState: TodoListUiState, onNavigateToEditPage: (id: Int?, date: Date?) -> Unit) {
+fun ToDoItem(
+    todo: Todo,
+    viewModel: TodoListViewModel,
+    uiState: TodoListUiState,
+    onNavigateToEditPage: (id: Int?, date: Date?) -> Unit
+) {
     var isChecked by remember(todo.complete) { mutableStateOf(todo.complete) }
 
     val clickAction = {
@@ -167,19 +171,22 @@ fun ToDoItem(todo: Todo, viewModel: TodoListViewModel, uiState: TodoListUiState,
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.clickable(onClick = clickAction ).weight(1f)
-        ){
+            modifier = Modifier
+                .clickable(onClick = clickAction)
+                .weight(1f)
+        ) {
 
             Spacer(modifier = Modifier.width(8.dp))
             Column(modifier = Modifier.padding(3.dp)) {
                 Text(
                     text = todo.title,
                     textDecoration = if (isChecked) TextDecoration.LineThrough else null,
-                    color = if (isChecked) Color.Gray else LocalContentColor.current
+                    color = if (isChecked) Color.Gray else LocalContentColor.current,
+                    style = MaterialTheme.typography.bodyLarge,
                 )
                 Text(
                     text = formatToHourMinuteAmPm(todo.dueTime),
-                    fontSize = 12.sp,
+                    style = MaterialTheme.typography.labelSmall,
                     textDecoration = if (isChecked) TextDecoration.LineThrough else null,
                     color = if (isChecked) Color.Gray else LocalContentColor.current
                 )
@@ -194,11 +201,15 @@ fun ToDoItem(todo: Todo, viewModel: TodoListViewModel, uiState: TodoListUiState,
 
 @Composable
 fun MonthSelector(
-    year: Int, month: Int, onPreviousClick: () -> Unit, onNextClick: () -> Unit, onTextClick: () -> Unit
+    year: Int,
+    month: Int,
+    onPreviousClick: () -> Unit,
+    onNextClick: () -> Unit,
+    onTextClick: () -> Unit
 ) {
     val typography = MaterialTheme.typography
     val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-    val displayText = if (year == currentYear) {
+    val displayText = if (year==currentYear) {
         "${month}월"
     } else {
         "${year}년 ${month}월"
@@ -222,7 +233,7 @@ fun MonthSelector(
 
         Text(text = displayText,
              color = Color.Black,
-             style = typography.bodyMedium,
+             style = MaterialTheme.typography.bodyLarge,
              textDecoration = TextDecoration.Underline,
              modifier = Modifier.clickable { onTextClick() })
 
@@ -254,7 +265,8 @@ fun MonthSelectionSheet(
     // LazyListState 생성
     val listState = rememberLazyListState()
     // 초기 스크롤 위치를 선택된 연도와 월에 기반하여 설정
-    val initialIndex = yearMonthCombinations.indexOfFirst { it.first == selectedYear && it.second == selectedMonth }
+    val initialIndex =
+        yearMonthCombinations.indexOfFirst { it.first==selectedYear && it.second==selectedMonth }
     LaunchedEffect(key1 = initialIndex) {
         listState.scrollToItem(initialIndex)
     }
@@ -270,31 +282,28 @@ fun MonthSelectionSheet(
         ) {
             Text(
                 text = "월 선택하기",
-                fontWeight = FontWeight.Bold ,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
             IconButton(onClick = { onDismiss() }) {
                 Icon(
-                    imageVector = Icons.Filled.Close,
-                    contentDescription = "Close"
+                    imageVector = Icons.Filled.Close, contentDescription = "Close"
                 )
             }
         }
 
         LazyColumn(state = listState) {
             items(yearMonthCombinations) { (year, month) ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onMonthYearSelected(year, month) }
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onMonthYearSelected(year, month) }
+                    .padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "${year}년 ${month}월",
-                        modifier = Modifier.weight(1f)
+                        text = "${year}년 ${month}월", modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.bodyMedium
                     )
-                    if (year == selectedYear && month == selectedMonth) {
+                    if (year==selectedYear && month==selectedMonth) {
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = "Selected",
@@ -308,12 +317,12 @@ fun MonthSelectionSheet(
 }
 
 
-
 @Composable
 fun hideToggle(viewModel: TodoListViewModel, uiState: TodoListUiState) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
-            text = "Hide Completed", color = Color.Blue, fontSize = 12.sp
+            text = "Hide Completed", color = Color.Blue,
+            style = MaterialTheme.typography.bodyMedium
         )
         Spacer(modifier = Modifier.width(8.dp))
         Switch(checked = uiState.hidedStatus, onCheckedChange = {
