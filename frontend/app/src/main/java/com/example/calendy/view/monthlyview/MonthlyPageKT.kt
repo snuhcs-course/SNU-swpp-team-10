@@ -147,13 +147,6 @@ fun MonthlyPageKT(
             }
         )
 
-        //add button
-        AddButton(
-            onButtonClick = {onNavigateToEditPage(null, PlanType.SCHEDULE,popupDate.toDate())},
-            modifier = Modifier
-                .padding(16.dp)
-                .align(Alignment.BottomEnd)
-        )
     }
         //list popup
     if (showListPopup) {

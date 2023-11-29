@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowLeft
 import androidx.compose.material.icons.filled.ArrowRight
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.data.maindb.plan.Schedule
@@ -81,13 +83,7 @@ fun WeeklyPage(
                    onPreviousWeekClick = {},
                    onNextWeekClick = {})
         },
-        floatingActionButton = {
-            FloatingActionButton(onClick = {
-                onNavigateToEditPage(null, PlanType.SCHEDULE, null)
-            }) {
-                Icon(Icons.Filled.Add, contentDescription = "Add")
-            }
-        },
+
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
             WeekPager(
@@ -135,7 +131,6 @@ fun WeekScreen(
     todoContent: @Composable (todo: Todo) -> Unit = { TodoItem(todo = it, onNavigateToEditPage = onNavigateToEditPage) },
     onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
 ) {
-    viewModel.updateWeekPlans()
     val hourHeight = 40.dp
     val verticalScrollState = rememberScrollState()
     var sidebarWidth by remember { mutableStateOf(0.dp) }
@@ -220,6 +215,7 @@ fun Header(
             text = displayText,
             color = Color.Black,
             style = typography.titleMedium,
+            fontWeight = FontWeight.Bold
         )
         IconButton(
             onClick = {

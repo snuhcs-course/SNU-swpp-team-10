@@ -1,15 +1,24 @@
 package com.example.calendy
 
 import android.os.Bundle
+import android.text.Layout.Alignment
 import android.util.Log
 import android.window.SplashScreen
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.FloatingActionButtonElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -19,6 +28,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -85,9 +96,11 @@ fun MainScreenView() {
     var showBottomNavigation by remember { mutableStateOf(true) }
 
     Scaffold(bottomBar = {
-        if (showBottomNavigation) BottomNavigation(
-            navController = navController,
-        )
+        if (showBottomNavigation) {
+            BottomNavigation(
+                navController = navController,
+            )
+        }
     }) {
         Box(Modifier.padding(it)) {
             NavigationGraph(
@@ -117,10 +130,23 @@ fun BottomNavigation(
     val items = listOf(
         BottomNavItem.Week,
         BottomNavItem.Month,
+        BottomNavItem.Dummy,
         BottomNavItem.Todo,
         BottomNavItem.AiManager,
-//        BottomNavItem.Setting
+        //BottomNavItem.Setting
     )
+    var selectedNavItem by remember { mutableStateOf<BottomNavItem>(BottomNavItem.Month) }
+
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+    LaunchedEffect(currentRoute) {
+        when (currentRoute) {
+            BottomNavItem.Todo.screenRoute -> selectedNavItem = BottomNavItem.Todo
+            BottomNavItem.Week.screenRoute -> selectedNavItem = BottomNavItem.Week
+            BottomNavItem.Month.screenRoute -> selectedNavItem = BottomNavItem.Month
+            BottomNavItem.AiManager.screenRoute -> selectedNavItem = BottomNavItem.AiManager
+        }
+    }
 
     NavigationBar(
         containerColor = Color.White, contentColor = Color(0xFF3F414E)
@@ -129,35 +155,64 @@ fun BottomNavigation(
         val currentRoute = navBackStackEntry?.destination?.route
 
         items.forEach { item ->
-            NavigationBarItem(
-                icon = {
-                    Icon(
-                        painter = painterResource(id = item.icon),
-                        contentDescription = stringResource(id = item.title),
-                        modifier = Modifier
-                            .width(26.dp)
-                            .height(26.dp),
-                    )
-                },
-                label = { Text(stringResource(id = item.title), fontSize = 9.sp) },
-                selected = currentRoute==item.screenRoute,
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Color.Cyan,
-                    unselectedIconColor = Color.Gray,
-                    selectedTextColor = Color.Black,
-                    unselectedTextColor = Color.Black,
-                ),
-                alwaysShowLabel = true,
-                onClick = {
-                    navController.navigateToBottom(item)
-                },
-            )
+            if (item!=BottomNavItem.Dummy) {
+                NavigationBarItem(
+                    icon = {
+                        Icon(
+                            painter = painterResource(id = item.icon!!),
+                            contentDescription = stringResource(id = item.title!!),
+                            modifier = Modifier
+                                .width(26.dp)
+                                .height(26.dp),
+                        )
+                    },
+                    label = {
+                        Text(
+                            stringResource(id = item.title!!),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    },
+                    selected = currentRoute==item.screenRoute,
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = Color.Black,
+                        unselectedIconColor = Color.Black,
+                        selectedTextColor = Color.Black,
+                        unselectedTextColor = Color.Black,
+                        indicatorColor = Color(0xC2E7FF)
+                    ),
+                    alwaysShowLabel = true,
+                    onClick = {
+                        selectedNavItem = item
+                        navController.navigateToBottom(item)
+                    },
+                )
+            } else {
+                FloatingActionButton(
+                    modifier = Modifier.padding(top = 2.dp),
+                    onClick = {
+                        if (selectedNavItem==BottomNavItem.Todo) {
+                            val route = EditPageRoute.AddTodo(date = Date()).route
+                            navController.navigate(route)
+                        } else {
+                            val route = EditPageRoute.AddSchedule(date = Date()).route
+                            navController.navigate(route)
+                        }
+                    },
+                    //containerColor = Color(),
+                    contentColor = Color.Black,
+                    //elevation = FloatingActionButtonDefaults.elevation(0.dp)
+                ) {
+                    Icon(imageVector = Icons.Filled.Add, contentDescription = "add plan")
+                }
+            }
+
         }
     }
 }
 
 sealed class BottomNavItem(
-    val title: Int, val icon: Int, val screenRoute: String
+    val title: Int?, val icon: Int?, val screenRoute: String
 ) {
     object Week : BottomNavItem(
         title = R.string.text_weekly_view,
@@ -181,6 +236,10 @@ sealed class BottomNavItem(
         title = R.string.text_manager_view,
         icon = R.drawable.outline_person_outline_24,
         screenRoute = "AiManager"
+    )
+
+    object Dummy : BottomNavItem(
+        title = null, icon = null, screenRoute = "Dummy"
     )
 
 //    object Setting : BottomNavItem(
@@ -214,8 +273,7 @@ sealed class EditPageRoute(val route: String) {
 
 @Composable
 fun NavigationGraph(
-    navController: NavHostController,
-    showBottomNavigation: (Boolean) -> Unit
+    navController: NavHostController, showBottomNavigation: (Boolean) -> Unit
 ) {
     NavHost(navController = navController, startDestination = BottomNavItem.Month.screenRoute) {
         // region Bottom Navigation Routes
@@ -309,7 +367,7 @@ fun NavigationGraph(
                 date = date
             )
 
-            EditPlanPage(viewModel, onNavigateBack = navController::popBackStack )
+            EditPlanPage(viewModel, onNavigateBack = navController::popBackStack)
         }
         composable(
             route = "QueryRoute?query={query}", arguments = listOf(
