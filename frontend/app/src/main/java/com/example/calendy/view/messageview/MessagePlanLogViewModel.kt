@@ -21,17 +21,11 @@ class MessagePlanLogViewModel(
     val historyRepository: IHistoryRepository
 ) : ViewModel() {
 
-    // currently selected message to show plan logs
-//    var selectedMessage = MutableStateFlow(Message(0,Date(), true, "", false))
-    // modified plans
-    var modifiedPlans = MutableStateFlow(emptyList<Plan>())
-    val modifiedPlanList: MutableStateFlow<List<Pair<Plan?, Plan?>>> = MutableStateFlow(emptyList())
 
     val modifiedPlanItems: MutableStateFlow<List<ModifiedPlanItem>> = MutableStateFlow(emptyList())
 
     // call on message show popup button clicked
     fun onMessageSelected(message: Message) {
-//        selectedMessage.update { message }
         getModifiedPlanLogOfMessage(message)
     }
 
@@ -39,22 +33,6 @@ class MessagePlanLogViewModel(
         viewModelScope.launch {
             // Cannot access database on the main thread since it may potentially lock the UI for a long period of time.
             withContext(Dispatchers.IO) {
-                // TODO: Pair<Plan?. Plan?>으로 반환하기
-//                val scheduleIDs: LinkedList<Int> = LinkedList()
-//                val todoIDs: LinkedList<Int> = LinkedList()
-//
-//                val historyList = historyRepository.getSavedPlansByMessageId(message.id)
-//                historyList.forEach {
-//                    when (it.isSchedule) {
-//                        // TODO: This May be null!
-//                        true  -> scheduleIDs.add(it.currentScheduleId!!)
-//                        false -> todoIDs.add(it.currentTodoId!!)
-//                    }
-//                }
-//
-//                val modifiedResults = planRepository.getPlansByIds(scheduleIDs, todoIDs)
-//                modifiedPlans.update { modifiedResults }
-
 
                 val histories = historyRepository.getRevisionHistoriesByMessageId(message.id)
                 val modifiedItems = histories.map { history ->
@@ -93,6 +71,11 @@ class MessagePlanLogViewModel(
     }
 
     fun undoModify(modifiedPlanItem: ModifiedPlanItem) {
+        if(!modifiedPlanItem.isValid
+            || modifiedPlanItem.queryType == QueryType.SELECT
+            || modifiedPlanItem.queryType == QueryType.UNEXPECTED
+            || modifiedPlanItem.queryType == QueryType.NOT_FOUND) return
+
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 val savedPlan :Plan? = modifiedPlanItem.planBefore
@@ -115,6 +98,16 @@ class MessagePlanLogViewModel(
                 historyRepository.deleteHistoryById(modifiedPlanItem.historyId)
 
 
+            }
+        }
+    }
+
+    fun undoAllModify(modifiedPlanItems: List<ModifiedPlanItem>) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                modifiedPlanItems.forEach { modifiedPlanItem ->
+                    undoModify(modifiedPlanItem)
+                }
             }
         }
     }

@@ -146,8 +146,6 @@ fun MessageContentManagerWithButton(
     }
     Column(
         modifier = Modifier
-            .clickable { onButtonClick() },
-//        horizontalAlignment = Alignment.End
 
     ) {
         Text(

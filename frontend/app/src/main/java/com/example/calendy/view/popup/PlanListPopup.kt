@@ -25,15 +25,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Undo
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -121,6 +125,7 @@ fun PlanRevisionListPopup(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlanModifiedListPopup(
     headerMessage:String = "Modified Plans",
@@ -128,7 +133,9 @@ fun PlanModifiedListPopup(
     onDismissed:()->Unit={},
     viewModel:MessagePlanLogViewModel
 ){
+    val context = LocalContext.current
     var recomposeTrigger by remember { mutableStateOf(1) }
+    val showUndoAllButton = modifiedPlanItems.isNotEmpty() && modifiedPlanItems.any { !(it.queryType == QueryType.SELECT || !it.isValid) }
     fun forceRecompose(){
         recomposeTrigger = -recomposeTrigger
     }
@@ -137,9 +144,24 @@ fun PlanModifiedListPopup(
         Dialog(
             onDismissRequest = onDismissed
         ) {
-            ListPopupBox(header = { PopupHeaderTitle(headerMessage) }, addButton = {}) {
+            ListPopupBox(
+                header = { PopupHeaderTitle(headerMessage) },
+                addButton = {
+                    if(showUndoAllButton){
+                        UndoButton(
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd),
+                            onUndoClick = {
+                                viewModel.undoAllModify(modifiedPlanItems)
+                                onDismissed()
+                                Toast.makeText(context, "변경 사항을 모두 되돌렸습니다.", Toast.LENGTH_SHORT).show()
+                            }
+                        )
+                    }
+                }
+            ) {
                 items(modifiedPlanItems) {
-                    if(it.isValid)
+//                    if(it.isValid)
                         PlanModifiedItem(
                             it,
                             openEditPlan = {},
@@ -414,7 +436,7 @@ fun TodoListItem(
         Column(
             modifier= Modifier
                 .fillMaxWidth()
-                .clickable( onClick = { onItemClick(todo) })
+                .clickable(onClick = { onItemClick(todo) })
 
         ) {
             Text(
@@ -448,7 +470,7 @@ fun TodoListItem(
 }
 
 enum class ModifiedTextType {
-    ADD, DELETE
+    ADD, DELETE, SHOW
 }
 @Composable
 fun PlanModifiedItem(
@@ -536,7 +558,10 @@ fun PlanModifiedItem(
             if(!modifiedBeforeText.isNullOrEmpty())
                 ModifiedText(ModifiedTextType.DELETE, modifiedBeforeText)
             if(!modifiedAfterText.isNullOrEmpty())
-                ModifiedText(ModifiedTextType.ADD, modifiedAfterText)
+                if(modifiedPlanItem.queryType == QueryType.SELECT)
+                    ModifiedText(ModifiedTextType.SHOW, modifiedAfterText)
+                else
+                    ModifiedText(ModifiedTextType.ADD, modifiedAfterText)
         }
     }
 
@@ -625,11 +650,13 @@ private fun ModifiedText(
     val label = when (type) {
         ModifiedTextType.ADD -> "+"
         ModifiedTextType.DELETE -> "–"
+        ModifiedTextType.SHOW -> ""
     }
 
     val textColor = when (type) {
         ModifiedTextType.ADD -> Light_Green
         ModifiedTextType.DELETE -> Light_Gray
+        ModifiedTextType.SHOW -> Color(0xFF000000)
     }
 
 
@@ -683,19 +710,60 @@ fun AddButton(
         Icon(
             imageVector = Icons.Filled.Add,
             contentDescription =  "add",
-//            modifier = Modifier
         )
 
-//        Icon(
-//            painter = painterResource(id = R.drawable.add_new_plan_button),
-//            contentDescription =  "add",
-//            modifier = Modifier
-//                .wrapContentSize()
-//
-//        )
     }
 }
 
+@Composable
+fun UndoButton(
+    modifier: Modifier,
+    onUndoClick: () -> Unit = {},
+){
+    var alertDialogOpen by remember { mutableStateOf(false) }
+    FloatingActionButton(
+        onClick = { alertDialogOpen = true },
+        modifier = modifier
+            .wrapContentWidth()
+            .wrapContentHeight()
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Undo,
+            contentDescription =  "undo",
+        )
+    }
+
+    if (alertDialogOpen)
+        AlertDialog(
+            onDismissRequest = { alertDialogOpen = false },
+            title = {
+                Text(
+                    text = "변경 사항을 모두 되돌리시겠습니까?",
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        lineHeight = 16.sp,
+                        color = Color(0xFF000000),
+                    ),
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        alertDialogOpen = false
+                        onUndoClick()
+                    }
+                )
+                { Text("확인") }
+            },
+            dismissButton = {
+                TextButton(onClick = {alertDialogOpen = false}) {Text("취소")}
+            },
+            modifier = Modifier
+                .padding(10.dp)
+                .background(Color.White, shape = RoundedCornerShape(10.dp)),
+            shape = RoundedCornerShape(10.dp),
+        )
+}
 
 @Preview(showBackground = true)
 @Composable
