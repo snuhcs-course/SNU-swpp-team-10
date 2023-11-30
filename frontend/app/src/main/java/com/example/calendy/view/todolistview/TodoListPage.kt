@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.calendy.R
 import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.data.maindb.plan.Todo
 import kotlinx.coroutines.flow.first
@@ -300,7 +301,8 @@ fun MonthSelectionSheet(
                     .clickable { onMonthYearSelected(year, month) }
                     .padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "${year}년 ${month}월", modifier = Modifier.weight(1f),
+                        text = "${year}년 ${month}월",
+                        modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.bodyMedium
                     )
                     if (year==selectedYear && month==selectedMonth) {
@@ -321,23 +323,28 @@ fun MonthSelectionSheet(
 fun hideToggle(viewModel: TodoListViewModel, uiState: TodoListUiState) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
-            text = "Hide Completed", color = Color.Blue,
-            style = MaterialTheme.typography.bodyMedium
+            text = "Hide Completed",
+            color = Color(0xFF337AFF),
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Switch(checked = uiState.hidedStatus, onCheckedChange = {
-            viewModel.setHidedStatus(it)
-        }, thumbContent = if (uiState.hidedStatus) {
-            {
-                Icon(
-                    imageVector = Icons.Filled.Check,
-                    contentDescription = null,
-                    modifier = Modifier.size(SwitchDefaults.IconSize),
-                )
-            }
-        } else {
-            null
-        })
+        Switch(checked = uiState.hidedStatus,
+               colors = SwitchDefaults.colors(checkedTrackColor = Color(0xFF337AFF),),
+               onCheckedChange = {
+                   viewModel.setHidedStatus(it)
+               },
+               thumbContent = if (uiState.hidedStatus) {
+                   {
+                       Icon(
+                           imageVector = Icons.Filled.Check,
+                           contentDescription = null,
+                           modifier = Modifier.size(SwitchDefaults.IconSize),
+                       )
+                   }
+               } else {
+                   null
+               })
     }
 }
 
