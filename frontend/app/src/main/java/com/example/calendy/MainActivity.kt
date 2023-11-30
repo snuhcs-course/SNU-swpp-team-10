@@ -145,7 +145,7 @@ fun BottomNavigation(
     }
 
     NavigationBar(
-        containerColor = Color.White, contentColor = Color(0xFF3F414E)
+        containerColor = Color.White, contentColor = Color(0xFFB2CDFF)
     ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
@@ -175,7 +175,7 @@ fun BottomNavigation(
                         unselectedIconColor = Color.Black,
                         selectedTextColor = Color.Black,
                         unselectedTextColor = Color.Black,
-                        indicatorColor = Color(0xC2E7FF)
+                        indicatorColor = Color(0xE5EEFF)
                     ),
                     alwaysShowLabel = true,
                     onClick = {

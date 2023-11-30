@@ -323,7 +323,7 @@ fun MonthSelectionSheet(
 fun hideToggle(viewModel: TodoListViewModel, uiState: TodoListUiState) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
-            text = "Hide Completed",
+            text = "완료된 TODO 숨기기",
             color = Color(0xFF337AFF),
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold
