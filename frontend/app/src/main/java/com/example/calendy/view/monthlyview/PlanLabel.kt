@@ -71,7 +71,7 @@ class PlanLabelContainer : Iterable<Pair<Date, LabelSlot<Plan>>> {
                 found = true
                 for (date in dateList) {
                     // if slot at index is not empty, increment index
-                    if (slots.get(date)!!.hasItemAt(index)) {
+                    if (slots[date]!!.hasItemAt(index)) {
                         found = false
                         break
                     }
@@ -81,7 +81,7 @@ class PlanLabelContainer : Iterable<Pair<Date, LabelSlot<Plan>>> {
             // index is the smallest index that does not have a plan label
             // add plan label to slots
             for (date in dateList) {
-                slots.get(date)!!.setItemAt(index, planLabel)
+                slots[date]!!.setItemAt(index, planLabel)
             }
         }
 
@@ -91,10 +91,10 @@ class PlanLabelContainer : Iterable<Pair<Date, LabelSlot<Plan>>> {
     fun hasPlanAt(date: Date): Boolean = slots.containsKey(date.dateOnly())
 
     fun getPlansAt(date: Date): List<Plan> {
-        if (!slots.containsKey(date.dateOnly())) return emptyList() else return slots.get(date.dateOnly())!!.getAllItems()
+        return if (!slots.containsKey(date.dateOnly())) emptyList() else slots[date.dateOnly()]!!.getAllItems()
     }
 
-    fun getSlotAt(date: Date): LabelSlot<Plan>? = if (!slots.containsKey(date.dateOnly())) null else slots.get(date.dateOnly())!!
+    fun getSlotAt(date: Date): LabelSlot<Plan>? = if (!slots.containsKey(date.dateOnly())) null else slots[date.dateOnly()]!!
 
     override fun iterator(): Iterator<Pair<Date, LabelSlot<Plan>>> = slots.entries.iterator().asSequence()
         .map { (date, labelSlot) -> Pair(date, labelSlot) }
@@ -104,7 +104,7 @@ class PlanLabelContainer : Iterable<Pair<Date, LabelSlot<Plan>>> {
 
 
 class LabelSlot<T>: Iterable<ILabel<T>>{
-    val labels = Hashtable<Int,ILabel<T>>()  // index, label
+    private val labels = Hashtable<Int,ILabel<T>>()  // index, label
 
     fun hasItemAt(index:Int):Boolean = labels.containsKey(index)
     fun setItemAt(index:Int, label:ILabel<T>){
@@ -112,11 +112,11 @@ class LabelSlot<T>: Iterable<ILabel<T>>{
             throw Exception("LabelSlot: setItemAt: index already has an item")
 //        else
         label.index= index
-        labels.put(index,label)
+        labels[index] = label
     }
-    fun getItemAt(index:Int):ILabel<T>? = labels.get(index)
+    fun getItemAt(index:Int):ILabel<T>? = labels.getOrDefault(index,null)
     fun getAllItems():List<T> = labels.values.map { it.item }
-    fun count():Int = labels.size
+    fun count():Int = labels.count()
     override fun iterator(): Iterator<ILabel<T>> = labels.values.iterator()
 }
 
@@ -152,15 +152,15 @@ class PlanLabel(
 
     override fun compareTo(otherLabel: ILabel<Plan>): Int {
         // greater than 0 if this is greater than other
-        // priority first, then weight, then start time or due time, then plan type (schedule first), then end time if schedule, then title
+        // weight first, then priority, then start time or due time, then plan type (schedule first), then end time if schedule, then title
         // earlier first for time comparison
         val other = otherLabel as PlanLabel
 
-        //priority
-        if(this.getPriority() != other.getPriority()) return this.getPriority() - other.getPriority()
-
         //weight
         if (this.weight != other.weight) return this.weight - other.weight
+
+        //priority
+        if(this.getPriority() != other.getPriority()) return this.getPriority() - other.getPriority()
 
 
         //start time or due time

@@ -1,7 +1,7 @@
 package com.example.calendy.view.monthlyview
 
+import android.graphics.Color
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -24,7 +24,6 @@ import com.example.calendy.data.dummy.DummyPlanRepository
 import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.data.maindb.plan.Todo
 import com.example.calendy.utils.afterDays
-import com.example.calendy.utils.equalDay
 import com.example.calendy.utils.getPlanType
 import com.example.calendy.utils.toCalendarDay
 import com.example.calendy.utils.toDate
@@ -49,16 +48,14 @@ fun MonthlyPageKT(
     monthlyViewModel: MonthlyViewModel = viewModel(factory = AppViewModelProvider.Factory),
     onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
 ) {
-
-    val custom_months = stringArrayResource(id = R.array.custom_months)
-    val custom_weekdays = stringArrayResource(id = R.array.custom_weekdays)
+    val customMonths = stringArrayResource(id = R.array.custom_months)
+    val customWeekdays = stringArrayResource(id = R.array.custom_weekdays)
     val uiState:MonthlyPageUIState by monthlyViewModel.uiState.collectAsState()
+    val titleDecorators : List<TitleDecorator> by monthlyViewModel.titleDecorators.collectAsState()
+    var selectedDayDecorator: SelectedDayDecorator? by remember { mutableStateOf(null) }
+    var saturdayDecorator = SaturdayDecorator(uiState.currentMonth.month)
+    var sundayDecorator = SundayDecorator(uiState.currentMonth.month)
 
-    var selectedDayDecorator: SelectedDayDecorator
-    var saturdayDecorator : SaturdayDecorator = SaturdayDecorator(uiState.currentMonth.month)
-    var sundayDecorator : SundayDecorator = SundayDecorator(uiState.currentMonth.month)
-
-    val planLabelContainer = PlanLabelContainer().setPlans(uiState.plansOfMonth)
 
     var popupDate by remember { mutableStateOf(uiState.selectedDate) }
     var showListPopup by remember { mutableStateOf(false) }
@@ -74,7 +71,6 @@ fun MonthlyPageKT(
     fun onListPopupDismissed()
     {
         showListPopup=false
-//        popupDate=uiState.selectedDate
     }
 
     Box(
@@ -88,11 +84,11 @@ fun MonthlyPageKT(
             calendar.apply {
 
                 // initial setting for calendar view
-                setTitleFormatter(MonthArrayTitleFormatter(custom_months))
-                setWeekDayFormatter(ArrayWeekDayFormatter(custom_weekdays))
+                setTitleFormatter(MonthArrayTitleFormatter(customMonths))
+                setWeekDayFormatter(ArrayWeekDayFormatter(customWeekdays))
                 setTileHeightDp(-1)
-                selectionColor = -1
-                setSelectedDate(uiState.selectedDate)
+                selectionColor = Color.TRANSPARENT
+                selectedDate = uiState.selectedDate
                 showOtherDates = MaterialCalendarView.SHOW_OTHER_MONTHS
                 state().edit()
                     .setFirstDayOfWeek(Calendar.SUNDAY)
@@ -102,46 +98,57 @@ fun MonthlyPageKT(
                     .commit();
 
 
+                // event
+
                 setOnDateChangedListener { widget, date, selected ->
 
-//                    if (planOfMonth.size == 0) planOfMonth = planListToHash(uiState.plansOfMonth)
 
                     if (date == uiState.selectedDate) {
                         openListPopup(date)
-//                    openAddPlanPopup(date)
                     } else {
+                        if (selectedDayDecorator != null)
+                            removeDecorator(selectedDayDecorator!!)
+                        selectedDayDecorator = SelectedDayDecorator(date, context)
+                        addDecorator(selectedDayDecorator!!)
                         monthlyViewModel.setSelectedDate(date)
                     }
+
+
                 }
-                // event
-                setOnMonthChangedListener(
-                    // selected month changed
-                    { widget, date ->
-                        //TODO: change planList
-                        monthlyViewModel.setCurrentMonth(date)
-                    })
+                setOnMonthChangedListener { _, date ->
+                    removeDecorator(saturdayDecorator)
+                    removeDecorator(sundayDecorator)
+                    saturdayDecorator = SaturdayDecorator(date.month)
+                    sundayDecorator = SundayDecorator(date.month)
+                    addDecorators(saturdayDecorator, sundayDecorator)
+                    monthlyViewModel.setCurrentMonth(date)
+                }
+
+                // TODO : range selection by drag
+//                setOnRangeSelectedListener{
+//                    widget, dates ->
+//                    val start = dates[0]
+//                    val end = dates[dates.size-1]
+//                    Log.d("BANG", "range selected : $start ~ $end")
+//                }
+
+                // decorator
+                selectedDayDecorator = SelectedDayDecorator(uiState.selectedDate, context)
+                addDecorators(
+                    saturdayDecorator,
+                    sundayDecorator,
+                    selectedDayDecorator,
+                    OneDayDecorator()
+                )
+
 
                 Log.d("BANG", "mcv initialize")
             }
         },
             update =
             { mcv ->
-
-                // selected day decorator initialization
-                mcv.removeDecorators()
-
-                // add title decorator
-                for((date, labelSlot) in planLabelContainer){
-                    mcv.addDecorator(TitleDecorator(date.toCalendarDay(), labelSlot))
-                }
-
-                selectedDayDecorator = SelectedDayDecorator(uiState.selectedDate, mcv.context)
-                mcv.addDecorators(
-                    saturdayDecorator,
-                    sundayDecorator,
-                    OneDayDecorator(),
-                    selectedDayDecorator
-                )
+                mcv.removeDecoratorsOfType(TitleDecorator::class.java)
+                mcv.addDecorators(titleDecorators)
 
                 Log.d("BANG", "mcv redraw")
             }
@@ -157,7 +164,7 @@ fun MonthlyPageKT(
     }
         //list popup
     if (showListPopup) {
-        val planList = planLabelContainer.getPlansAt(popupDate.toDate())
+        val planList = uiState.planLabelContainer.getPlansAt(popupDate.toDate())
         SwitchablePlanListPopup(
             planList = if (planList != null) planList else emptyList(),
             header = { PopupHeaderDate(popupDate.toDate()) },
