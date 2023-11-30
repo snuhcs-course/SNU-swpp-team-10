@@ -40,6 +40,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.calendy.R
 import com.example.calendy.data.maindb.category.Category
+import com.example.calendy.ui.theme.CalendyFontFamily
 import com.gowtham.ratingbar.RatingBar
 import com.gowtham.ratingbar.RatingBarConfig
 
@@ -63,6 +64,7 @@ fun CategorySelector(
             onClick = { showCategoryPickerDialog = true }, modifier = Modifier.weight(1f)
         ) {
             Text(
+                fontFamily = CalendyFontFamily,
                 text = currentCategory?.title ?: "분류 없음",
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Left

@@ -704,7 +704,9 @@ fun AddButton(
         modifier = modifier
 //                .padding(end = 10.dp)
             .wrapContentWidth()
-            .wrapContentHeight()
+            .wrapContentHeight(),
+        containerColor = Color(0xFF80ACFF),
+        contentColor = Color.Black,
 
     ) {
         Icon(

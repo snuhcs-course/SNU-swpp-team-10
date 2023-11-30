@@ -32,6 +32,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -65,6 +66,7 @@ import com.example.calendy.data.dummy.DummyPlanRepository
 import com.example.calendy.data.dummy.DummyRepeatGroupRepository
 import com.example.calendy.data.maindb.category.Category
 import com.example.calendy.data.maindb.plan.PlanType
+import com.example.calendy.ui.theme.CalendyFontFamily
 import com.gowtham.ratingbar.RatingBar
 import com.gowtham.ratingbar.RatingBarConfig
 import kotlinx.coroutines.coroutineScope
@@ -175,14 +177,14 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
                                    Modifier.padding(
                                        horizontal = 12.dp, vertical = 5.dp
                                    )
-                               ), // Remove padding
-                           textStyle = TextStyle(fontSize = 32.sp, fontWeight = FontWeight.Bold),
+                               ), // Remove paddingc
+                           textStyle = TextStyle(fontFamily = CalendyFontFamily, fontSize = 32.sp, fontWeight = FontWeight.Bold),
                            decorationBox = { innerTextField ->
                                if (editPlanUiState.titleField.isEmpty()) {
                                    Text(
                                        text = "제목",
                                        fontSize = 32.sp,
-                                       fontWeight = FontWeight.Normal,
+                                       fontWeight = FontWeight.ExtraBold,
                                        color = Color.LightGray
                                    )
                                }
@@ -253,12 +255,12 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
             BasicTextField(value = editPlanUiState.memoField,
                            onValueChange = { value -> editPlanViewModel.setMemo(value) },
                            modifier = Modifier.fillMaxWidth(),
-                           textStyle = TextStyle(fontSize = 16.sp),
+                           textStyle = TextStyle(fontFamily = CalendyFontFamily,fontSize = 16.sp),
                            decorationBox = { innerTextField ->
                                if (editPlanUiState.memoField.isEmpty()) {
                                    Text(
                                        text = "메모",
-                                       fontSize = 16.sp,
+                                       style = MaterialTheme.typography.bodyLarge,
                                        fontWeight = FontWeight.Normal,
                                        color = Color.LightGray
                                    )
@@ -332,7 +334,7 @@ fun TypeButton(
             .fillMaxWidth(),
     ) {
         Text(
-            text = text, fontSize = 16.sp, style = TextStyle(
+            text = text, fontFamily = CalendyFontFamily,fontSize = 16.sp, style = TextStyle(
                 fontSize = 14.sp,
                 lineHeight = 18.sp,
                 fontWeight = FontWeight(500),
@@ -360,6 +362,7 @@ fun FieldWithLeadingText(
     ) {
         Text(
             text = leadingText,
+            style = MaterialTheme.typography.titleMedium,
             modifier = Modifier
                 .width(textWidth)
                 .padding(end = 16.dp),

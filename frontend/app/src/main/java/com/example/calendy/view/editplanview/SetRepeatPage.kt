@@ -65,15 +65,13 @@ fun SetRepeat(uiState: EditPlanUiState, viewModel: EditPlanViewModel) {
                 endDate = dateFormat.format(repeatGroup.endDate) + "까지 "
             }
             if (repeatGroup.day) {
-                repeatInterval =
-                    if (repeatGroup.repeatInterval==1) "매일 반복"
-                    else repeatGroup.repeatInterval.toString() + "일마다 반복"
+                repeatInterval = if (repeatGroup.repeatInterval==1) "매일 반복"
+                else repeatGroup.repeatInterval.toString() + "일마다 반복"
                 return endDate + repeatInterval
             }
             if (repeatGroup.week) {
-                repeatInterval =
-                    if (repeatGroup.repeatInterval==1) "매주 "
-                    else repeatGroup.repeatInterval.toString() + "주마다 "
+                repeatInterval = if (repeatGroup.repeatInterval==1) "매주 "
+                else repeatGroup.repeatInterval.toString() + "주마다 "
                 val dayMapping = mapOf(
                     "MON" to "월요일",
                     "TUE" to "화요일",
@@ -97,33 +95,40 @@ fun SetRepeat(uiState: EditPlanUiState, viewModel: EditPlanViewModel) {
 
             }
             if (repeatGroup.month) {
-                repeatInterval =
-                    if (repeatGroup.repeatInterval==1) "매월 "
-                    else repeatGroup.repeatInterval.toString() + "개월마다 "
+                repeatInterval = if (repeatGroup.repeatInterval==1) "매월 "
+                else repeatGroup.repeatInterval.toString() + "개월마다 "
 
                 val dateList = mutableListOf<String>()
                 for (i in repeatGroup.repeatRule!!.indices step 2) {
                     val dayString = repeatGroup.repeatRule!!.substring(i, i + 2).toInt()
-                    dateList.add(dayString.toString() +"일")
+                    dateList.add(dayString.toString() + "일")
                 }
                 repeatRule = dateList.joinToString(", ")
                 return endDate + repeatInterval + repeatRule + "에 반복"
 
             }
             if (repeatGroup.year) {
-                repeatInterval =
-                    if (repeatGroup.repeatInterval==1) "매년 반복"
-                    else repeatGroup.repeatInterval.toString() + "년마다 반복"
+                repeatInterval = if (repeatGroup.repeatInterval==1) "매년 반복"
+                else repeatGroup.repeatInterval.toString() + "년마다 반복"
                 return endDate + repeatInterval
-            }
-            else {
+            } else {
                 return "반복 안함"
             }
         }
     }
+
     var repeatInfoText = remember { mutableStateOf(updateRepeatInfoText()) }
     // uiState의 repeatGroup 정보가 변경될 때마다 repeatInfoText 값을 업데이트
-    LaunchedEffect(uiState.repeatGroup, uiState.repeatGroup?.day, uiState.repeatGroup?.week, uiState.repeatGroup?.month, uiState.repeatGroup?.year, uiState.repeatGroup?.repeatInterval, uiState.repeatGroup?.repeatRule, uiState.repeatGroup?.endDate) {
+    LaunchedEffect(
+        uiState.repeatGroup,
+        uiState.repeatGroup?.day,
+        uiState.repeatGroup?.week,
+        uiState.repeatGroup?.month,
+        uiState.repeatGroup?.year,
+        uiState.repeatGroup?.repeatInterval,
+        uiState.repeatGroup?.repeatRule,
+        uiState.repeatGroup?.endDate
+    ) {
         repeatInfoText.value = updateRepeatInfoText()
     }
     TextButton(
@@ -137,8 +142,8 @@ fun SetRepeat(uiState: EditPlanUiState, viewModel: EditPlanViewModel) {
         Text(
             text = repeatInfoText.value,
             textAlign = TextAlign.Left,
-            modifier = Modifier
-                .fillMaxWidth()
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
@@ -168,7 +173,7 @@ fun SetRepeatDialog(
             } else {
                 //존재하던 repeatRule 반영 weeklyRule 값 변경 (해당하는 요일 index(0:월-6:일)의 값을 true로)
                 if (repeatGroup.repeatRule!=null) {
-                    if(repeatGroup.week) {
+                    if (repeatGroup.week) {
                         val dayMapping = mapOf(
                             "MON" to 0,
                             "TUE" to 1,
@@ -181,9 +186,9 @@ fun SetRepeatDialog(
                         for (i in repeatGroup.repeatRule!!.indices step 3) {
                             val dayString = repeatGroup.repeatRule!!.substring(i, i + 3)
                             dayMapping[dayString]?.let { index ->
-                                   this[index] = true
+                                this[index] = true
                             }
-                         }
+                        }
                     } else {
                         val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
                         this[if (dayOfWeek==1) 6 else dayOfWeek - 2] = true
@@ -204,7 +209,7 @@ fun SetRepeatDialog(
             } else {
                 //존재하던 repeatRule 반영 monthlyRule 값 변경 (해당하는 (날짜-1)(0-30) index의 값을 true로)
                 if (repeatGroup.repeatRule!=null) {
-                    if(repeatGroup.month) {
+                    if (repeatGroup.month) {
                         for (i in repeatGroup.repeatRule!!.indices step 2) {
                             val dayString = repeatGroup.repeatRule!!.substring(i, i + 2)
                             val dayIndex = dayString.toInt() - 1
@@ -226,23 +231,26 @@ fun SetRepeatDialog(
     // repeatGroup table's endDate attribute value
     var endPlanDate = remember(repeatGroup) {
         mutableStateOf<Long>(0).also { state ->
-            if (repeatGroup == null) {
+            if (repeatGroup==null) {
                 state.value = calendar.timeInMillis
-            } else if (repeatGroup.endDate == null) {
+            } else if (repeatGroup.endDate==null) {
                 when {
-                    repeatGroup.day -> {
+                    repeatGroup.day   -> {
                         calendar.add(Calendar.DATE, 7)
                         state.value = calendar.timeInMillis
                     }
-                    repeatGroup.week -> {
+
+                    repeatGroup.week  -> {
                         calendar.add(Calendar.MONTH, 1)
                         state.value = calendar.timeInMillis
                     }
+
                     repeatGroup.month -> {
                         calendar.add(Calendar.YEAR, 1)
                         state.value = calendar.timeInMillis
                     }
-                    repeatGroup.year -> {
+
+                    repeatGroup.year  -> {
                         calendar.add(Calendar.YEAR, 5)
                         state.value = calendar.timeInMillis
                     }
@@ -281,8 +289,9 @@ fun SetRepeatDialog(
 
     //SetRepeatDialog 종료시 ui에 맞는 repeatGroup 객체를 넘겨줌
     fun exitDialog() {
-        val endDate : Date? = if(durationRadioGroup.value == "noEndTime") null else Date(endPlanDate.value)
-        val repeatInt = if(repeatInterval.value.isBlank()) 1 else repeatInterval.value.toInt()
+        val endDate: Date? =
+            if (durationRadioGroup.value=="noEndTime") null else Date(endPlanDate.value)
+        val repeatInt = if (repeatInterval.value.isBlank()) 1 else repeatInterval.value.toInt()
         if (repeatGroup==null) {
             val newRepeatGroup: RepeatGroup? = when (repeatRadioGroup.value) {
                 "noRepeat" -> null
@@ -393,11 +402,16 @@ fun SetRepeatDialog(
                         IconButton(onClick = { exitDialog() }) {
                             Icon(Icons.Default.Close, contentDescription = null)
                         }
-                    }, title = { Text("  반복") })
+                    }, title = {
+                        Text(
+                            text = "  반복", style = MaterialTheme.typography.titleMedium
+                        )
+                    })
                 }
                 item {
                     Text(
                         text = "  반복 선택",
+                        style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
@@ -448,6 +462,7 @@ fun SetRepeatDialog(
                     item {
                         Text(
                             text = "  기간",
+                            style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
@@ -478,7 +493,9 @@ fun RadioButtonLine(type: String, text: String, selected: MutableState<String>) 
             selected.value = type
         })
         Spacer(modifier = Modifier.width(8.dp))
-        Text(text = text)
+        Text(
+            text = text, style = MaterialTheme.typography.bodyMedium
+        )
 
         Spacer(modifier = Modifier.width(16.dp))
 
@@ -525,9 +542,9 @@ fun DailyRadioButtonLine(
 
                 ),
             )
-            Text(text = text2)
+            Text(text = text2, style = MaterialTheme.typography.bodyMedium)
         } else {
-            Text(text = text)
+            Text(text = text, style = MaterialTheme.typography.bodyMedium)
         }
         Spacer(modifier = Modifier.width(16.dp))
 
@@ -553,7 +570,7 @@ fun WeeklyRadioButtonLine(
 
         // 선택되었을 때 펼쳐지는 ui
         AnimatedVisibility(visible = selected.value==type) {
-            Text("  반복할 요일 선택")
+            Text("  반복할 요일 선택", style = MaterialTheme.typography.bodyMedium)
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
@@ -581,13 +598,15 @@ fun WeeklyRadioButtonLine(
                             .clip(CircleShape)
                             .padding(8.dp)
                     ) {
-                        Text(text = day, modifier = if (buttonStates[index]) Modifier.drawBehind {
-                            drawCircle(
-                                color = Color.LightGray,
-                                radius = this.size.maxDimension,
-                                style = Stroke(width = 6.dp.toPx())
-                            )
-                        } else Modifier)
+                        Text(text = day,
+                             style = MaterialTheme.typography.labelSmall,
+                             modifier = if (buttonStates[index]) Modifier.drawBehind {
+                                 drawCircle(
+                                     color = Color.LightGray,
+                                     radius = this.size.maxDimension,
+                                     style = Stroke(width = 6.dp.toPx())
+                                 )
+                             } else Modifier)
 
                     }
                 }
@@ -618,7 +637,7 @@ fun MonthlyRadioButtonLine(
         // 선택되었을 때 펼쳐지는 ui
         AnimatedVisibility(visible = selected.value==type) {
             Column() {
-                Text("  반복할 날짜 선택")
+                Text("  반복할 날짜 선택", style = MaterialTheme.typography.bodyMedium)
                 for (i in days.indices step 7) {
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -647,13 +666,14 @@ fun MonthlyRadioButtonLine(
                                     .padding(4.dp)
                             ) {
                                 //Text(text = days[j].toString(), fontSize = 14.sp)
-                                Text(text = days[j].toString(), modifier = if (buttonStates[j]) Modifier.drawBehind {
-                                    drawCircle(
-                                        color = Color.LightGray,
-                                        radius = this.size.maxDimension,
-                                        style = Stroke(width = 3.dp.toPx())
-                                    )
-                                } else Modifier)
+                                Text(text = days[j].toString(), style = MaterialTheme.typography.labelSmall,
+                                     modifier = if (buttonStates[j]) Modifier.drawBehind {
+                                         drawCircle(
+                                             color = Color.LightGray,
+                                             radius = this.size.maxDimension,
+                                             style = Stroke(width = 3.dp.toPx())
+                                         )
+                                     } else Modifier)
                             }
                         }
                         if (endIndex==31) {
@@ -698,7 +718,10 @@ fun EndTimeRadioButtonLine(
         RadioButtonLine(type = type, text = text, selected = selected)
         AnimatedVisibility(visible = selected.value==type) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                val state = rememberDatePickerState(initialSelectedDateMillis = endDate.value,initialDisplayMode = DisplayMode.Picker)
+                val state = rememberDatePickerState(
+                    initialSelectedDateMillis = endDate.value,
+                    initialDisplayMode = DisplayMode.Picker
+                )
                 DatePicker(state = state, modifier = Modifier.padding(16.dp))
 
                 LaunchedEffect(state.selectedDateMillis) {
@@ -717,7 +740,6 @@ fun EndTimeRadioButtonLine(
         }
     }
 }
-
 
 
 fun getRepeatRuleFromMonthlyRule(monthlyRule: List<Boolean>): String {

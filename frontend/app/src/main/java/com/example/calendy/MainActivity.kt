@@ -195,7 +195,7 @@ fun BottomNavigation(
                             navController.navigate(route)
                         }
                     },
-                    //containerColor = Color(),
+                    containerColor = Color(0xFF80ACFF),
                     contentColor = Color.Black,
                     //elevation = FloatingActionButtonDefaults.elevation(0.dp)
                 ) {
