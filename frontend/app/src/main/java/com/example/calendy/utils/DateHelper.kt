@@ -170,6 +170,7 @@ fun CalendarDay.toFirstDateOfMonth(): Date = Date(year - 1900, month, 1)
 fun CalendarDay.toLastDateOfMonth(): Date = Date(year - 1900, month, 1).lastDayOfMonth()
 fun CalendarDay.getWeekDay(): String = toDate().dayOfWeek()
 fun CalendarDay.afterDays(amount: Int): CalendarDay = toDate().afterDays(amount).toCalendarDay()
+fun CalendarDay.afterMonths(amount: Int): CalendarDay = toDate().afterMonths(amount).toCalendarDay()
 
 fun Date.toCalendarDay(): CalendarDay = CalendarDay.from(this)
 

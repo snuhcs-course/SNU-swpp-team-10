@@ -197,7 +197,7 @@ class DayView extends AppCompatCheckedTextView {
             customBackground.draw(canvas);
         }
 
-        mCircleDrawable.setBounds(circleDrawableRect);
+//        mCircleDrawable.setBounds(circleDrawableRect);
 
         super.onDraw(canvas);
     }
@@ -206,8 +206,9 @@ class DayView extends AppCompatCheckedTextView {
         if (selectionDrawable != null) {
             setBackgroundDrawable(selectionDrawable);
         } else {
-            mCircleDrawable = generateBackground(selectionColor, fadeTime, circleDrawableRect);
-            setBackgroundDrawable(mCircleDrawable);
+//            mCircleDrawable = generateBackground(selectionColor, fadeTime, circleDrawableRect);
+//            setBackgroundDrawable(mCircleDrawable);
+            setBackground(null);
         }
     }
 

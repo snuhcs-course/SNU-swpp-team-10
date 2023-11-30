@@ -6,6 +6,6 @@ import java.util.Hashtable
 
 data class MonthlyPageUIState (
     val selectedDate : CalendarDay = CalendarDay.today(),
-    val plansOfMonth : List<Plan> = emptyList(),
-    val currentMonth:CalendarDay = CalendarDay.today()
+    val currentMonth:CalendarDay = CalendarDay.today(),
+    val planLabelContainer: PlanLabelContainer = PlanLabelContainer()
 )

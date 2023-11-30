@@ -38,9 +38,11 @@ public class TitleDecorator implements DayViewDecorator {
 
     @Override
     public void decorate(DayViewFacade view) {
-        int count=0;
         int max=5;  //prevent rendering too many plans
-        for(ILabel label : planLabel){
+        for(int i =0;i<max;i++){
+            var label=planLabel.getItemAt(i);
+            if(label == null) continue;
+
             PlanLabel pLabel=(PlanLabel)label;
             Plan plan=pLabel.getItem();
             int index=pLabel.getIndex();
@@ -59,8 +61,6 @@ public class TitleDecorator implements DayViewDecorator {
                     );
             view.addSpan(span);
 
-            count++;
-            if(count>=max) break;
         }
 
     }

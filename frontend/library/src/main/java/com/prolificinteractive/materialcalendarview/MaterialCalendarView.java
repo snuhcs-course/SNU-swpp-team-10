@@ -1345,6 +1345,22 @@ public class MaterialCalendarView extends ViewGroup {
     }
 
     /**
+     * Remove a specific decorator instance.
+     * Added by calendy team
+     */
+    public void removeDecoratorsOfType(Class<? extends DayViewDecorator> decoratorType) {
+        // prevent java.util.ConcurrentModificationException
+        ArrayList removeList = new ArrayList<DayViewDecorator>();
+        for (DayViewDecorator decorator : dayViewDecorators) {
+            if (decorator.getClass().equals(decoratorType)) {
+                removeList.add(decorator);
+            }
+        }
+        dayViewDecorators.removeAll(removeList);
+        adapter.setDecorators(dayViewDecorators);
+    }
+
+    /**
      * Remove a specific decorator instance. Same rules as {@linkplain List#remove(Object)}
      *
      * @param decorator decorator to remove

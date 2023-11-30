@@ -7,6 +7,8 @@ import android.graphics.drawable.Drawable;
 import android.text.style.ForegroundColorSpan;
 
 //import com.project.sample_calendar.R;
+import androidx.annotation.NonNull;
+
 import com.example.calendy.R;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.DayViewDecorator;
@@ -32,7 +34,7 @@ public class SelectedDayDecorator implements DayViewDecorator {
     }
 
     @Override
-    public void decorate(DayViewFacade view) {
+    public void decorate(@NonNull DayViewFacade view) {
 
         view.setSelectionDrawable(drawable);
         view.addSpan(new ForegroundColorSpan(Color.BLACK));

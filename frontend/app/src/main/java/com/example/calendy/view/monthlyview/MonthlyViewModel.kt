@@ -1,12 +1,14 @@
 package com.example.calendy.view.monthlyview
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.calendy.data.maindb.plan.IPlanRepository
 import com.example.calendy.data.maindb.plan.Plan
 import com.example.calendy.utils.afterDays
+import com.example.calendy.utils.afterMonths
+import com.example.calendy.utils.toCalendarDay
 import com.example.calendy.utils.toFirstDateOfMonth
 import com.example.calendy.utils.toLastDateOfMonth
+import com.example.calendy.view.monthlyview.decorator.TitleDecorator
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
@@ -23,16 +25,17 @@ class MonthlyViewModel(
 
     private val _uiState = MutableStateFlow(MonthlyPageUIState())
     val uiState :StateFlow<MonthlyPageUIState> = _uiState.asStateFlow()
-    var job : Job?=null
+    val titleDecorators = MutableStateFlow(emptyList<TitleDecorator>())
+    private var job : Job?=null
 
     init{
-        getPlansOfMonth(CalendarDay.today(),CalendarDay.today())
+        getPlansOfMonth(CalendarDay.today())
     }
 
     fun setCurrentMonth(month : CalendarDay)
     {
         _uiState.update { current -> current.copy(currentMonth = month) }
-        getPlansOfMonth(month, month) // update plans
+        getPlansOfMonth(month) // update plans
     }
     fun setSelectedDate(day :CalendarDay){
         _uiState.update { current -> current.copy(selectedDate = day) }
@@ -45,10 +48,10 @@ class MonthlyViewModel(
             started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000)
         )
     }
-    private fun getPlansOfMonth(startDate:CalendarDay, endDate:CalendarDay)
+    private fun getPlansOfMonth(month: CalendarDay)
     {
-        val flow = planRepository.getMonthlyPlansStream(startDate.toFirstDateOfMonth().afterDays(-14),
-                                                 endDate.toLastDateOfMonth().afterDays(14))
+        val flow = planRepository.getMonthlyPlansStream(month.afterMonths(-1).toFirstDateOfMonth().afterDays(-14),
+                                                 month.afterMonths(1).toLastDateOfMonth().afterDays(14))
         job?.cancel()
         job = viewModelScope.launch {
             flow.collect{
@@ -64,6 +67,15 @@ class MonthlyViewModel(
 
     private fun updatePlanList(planList:List<Plan>)
     {
-        _uiState.update { current -> current.copy(plansOfMonth = planList) }
+//        _uiState.update { current -> current.copy(planLabelContainer = PlanLabelContainer().setPlans(planList)) }
+        val container = PlanLabelContainer().setPlans(planList)
+        _uiState.update { current -> current.copy(planLabelContainer = container) }
+        val decos= mutableListOf<TitleDecorator>()
+        for((date,slot) in container)
+        {
+            decos.add(TitleDecorator(date.toCalendarDay(),slot))
+        }
+
+        titleDecorators.update { decos }
     }
 }
