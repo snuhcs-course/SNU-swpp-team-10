@@ -1,7 +1,6 @@
 package com.example.calendy.data.maindb.repeatgroup
 
 import com.example.calendy.utils.DateHelper
-import com.example.calendy.utils.DateHelper.extract
 import com.example.calendy.utils.applyTime
 import org.junit.Test
 
@@ -20,11 +19,7 @@ class RepeatGroupTest {
 
         var previousDate = DateHelper.getDate(2023, 11 - 1, 5)
 
-        for (startDateOnly in repeatGroup.toIterable(
-            startDate = DateHelper.getDate(
-                2023, 11 - 1, 7
-            )
-        )) {
+        for (startDateOnly in repeatGroup.toIterable()) {
             // Iterator returns Date Only without time information.
             val repeatedDate = startDateOnly.applyTime(10, 56)
             if (!(previousDate < repeatedDate)) {

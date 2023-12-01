@@ -12,4 +12,7 @@ interface RepeatGroupDao : BaseDao<RepeatGroup> {
 
     @Query("SELECT * FROM repeat_group WHERE id = :id")
     fun getRepeatGroupById(id: Int): RepeatGroup
+
+    @Query("SELECT * FROM repeat_group")
+    fun getAllRepeatGroups(): Flow<List<RepeatGroup>>
 }

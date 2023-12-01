@@ -37,14 +37,7 @@ class MonthlyViewModel(
     fun setSelectedDate(day :CalendarDay){
         _uiState.update { current -> current.copy(selectedDate = day) }
     }
-    fun getAllPlans():StateFlow<List<Plan>>
-    {
-        return planRepository.getAllPlansStream().stateIn(
-            scope = viewModelScope,
-            initialValue = emptyList<Plan>(),
-            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000)
-        )
-    }
+
     private fun getPlansOfMonth(startDate:CalendarDay, endDate:CalendarDay)
     {
         val flow = planRepository.getMonthlyPlansStream(startDate.toFirstDateOfMonth().afterDays(-14),

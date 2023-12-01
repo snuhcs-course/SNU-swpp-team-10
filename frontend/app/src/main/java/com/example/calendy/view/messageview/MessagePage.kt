@@ -136,16 +136,13 @@ fun MessageInputField(
                     imageVector = Icons.Default.Mic, contentDescription = "Start Speech Recognition"
                 )
             } else {
-//                Icon(
-//                    imageVector = Icons.Default.MoreHoriz,
-//                    contentDescription = "Cancel Speech Recognition"
-//                )
+                // Is Listening, ... animation
                 LoadingAnimation2(
-                    circleColor= Blue3,
-                    circleSize= 8.dp,
-                    spaceBetween=4.dp,
-                    animationDelay= 400,
-                    initialAlpha= 0.3f
+                    circleColor = Blue3,
+                    circleSize = 8.dp,
+                    spaceBetween = 4.dp,
+                    animationDelay = 400,
+                    initialAlpha = 0.3f
                 )
             }
         }
@@ -153,12 +150,15 @@ fun MessageInputField(
         BasicTextField(
             value = text,
             onValueChange = onValueChanged,
-            enabled= !isListening,
+            enabled = !isListening,
             modifier = modifier
                 .padding(top = 10.dp, bottom = 10.dp, start = 10.dp)
                 .fillMaxWidth()
                 .weight(1f)
-                .background(color = Color(0xFFFFFEFE), shape = RoundedCornerShape(size = 25.dp))
+                .background(
+                    color = if (!isListening) Color(0xFFFFFEFE) else Color(0xFF888888),
+                    shape = RoundedCornerShape(size = 25.dp)
+                )
                 .then(Modifier.padding(horizontal = 12.dp, vertical = 5.dp)), // Remove padding
             textStyle = TextStyle(
                 color = Color.Black, fontSize = 16.sp
@@ -191,20 +191,20 @@ fun MessageList(
     }
 
     // wrap content with ListItemWrapper, and add time divider if needed
-    val listItems = mutableListOf<@Composable ()->Unit>()
-    for( msg in messageLogList){
+    val listItems = mutableListOf<@Composable () -> Unit>()
+    for (msg in messageLogList) {
         var currDate = msg.sentTime
-        if ( prevDate != null && !(prevDate!!.equalDay(currDate))) {
+        if (prevDate!=null && !(prevDate!!.equalDay(currDate))) {
             listItems.add { DateDivider(prevDate) } // since messages are sorted in descending order, add prevDate
             prevDate = currDate
         }
         listItems.add { MessageItem(msg) }
     }
-    if (prevDate != null) {
+    if (prevDate!=null) {
         // first date divider
         listItems.add { DateDivider(prevDate) }
     }
-    
+
     LazyColumn(
         reverseLayout = true, modifier = modifier.fillMaxWidth()
 
@@ -217,7 +217,7 @@ fun MessageList(
 
 @Composable
 fun MessageItem(messageLog: Message, modifier: Modifier = Modifier) {
-    val fromManager= messageLog.messageFromManager
+    val fromManager = messageLog.messageFromManager
     val chatBackground = when (fromManager) {
         true  -> Color(0xFFACC7FA)
         false -> Color(0xFFDBE2F6)
@@ -231,10 +231,8 @@ fun MessageItem(messageLog: Message, modifier: Modifier = Modifier) {
         }
     ) {
         Row(
-            verticalAlignment = Alignment.Bottom,
-            modifier = Modifier
-                .padding(5.dp)
-        ){
+            verticalAlignment = Alignment.Bottom, modifier = Modifier.padding(5.dp)
+        ) {
             if (!fromManager) {
                 SentTime(messageLog)
             }
@@ -242,16 +240,15 @@ fun MessageItem(messageLog: Message, modifier: Modifier = Modifier) {
                 modifier = Modifier
                     .widthIn(20.dp, 320.dp)
                     .wrapContentWidth()
-                    .padding(vertical = 10.dp, horizontal =5.dp)
+                    .padding(vertical = 10.dp, horizontal = 5.dp)
                     .background(
-                        color = chatBackground,
-                        shape = RoundedCornerShape(size = 15.dp)
+                        color = chatBackground, shape = RoundedCornerShape(size = 15.dp)
                     )
                     //            .border(width = 2.dp, color = Color.Black, shape = RoundedCornerShape(15.dp, 15.dp, 15.dp, 15.dp))
                     .clip(shape = RoundedCornerShape(15.dp))
             ) {
                 when (fromManager) {
-                    true -> MessageContentManager(messageLog)
+                    true  -> MessageContentManager(messageLog)
                     false -> MessageContentUser(messageLog)
                 }
             }
@@ -310,7 +307,7 @@ fun DateDivider(
 @Preview(showBackground = false, name = "chatbar preview")
 @Composable
 fun MessageInputPreview() {
-    MessageInputField(isListening=true)
+    MessageInputField(isListening = true)
 }
 
 

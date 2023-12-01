@@ -1,6 +1,5 @@
 package com.example.calendy.utils
 
-import android.util.Log
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -55,22 +54,6 @@ object DateHelper {
         this.time
     }
 
-    fun getDateFromUTCMillis(dateInUTCMillis: Long, hourOfDay: Int? = null, minute: Int? = null): Date {
-        val selectedUtc = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-        val selectedLocal = Calendar.getInstance()
-
-        selectedUtc.timeInMillis = dateInUTCMillis
-        selectedLocal.clear()
-        selectedLocal.set(
-            selectedUtc.get(Calendar.YEAR),
-            selectedUtc.get(Calendar.MONTH),
-            selectedUtc.get(Calendar.DATE),
-            hourOfDay ?: selectedUtc.get(Calendar.HOUR_OF_DAY),
-            minute ?: selectedUtc.get(Calendar.MINUTE)
-        )
-        return selectedLocal.time
-    }
-
     data class DateFields(
         val year: Int, val monthZeroIndexed: Int, val day: Int, val hour: Int, val minute: Int
     )
@@ -85,20 +68,6 @@ object DateHelper {
             hour = calendar.get(Calendar.HOUR_OF_DAY),
             minute = calendar.get(Calendar.MINUTE),
         )
-    }
-
-    fun Date.timestampUTC(): Long {
-        // treat GMT Date as UTC for DatePicker Library
-        val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-        val (year, monthZeroIndexed, date, hour, minute) = extract()
-        calendar.set(
-            year,
-            monthZeroIndexed,
-            date,
-            hour,
-            minute
-        )
-        return calendar.timeInMillis
     }
 
     /**
@@ -121,33 +90,42 @@ object DateHelper {
     )
 
 
-    /**
-     * DueTime for tod0
-     */
-    fun getYearlyDueTime(year: Int): Date = endOf(year)
+    private val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+    fun Date.toLocalTimeString(): String = format.format(this)
+    fun parseLocalTimeString(dateString: String): Date = format.parse(dateString)!!
 
-    /**
-     * DueTime for tod0
-     * @param monthZeroIndexed 0 ~ 11 based
-     */
-    fun getMonthlyDueTime(year: Int, monthZeroIndexed: Int): Date = endOf(year, monthZeroIndexed)
 
-    /**
-     * DueTime for tod0
-     * @param monthZeroIndexed 0 ~ 11 based
-     */
-    fun getDailyDueTime(year: Int, monthZeroIndexed: Int, day: Int): Date =
-        endOf(year, monthZeroIndexed, day)
+    fun getDateFromUTCMillis(dateInUTCMillis: Long, hourOfDay: Int? = null, minute: Int? = null): Date {
+        val selectedUtc = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        val selectedLocal = Calendar.getInstance()
 
-    /**
-     * String formatter for date
-     */
+        selectedUtc.timeInMillis = dateInUTCMillis
+        selectedLocal.clear()
+        selectedLocal.set(
+            selectedUtc.get(Calendar.YEAR),
+            selectedUtc.get(Calendar.MONTH),
+            selectedUtc.get(Calendar.DATE),
+            hourOfDay ?: selectedUtc.get(Calendar.HOUR_OF_DAY),
+            minute ?: selectedUtc.get(Calendar.MINUTE)
+        )
+        return selectedLocal.time
+    }
+    fun Date.timestampUTC(): Long {
+        // treat GMT Date as UTC for DatePicker Library
+        val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        val (year, monthZeroIndexed, date, hour, minute) = extract()
+        calendar.set(
+            year,
+            monthZeroIndexed,
+            date,
+            hour,
+            minute
+        )
+        return calendar.timeInMillis
+    }
 
-    /**
-     * number of days diff between two dates, no considering time
-     *
-     */
-
+    fun worldStart(): Date = getDate(2020, 1 - 1, 1)
+    fun worldEnd(): Date = getDate(2030, 12 - 1, 31)
 }
 
 fun getDiffBetweenDates(startDate: Date, endDate: Date): Int {

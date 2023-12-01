@@ -2,7 +2,6 @@ package com.example.calendy
 
 import android.os.Bundle
 import android.util.Log
-import android.window.SplashScreen
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
@@ -43,20 +42,19 @@ import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.ui.theme.CalendyTheme
+import com.example.calendy.utils.DateHelper.parseLocalTimeString
+import com.example.calendy.utils.DateHelper.toLocalTimeString
 import com.example.calendy.view.editplanview.EditPlanPage
 import com.example.calendy.view.editplanview.EditPlanViewModel
 import com.example.calendy.view.messagepage.MessagePageViewModel
 import com.example.calendy.view.messageview.MessagePage
 import com.example.calendy.view.monthlyview.MonthlyPageKT
-import com.example.calendy.view.settingview.SettingPage
 import com.example.calendy.view.todolistview.ToDoListPage
 import com.example.calendy.view.todolistview.TodoListViewModel
 import com.example.calendy.view.weeklyview.WeeklyPage
 import com.example.calendy.view.weeklyview.WeeklyViewModel
 
-import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
 
 
 class MainActivity : ComponentActivity() {
@@ -108,6 +106,25 @@ fun NavController.navigateToBottom(bottomNav: BottomNavItem) {
         launchSingleTop = true
 //        restoreState = true
     }
+}
+
+fun NavController.navigateToEditPage(id: Int?, type: PlanType, date: Date?) {
+    val route = if (id==null) {
+        when (type) {
+            PlanType.SCHEDULE -> EditPageRoute.AddSchedule(
+                date = date ?: Date()
+            ).route
+
+            PlanType.TODO     -> EditPageRoute.AddTodo(date = date ?: Date()).route
+        }
+    } else {
+        when (type) {
+            PlanType.SCHEDULE -> EditPageRoute.EditSchedule(id = id).route
+            PlanType.TODO     -> EditPageRoute.EditTodo(id = id).route
+        }
+    }
+
+    this.navigate(route)
 }
 
 @Composable
@@ -193,29 +210,32 @@ sealed class BottomNavItem(
 sealed class EditPageRoute(val route: String) {
     companion object {
         const val baseRoute = "EditPage"
-
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+        const val scheduleArgument = "schedule"
+        const val todoArgument = "todo"
 
         // Helper method to convert a Date to a String
-        fun dateToString(date: Date): String {
-            return dateFormat.format(date)
-        }
+        fun dateToString(date: Date): String = date.toLocalTimeString()
     }
 
-    class AddSchedule(date: Date) : EditPageRoute("$baseRoute/schedule?date=${dateToString(date)}")
+    class AddSchedule(date: Date) : EditPageRoute(
+        "$baseRoute/$scheduleArgument?date=${
+            dateToString(
+                date
+            )
+        }"
+    )
 
-    class AddTodo(date: Date) : EditPageRoute("$baseRoute/todo?date=${dateToString(date)}")
+    class AddTodo(date: Date) : EditPageRoute("$baseRoute/$todoArgument?date=${dateToString(date)}")
 
-    class EditSchedule(id: Int) : EditPageRoute("$baseRoute/schedule?id=$id")
+    class EditSchedule(id: Int) : EditPageRoute("$baseRoute/$scheduleArgument?id=$id")
 
-    class EditTodo(id: Int) : EditPageRoute("$baseRoute/todo?id=$id")
+    class EditTodo(id: Int) : EditPageRoute("$baseRoute/$todoArgument?id=$id")
 }
 
 
 @Composable
 fun NavigationGraph(
-    navController: NavHostController,
-    showBottomNavigation: (Boolean) -> Unit
+    navController: NavHostController, showBottomNavigation: (Boolean) -> Unit
 ) {
     NavHost(navController = navController, startDestination = BottomNavItem.Month.screenRoute) {
         // region Bottom Navigation Routes
@@ -223,55 +243,20 @@ fun NavigationGraph(
             showBottomNavigation(true)
             val viewModel: WeeklyViewModel = viewModel(factory = AppViewModelProvider.Factory)
             WeeklyPage(viewModel, onNavigateToEditPage = { id: Int?, type: PlanType, date: Date? ->
-                val route = if (id==null) {
-                    when (type) {
-                        PlanType.SCHEDULE -> EditPageRoute.AddSchedule(
-                            date = date ?: Date()
-                        ).route
-
-                        PlanType.TODO     -> EditPageRoute.AddTodo(date = date ?: Date()).route
-                    }
-                } else {
-                    when (type) {
-                        PlanType.SCHEDULE -> EditPageRoute.EditSchedule(id = id).route
-                        PlanType.TODO     -> EditPageRoute.EditTodo(id = id).route
-                    }
-                }
-                navController.navigate(route)
+                navController.navigateToEditPage(id = id, type = type, date = date)
             })
         }
         composable(BottomNavItem.Month.screenRoute) {
             showBottomNavigation(true)
             MonthlyPageKT(onNavigateToEditPage = { id: Int?, type: PlanType, date: Date? ->
-                val route = if (id==null) {
-                    when (type) {
-                        PlanType.SCHEDULE -> EditPageRoute.AddSchedule(
-                            date = date ?: Date()
-                        ).route
-
-                        PlanType.TODO     -> EditPageRoute.AddTodo(date = date ?: Date()).route
-                    }
-                } else {
-                    when (type) {
-                        PlanType.SCHEDULE -> EditPageRoute.EditSchedule(id = id).route
-                        PlanType.TODO     -> EditPageRoute.EditTodo(id = id).route
-                    }
-                }
-
-                navController.navigate(route)
+                navController.navigateToEditPage(id = id, type = type, date = date)
             })
         }
         composable(BottomNavItem.Todo.screenRoute) {
             showBottomNavigation(true)
             val viewModel: TodoListViewModel = viewModel(factory = AppViewModelProvider.Factory)
             ToDoListPage(viewModel, onNavigateToEditPage = { id: Int?, date: Date? ->
-                if (id!=null) {
-                    val route = EditPageRoute.EditTodo(id = id).route
-                    navController.navigate(route)
-                } else {
-                    val route = EditPageRoute.AddTodo(date = date ?: Date()).route
-                    navController.navigate(route)
-                }
+                navController.navigateToEditPage(id = id, type = PlanType.TODO, date = date)
             })
         }
         composable(BottomNavItem.AiManager.screenRoute) {
@@ -297,19 +282,21 @@ fun NavigationGraph(
             Log.d("GUN MainActivity", "Recompose")
 
             val dateString = entry.arguments?.getString("date")
-            val date = dateString?.let { EditPageRoute.dateFormat.parse(it) }
+            val date = dateString?.let { parseLocalTimeString(it) }
 
             val viewModel: EditPlanViewModel = viewModel(factory = AppViewModelProvider.Factory)
             viewModel.initialize(
                 id = entry.arguments?.getString("id")?.toIntOrNull(),
                 type = when (entry.arguments?.getString("type")) {
-                    "schedule" -> PlanType.SCHEDULE
-                    else       -> PlanType.TODO
+                    EditPageRoute.scheduleArgument -> PlanType.SCHEDULE
+                    else                           -> PlanType.TODO
                 },
                 date = date
             )
 
-            EditPlanPage(viewModel, onNavigateBack = navController::popBackStack )
+            // TODO: 이것도 QueryRoute처럼 분리하면 되겠는데?
+            // 게다가 navigateToEditPage에서 ViewModel을 설정하기만 하면 되겠다.
+            EditPlanPage(viewModel, onNavigateBack = navController::popBackStack)
         }
         composable(
             route = "QueryRoute?query={query}", arguments = listOf(
@@ -336,7 +323,6 @@ fun NavigationGraph(
             navController.navigateToBottom(BottomNavItem.AiManager)
         }
         composable(
-            // TODO: Specify Route & Query랑 일치하게 만들기
             route = "BriefingRoute?time={timeScope}", arguments = listOf(
                 navArgument("timeScope") {
                     type = NavType.StringType
@@ -353,9 +339,8 @@ fun NavigationGraph(
             val timeScope = entry.arguments?.getString("timeScope")
             if (timeScope!=null) {
                 Log.d("GUN Main", timeScope.toString())
-//                messagePageViewModel.setUserInputText(timeScope)
-//                messagePageViewModel.onSendButtonClicked()
             }
+            // TODO: Set ViewModel, and navigate to ManagerPage
         }
     }
 }

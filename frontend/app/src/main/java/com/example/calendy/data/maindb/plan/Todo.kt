@@ -35,14 +35,14 @@ data class Todo(
     val complete: Boolean = false,
     @ColumnInfo(name = "memo")
     override val memo: String = "",
-    @ColumnInfo(name = "repeat_group_id", index = true)
-    override val repeatGroupId: Int? = null,
     @ColumnInfo(name = "category_id", index = true)
     override val categoryId: Int? = null,
     @ColumnInfo(name = "priority")
     override val priority: Int = PRIORITY_DEFAULT,
     @ColumnInfo(name = "show_in_monthly_view")
     override val showInMonthlyView: Boolean = true,
+    @ColumnInfo(name = "repeat_group_id", index = true)
+    override val repeatGroupId: Int? = null,
     @ColumnInfo(name = "is_overridden")
     override val isOverridden: Boolean = false
 ) : Plan

@@ -3,11 +3,15 @@ package com.example.calendy.data.maindb.repeatgroup
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.example.calendy.data.maindb.plan.Plan
+import com.example.calendy.data.maindb.plan.Schedule
+import com.example.calendy.data.maindb.plan.Todo
 import com.example.calendy.utils.DateHelper
 import com.example.calendy.utils.DateHelper.extract
 import com.example.calendy.utils.afterDays
 import com.example.calendy.utils.afterMonths
 import com.example.calendy.utils.afterYears
+import com.example.calendy.utils.applyTime
 import com.example.calendy.utils.dateOnly
 import java.util.Calendar
 import java.util.Date
@@ -30,7 +34,7 @@ data class RepeatGroup(
     @ColumnInfo(name = "repeat_rule")
     var repeatRule: String? = null,
     @ColumnInfo(name = "end_date")
-    var endDate: Date?
+    var endDate: Date?, // This should be date only
 ) {
     private fun parseWeeklyRepeatRule(repeatRule: String): List<Int> {
         // return SUN: 1 ~ SAT: 7
@@ -47,25 +51,29 @@ data class RepeatGroup(
         return repeatRule.chunked(2).map { it.toInt() }
     }
 
+    private fun nonNullEndDate(): Date {
+        return endDate ?: DateHelper.worldEnd()
+    }
+
     /**
      * Returns Iterable<Date> from repeat group. Date Only without time information.
-     * @param startDate start date of repeat group. No need to be date only.
+     * @param startDate start date of repeat group. This need to be date only.
      */
     fun toIterable(startDate: Date): Iterable<Date> = object : Iterable<Date> {
         override fun iterator(): Iterator<Date> {
             // Internal Final Date
-            val startDateOnly = startDate.dateOnly()
-            val endDate = endDate ?: DateHelper.getDate(2030, 12 - 1, 31)
+            val endDate = nonNullEndDate()
             return when {
-                day   -> dayIterator(startDateOnly, endDate)
-                week  -> weekIterator(startDateOnly, endDate).iterator()
-                month -> monthIterator(startDateOnly, endDate).iterator()
-                year  -> yearIterator(startDateOnly, endDate).iterator()
+                day   -> dayIterator(startDate, endDate)
+                week  -> weekIterator(startDate, endDate).iterator()
+                month -> monthIterator(startDate, endDate).iterator()
+                year  -> yearIterator(startDate, endDate).iterator()
                 else  -> throw Exception("No repeat rule")
             }
         }
     }
 
+    //region iterators
     private fun dayIterator(startDate: Date, endDate: Date) = object : Iterator<Date> {
         private var currentDate = startDate
 
@@ -132,6 +140,7 @@ data class RepeatGroup(
     }
 
     private fun yearIterator(startDate: Date, endDate: Date) = sequence {
+        // TODO: Not Complete! there is no yearRule
         val (_, monthZeroIndexed, day, _, _) = startDate.extract()
 
         val calendar = Calendar.getInstance()
@@ -152,6 +161,48 @@ data class RepeatGroup(
                 // Ignore errors like February 29th
             }
             currentDate = currentDate.afterYears(repeatInterval)
+        }
+    }
+    //endregion
+
+    fun generatePlanList(from: Date, until: Date, plan: Plan): List<Plan> {
+        // TODO: ineffective because of filter.
+        //  repeatGroup.toIterable should take from, until and be effective
+        when (plan) {
+            is Schedule -> {
+                val duration = plan.endTime.time - plan.startTime.time
+                val (_, _, _, hour, minute) = plan.startTime.extract()
+                return this.toIterable(from).mapNotNull { repeatDate ->
+                    val startTime = repeatDate.applyTime(hour, minute)
+                    val endTime = Date(startTime.time + duration)
+
+                    // [from, until] and [startTime, endTime] should overlap
+                    // endTime < from -> [startTime, endTime] ,,, [from, until]
+                    // until < startTime -> [from, until] ... [startTime, endTime]
+                    if (endTime < from || until < startTime) null
+                    else {
+                        plan.copy(
+                            id = 0,
+                            startTime = repeatDate.applyTime(hour, minute),
+                            endTime = endTime
+                        )
+                    }
+                }
+            }
+
+            is Todo     -> {
+                val (_, _, _, hour, minute) = plan.dueTime.extract()
+                return this.toIterable(from).mapNotNull { repeatDate ->
+                    val dueTime = repeatDate.applyTime(hour, minute)
+
+                    if (dueTime < from || until < dueTime) null
+                    else {
+                        plan.copy(
+                            id = 0, dueTime = repeatDate.applyTime(hour, minute)
+                        )
+                    }
+                }
+            }
         }
     }
 

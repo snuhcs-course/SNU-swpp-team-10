@@ -215,9 +215,10 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
         //endregion
 
         //region Repeat
-        FieldWithLeadingText(leadingText = "반복", modifier = Modifier.height(commonHeight)) {
-            SetRepeat(editPlanUiState, editPlanViewModel)
-        }
+        // TODO: Repeat Group Feature Give up
+//        FieldWithLeadingText(leadingText = "반복", modifier = Modifier.height(commonHeight)) {
+//            SetRepeat(editPlanUiState, editPlanViewModel)
+//        }
         //endregion
 
         //region Category
