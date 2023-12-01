@@ -57,6 +57,8 @@ class EditPlanViewModel(
             calendar.set(Calendar.YEAR, providedCalendar.get(Calendar.YEAR))
             calendar.set(Calendar.MONTH, providedCalendar.get(Calendar.MONTH))
             calendar.set(Calendar.DAY_OF_MONTH, providedCalendar.get(Calendar.DAY_OF_MONTH))
+            calendar.set(Calendar.HOUR_OF_DAY, providedCalendar.get(Calendar.HOUR_OF_DAY))
+            calendar.set(Calendar.MINUTE, providedCalendar.get(Calendar.MINUTE))
 
             _uiState.value = EditPlanUiState(
                 isAddPage = true,

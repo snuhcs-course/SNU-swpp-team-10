@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,7 +15,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -253,26 +256,40 @@ fun WeeklyTable(
     val numDays = 7
     val dividerColor = Color.LightGray
 
-    Layout(
-        content = {
-            schedules.sortedBy(Schedule::startTime).forEach { originalSchedule ->
-                // 일정을 날짜별로 분할
-                val splitSchedules = splitScheduleByDays(originalSchedule, uiState.currentWeek.first, uiState.currentWeek.second)
+    BoxWithConstraints(modifier = modifier) {
+        // 클릭 가능한 시간 슬롯 Box 배치
+        for (day in 0 until numDays) {
+            for (hour in 0 until 24) {
+                ClickableTimeSlotBox(
+                    uiState = uiState,
+                    day = day,
+                    hour = hour,
+                    dayWidth = dayWidth,
+                    hourHeight = hourHeight,
+                    onNavigateToEditPage = onNavigateToEditPage
+                )
+            }
+        }
+        Layout(
+            content = {
+                schedules.sortedBy(Schedule::startTime).forEach { originalSchedule ->
+                    // 일정을 날짜별로 분할
+                    val splitSchedules = splitScheduleByDays(originalSchedule, uiState.currentWeek.first, uiState.currentWeek.second)
 
-                // 각 분할된 일정에 대해 scheduleContent를 호출
-                splitSchedules.forEach { schedule ->
-                    Box(modifier = Modifier.scheduleData(schedule = schedule)) {
-                        scheduleContent(schedule)
+                    // 각 분할된 일정에 대해 scheduleContent를 호출
+                    splitSchedules.forEach { schedule ->
+                        Box(modifier = Modifier.scheduleData(schedule = schedule)) {
+                            scheduleContent(schedule)
+                        }
                     }
                 }
-            }
-            todos.sortedBy(Todo::dueTime).forEach { todo ->
-                Box(modifier = Modifier.todoData(todo = todo)) {
-                    todoContent(todo)
+                todos.sortedBy(Todo::dueTime).forEach { todo ->
+                    Box(modifier = Modifier.todoData(todo = todo)) {
+                        todoContent(todo)
+                    }
                 }
-            }
-        },
-        modifier = modifier.drawBehind {
+            },
+            modifier = modifier.matchParentSize().drawBehind {
                 repeat(23) {
                     drawLine(
                         dividerColor,
@@ -290,15 +307,16 @@ fun WeeklyTable(
                     )
                 }
             },
-    ) { measureables, constraints ->
-        val height = (hourHeight*24).roundToPx()
-        val width = (dayWidth*7).roundToPx()
-        val scheduleMeasureables = measureables.filter { it.parentData is Schedule }
-        val todoMeasureables = measureables.filter { it.parentData is Todo }
-        val placeableWithSchedules = scheduleMeasureables.map { measurable ->
-            val schedule = measurable.parentData as Schedule
-            val itemHeight = ((TimeUnit.MILLISECONDS.toMinutes(schedule.endTime.time - schedule.startTime.time) / 60f) * hourHeight.toPx()).roundToInt()
-            val placeable = measurable.measure(
+
+            ) { measureables, constraints ->
+            val height = (hourHeight*24).roundToPx()
+            val width = (dayWidth*7).roundToPx()
+            val scheduleMeasureables = measureables.filter { it.parentData is Schedule }
+            val todoMeasureables = measureables.filter { it.parentData is Todo }
+            val placeableWithSchedules = scheduleMeasureables.map { measurable ->
+                val schedule = measurable.parentData as Schedule
+                val itemHeight = ((TimeUnit.MILLISECONDS.toMinutes(schedule.endTime.time - schedule.startTime.time) / 60f) * hourHeight.toPx()).roundToInt()
+                val placeable = measurable.measure(
                     constraints.copy(
                         minWidth = dayWidth.roundToPx(),
                         maxWidth = dayWidth.roundToPx(),
@@ -306,106 +324,108 @@ fun WeeklyTable(
                         maxHeight = itemHeight
                     )
                 )
-            Pair(placeable, schedule)
-        }
-        val placeableWithTodos = todoMeasureables.map { measurable ->
-            val todo = measurable.parentData as Todo
-            val placeable = measurable.measure(
-                constraints.copy(
-                    minWidth = dayWidth.roundToPx(),
-                    maxWidth = dayWidth.roundToPx(),
-                )
-            )
-            Pair(placeable, todo)
-        }
-        layout(width, height) {
-            placeableWithSchedules.forEach { (placeable, schedule) ->
-                // schedule 객체 y 좌표 정하기
-                val startDayMidnight = Calendar.getInstance().apply {
-                    time = schedule.startTime
-                    set(Calendar.HOUR_OF_DAY, 0)
-                    set(Calendar.MINUTE, 0)
-                    set(Calendar.SECOND, 0)
-                    set(Calendar.MILLISECOND, 0)
-                }
-                val itemOffsetMinutes =
-                    TimeUnit.MILLISECONDS.toMinutes(schedule.startTime.time - startDayMidnight.time.time)
-                val itemY = ((itemOffsetMinutes / 60f) * hourHeight.toPx()).roundToInt()
-
-                // schedule 객체 x 좌표 정하기
-                val startOfWeekCalendar = Calendar.getInstance().apply {
-                    time = uiState.currentWeek.first
-                    set(Calendar.HOUR_OF_DAY, 0)
-                    set(Calendar.MINUTE, 0)
-                    set(Calendar.SECOND, 0)
-                    set(Calendar.MILLISECOND, 0)
-                }
-                val startDayCalendar = Calendar.getInstance().apply {
-                    time = schedule.startTime
-                    set(Calendar.HOUR_OF_DAY, 0)
-                    set(Calendar.MINUTE, 0)
-                    set(Calendar.SECOND, 0)
-                    set(Calendar.MILLISECOND, 0)
-                }
-
-                val itemOffsetDays =
-                    TimeUnit.MILLISECONDS.toDays(startDayCalendar.timeInMillis - startOfWeekCalendar.timeInMillis)
-                        .toInt()
-                var itemX = itemOffsetDays * dayWidth.roundToPx()
-                placeable.place(itemX, itemY)
+                Pair(placeable, schedule)
             }
-            placeableWithTodos.forEach{(placeable, todo) ->
-                // todo y좌표 정하기
-                val calendar = Calendar.getInstance().apply {
-                    time = todo.dueTime
-                    set(Calendar.HOUR_OF_DAY, 0)
-                    set(Calendar.MINUTE, 0)
-                    set(Calendar.SECOND, 0)
-                    set(Calendar.MILLISECOND, 0)
-                }
-                val dueTime = Calendar.getInstance().apply {
-                    time = todo.dueTime
-                }
-                val dueTimeCheck = when (dueTime.get(Calendar.HOUR_OF_DAY)) {
-                    0    -> true // Between AM 0:00 and AM 0:59
-                    1    -> calendar.get(Calendar.MINUTE) <= 20 // Between AM 1:00 and AM 1:20
-                    else -> false
-                }
-                val midnight = calendar.time
-                val itemOffsetMinutes =
-                    TimeUnit.MILLISECONDS.toMinutes(todo.dueTime.time - midnight.time)
+            val placeableWithTodos = todoMeasureables.map { measurable ->
+                val todo = measurable.parentData as Todo
+                val placeable = measurable.measure(
+                    constraints.copy(
+                        minWidth = dayWidth.roundToPx(),
+                        maxWidth = dayWidth.roundToPx(),
+                    )
+                )
+                Pair(placeable, todo)
+            }
+            layout(width, height) {
+                placeableWithSchedules.forEach { (placeable, schedule) ->
+                    // schedule 객체 y 좌표 정하기
+                    val startDayMidnight = Calendar.getInstance().apply {
+                        time = schedule.startTime
+                        set(Calendar.HOUR_OF_DAY, 0)
+                        set(Calendar.MINUTE, 0)
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }
+                    val itemOffsetMinutes =
+                        TimeUnit.MILLISECONDS.toMinutes(schedule.startTime.time - startDayMidnight.time.time)
+                    val itemY = ((itemOffsetMinutes / 60f) * hourHeight.toPx()).roundToInt()
 
-                val itemY = if(dueTimeCheck){
-                    ((itemOffsetMinutes / 60f) * hourHeight.toPx()).roundToInt()
-                } else {
-                    (((itemOffsetMinutes / 60f)) * hourHeight.toPx()).roundToInt() - placeable.height
-                }
-                // todo객체 x 좌표 정하기
-                val startOfWeekCalendar = Calendar.getInstance().apply {
-                    time = uiState.currentWeek.first
-                    set(Calendar.HOUR_OF_DAY, 0)
-                    set(Calendar.MINUTE, 0)
-                    set(Calendar.SECOND, 0)
-                    set(Calendar.MILLISECOND, 0)
-                }
-                val todoDayCalendar = Calendar.getInstance().apply {
-                    time = todo.dueTime
-                    set(Calendar.HOUR_OF_DAY, 0)
-                    set(Calendar.MINUTE, 0)
-                    set(Calendar.SECOND, 0)
-                    set(Calendar.MILLISECOND, 0)
-                }
+                    // schedule 객체 x 좌표 정하기
+                    val startOfWeekCalendar = Calendar.getInstance().apply {
+                        time = uiState.currentWeek.first
+                        set(Calendar.HOUR_OF_DAY, 0)
+                        set(Calendar.MINUTE, 0)
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }
+                    val startDayCalendar = Calendar.getInstance().apply {
+                        time = schedule.startTime
+                        set(Calendar.HOUR_OF_DAY, 0)
+                        set(Calendar.MINUTE, 0)
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }
 
-                val itemOffsetDays =
-                    TimeUnit.MILLISECONDS.toDays(todoDayCalendar.timeInMillis - startOfWeekCalendar.timeInMillis)
-                        .toInt()
-                val itemX = itemOffsetDays * dayWidth.roundToPx()
+                    val itemOffsetDays =
+                        TimeUnit.MILLISECONDS.toDays(startDayCalendar.timeInMillis - startOfWeekCalendar.timeInMillis)
+                            .toInt()
+                    var itemX = itemOffsetDays * dayWidth.roundToPx()
+                    placeable.place(itemX, itemY)
+                }
+                placeableWithTodos.forEach{(placeable, todo) ->
+                    // todo y좌표 정하기
+                    val calendar = Calendar.getInstance().apply {
+                        time = todo.dueTime
+                        set(Calendar.HOUR_OF_DAY, 0)
+                        set(Calendar.MINUTE, 0)
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }
+                    val dueTime = Calendar.getInstance().apply {
+                        time = todo.dueTime
+                    }
+                    val dueTimeCheck = when (dueTime.get(Calendar.HOUR_OF_DAY)) {
+                        0    -> true // Between AM 0:00 and AM 0:59
+                        1    -> calendar.get(Calendar.MINUTE) <= 20 // Between AM 1:00 and AM 1:20
+                        else -> false
+                    }
+                    val midnight = calendar.time
+                    val itemOffsetMinutes =
+                        TimeUnit.MILLISECONDS.toMinutes(todo.dueTime.time - midnight.time)
 
-                // x,y 좌표 기반 배치
-                placeable.place(itemX, itemY)
+                    val itemY = if(dueTimeCheck){
+                        ((itemOffsetMinutes / 60f) * hourHeight.toPx()).roundToInt()
+                    } else {
+                        (((itemOffsetMinutes / 60f)) * hourHeight.toPx()).roundToInt() - placeable.height
+                    }
+                    // todo객체 x 좌표 정하기
+                    val startOfWeekCalendar = Calendar.getInstance().apply {
+                        time = uiState.currentWeek.first
+                        set(Calendar.HOUR_OF_DAY, 0)
+                        set(Calendar.MINUTE, 0)
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }
+                    val todoDayCalendar = Calendar.getInstance().apply {
+                        time = todo.dueTime
+                        set(Calendar.HOUR_OF_DAY, 0)
+                        set(Calendar.MINUTE, 0)
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }
+
+                    val itemOffsetDays =
+                        TimeUnit.MILLISECONDS.toDays(todoDayCalendar.timeInMillis - startOfWeekCalendar.timeInMillis)
+                            .toInt()
+                    val itemX = itemOffsetDays * dayWidth.roundToPx()
+
+                    // x,y 좌표 기반 배치
+                    placeable.place(itemX, itemY)
+                }
             }
         }
     }
+
 }
 
 private class ScheduleDataModifier(
@@ -422,6 +442,27 @@ private class TodoDataModifier(
 }
 
 private fun Modifier.todoData(todo: Todo) = this.then(TodoDataModifier(todo))
+
+@Composable
+fun ClickableTimeSlotBox(uiState: WeeklyUiState,day: Int, hour: Int, dayWidth: Dp, hourHeight: Dp, onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit) {
+    val boxX = day * dayWidth.value
+    val boxY = hour * hourHeight.value
+
+    val clickedDateTime = Calendar.getInstance().apply {
+        time = uiState.currentWeek.first
+        add(Calendar.DAY_OF_YEAR, day)
+        set(Calendar.HOUR_OF_DAY, hour)
+    }.time
+
+    Box(
+        modifier = Modifier
+            .offset(x = boxX.dp, y = boxY.dp)
+            .size(dayWidth, hourHeight)
+            .clickable { onNavigateToEditPage(null, PlanType.SCHEDULE, clickedDateTime) }
+    ) {
+
+    }
+}
 
 @Composable
 fun balloonShape(
