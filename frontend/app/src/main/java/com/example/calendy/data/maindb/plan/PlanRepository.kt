@@ -9,8 +9,10 @@ import com.example.calendy.data.maindb.plan.schedule.IScheduleRepository
 import com.example.calendy.data.maindb.plan.todo.ITodoRepository
 import com.example.calendy.data.maindb.repeatgroup.IRepeatGroupRepository
 import com.example.calendy.data.maindb.repeatgroup.RepeatGroup
+import com.example.calendy.utils.dateOnly
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import java.util.Date
 
 class PlanRepository(
@@ -19,9 +21,8 @@ class PlanRepository(
     private val categoryRepository: ICategoryRepository,
     private val repeatGroupRepository: IRepeatGroupRepository
 ) : IPlanRepository {
-    // We need each of them because copy function is not valid in interface Plan.
     private fun validatePlan(plan: Plan): Plan {
-
+        // We need both validateSchedule and tod0 because copy function is not valid in interface Plan.
         fun validateSchedule(schedule: Schedule): Schedule {
             val category: Category? = if (schedule.categoryId!=null) {
                 try {
@@ -156,12 +157,30 @@ class PlanRepository(
     override fun getPlansStream(startTime: Date, endTime: Date): Flow<List<Plan>> {
         val schedulesStream = scheduleRepository.getSchedulesStream(startTime, endTime)
         val todosStream = todoRepository.getTodosStream(startTime, endTime)
-        return combine(schedulesStream, todosStream) { scheduleList, todoList ->
-            val result = scheduleList + todoList
+
+        // Generate Repeated Plan Dynamically
+        val repeatGroupsStream = repeatGroupRepository.getAllRepeatGroupsStream()
+        val repeatedPlansStream: Flow<List<Plan>> = repeatGroupsStream.map { repeatGroupList ->
+            repeatGroupList.map {
+                // TODO: RepeatGroup Feature Give up
+                // savedPlan Entity 에 저장하거나 Schedule table에 not visible flag를 세워서 추가해둬야 하네...
+//                val x = scheduleRepository.getScheduleById(it.originalPlanId)
+//                it.generatePlanList(
+//                    from = startTime.dateOnly(), until = endTime.dateOnly(), plan = x
+//                )
+                emptyList<Plan>()
+            }.flatten() // flatten List<List<Plan>> to List<Plan>
+        }
+
+        return combine(
+            schedulesStream, todosStream, repeatedPlansStream
+        ) { scheduleList, todoList, repeatedPlanList ->
+            val result = scheduleList + todoList + repeatedPlanList
             result
         }
     }
 
+    // get Plans where showInMonthlyView = 1
     override fun getMonthlyPlansStream(startTime: Date, endTime: Date): Flow<List<Plan>> {
         val schedulesStream = scheduleRepository.getMonthlySchedulesStream(startTime, endTime)
         val todosStream = todoRepository.getMonthlyTodosStream(startTime, endTime)
@@ -171,7 +190,7 @@ class PlanRepository(
         }
     }
 
-    // Usage: getPlanById(id = 3, type = Plan.PlanType.Schedule)
+    // Usage: getPlanById(id = 3, type = PlanType.SCHEDULE)
     override fun getPlanById(id: Int, type: PlanType): Plan = when (type) {
         PlanType.SCHEDULE -> scheduleRepository.getScheduleById(id)
         PlanType.TODO     -> todoRepository.getTodoById(id)
