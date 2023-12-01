@@ -128,7 +128,7 @@ fun WeekScreen(
     viewModel: WeeklyViewModel,
     modifier: Modifier = Modifier,
     scheduleContent: @Composable (schedule: Schedule) -> Unit = { ScheduleItem(schedule = it, onNavigateToEditPage = onNavigateToEditPage) },
-    todoContent: @Composable (todo: Todo) -> Unit = { TodoItem(todo = it, onNavigateToEditPage = onNavigateToEditPage) },
+    todoContent: @Composable (todo: Todo) -> Unit = { TodoItem(viewModel = viewModel ,todo = it, onNavigateToEditPage = onNavigateToEditPage) },
     onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
 ) {
     val hourHeight = 40.dp
@@ -164,6 +164,7 @@ fun WeekScreen(
                 )
                 WeeklyTable(
                     uiState = uiState,
+                    viewModel = viewModel,
                     dayWidth = dayWidth,
                     hourHeight = hourHeight,
                     scheduleContent = scheduleContent,

@@ -1,9 +1,11 @@
 package com.example.calendy.view.weeklyview
 
 import android.util.Log
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -37,11 +39,13 @@ import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.ParentDataModifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
@@ -73,10 +77,13 @@ fun ScheduleItem(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(schedule.getColor().copy(alpha = 0.6f))
+            .background(
+                schedule
+                    .getColor()
+                    .copy(alpha = 0.6f)
+            )
             .clickable(onClick = clickAction)
-            .padding(),
-        contentAlignment = Alignment.Center
+            .padding(), contentAlignment = Alignment.Center
     ) {
         Text(
             text = schedule.title,
@@ -89,6 +96,7 @@ fun ScheduleItem(
 
 @Composable
 fun TodoItem(
+    viewModel: WeeklyViewModel,
     modifier: Modifier = Modifier,
     todo: Todo,
     tailHeight: Dp = 10.dp,
@@ -110,30 +118,46 @@ fun TodoItem(
     val shape = balloonShape(tailHeight = tailHeight, tailDirectionUp = tailDirectionUp)
 
     Column {
-        if(tailDirectionUp) {
-            Canvas(modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp) // 선의 높이
-                .padding(horizontal = 1.dp)) { // 좌우 패딩
+        if (tailDirectionUp) {
+            Canvas(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp) // 선의 높이
+                    .padding(horizontal = 1.dp)
+            ) { // 좌우 패딩
                 val strokeWidth = 8.dp.toPx() // 선의 두께
                 val y = center.y // 선을 그릴 y 위치
                 drawLine(
                     color = todo.getColor().copy(alpha = 0.6f), // 선의 색상
                     start = Offset(strokeWidth, y), // 시작 위치
                     end = Offset(size.width - strokeWidth, y), // 끝 위치
-                    strokeWidth = strokeWidth,
-                    cap = StrokeCap.Round // 라운드 모양의 선 끝 처리
+                    strokeWidth = strokeWidth, cap = StrokeCap.Round // 라운드 모양의 선 끝 처리
                 )
             }
             Spacer(modifier = Modifier.height(5.dp))
         }
-        Card(
-            shape = shape,
-            colors = CardDefaults.cardColors(containerColor = todo.getColor().copy(alpha = 0.6f)),
-            modifier = modifier
-                .fillMaxWidth()
-                .clickable(onClick = clickAction)
-                .height(45.dp)
+        Card(shape = shape,
+             colors = if (todo.complete) CardDefaults.cardColors(Color.White.copy(alpha = 0.6f)) else CardDefaults.cardColors(
+                 containerColor = todo.getColor().copy(alpha = 0.6f)
+             ),
+             border = if (todo.complete) BorderStroke(
+                 width = 3.dp,
+                 color = todo.getColor().copy(alpha = 0.8f)
+             ) else null,
+             modifier = modifier
+                 .fillMaxWidth()
+                 .height(45.dp)
+                 .pointerInput(todo) {
+                     detectTapGestures(
+                         onTap = {
+                             clickAction()
+                         },
+                         onLongPress = {
+                             viewModel.updateCompletionOfTodo(todo)
+                         },
+
+                         )
+                 }
 
         ) {
             Box(
@@ -148,7 +172,7 @@ fun TodoItem(
                             Modifier.padding(bottom = tailHeight) // 꼬리가 아래쪽인 경우 아래쪽에 패딩을 추가
                         }
                     )
-            ){
+            ) {
                 Text(
                     text = todo.title,
                     modifier = Modifier.padding(1.dp),
@@ -156,29 +180,33 @@ fun TodoItem(
                     fontWeight = FontWeight.Bold,
                     maxLines = 2,
                     textAlign = TextAlign.Center,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    textDecoration = if (todo.complete) TextDecoration.LineThrough else null,
+                    color = if (todo.complete) Color.Gray else Color.Black
                 )
             }
         }
-        if(!tailDirectionUp) {
+        if (!tailDirectionUp) {
             Spacer(modifier = Modifier.height(5.dp))
-            Canvas(modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp) // 선의 높이
-                .padding(horizontal = 1.dp)) { // 좌우 패딩
+            Canvas(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp) // 선의 높이
+                    .padding(horizontal = 1.dp)
+            ) { // 좌우 패딩
                 val strokeWidth = 8.dp.toPx() // 선의 두께
                 val y = center.y // 선을 그릴 y 위치
                 drawLine(
                     color = todo.getColor().copy(alpha = 0.6f), // 선의 색상
                     start = Offset(strokeWidth, y), // 시작 위치
                     end = Offset(size.width - strokeWidth, y), // 끝 위치
-                    strokeWidth = strokeWidth,
-                    cap = StrokeCap.Round // 라운드 모양의 선 끝 처리
+                    strokeWidth = strokeWidth, cap = StrokeCap.Round // 라운드 모양의 선 끝 처리
                 )
             }
         }
     }
 }
+
 
 @Composable
 fun WeekHeader(
@@ -239,14 +267,20 @@ fun WeekSidebar(
 @Composable
 fun WeeklyTable(
     uiState: WeeklyUiState,
+    viewModel: WeeklyViewModel,
     modifier: Modifier = Modifier,
     scheduleContent: @Composable (schedule: Schedule) -> Unit = {
         ScheduleItem(
-            schedule = it,
+            schedule = it, onNavigateToEditPage = onNavigateToEditPage
+        )
+    },
+    todoContent: @Composable (todo: Todo) -> Unit = {
+        TodoItem(
+            viewModel = viewModel,
+            todo = it,
             onNavigateToEditPage = onNavigateToEditPage
         )
     },
-    todoContent: @Composable (todo: Todo) -> Unit = { TodoItem(todo = it, onNavigateToEditPage = onNavigateToEditPage) },
     dayWidth: Dp,
     hourHeight: Dp,
     onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
@@ -274,7 +308,11 @@ fun WeeklyTable(
             content = {
                 schedules.sortedBy(Schedule::startTime).forEach { originalSchedule ->
                     // 일정을 날짜별로 분할
-                    val splitSchedules = splitScheduleByDays(originalSchedule, uiState.currentWeek.first, uiState.currentWeek.second)
+                    val splitSchedules = splitScheduleByDays(
+                        originalSchedule,
+                        uiState.currentWeek.first,
+                        uiState.currentWeek.second
+                    )
 
                     // 각 분할된 일정에 대해 scheduleContent를 호출
                     splitSchedules.forEach { schedule ->
@@ -289,33 +327,36 @@ fun WeeklyTable(
                     }
                 }
             },
-            modifier = modifier.matchParentSize().drawBehind {
-                repeat(23) {
-                    drawLine(
-                        dividerColor,
-                        start = Offset(0f, (it + 1) * hourHeight.toPx()),
-                        end = Offset(size.width, (it + 1) * hourHeight.toPx()),
-                        strokeWidth = 1.dp.toPx()
-                    )
-                }
-                repeat(numDays - 1) {
-                    drawLine(
-                        dividerColor,
-                        start = Offset((it + 1) * dayWidth.toPx(), 0f),
-                        end = Offset((it + 1) * dayWidth.toPx(), size.height),
-                        strokeWidth = 1.dp.toPx()
-                    )
-                }
-            },
+            modifier = modifier
+                .matchParentSize()
+                .drawBehind {
+                    repeat(23) {
+                        drawLine(
+                            dividerColor,
+                            start = Offset(0f, (it + 1) * hourHeight.toPx()),
+                            end = Offset(size.width, (it + 1) * hourHeight.toPx()),
+                            strokeWidth = 1.dp.toPx()
+                        )
+                    }
+                    repeat(numDays - 1) {
+                        drawLine(
+                            dividerColor,
+                            start = Offset((it + 1) * dayWidth.toPx(), 0f),
+                            end = Offset((it + 1) * dayWidth.toPx(), size.height),
+                            strokeWidth = 1.dp.toPx()
+                        )
+                    }
+                },
 
             ) { measureables, constraints ->
-            val height = (hourHeight*24).roundToPx()
-            val width = (dayWidth*7).roundToPx()
+            val height = (hourHeight * 24).roundToPx()
+            val width = (dayWidth * 7).roundToPx()
             val scheduleMeasureables = measureables.filter { it.parentData is Schedule }
             val todoMeasureables = measureables.filter { it.parentData is Todo }
             val placeableWithSchedules = scheduleMeasureables.map { measurable ->
                 val schedule = measurable.parentData as Schedule
-                val itemHeight = ((TimeUnit.MILLISECONDS.toMinutes(schedule.endTime.time - schedule.startTime.time) / 60f) * hourHeight.toPx()).roundToInt()
+                val itemHeight =
+                    ((TimeUnit.MILLISECONDS.toMinutes(schedule.endTime.time - schedule.startTime.time) / 60f) * hourHeight.toPx()).roundToInt()
                 val placeable = measurable.measure(
                     constraints.copy(
                         minWidth = dayWidth.roundToPx(),
@@ -372,7 +413,7 @@ fun WeeklyTable(
                     var itemX = itemOffsetDays * dayWidth.roundToPx()
                     placeable.place(itemX, itemY)
                 }
-                placeableWithTodos.forEach{(placeable, todo) ->
+                placeableWithTodos.forEach { (placeable, todo) ->
                     // todo y좌표 정하기
                     val calendar = Calendar.getInstance().apply {
                         time = todo.dueTime
@@ -393,7 +434,7 @@ fun WeeklyTable(
                     val itemOffsetMinutes =
                         TimeUnit.MILLISECONDS.toMinutes(todo.dueTime.time - midnight.time)
 
-                    val itemY = if(dueTimeCheck){
+                    val itemY = if (dueTimeCheck) {
                         ((itemOffsetMinutes / 60f) * hourHeight.toPx()).roundToInt()
                     } else {
                         (((itemOffsetMinutes / 60f)) * hourHeight.toPx()).roundToInt() - placeable.height
@@ -444,7 +485,14 @@ private class TodoDataModifier(
 private fun Modifier.todoData(todo: Todo) = this.then(TodoDataModifier(todo))
 
 @Composable
-fun ClickableTimeSlotBox(uiState: WeeklyUiState,day: Int, hour: Int, dayWidth: Dp, hourHeight: Dp, onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit) {
+fun ClickableTimeSlotBox(
+    uiState: WeeklyUiState,
+    day: Int,
+    hour: Int,
+    dayWidth: Dp,
+    hourHeight: Dp,
+    onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
+) {
     val boxX = day * dayWidth.value
     val boxY = hour * hourHeight.value
 
@@ -454,12 +502,10 @@ fun ClickableTimeSlotBox(uiState: WeeklyUiState,day: Int, hour: Int, dayWidth: D
         set(Calendar.HOUR_OF_DAY, hour)
     }.time
 
-    Box(
-        modifier = Modifier
-            .offset(x = boxX.dp, y = boxY.dp)
-            .size(dayWidth, hourHeight)
-            .clickable { onNavigateToEditPage(null, PlanType.SCHEDULE, clickedDateTime) }
-    ) {
+    Box(modifier = Modifier
+        .offset(x = boxX.dp, y = boxY.dp)
+        .size(dayWidth, hourHeight)
+        .clickable { onNavigateToEditPage(null, PlanType.SCHEDULE, clickedDateTime) }) {
 
     }
 }
@@ -475,9 +521,7 @@ fun balloonShape(
 
     return object : Shape {
         override fun createOutline(
-            size: Size,
-            layoutDirection: LayoutDirection,
-            density: Density
+            size: Size, layoutDirection: LayoutDirection, density: Density
         ): Outline {
 
             val path = Path()
@@ -522,14 +566,13 @@ fun splitScheduleByDays(schedule: Schedule, weekStart: Date, weekEnd: Date): Lis
     val endCalendar = Calendar.getInstance().apply { time = schedule.endTime }
 
 
-
     val weekEndCalendar = Calendar.getInstance()
     weekEndCalendar.time = weekEnd
     weekEndCalendar.add(Calendar.DATE, 1)
     weekEndCalendar.set(Calendar.HOUR_OF_DAY, 0)
     weekEndCalendar.set(Calendar.MINUTE, 0)
     weekEndCalendar.set(Calendar.SECOND, 0)
-    weekEndCalendar.set(Calendar.MILLISECOND,1)
+    weekEndCalendar.set(Calendar.MILLISECOND, 1)
 
     while (!startCalendar.after(endCalendar)) {
         val nextDayCalendar = startCalendar.clone() as Calendar
@@ -540,14 +583,14 @@ fun splitScheduleByDays(schedule: Schedule, weekStart: Date, weekEnd: Date): Lis
         nextDayCalendar.set(Calendar.MILLISECOND, 0)
 
 
-        val partEnd = if (endCalendar.before(nextDayCalendar)) endCalendar.time else nextDayCalendar.time
+        val partEnd =
+            if (endCalendar.before(nextDayCalendar)) endCalendar.time else nextDayCalendar.time
 
         // 일정이 주 내에 있는 경우에만 추가
         if (!startCalendar.time.before(weekStart) && partEnd.before(weekEndCalendar.time)) {
             splitSchedules.add(
                 schedule.copy(
-                    startTime = startCalendar.time,
-                    endTime = partEnd
+                    startTime = startCalendar.time, endTime = partEnd
                 )
             )
         }

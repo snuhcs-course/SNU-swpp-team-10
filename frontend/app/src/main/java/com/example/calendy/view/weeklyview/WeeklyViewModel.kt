@@ -3,6 +3,7 @@ package com.example.calendy.view.weeklyview
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.calendy.data.maindb.plan.IPlanRepository
+import com.example.calendy.data.maindb.plan.Todo
 import com.example.calendy.data.maindb.plan.schedule.IScheduleRepository
 import com.example.calendy.data.maindb.plan.todo.ITodoRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,6 +52,16 @@ class WeeklyViewModel(private val scheduleRepository: IScheduleRepository, priva
             _uiState.update { currentState ->
                 currentState.copy(weekSchedules = weekSchedules.first(), weekTodos = weekTodos.first())
             }
+        }
+    }
+    fun updateCompletionOfTodo(todo: Todo) {
+        viewModelScope.launch {
+            val updatedTodo = todo.copy(complete = !todo.complete)
+            todoRepository.update(updatedTodo)
+            val updatedTodos = _uiState.value.weekTodos.map {
+                if (it.id == todo.id) updatedTodo else it
+            }
+            _uiState.value = _uiState.value.copy(weekTodos = updatedTodos)
         }
     }
 
