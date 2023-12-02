@@ -23,6 +23,7 @@ import com.example.calendy.R
 import com.example.calendy.data.dummy.DummyPlanRepository
 import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.data.maindb.plan.Todo
+import com.example.calendy.utils.DateHelper
 import com.example.calendy.utils.afterDays
 import com.example.calendy.utils.getPlanType
 import com.example.calendy.utils.toCalendarDay
@@ -92,8 +93,8 @@ fun MonthlyPageKT(
                 showOtherDates = MaterialCalendarView.SHOW_OTHER_MONTHS
                 state().edit()
                     .setFirstDayOfWeek(Calendar.SUNDAY)
-                    .setMinimumDate(CalendarDay.from(2000, 0, 1))   //from 2000.1.1
-                    .setMaximumDate(CalendarDay.from(2030, 11, 31)) //to 2030.12.31
+                    .setMinimumDate(DateHelper.worldStart().toCalendarDay())   //from 2000.1.1
+                    .setMaximumDate(DateHelper.worldEnd().toCalendarDay()) //to 2030.12.31
                     .setCalendarDisplayMode(CalendarMode.MONTHS)
                     .commit();
 

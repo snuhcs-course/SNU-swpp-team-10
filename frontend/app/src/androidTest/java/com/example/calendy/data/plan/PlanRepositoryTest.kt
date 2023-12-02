@@ -152,7 +152,7 @@ class PlanRepositoryTest {
     }
 
     @Test
-        fun update() = runBlocking {
+    fun update() = runBlocking {
         val updatedSchedule = schedule1.copy(title = "updated", priority = 5, memo = "updated memo")
         planRepository.update(updatedSchedule)
 
@@ -175,20 +175,15 @@ class PlanRepositoryTest {
         planRepository.delete(todo1)
 
         // Then
-        val actual = planRepository.getAllPlansStream().first()
+        val actual = planRepository.getPlansStream(
+            DateHelper.getDate(year = 2023, monthZeroIndexed = 10, day = 1),
+            DateHelper.getDate(year = 2023, monthZeroIndexed = 10, day = 31)
+        ).first()
         val expected = listOf(schedule2, todo2)
         assertEqualsWithoutOrder(expected = expected, actual = actual)
     }
 
     //region GET
-    @Test
-    fun getAllPlansStream() = runBlocking {
-        val planList: List<Plan> = planRepository.getAllPlansStream().first()
-
-        val expectedList = listOf(schedule1, schedule2, todo1, todo2)
-        assertEqualsWithoutOrder(expected = expectedList, actual = planList)
-    }
-
     @Test
     fun getPlansStream() = runBlocking {
         val planList: List<Plan> = planRepository.getPlansStream(
@@ -221,8 +216,7 @@ class PlanRepositoryTest {
 
 
         assertEqualsWithoutOrder(
-            expected = listOf(schedule1105to1111),
-            actual = planRepository.getPlansStream(
+            expected = listOf(schedule1105to1111), actual = planRepository.getPlansStream(
                 DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 4),
                 DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 8)
             ).first()
@@ -269,16 +263,14 @@ class PlanRepositoryTest {
         )
 
         assertEqualsWithoutOrder(
-            expected = listOf(schedule1112to1115),
-            actual = planRepository.getPlansStream(
+            expected = listOf(schedule1112to1115), actual = planRepository.getPlansStream(
                 DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 15),
                 DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 18)
             ).first()
         )
 
         assertEqualsWithoutOrder(
-            expected = listOf(),
-            actual = planRepository.getPlansStream(
+            expected = listOf(), actual = planRepository.getPlansStream(
                 DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 16),
                 DateHelper.getDate(year = 2023, monthZeroIndexed = 11, day = 18)
             ).first()

@@ -22,6 +22,7 @@ import com.example.calendy.data.maindb.plan.Todo
 import com.example.calendy.data.network.CalendyServerApi
 import com.example.calendy.data.network.MessageBody
 import com.example.calendy.data.rawsqldb.RawSqlDatabase
+import com.example.calendy.utils.DateHelper.toLocalTimeString
 import com.example.calendy.view.messageview.MessageUIState
 import com.example.calendy.view.messageview.QueryType
 import kotlinx.coroutines.Dispatchers
@@ -76,8 +77,10 @@ class MessagePageViewModel(
 
     fun onSendButtonClicked() {
         val userInput = uiState.value.userInputText
-        addUserMessage(userInput)
-        sendQuery(userInput)
+        if (userInput.isNotBlank()) {
+            addUserMessage(userInput)
+            sendQuery(userInput)
+        }
         setUserInputText("")
     }
 
@@ -100,12 +103,12 @@ class MessagePageViewModel(
 
         // 말하기 시작할 준비가되면 호출
         override fun onReadyForSpeech(params: Bundle) {
-
+            activateSpeechRecognition()
         }
 
         // 말하기 시작했을 때 호출
         override fun onBeginningOfSpeech() {
-            activateSpeechRecognition()
+
         }
 
         // 입력받는 소리의 크기를 알려줌
@@ -176,6 +179,7 @@ class MessagePageViewModel(
 
     fun onMicButtonClicked(context: Context) {
         // Permission is already granted
+        setUserInputText("")
 
         // Toggle Speech Recognition
         if (uiState.value.isMicButtonClicked) {
@@ -249,11 +253,7 @@ class MessagePageViewModel(
                     val resultFromServer = calendyServerApi.sendMessageToServer(
                         MessageBody(
                             message = requestMessage,
-                            time = SimpleDateFormat(
-                                "yyyy-MM-dd HH:mm:ss", Locale.getDefault()
-                            ).format(
-                                Date()
-                            ),
+                            time = Date().toLocalTimeString(),
                             category = allCategoriesPrompt,
                             schedule = allSchedulesPrompt,
                             todo = allTodosPrompt

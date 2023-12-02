@@ -12,8 +12,6 @@ import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
 import com.example.calendy.data.maindb.repeatgroup.IRepeatGroupRepository
 import com.example.calendy.data.maindb.repeatgroup.RepeatGroup
-import com.example.calendy.utils.DateHelper.extract
-import com.example.calendy.utils.applyTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -131,6 +129,7 @@ class EditPlanViewModel(
     }
 
 
+    //region Set UI State
     // Style: functions' order is aligned with UI
     fun setType(selectedType: PlanType) {
         _uiState.update { currentState -> currentState.copy(entryType = selectedType) }
@@ -175,6 +174,7 @@ class EditPlanViewModel(
     }
     //endregion
 
+    //region Category
     fun setCategory(category: Category?) {
         _uiState.update { currentState -> currentState.copy(category = category) }
         if (category!=null) setPriority(category.defaultPriority)
@@ -200,8 +200,8 @@ class EditPlanViewModel(
             categoryRepository.delete(category)
         }
     }
+    //endregion
 
-    //region Repeat Group
     fun setRepeatGroup(repeatGroup: RepeatGroup?) {
         _uiState.update { currentState ->
             if (repeatGroup!=null) {
@@ -212,7 +212,6 @@ class EditPlanViewModel(
             }
         }
     }
-    // endregion
 
     fun setPriority(input: Int) {
         val priority = max(1, min(5, input))
@@ -228,7 +227,36 @@ class EditPlanViewModel(
             currentState.copy(showInMonthlyView = showInMonthlyView)
         }
     }
+    //endregion
 
+    private fun generatePlanFromCurrentState(): Plan {
+        val currentState = _uiState.value
+        return when (currentState.entryType) {
+            PlanType.SCHEDULE -> Schedule(
+                title = currentState.titleField,
+                startTime = currentState.startTime,
+                endTime = currentState.endTime,
+                memo = currentState.memoField,
+                repeatGroupId = currentState.repeatGroup?.id,
+                categoryId = currentState.category?.id,
+                priority = currentState.priority,
+                showInMonthlyView = currentState.showInMonthlyView,
+                isOverridden = false
+            )
+
+            PlanType.TODO     -> Todo(
+                title = currentState.titleField,
+                dueTime = currentState.dueTime,
+                memo = currentState.memoField,
+                complete = currentState.isComplete,
+                repeatGroupId = currentState.repeatGroup?.id,
+                categoryId = currentState.category?.id,
+                priority = currentState.priority,
+                showInMonthlyView = currentState.showInMonthlyView,
+                isOverridden = false
+            )
+        }
+    }
 
     fun addPlan() {
         if (_uiState.value.titleField=="") {
@@ -236,90 +264,16 @@ class EditPlanViewModel(
         }
         val currentState = _uiState.value
 
-        // GlobalScope may be bad!
-        GlobalScope.launch(context = Dispatchers.IO) {
+        viewModelScope.launch(context = Dispatchers.IO) {
             val repeatGroup = currentState.repeatGroup
             if (repeatGroup==null) {
-                val newPlan = when (currentState.entryType) {
-                    PlanType.SCHEDULE -> Schedule(
-                        title = currentState.titleField,
-                        startTime = currentState.startTime,
-                        endTime = currentState.endTime,
-                        memo = currentState.memoField,
-                        repeatGroupId = null,
-                        categoryId = currentState.category?.id,
-                        priority = currentState.priority,
-                        showInMonthlyView = currentState.showInMonthlyView,
-                        isOverridden = false
-                    )
-
-                    PlanType.TODO     -> Todo(
-                        title = currentState.titleField,
-                        dueTime = currentState.dueTime,
-                        memo = currentState.memoField,
-                        complete = currentState.isComplete,
-                        repeatGroupId = null,
-                        categoryId = currentState.category?.id,
-                        priority = currentState.priority,
-                        showInMonthlyView = currentState.showInMonthlyView,
-                        isOverridden = false
-                    )
-                }
+                val newPlan = generatePlanFromCurrentState()
                 // Insert the plan into the database
                 planRepository.insert(newPlan)
             } else {
-                try {
-                    val repeatGroupId: Int = repeatGroupRepository.insert(repeatGroup).toInt()
-
-                    // Invariance: startTime == dueTime (Imposed by setDueTime, setTimeRange)
-                    val scheduleDuration = currentState.endTime.time - currentState.startTime.time
-                    val (_, _, _, hour, minute) = currentState.startTime.extract()
-
-                    var previousDate = currentState.startTime // TODO: TESTING
-
-                    for (startDateOnly in repeatGroup.toIterable(currentState.startTime)) {
-                        // Iterator returns Date Only without time information.
-                        val repeatedDate = startDateOnly.applyTime(hour, minute)
-
-                        if (!(previousDate < repeatedDate)) {
-                            Log.e("GUN EditPlanViewModel", "Previous: $previousDate -> Current: $repeatedDate")
-                        } else if (repeatedDate.hours != hour || repeatedDate.minutes != minute) {
-                            Log.e("GUN EditPlanViewModel", "Current: $repeatedDate")
-                        }
-                        previousDate = repeatedDate
-
-                        val newPlan = when (currentState.entryType) {
-                            PlanType.SCHEDULE -> Schedule(
-                                title = currentState.titleField,
-                                startTime = repeatedDate,
-                                endTime = Date(repeatedDate.time + scheduleDuration),
-                                memo = currentState.memoField,
-                                repeatGroupId = repeatGroupId,
-                                categoryId = currentState.category?.id,
-                                priority = currentState.priority,
-                                showInMonthlyView = currentState.showInMonthlyView,
-                                isOverridden = false
-                            )
-
-                            PlanType.TODO     -> Todo(
-                                title = currentState.titleField,
-                                dueTime = repeatedDate,
-                                memo = currentState.memoField,
-                                complete = currentState.isComplete,
-                                repeatGroupId = repeatGroupId,
-                                categoryId = currentState.category?.id,
-                                priority = currentState.priority,
-                                showInMonthlyView = currentState.showInMonthlyView,
-                                isOverridden = false
-                            )
-                        }
-                        Log.d("AddPlan", "newPlan: $newPlan")
-                        planRepository.insert(newPlan)
-                    }
-                } catch (e: Exception) {
-                    Log.e("AddPlan", "Error adding plan: ${e.localizedMessage}")
-                    Log.e("AddPlan", e.stackTraceToString())
-                }
+                // TODO: Repeat Group Feature Give up
+                // first insert current plan into db (This plan should not be visible in ui)
+                // then insert repeat group
             }
         }
     }
@@ -335,12 +289,8 @@ class EditPlanViewModel(
             return
         }
 
-        GlobalScope.launch(context = Dispatchers.IO) {
-            if (currentState.repeatGroupId!=null) {
-                deletePlan()
-                // TODO: Start Date가 달라져버려서 망한다.
-                addPlan()
-            } else {
+        viewModelScope.launch(context = Dispatchers.IO) {
+            if (currentState.repeatGroupId==null) {
                 // id: Int? is smart casted into type Int
                 val updatedPlan = when (currentState.entryType) {
                     PlanType.SCHEDULE -> Schedule(
@@ -370,6 +320,8 @@ class EditPlanViewModel(
                     )
                 }
                 planRepository.update(updatedPlan)
+            } else {
+                // TODO: Repeat Group Feature Give up
             }
         }
 
@@ -384,11 +336,8 @@ class EditPlanViewModel(
             return
         }
 
-        GlobalScope.launch(context = Dispatchers.IO) {
-            if (currentState.repeatGroupId!=null) {
-                // Delete repeat group -> cascade delete
-                repeatGroupRepository.deleteRepeatGroupById(currentState.repeatGroupId)
-            } else {
+        viewModelScope.launch(context = Dispatchers.IO) {
+            if (currentState.repeatGroupId==null) {
                 val deletedPlan = when (currentState.entryType) {
                     PlanType.SCHEDULE -> Schedule(
                         id = currentState.id,
@@ -404,6 +353,9 @@ class EditPlanViewModel(
                     )
                 }
                 planRepository.delete(deletedPlan)
+            } else {
+                // TODO: Repeat Group Feature Give up
+                repeatGroupRepository.deleteRepeatGroupById(currentState.repeatGroupId)
             }
         }
     }
