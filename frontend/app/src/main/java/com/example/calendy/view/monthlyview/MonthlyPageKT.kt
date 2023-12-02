@@ -47,7 +47,7 @@ import java.util.Date
 @Composable
 fun MonthlyPageKT(
     monthlyViewModel: MonthlyViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
+    onNavigateToEditPage: (Int?, PlanType, Date?, Date?) -> Unit
 ) {
     val customMonths = stringArrayResource(id = R.array.custom_months)
     val customWeekdays = stringArrayResource(id = R.array.custom_weekdays)
@@ -165,14 +165,14 @@ fun MonthlyPageKT(
             onDismissed = ::onListPopupDismissed,
             addButton = {
                 AddButton(
-                    onButtonClick = {onNavigateToEditPage(null,PlanType.SCHEDULE,popupDate.toDate())},
+                    onButtonClick = {onNavigateToEditPage(null,PlanType.SCHEDULE,popupDate.toDate(), null)},
                     modifier = Modifier
                         .padding(8.dp)
                         .align(Alignment.BottomEnd)
                 )
             },
             onItemClick = { plan ->
-                onNavigateToEditPage(plan.id, plan.getPlanType(), null)
+                onNavigateToEditPage(plan.id, plan.getPlanType(), null, null)
             },
             onCheckboxClicked =
             { plan, checked ->
@@ -198,5 +198,5 @@ fun MonthlyCalendarPreview() {
         monthlyViewModel = MonthlyViewModel(
             planRepository = DummyPlanRepository(),
         )
-    ) { _, _, _ -> }
+    ) { _, _, _, _ -> }
 }

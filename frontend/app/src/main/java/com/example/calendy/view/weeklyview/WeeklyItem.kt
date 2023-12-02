@@ -1,10 +1,8 @@
 package com.example.calendy.view.weeklyview
 
-import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,7 +33,6 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.ParentDataModifier
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -49,7 +45,6 @@ import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
 import com.example.calendy.ui.theme.getColor
-import java.lang.Integer.max
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -62,10 +57,10 @@ import kotlin.math.roundToInt
 fun ScheduleItem(
     schedule: Schedule,
     modifier: Modifier = Modifier,
-    onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
+    onNavigateToEditPage: (Int?, PlanType, Date?, Date?) -> Unit
 ) {
     val clickAction = {
-        onNavigateToEditPage(schedule.id, PlanType.SCHEDULE, null)
+        onNavigateToEditPage(schedule.id, PlanType.SCHEDULE, null, null)
     }
     Box(
         modifier = modifier
@@ -89,10 +84,10 @@ fun TodoItem(
     modifier: Modifier = Modifier,
     todo: Todo,
     tailHeight: Dp = 10.dp,
-    onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
+    onNavigateToEditPage: (Int?, PlanType, Date?, Date?) -> Unit
 ) {
     val clickAction = {
-        onNavigateToEditPage(todo.id, PlanType.TODO, null)
+        onNavigateToEditPage(todo.id, PlanType.TODO, null, null)
     }
     // duetime이 자정 ~ am 1:30인 경우 말풍선을 밑쪽으로 배치
     val calendar = Calendar.getInstance().apply {
@@ -246,7 +241,7 @@ fun WeeklyTable(
     todoContent: @Composable (todo: Todo) -> Unit = { TodoItem(todo = it, onNavigateToEditPage = onNavigateToEditPage) },
     dayWidth: Dp,
     hourHeight: Dp,
-    onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
+    onNavigateToEditPage: (Int?, PlanType, Date?, Date?) -> Unit
 ) {
     val schedules = uiState.weekSchedules
     val todos = uiState.weekTodos

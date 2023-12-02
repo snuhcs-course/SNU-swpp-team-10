@@ -31,7 +31,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -44,21 +43,20 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import com.example.calendy.BottomNavItem.AiManager
+import com.example.calendy.BottomNavItem.Month
+import com.example.calendy.BottomNavItem.Todo
+import com.example.calendy.BottomNavItem.Week
+import com.example.calendy.ScreenRoute.EditPlan
 import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.ui.theme.CalendyTheme
-import com.example.calendy.utils.DateHelper.parseLocalTimeString
-import com.example.calendy.utils.DateHelper.toLocalTimeString
 import com.example.calendy.view.editplanview.EditPlanPage
 import com.example.calendy.view.editplanview.EditPlanViewModel
 import com.example.calendy.view.messagepage.MessagePageViewModel
 import com.example.calendy.view.messageview.MessagePage
 import com.example.calendy.view.monthlyview.MonthlyPageKT
 import com.example.calendy.view.todolistview.ToDoListPage
-import com.example.calendy.view.todolistview.TodoListViewModel
 import com.example.calendy.view.weeklyview.WeeklyPage
-import com.example.calendy.view.weeklyview.WeeklyViewModel
-import kotlinx.coroutines.delay
-
 import java.util.Date
 
 
@@ -66,14 +64,14 @@ class MainActivity : ComponentActivity() {
     private var isMainScreenLoaded = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        installSplashScreen().setKeepOnScreenCondition {!isMainScreenLoaded}
+        installSplashScreen().setKeepOnScreenCondition { !isMainScreenLoaded }
         setContent {
             CalendyTheme(darkTheme = false, dynamicColor = false) {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
-                    MainScreenView(onLoaded = {isMainScreenLoaded = true})
+                    MainScreenView(onLoaded = { isMainScreenLoaded = true })
                 }
             }
         }
@@ -83,10 +81,14 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreenView(onLoaded: () -> Unit) {
-
     val navController = rememberNavController()
-
     var showBottomNavigation by remember { mutableStateOf(true) }
+
+    val editPlanViewModel: EditPlanViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    fun navigateToEditPage(id: Int?, type: PlanType, startDate: Date?, endDate: Date?) {
+        editPlanViewModel.initialize(id = id, type = type, startDate = startDate, endDate = endDate)
+        navController.navigate(EditPlan.screenRoute)
+    }
 
     LaunchedEffect(Unit) {
         onLoaded()
@@ -95,13 +97,21 @@ fun MainScreenView(onLoaded: () -> Unit) {
         if (showBottomNavigation) {
             BottomNavigation(
                 navController = navController,
-            )
+            ) { planType: PlanType ->
+                navigateToEditPage(
+                    id = null, type = planType, startDate = Date(), endDate = null
+                )
+            }
         }
     }) {
         Box(Modifier.padding(it)) {
             NavigationGraph(
                 navController = navController,
                 showBottomNavigation = { shouldShow -> showBottomNavigation = shouldShow },
+                editPlanViewModel = editPlanViewModel,
+                navigateToEditPage = { id, type, startDate, endDate ->
+                    navigateToEditPage(id, type, startDate, endDate)
+                }
             )
         }
     }
@@ -119,47 +129,28 @@ fun NavController.navigateToBottom(bottomNav: BottomNavItem) {
     }
 }
 
-fun NavController.navigateToEditPage(id: Int?, type: PlanType, date: Date?) {
-    val route = if (id==null) {
-        when (type) {
-            PlanType.SCHEDULE -> EditPageRoute.AddSchedule(
-                date = date ?: Date()
-            ).route
-
-            PlanType.TODO     -> EditPageRoute.AddTodo(date = date ?: Date()).route
-        }
-    } else {
-        when (type) {
-            PlanType.SCHEDULE -> EditPageRoute.EditSchedule(id = id).route
-            PlanType.TODO     -> EditPageRoute.EditTodo(id = id).route
-        }
-    }
-
-    this.navigate(route)
-}
-
 @Composable
 fun BottomNavigation(
-    navController: NavHostController
+    navController: NavHostController, navigateToEditPageWhenPlus: (PlanType) -> Unit
 ) {
     val items = listOf(
-        BottomNavItem.Week,
-        BottomNavItem.Month,
+        Week,
+        Month,
         BottomNavItem.Dummy,
-        BottomNavItem.Todo,
-        BottomNavItem.AiManager,
+        Todo,
+        AiManager,
         //BottomNavItem.Setting
     )
-    var selectedNavItem by remember { mutableStateOf<BottomNavItem>(BottomNavItem.Month) }
+    var selectedNavItem by remember { mutableStateOf<BottomNavItem>(Month) }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     LaunchedEffect(currentRoute) {
         when (currentRoute) {
-            BottomNavItem.Todo.screenRoute -> selectedNavItem = BottomNavItem.Todo
-            BottomNavItem.Week.screenRoute -> selectedNavItem = BottomNavItem.Week
-            BottomNavItem.Month.screenRoute -> selectedNavItem = BottomNavItem.Month
-            BottomNavItem.AiManager.screenRoute -> selectedNavItem = BottomNavItem.AiManager
+            Todo.screenRoute      -> selectedNavItem = Todo
+            Week.screenRoute      -> selectedNavItem = Week
+            Month.screenRoute     -> selectedNavItem = Month
+            AiManager.screenRoute -> selectedNavItem = AiManager
         }
     }
 
@@ -206,12 +197,10 @@ fun BottomNavigation(
                 FloatingActionButton(
                     modifier = Modifier.padding(top = 2.dp),
                     onClick = {
-                        if (selectedNavItem==BottomNavItem.Todo) {
-                            val route = EditPageRoute.AddTodo(date = Date()).route
-                            navController.navigate(route)
+                        if (selectedNavItem==Todo) {
+                            navigateToEditPageWhenPlus(PlanType.TODO)
                         } else {
-                            val route = EditPageRoute.AddSchedule(date = Date()).route
-                            navController.navigate(route)
+                            navigateToEditPageWhenPlus(PlanType.SCHEDULE)
                         }
                     },
                     containerColor = Color(0xFF80ACFF),
@@ -226,134 +215,84 @@ fun BottomNavigation(
     }
 }
 
-sealed class BottomNavItem(
-    val title: Int?, val icon: Int?, val screenRoute: String
-) {
+sealed class ScreenRoute(val screenRoute: String) {
+    object Week : ScreenRoute("Week")
+    object Month : ScreenRoute("Month")
+    object Todo : ScreenRoute("Todo")
+    object AiManager : ScreenRoute("AiManager")
+    object Dummy : ScreenRoute("Dummy")
+    object EditPlan : ScreenRoute("EditPlan")
+}
+
+sealed class BottomNavItem(val title: Int?, val icon: Int?, route: ScreenRoute) {
+    val screenRoute = route.screenRoute
+
     object Week : BottomNavItem(
         title = R.string.text_weekly_view,
         icon = R.drawable.outline_format_list_bulleted_24,
-        screenRoute = "Week"
+        route = ScreenRoute.Week
     )
 
     object Month : BottomNavItem(
         title = R.string.text_monthly_view,
         icon = R.drawable.outline_calendar_month_24,
-        screenRoute = "Month"
+        route = ScreenRoute.Month
     )
 
     object Todo : BottomNavItem(
         title = R.string.text_todo_view,
         icon = R.drawable.outline_checklist_rtl_24,
-        screenRoute = "Todo"
+        route = ScreenRoute.Todo
     )
 
     object AiManager : BottomNavItem(
         title = R.string.text_manager_view,
         icon = R.drawable.outline_person_outline_24,
-        screenRoute = "AiManager"
+        route = ScreenRoute.AiManager
     )
 
+    // This is for plus button in middle
     object Dummy : BottomNavItem(
-        title = null, icon = null, screenRoute = "Dummy"
+        title = null, icon = null, route = ScreenRoute.Dummy
     )
-
-//    object Setting : BottomNavItem(
-//        title = R.string.setting_view,
-//        icon = R.drawable.outline_app_settings_alt_24,
-//        screenRoute = "Setting"
-//    )
-}
-
-sealed class EditPageRoute(val route: String) {
-    companion object {
-        const val baseRoute = "EditPage"
-        const val scheduleArgument = "schedule"
-        const val todoArgument = "todo"
-
-        // Helper method to convert a Date to a String
-        fun dateToString(date: Date): String = date.toLocalTimeString()
-    }
-
-    class AddSchedule(date: Date) : EditPageRoute(
-        "$baseRoute/$scheduleArgument?date=${
-            dateToString(
-                date
-            )
-        }"
-    )
-
-    class AddTodo(date: Date) : EditPageRoute("$baseRoute/$todoArgument?date=${dateToString(date)}")
-
-    class EditSchedule(id: Int) : EditPageRoute("$baseRoute/$scheduleArgument?id=$id")
-
-    class EditTodo(id: Int) : EditPageRoute("$baseRoute/$todoArgument?id=$id")
 }
 
 
 @Composable
 fun NavigationGraph(
-    navController: NavHostController, showBottomNavigation: (Boolean) -> Unit
+    navController: NavHostController,
+    showBottomNavigation: (Boolean) -> Unit,
+    editPlanViewModel: EditPlanViewModel,
+    navigateToEditPage: (Int?, PlanType, Date?, Date?) -> Unit
 ) {
-    NavHost(navController = navController, startDestination = BottomNavItem.Month.screenRoute) {
+    NavHost(navController = navController, startDestination = Month.screenRoute) {
         // region Bottom Navigation Routes
-        composable(BottomNavItem.Week.screenRoute) {
+        composable(Week.screenRoute) {
             showBottomNavigation(true)
-            val viewModel: WeeklyViewModel = viewModel(factory = AppViewModelProvider.Factory)
-            WeeklyPage(viewModel, onNavigateToEditPage = { id: Int?, type: PlanType, date: Date? ->
-                navController.navigateToEditPage(id = id, type = type, date = date)
-            })
+            WeeklyPage { id: Int?, type: PlanType, startDate: Date?, endDate: Date? ->
+                navigateToEditPage(id, type, startDate, endDate)
+            }
         }
-        composable(BottomNavItem.Month.screenRoute) {
+        composable(Month.screenRoute) {
             showBottomNavigation(true)
-            MonthlyPageKT(onNavigateToEditPage = { id: Int?, type: PlanType, date: Date? ->
-                navController.navigateToEditPage(id = id, type = type, date = date)
-            })
+            MonthlyPageKT { id: Int?, type: PlanType, startDate: Date?, endDate: Date? ->
+                navigateToEditPage(id, type, startDate, endDate)
+            }
         }
-        composable(BottomNavItem.Todo.screenRoute) {
+        composable(Todo.screenRoute) {
             showBottomNavigation(true)
-            val viewModel: TodoListViewModel = viewModel(factory = AppViewModelProvider.Factory)
-            ToDoListPage(viewModel, onNavigateToEditPage = { id: Int?, date: Date? ->
-                navController.navigateToEditPage(id = id, type = PlanType.TODO, date = date)
-            })
+            ToDoListPage { id: Int?, startDate: Date?, endDate: Date? ->
+                navigateToEditPage(id, PlanType.TODO, startDate, endDate)
+            }
         }
-        composable(BottomNavItem.AiManager.screenRoute) {
+        composable(AiManager.screenRoute) {
             showBottomNavigation(true)
             MessagePage()
         }
         //endregion
-        composable(
-            route = "${EditPageRoute.baseRoute}/{type}?id={id}&date={date}",
-            arguments = listOf(navArgument("type") {
-                type = NavType.StringType
-            }, navArgument("id") {
-                type = NavType.StringType
-                nullable = true
-                defaultValue = null
-            }, navArgument("date") {
-                type = NavType.StringType
-                nullable = true
-                defaultValue = null
-            })
-        ) { entry ->
+        composable(EditPlan.screenRoute) {
             showBottomNavigation(false)
-            Log.d("GUN MainActivity", "Recompose")
-
-            val dateString = entry.arguments?.getString("date")
-            val date = dateString?.let { parseLocalTimeString(it) }
-
-            val viewModel: EditPlanViewModel = viewModel(factory = AppViewModelProvider.Factory)
-            viewModel.initialize(
-                id = entry.arguments?.getString("id")?.toIntOrNull(),
-                type = when (entry.arguments?.getString("type")) {
-                    EditPageRoute.scheduleArgument -> PlanType.SCHEDULE
-                    else                           -> PlanType.TODO
-                },
-                date = date
-            )
-
-            // TODO: 이것도 QueryRoute처럼 분리하면 되겠는데?
-            // 게다가 navigateToEditPage에서 ViewModel을 설정하기만 하면 되겠다.
-            EditPlanPage(viewModel, onNavigateBack = navController::popBackStack)
+            EditPlanPage(editPlanViewModel, onNavigateBack = navController::popBackStack)
         }
         composable(
             route = "QueryRoute?query={query}", arguments = listOf(
@@ -377,7 +316,7 @@ fun NavigationGraph(
             }
 
             // Navigate To ManagerPage
-            navController.navigateToBottom(BottomNavItem.AiManager)
+            navController.navigateToBottom(AiManager)
         }
         composable(
             route = "BriefingRoute?time={timeScope}", arguments = listOf(
@@ -395,7 +334,6 @@ fun NavigationGraph(
 
             val timeScope = entry.arguments?.getString("timeScope")
             if (timeScope!=null) {
-                Log.d("GUN Main", timeScope.toString())
             }
             // TODO: Set ViewModel, and navigate to ManagerPage
         }

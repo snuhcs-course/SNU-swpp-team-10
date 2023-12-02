@@ -12,8 +12,10 @@ import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
 import com.example.calendy.data.maindb.repeatgroup.IRepeatGroupRepository
 import com.example.calendy.data.maindb.repeatgroup.RepeatGroup
+import com.example.calendy.utils.DateHelper.extract
+import com.example.calendy.utils.applyTime
+import com.example.calendy.utils.dateOnly
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -45,23 +47,20 @@ class EditPlanViewModel(
 
 
     // set once when navigating to EditPlanPage
-    fun initialize(id: Int?, type: PlanType, date: Date?) {
+    fun initialize(id: Int?, type: PlanType, startDate: Date?, endDate: Date?) {
         if (id==null) {
             // new plan
-            val calendar = Calendar.getInstance()
-            val providedCalendar = Calendar.getInstance().apply {
-                time = date ?: Date()
-            }
-            calendar.set(Calendar.YEAR, providedCalendar.get(Calendar.YEAR))
-            calendar.set(Calendar.MONTH, providedCalendar.get(Calendar.MONTH))
-            calendar.set(Calendar.DAY_OF_MONTH, providedCalendar.get(Calendar.DAY_OF_MONTH))
+            val (_, _, _, currentHour, currentMinute) = Date().extract()
+            // selected (year, month, day) + current (hour, minute)
+            val time = (startDate ?: Date()).applyTime(currentHour, currentMinute)
+            val endTime = endDate ?: time // If not specified, set endTime to startTime
 
             _uiState.value = EditPlanUiState(
                 isAddPage = true,
                 entryType = type,
-                startTime = calendar.time,
-                endTime = calendar.time,
-                dueTime = calendar.time
+                startTime = time,
+                endTime = endTime,
+                dueTime = time
             )
         } else {
             // edit existing plan

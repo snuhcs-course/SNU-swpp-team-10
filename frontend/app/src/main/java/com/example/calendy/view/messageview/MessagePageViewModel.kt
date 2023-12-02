@@ -10,6 +10,13 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.sqlite.db.SimpleSQLiteQuery
+import androidx.work.Constraints
+import androidx.work.Data
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequest
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import com.example.calendy.data.maindb.category.Category
 import com.example.calendy.data.maindb.category.ICategoryRepository
 import com.example.calendy.data.maindb.history.IHistoryRepository
 import com.example.calendy.data.maindb.history.ManagerHistory
@@ -23,8 +30,10 @@ import com.example.calendy.data.network.CalendyServerApi
 import com.example.calendy.data.network.MessageBody
 import com.example.calendy.data.rawsqldb.RawSqlDatabase
 import com.example.calendy.utils.DateHelper.toLocalTimeString
+import com.example.calendy.view.messageview.ManagerResponse
 import com.example.calendy.view.messageview.MessageUIState
 import com.example.calendy.view.messageview.QueryType
+import com.example.calendy.view.messageview.SendMessageWorker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,9 +43,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
 
 
 class MessagePageViewModel(
@@ -47,6 +54,7 @@ class MessagePageViewModel(
     val rawSqlDatabase: RawSqlDatabase,
     val historyRepository: IHistoryRepository,
 ) : ViewModel() {
+    // TODO: Refactor Idea: Separate UI Part, Voice Recognition Part, Server Communication Part
 
     private val _uiState = MutableStateFlow(MessageUIState())
     val uiState: StateFlow<MessageUIState> = _uiState.asStateFlow()
@@ -64,7 +72,6 @@ class MessagePageViewModel(
                 updateMessageList(it)
             }
         }
-        Log.d("calendy", "getmessages")
     }
 
     private fun updateMessageList(messageList: List<Message>) {
@@ -77,6 +84,9 @@ class MessagePageViewModel(
 
     fun onSendButtonClicked() {
         val userInput = uiState.value.userInputText
+        if (userInput.contentEquals("/reset")) {
+            // TODO: RESET DB. For UAT
+        }
         if (userInput.isNotBlank()) {
             addUserMessage(userInput)
             sendQuery(userInput)
@@ -117,11 +127,10 @@ class MessagePageViewModel(
         // 말을 시작하고 인식이 된 audio stream을 buffer에 담는다
         override fun onBufferReceived(buffer: ByteArray) {
             // TODO: Need Test
-            _uiState.update{
-                currentState ->
-                    var prevText = currentState.userInputText
-                    prevText += buffer.toString()
-                    currentState.copy(userInputText = prevText)
+            _uiState.update { currentState ->
+                var prevText = currentState.userInputText
+                prevText += buffer.toString()
+                currentState.copy(userInputText = prevText)
             }
         }
 
@@ -206,23 +215,28 @@ class MessagePageViewModel(
         viewModelScope.launch { messageRepository.insert(newMessage) }
     }
 
+    /**
+     * Add Message into DB and return it
+     */
+    private suspend fun addManagerMessage(managerContent: String): Message {
+        val newMessage = Message(
+            sentTime = Date(), messageFromManager = true, content = managerContent
+        )
+        val messageId: Int = messageRepository.insert(newMessage).toInt()
+        return newMessage.copy(id = messageId)
+    }
+
     // sendQuery is called when on send button clicked
     // send message to server and handle result
     private fun sendQuery(requestMessage: String) {
         viewModelScope.launch {
-            Log.d("GUN", "send to server $requestMessage")
+            Log.d("GUN Message ViewModel", "send to server $requestMessage")
+            val isBriefing = requestMessage.contains("요약") || requestMessage.contains("브리핑")
+            val briefingPlanList = mutableListOf<Plan>()
 
-            val gptFirstMessage = Message(
-                id = 0,
-                sentTime = Date(),
-                messageFromManager = true,
-                content = "AI가 생성 중입니다. 잠시만 기다려주세요."
-            ).let {
-                val messageId: Int = messageRepository.insert(it).toInt()
-                it.copy(id = messageId)
-            }
+            val managerReadyingMessage =
+                addManagerMessage(managerContent = ManagerResponse.PLEASE_WAIT)
 
-            // TODO: Stream을 쓰지 말기
             //region 모든 DB 정보 string 으로 변환하기
             val allCategories = categoryRepository.getCategoriesStream().first()
             // ex) (1, 과제), (2, 운동), ..., (5, 약속)
@@ -244,12 +258,6 @@ class MessagePageViewModel(
 
             withContext(Dispatchers.IO) {
                 try {
-                    messageRepository.update(
-//                        gptOriginalMessage.copy(content = "AI 매니저가 살펴보고 있어요")
-                        //TODO: Refactor string as constant variable or message type
-                        gptFirstMessage.copy(content = "AI_THINKING")
-                    )
-
                     val resultFromServer = calendyServerApi.sendMessageToServer(
                         MessageBody(
                             message = requestMessage,
@@ -261,47 +269,63 @@ class MessagePageViewModel(
                     )
 
                     // handle result
-                    // TODO: Flag - NO_SUCH_TODO 등
                     // TODO: memo에 ; 가 들어가면, GPT가 SQL Injection이나 버그를 유발하는 SQL Query를 반환한다.
-                    var queries = resultFromServer.trim('"').split(";").dropLast(1)
-
-                    sqlExecute(queries[0].trim(), gptFirstMessage)
-                    for (query in queries.drop(1)) {
-                        val gptMessage = Message(
-                            id = 0,
-                            sentTime = Date(),
-                            messageFromManager = true,
-                            content = "AI가 생성 중입니다. 잠시만 기다려주세요."
-                        ).let {
-                            val messageId: Int = messageRepository.insert(it).toInt()
-                            it.copy(id = messageId)
-                        }
-                        //gpt가 처리한 후에 이후 message들을 띄우는게 낫지만, 일단은 sqlExecute이 이미 존재하는 message를 처리하므로 이렇게 한다.
-                        sqlExecute(query.trim(), gptMessage)
+                    val queries = resultFromServer.trim('"').split(";").dropLast(1)
+                    for (query in queries) {
+                        val selectedPlanList = sqlExecute(query.trim()) ?: emptyList()
+                        briefingPlanList.addAll(selectedPlanList)
                     }
                 } catch (e: Throwable) {
-                    //message 여러개 생성 후에 error날 경우 첫번째만 바꾸게될 것 같은데, 추후 수정 필
-                    Log.e("GUN", e.stackTraceToString())
-                    messageRepository.update(
-                        gptFirstMessage.copy(content = "Send Query 에서 에러가 나타났다")
-                    )
+                    Log.e("GUN Message ViewModel", e.stackTraceToString())
+                    // This may be server error. Because sqlExecute has error handling
+                    addManagerMessage(managerContent = ManagerResponse.ERROR) // TODO: 유저에게 어떻게 설명해야 하지?
+                } finally {
+                    messageRepository.delete(managerReadyingMessage)
+
+                    if (isBriefing) {
+                        sendBriefing(briefingPlanList, allCategories)
+                    }
                 }
             }
         }
     }
 
+    private suspend fun sendBriefing(briefingPlanList: List<Plan>, allCategories: List<Category>) {
+        val briefingReadyingMessage =
+            addManagerMessage(managerContent = ManagerResponse.BRIEFING_PLAN_PLEASE_WAIT)
+
+        try {
+            val allPlans = briefingPlanList.joinToString {
+                it.toSummary { categoryId ->
+                    allCategories.find { category -> category.id==categoryId }?.title ?: "None"
+                }
+            }
+            Log.d("GUN Message ViewModel", "AllPlans: $allPlans")
+            val briefingResult = calendyServerApi.sendBriefingRequestToServer(allPlans)
+            addManagerMessage(managerContent = briefingResult)
+        } catch (e: Throwable) {
+            Log.e("GUN Message ViewModel - Briefing", e.stackTraceToString())
+            addManagerMessage(managerContent = ManagerResponse.ERROR) // TODO: 유저에게 어떻게 설명해야 하지?
+        } finally {
+            messageRepository.delete(briefingReadyingMessage)
+        }
+
+    }
+
     // should update information to gptMessage
-    private suspend fun sqlExecute(gptQuery: String, gptMessage: Message) {
+    private suspend fun sqlExecute(gptQuery: String): List<Plan>? {
+        val gptMessage = addManagerMessage(managerContent = ManagerResponse.PLEASE_WAIT)
+
         // TODO: Refactor Me
-        Log.d("GUN", "Query Start: $gptQuery")
-        val startsWith = gptQuery.takeWhile{ it != ' '}.uppercase()
-        val queryType = when(startsWith){
-            "INSERT" -> QueryType.INSERT
-            "UPDATE" -> QueryType.UPDATE
-            "DELETE" -> QueryType.DELETE
-            "SELECT" -> QueryType.SELECT
+        Log.d("GUN Message ViewModel", "Query Start: $gptQuery")
+        val startsWith = gptQuery.takeWhile { it!=' ' }.uppercase()
+        val queryType = when (startsWith) {
+            "INSERT"       -> QueryType.INSERT
+            "UPDATE"       -> QueryType.UPDATE
+            "DELETE"       -> QueryType.DELETE
+            "SELECT"       -> QueryType.SELECT
             "NO_SUCH_PLAN" -> QueryType.NOT_FOUND
-            else -> QueryType.UNEXPECTED
+            else           -> QueryType.UNEXPECTED
         }
 
 
@@ -335,19 +359,26 @@ class MessagePageViewModel(
                 false -> planRepository.getTodosViaQuery(calendySelectQuery)
             }
         }
-        suspend fun insertHistory(gptMessage: Message, isSchedule: Boolean, queryType: QueryType, currentId: Int? = null, savedId: Int? = null){
-            if(isSchedule){
+
+        suspend fun insertHistory(
+            gptMessage: Message,
+            isSchedule: Boolean,
+            queryType: QueryType,
+            currentId: Int? = null,
+            savedId: Int? = null
+        ) {
+            if (isSchedule) {
                 historyRepository.insertHistory(
                     ManagerHistory(
                         messageId = gptMessage.id,
                         isSchedule = isSchedule,
                         revisionType = queryType,
                         currentScheduleId = currentId,
-                        savedScheduleId= savedId
+                        savedScheduleId = savedId
                     )
                 )
 
-            }else{
+            } else {
                 historyRepository.insertHistory(
                     ManagerHistory(
                         messageId = gptMessage.id,
@@ -361,40 +392,42 @@ class MessagePageViewModel(
 
 
         }
-        suspend fun updateGptResponseMessage(gptMessage: Message, planListSize: Int, queryType: QueryType, isSchedule: Boolean) {
+
+        suspend fun updateGptResponseMessage(
+            gptMessage: Message, planListSize: Int, queryType: QueryType, isSchedule: Boolean
+        ) {
             var messageString: String
-            var hasRevision= true
-            if(QueryType.NOT_FOUND==queryType){
-                hasRevision=false
-                messageString= "찾으시는 플랜이 없어요"
-            }
-            else if(planListSize==0){
+            var hasRevision = true
+            if (QueryType.NOT_FOUND==queryType) {
+                hasRevision = false
+                messageString = "찾으시는 플랜이 없어요"
+            } else if (planListSize==0) {
                 val planType = if (isSchedule) "일정" else "할 일"
                 messageString = when (queryType) {
-                    QueryType.INSERT    -> "말씀하신 ${planType}을 추가하지 못했어요."
-                    QueryType.UPDATE, QueryType.DELETE, QueryType.SELECT    -> "말씀하신 ${planType}을 찾지 못했어요."
-                    else                -> "죄송해요. 잘 이해하지 못했어요. "
+                    QueryType.INSERT                                     -> "말씀하신 ${planType}을 추가하지 못했어요."
+                    QueryType.UPDATE, QueryType.DELETE, QueryType.SELECT -> "말씀하신 ${planType}을 찾지 못했어요."
+                    else                                                 -> "죄송해요. 잘 이해하지 못했어요. "
                 }
-                hasRevision=false
+                hasRevision = false
 
-            }
-            else{
+            } else {
                 messageString = "AI 매니저가 "
                 if (isSchedule) messageString += "일정 "
                 else messageString += "할 일 "
                 when (queryType) {
-                    QueryType.INSERT    -> messageString += "${planListSize}개를 추가했어요"
-                    QueryType.UPDATE    -> messageString += "${planListSize}개를 수정했어요"
-                    QueryType.DELETE    -> messageString += "${planListSize}개를 삭제했어요"
-                    QueryType.SELECT    -> messageString += "${planListSize}개를 발견했어요"
+                    QueryType.INSERT -> messageString += "${planListSize}개를 추가했어요"
+                    QueryType.UPDATE -> messageString += "${planListSize}개를 수정했어요"
+                    QueryType.DELETE -> messageString += "${planListSize}개를 삭제했어요"
+                    QueryType.SELECT -> messageString += "${planListSize}개를 발견했어요"
 //                    QueryType.NOT_FOUND -> {messageString = "찾으시는 플랜이 없어요"
 //                        hasRevision=false
 //                    }
-                    else                -> {messageString = "죄송해요. 잘 이해하지 못했어요."
-                        hasRevision=false
+                    else             -> {
+                        messageString = "죄송해요. 잘 이해하지 못했어요."
+                        hasRevision = false
                     }
                 }
-                if(planListSize<=0) hasRevision=false
+                if (planListSize <= 0) hasRevision = false
 
             }
             messageRepository.update(
@@ -403,13 +436,15 @@ class MessagePageViewModel(
                 )
             )
         }
+
         // 우선 기존 data를 모두 삭제해둔다.
         rawSqlDatabase.deleteAll()
 
+        var selectedPlanList: List<Plan>? = null
         try {
             val planListSize: Int
-            when(queryType){
-                QueryType.INSERT -> {
+            when (queryType) {
+                QueryType.INSERT    -> {
                     // RawSqlDB에 INSERT sqlQuery 실행
                     rawSqlDatabase.execSql(gptQuery)
                     // RawSqlDB에서 Select All
@@ -421,14 +456,15 @@ class MessagePageViewModel(
 
                         // Manager가 변경한 사항을 기록
 
-                        insertHistory(gptMessage, isSchedule, queryType, currentId=newPlanId)
+                        insertHistory(gptMessage, isSchedule, queryType, currentId = newPlanId)
                     }
 
                     //initialize planListSize for updating message
 
-                    planListSize= planList.size
+                    planListSize = planList.size
                 }
-                QueryType.UPDATE -> {
+
+                QueryType.UPDATE    -> {
                     val originalPlanList = getAffectedPlansFromGptQuery()
 
                     // RawSqlDB에 복사
@@ -442,7 +478,13 @@ class MessagePageViewModel(
                         rawSqlDatabase.insertFromPlan(plan)
 
                         // Manager가 변경할 예정인 사항을 기록
-                        insertHistory(gptMessage, isSchedule, QueryType.UPDATE, currentId = originalPlanId, savedId = savedPlanId)
+                        insertHistory(
+                            gptMessage,
+                            isSchedule,
+                            QueryType.UPDATE,
+                            currentId = originalPlanId,
+                            savedId = savedPlanId
+                        )
                     }
 
                     // RawSqlDB에 update sqlQuery 실행
@@ -455,10 +497,11 @@ class MessagePageViewModel(
                     }
 
                     //initialize planListSize for updating message
-                    planListSize= planList.size
+                    planListSize = planList.size
 
                 }
-                QueryType.DELETE ->{
+
+                QueryType.DELETE    -> {
                     val originalPlanList = getAffectedPlansFromGptQuery()
 
                     // MainDB에서 삭제
@@ -470,13 +513,16 @@ class MessagePageViewModel(
                         planRepository.delete(plan)
 
                         // Manager가 변경한 사항을 기록
-                        insertHistory(gptMessage, isSchedule, QueryType.DELETE, savedId = savedPlanId)
+                        insertHistory(
+                            gptMessage, isSchedule, QueryType.DELETE, savedId = savedPlanId
+                        )
                     }
 
                     //initialize planListSize for updating message
-                    planListSize= originalPlanList.size
+                    planListSize = originalPlanList.size
                 }
-                QueryType.SELECT->{
+
+                QueryType.SELECT    -> {
                     // SELECT 문에 의해 영향을 받는 planList 받기
                     val planList = getAffectedPlansFromGptQuery()
 
@@ -485,31 +531,36 @@ class MessagePageViewModel(
                     }
 
                     //initialize planListSize for updating message
-                    planListSize= planList.size
+                    planListSize = planList.size
+
+                    selectedPlanList = planList
                 }
-                QueryType.NOT_FOUND->{
-                    planListSize=0;
+
+                QueryType.NOT_FOUND -> {
+                    planListSize = 0;
 
                 }
-                else -> {
+
+                else                -> {
                     // if invalid request, say sorry
-                    planListSize=-1;
+                    planListSize = -1;
 
                 }
-
 
             }
             // Message DB에 Message 넣어주기
             updateGptResponseMessage(gptMessage, planListSize, queryType, isSchedule)
-
         } catch (e: Throwable) {
             // Catching all throwable may not be good
-            Log.e("GUN", e.stackTraceToString())
+            Log.e("GUN Message ViewModel", e.stackTraceToString())
             messageRepository.update(
                 gptMessage.copy(content = "으악! 에러다!", hasRevision = false)
             )
         }
 
+        // TODO: Refactor Me
+        // Return Select Query for Briefing
+        return selectedPlanList
     }
 
 }
