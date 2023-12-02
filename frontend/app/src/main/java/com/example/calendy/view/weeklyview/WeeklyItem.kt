@@ -570,8 +570,9 @@ fun LongPlanStack(
                 }
             }
             placeableWithSchedules.forEach { (placeable, schedule) ->
+                val start = if(schedule.startTime.before(currentWeek.first)) currentWeek.first else schedule.startTime
                 val offset = Calendar.getInstance()
-                    .apply { time = schedule.startTime }
+                    .apply { time = start }
                     .get(Calendar.DAY_OF_WEEK) - Calendar.SUNDAY
                 val duration = calculateDateDifference(schedule.startTime, schedule.endTime, currentWeek.first, currentWeek.second)
                 val itemX = ((dayWidth * offset)+1.5.dp).roundToPx()
