@@ -8,6 +8,8 @@ import java.util.Date
 
 data class WeeklyUiState(
     val weekSchedules : List<Schedule> = emptyList(),
+    val singleDaySchedules : List<Schedule> = emptyList(),
+    val multipleDaySchedules : List<Schedule> = emptyList(),
     val weekTodos: List<Todo> = emptyList(),
     val pageCount : Int = Int.MAX_VALUE,             // 최대 페이지 개수
     val currentPosition : Int = Int.MAX_VALUE / 2 ,

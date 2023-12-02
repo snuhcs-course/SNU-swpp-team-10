@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Calendar
+import java.util.Date
 
 class WeeklyViewModel(private val scheduleRepository: IScheduleRepository, private val todoRepository: ITodoRepository) : ViewModel() {
     private val _uiState = MutableStateFlow(WeeklyUiState())
@@ -49,8 +50,19 @@ class WeeklyViewModel(private val scheduleRepository: IScheduleRepository, priva
         viewModelScope.launch {
             val weekSchedules = scheduleRepository.getSchedulesStream(uiState.value.currentWeek.first, uiState.value.currentWeek.second)
             val weekTodos = todoRepository.getTodosStream(uiState.value.currentWeek.first, uiState.value.currentWeek.second)
+            val singleDaySchedules = weekSchedules.first().filter { schedule ->
+                isSameDay(schedule.startTime, schedule.endTime)
+            }
+            val multipleDaySchedules = weekSchedules.first().filterNot { schedule ->
+                isSameDay(schedule.startTime, schedule.endTime)
+            }
             _uiState.update { currentState ->
-                currentState.copy(weekSchedules = weekSchedules.first(), weekTodos = weekTodos.first())
+                currentState.copy(
+                    weekSchedules = weekSchedules.first(),
+                    weekTodos = weekTodos.first(),
+                    singleDaySchedules = singleDaySchedules,
+                    multipleDaySchedules = multipleDaySchedules
+                )
             }
         }
     }
@@ -65,4 +77,10 @@ class WeeklyViewModel(private val scheduleRepository: IScheduleRepository, priva
         }
     }
 
+    fun isSameDay(date1: Date, date2: Date): Boolean {
+        val cal1 = Calendar.getInstance().apply { time = date1 }
+        val cal2 = Calendar.getInstance().apply { time = date2 }
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
+    }
 }

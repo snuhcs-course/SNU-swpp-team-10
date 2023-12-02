@@ -54,6 +54,7 @@ import androidx.compose.ui.input.pointer.isOutOfBounds
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChangeConsumed
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -66,7 +67,6 @@ import com.example.calendy.data.dummy.DummyPlanRepository
 import com.example.calendy.data.dummy.DummyRepeatGroupRepository
 import com.example.calendy.data.maindb.category.Category
 import com.example.calendy.data.maindb.plan.PlanType
-import com.example.calendy.ui.theme.CalendyFontFamily
 import com.gowtham.ratingbar.RatingBar
 import com.gowtham.ratingbar.RatingBarConfig
 import kotlinx.coroutines.coroutineScope
@@ -178,7 +178,7 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
                                        horizontal = 12.dp, vertical = 5.dp
                                    )
                                ), // Remove paddingc
-                           textStyle = TextStyle(fontFamily = CalendyFontFamily, fontSize = 32.sp, fontWeight = FontWeight.Bold),
+                           textStyle = TextStyle( fontSize = 32.sp, fontWeight = FontWeight.Bold),
                            decorationBox = { innerTextField ->
                                if (editPlanUiState.titleField.isEmpty()) {
                                    Text(
@@ -256,7 +256,7 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
             BasicTextField(value = editPlanUiState.memoField,
                            onValueChange = { value -> editPlanViewModel.setMemo(value) },
                            modifier = Modifier.fillMaxWidth(),
-                           textStyle = TextStyle(fontFamily = CalendyFontFamily,fontSize = 16.sp),
+                           textStyle = TextStyle(fontSize = 16.sp),
                            decorationBox = { innerTextField ->
                                if (editPlanUiState.memoField.isEmpty()) {
                                    Text(
@@ -335,7 +335,7 @@ fun TypeButton(
             .fillMaxWidth(),
     ) {
         Text(
-            text = text, fontFamily = CalendyFontFamily,fontSize = 16.sp, style = TextStyle(
+            text = text, fontSize = 16.sp, style = TextStyle(
                 fontSize = 14.sp,
                 lineHeight = 18.sp,
                 fontWeight = FontWeight(500),

@@ -1,5 +1,6 @@
 package com.example.calendy.view.todolistview
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import com.example.calendy.R
 import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.data.maindb.plan.Todo
+import com.example.calendy.ui.theme.getColor
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import com.example.calendy.view.popup.EditButton
@@ -98,7 +100,19 @@ fun ToDoListPage(
             )
 
         }, actions = { hideToggle(viewModel, uiState) })
-
+    }, floatingActionButton = {
+        FloatingActionButton(
+            onClick = {
+                onNavigateToEditPage(null, Calendar.getInstance().apply {
+                    set(Calendar.YEAR, uiState.year)
+                    set(Calendar.MONTH, uiState.month - 1)
+                }.time)
+            },
+            containerColor = Color(0xFF80ACFF),
+            contentColor = Color.Black,
+        ) {
+            Icon(Icons.Filled.Add, contentDescription = "Add")
+        }
     }) { innerPadding ->
         Column(
             modifier = Modifier.padding(innerPadding)
@@ -176,8 +190,15 @@ fun ToDoItem(
                 .clickable(onClick = clickAction)
                 .weight(1f)
         ) {
-
-            Spacer(modifier = Modifier.width(8.dp))
+            Canvas(
+                modifier = Modifier
+                    .size(30.dp)
+                    .padding(8.dp)
+            ) {
+                drawCircle(
+                    color = todo.getColor(), radius = size.minDimension / 2
+                )
+            }
             Column(modifier = Modifier.padding(3.dp)) {
                 Text(
                     text = todo.title,
@@ -330,7 +351,7 @@ fun hideToggle(viewModel: TodoListViewModel, uiState: TodoListUiState) {
         )
         Spacer(modifier = Modifier.width(8.dp))
         Switch(checked = uiState.hidedStatus,
-               colors = SwitchDefaults.colors(checkedTrackColor = Color(0xFF337AFF),),
+               colors = SwitchDefaults.colors(checkedTrackColor = Color(0xFF337AFF)),
                onCheckedChange = {
                    viewModel.setHidedStatus(it)
                },
@@ -349,7 +370,7 @@ fun hideToggle(viewModel: TodoListViewModel, uiState: TodoListUiState) {
 }
 
 fun formatToHourMinuteAmPm(date: Date): String {
-    val formatter = SimpleDateFormat("d일 a hh:mm")
+    val formatter = SimpleDateFormat("d일(E) a hh:mm")
     return formatter.format(date)
 }
 

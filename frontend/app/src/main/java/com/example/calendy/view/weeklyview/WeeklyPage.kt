@@ -148,6 +148,8 @@ fun WeekScreen(
         val dayWidth = (totalWidth - sidebarWidth) / 7
         Column {
             WeekHeader(
+                uiState = uiState,
+                onNavigateToEditPage = onNavigateToEditPage,
                 startDate = uiState.currentWeek.first,
                 dayWidth = dayWidth,
                 modifier = Modifier

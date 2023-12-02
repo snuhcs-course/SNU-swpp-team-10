@@ -210,9 +210,11 @@ fun TodoItem(
 
 @Composable
 fun WeekHeader(
+    uiState: WeeklyUiState,
     startDate: Date,
     dayWidth: Dp,
     modifier: Modifier = Modifier,
+    onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
 ) {
     val calendar = Calendar.getInstance()
     calendar.time = startDate
@@ -285,7 +287,7 @@ fun WeeklyTable(
     hourHeight: Dp,
     onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
 ) {
-    val schedules = uiState.weekSchedules
+    val schedules = uiState.singleDaySchedules
     val todos = uiState.weekTodos
     val numDays = 7
     val dividerColor = Color.LightGray
@@ -306,19 +308,9 @@ fun WeeklyTable(
         }
         Layout(
             content = {
-                schedules.sortedBy(Schedule::startTime).forEach { originalSchedule ->
-                    // 일정을 날짜별로 분할
-                    val splitSchedules = splitScheduleByDays(
-                        originalSchedule,
-                        uiState.currentWeek.first,
-                        uiState.currentWeek.second
-                    )
-
-                    // 각 분할된 일정에 대해 scheduleContent를 호출
-                    splitSchedules.forEach { schedule ->
-                        Box(modifier = Modifier.scheduleData(schedule = schedule)) {
-                            scheduleContent(schedule)
-                        }
+                schedules.sortedBy(Schedule::startTime).forEach {schedule ->
+                    Box(modifier = Modifier.scheduleData(schedule = schedule)) {
+                        scheduleContent(schedule)
                     }
                 }
                 todos.sortedBy(Todo::dueTime).forEach { todo ->
@@ -511,6 +503,50 @@ fun ClickableTimeSlotBox(
 }
 
 @Composable
+fun LongPlanStack(
+    modifier: Modifier = Modifier,
+    uiState: WeeklyUiState,
+    onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
+) {
+    val multipleDaySchedules: List<Schedule> = uiState.multipleDaySchedules
+    if (multipleDaySchedules.isNotEmpty()) {
+        Layout(content = {
+            multipleDaySchedules.forEach { schedule ->
+                ScheduleItem(
+                    schedule = schedule, onNavigateToEditPage = onNavigateToEditPage
+                )
+            }
+
+        }) { measurables, constraints ->
+            val placeables = measurables.map { measurable ->
+                measurable.measure(constraints)
+            }
+
+            layout(constraints.maxWidth, constraints.maxHeight) {
+                var yPosition = 0
+
+                val showMore = placeables.subList(0, placeables.count() - 1).map {
+                    it.height
+                }.sum() > constraints.maxHeight
+
+                val availableHeight = constraints.maxHeight - placeables.last().height
+
+                placeables.subList(0, placeables.count() - 1).forEach { placeable ->
+                    if (!showMore || (yPosition + placeable.height < availableHeight)) {
+                        placeable.placeRelative(x = 0, y = yPosition)
+                        yPosition += placeable.height
+                    }
+                }
+                if (showMore) {
+                    val more = placeables.last()
+                    more.placeRelative(x = constraints.maxWidth - more.width - 5, y = yPosition)
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun balloonShape(
     tailDirectionUp: Boolean = false,
     cornerRadius: Dp = 5.dp, // 모서리의 둥근 정도
@@ -560,56 +596,10 @@ fun balloonShape(
 }
 
 // 기존 Schedule 객체를 날짜별로 분할하는 함수
-fun splitScheduleByDays(schedule: Schedule, weekStart: Date, weekEnd: Date): List<Schedule> {
-    val splitSchedules = mutableListOf<Schedule>()
-    val startCalendar = Calendar.getInstance().apply { time = schedule.startTime }
-    val endCalendar = Calendar.getInstance().apply { time = schedule.endTime }
 
 
-    val weekEndCalendar = Calendar.getInstance()
-    weekEndCalendar.time = weekEnd
-    weekEndCalendar.add(Calendar.DATE, 1)
-    weekEndCalendar.set(Calendar.HOUR_OF_DAY, 0)
-    weekEndCalendar.set(Calendar.MINUTE, 0)
-    weekEndCalendar.set(Calendar.SECOND, 0)
-    weekEndCalendar.set(Calendar.MILLISECOND, 1)
-
-    while (!startCalendar.after(endCalendar)) {
-        val nextDayCalendar = startCalendar.clone() as Calendar
-        nextDayCalendar.add(Calendar.DATE, 1)
-        nextDayCalendar.set(Calendar.HOUR_OF_DAY, 0)
-        nextDayCalendar.set(Calendar.MINUTE, 0)
-        nextDayCalendar.set(Calendar.SECOND, 0)
-        nextDayCalendar.set(Calendar.MILLISECOND, 0)
 
 
-        val partEnd =
-            if (endCalendar.before(nextDayCalendar)) endCalendar.time else nextDayCalendar.time
-
-        // 일정이 주 내에 있는 경우에만 추가
-        if (!startCalendar.time.before(weekStart) && partEnd.before(weekEndCalendar.time)) {
-            splitSchedules.add(
-                schedule.copy(
-                    startTime = startCalendar.time, endTime = partEnd
-                )
-            )
-        }
-        // 다음 날짜로 이동
-        startCalendar.time = nextDayCalendar.time
-    }
-
-    return splitSchedules
-}
-
-
-@Preview(showBackground = true, name = "WeekHeader Preview")
-@Composable
-fun WeekHeaderPreview() {
-    val calendar = Calendar.getInstance().apply {
-        set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
-    }
-    WeekHeader(startDate = calendar.time, dayWidth = 256.dp)
-}
 
 @Preview(showBackground = true, name = "WeekSidebar Preview")
 @Composable
