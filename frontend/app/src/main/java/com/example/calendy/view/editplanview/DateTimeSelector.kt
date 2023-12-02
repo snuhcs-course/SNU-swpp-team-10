@@ -95,19 +95,19 @@ private fun HourMinutePicker(
             wheelItem = { value ->
                 Text(
                     text = String.format("%02d", value),
-                    style = TextStyle(fontSize = 22.sp),
+                    style = TextStyle(fontSize = 28.sp),
                 )
             },
-            wheelItemHeight = 30.dp,
-            modifier = Modifier.width(36.dp),
+            wheelItemHeight = 40.dp,
+            modifier = Modifier.width(70.dp),
         )
         Text(
             ":",
             style = TextStyle(
-                fontSize = 20.sp, fontWeight = FontWeight.Normal,
+                fontSize = 24.sp, fontWeight = FontWeight.Normal,
             ),
             modifier = Modifier.padding(
-                start = 4.dp, end = 4.dp, bottom = 1.dp
+                start = 8.dp, end = 8.dp, bottom = 2.dp
             ),
         )
         VerticalWheelPickerWrapper(
@@ -117,11 +117,11 @@ private fun HourMinutePicker(
             wheelItem = { value ->
                 Text(
                     text = String.format("%02d", value),
-                    style = TextStyle(fontSize = 22.sp),
+                    style = TextStyle(fontSize = 28.sp),
                 )
             },
-            wheelItemHeight = 30.dp,
-            modifier = Modifier.width(36.dp),
+            wheelItemHeight = 40.dp,
+            modifier = Modifier.width(70.dp),
         )
     }
 }
@@ -144,7 +144,7 @@ private fun DateTimeSelectButton(
                 containerColor = Color.Transparent, contentColor = Color.Black
             ),
         ) {
-            val formatter = SimpleDateFormat("yyyy.MM.dd", Locale.getDefault())
+            val formatter = SimpleDateFormat("yyyy.MM.dd.", Locale.getDefault())
             val textString = formatter.format(currentTime)
             Text(text = textString, style = TextStyle(fontSize = 20.sp))
         }
