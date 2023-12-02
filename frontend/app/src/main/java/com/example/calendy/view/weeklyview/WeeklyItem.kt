@@ -6,7 +6,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -42,7 +41,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.ParentDataModifier
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -141,8 +139,7 @@ fun TodoItem(
                  containerColor = todo.getColor().copy(alpha = 0.6f)
              ),
              border = if (todo.complete) BorderStroke(
-                 width = 3.dp,
-                 color = todo.getColor().copy(alpha = 0.8f)
+                 width = 3.dp, color = todo.getColor().copy(alpha = 0.8f)
              ) else null,
              modifier = modifier
                  .fillMaxWidth()
@@ -211,31 +208,42 @@ fun TodoItem(
 @Composable
 fun WeekHeader(
     uiState: WeeklyUiState,
-    startDate: Date,
     dayWidth: Dp,
     modifier: Modifier = Modifier,
     onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
 ) {
+    val multipleDaySchedules: List<Schedule> = uiState.multipleDaySchedules.filterNot { schedule ->  isSameDay(schedule.startTime, schedule.endTime) }
     val calendar = Calendar.getInstance()
-    calendar.time = startDate
+    calendar.time = uiState.currentWeek.first
     val dayFormatter = SimpleDateFormat("E\nd", Locale.getDefault())
-
-    Row(modifier = modifier) {
-        val numDays = 7
-        repeat(numDays) { _ ->
-            val dateText = dayFormatter.format(calendar.time)
-            Box(modifier = Modifier.width(dayWidth)) {
-                Text(
-                    text = dateText,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(4.dp)
-                )
+    Column {
+        Row(modifier = modifier) {
+            val numDays = 7
+            repeat(numDays) { _ ->
+                val dateText = dayFormatter.format(calendar.time)
+                Box(modifier = Modifier.width(dayWidth)) {
+                    Text(
+                        text = dateText,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(4.dp)
+                    )
+                }
+                calendar.add(Calendar.DAY_OF_MONTH, 1)
             }
-            calendar.add(Calendar.DAY_OF_MONTH, 1)
         }
+        if(multipleDaySchedules.isNotEmpty()){
+            LongPlanStack(
+                modifier = modifier,
+                uiState = uiState,
+                dayWidth = dayWidth,
+                onNavigateToEditPage = onNavigateToEditPage
+            )
+        }
+        Spacer(modifier = modifier.padding(bottom = 10.dp))
     }
+
 }
 
 @Composable
@@ -278,16 +286,14 @@ fun WeeklyTable(
     },
     todoContent: @Composable (todo: Todo) -> Unit = {
         TodoItem(
-            viewModel = viewModel,
-            todo = it,
-            onNavigateToEditPage = onNavigateToEditPage
+            viewModel = viewModel, todo = it, onNavigateToEditPage = onNavigateToEditPage
         )
     },
     dayWidth: Dp,
     hourHeight: Dp,
     onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
 ) {
-    val schedules = uiState.singleDaySchedules
+    val schedules = uiState.weekSchedules.filter { schedule -> isSameDay(schedule.startTime, schedule.endTime)  }
     val todos = uiState.weekTodos
     val numDays = 7
     val dividerColor = Color.LightGray
@@ -308,7 +314,7 @@ fun WeeklyTable(
         }
         Layout(
             content = {
-                schedules.sortedBy(Schedule::startTime).forEach {schedule ->
+                schedules.sortedBy(Schedule::startTime).forEach { schedule ->
                     Box(modifier = Modifier.scheduleData(schedule = schedule)) {
                         scheduleContent(schedule)
                     }
@@ -402,7 +408,7 @@ fun WeeklyTable(
                     val itemOffsetDays =
                         TimeUnit.MILLISECONDS.toDays(startDayCalendar.timeInMillis - startOfWeekCalendar.timeInMillis)
                             .toInt()
-                    var itemX = itemOffsetDays * dayWidth.roundToPx()
+                    val itemX = itemOffsetDays * dayWidth.roundToPx()
                     placeable.place(itemX, itemY)
                 }
                 placeableWithTodos.forEach { (placeable, todo) ->
@@ -497,7 +503,9 @@ fun ClickableTimeSlotBox(
     Box(modifier = Modifier
         .offset(x = boxX.dp, y = boxY.dp)
         .size(dayWidth, hourHeight)
-        .clickable { onNavigateToEditPage(null, PlanType.SCHEDULE, clickedDateTime) }) {
+        .clickable {
+            onNavigateToEditPage(null, PlanType.SCHEDULE, clickedDateTime)
+        }) {
 
     }
 }
@@ -506,45 +514,149 @@ fun ClickableTimeSlotBox(
 fun LongPlanStack(
     modifier: Modifier = Modifier,
     uiState: WeeklyUiState,
+    dayWidth: Dp,
+    scheduleContent: @Composable (schedule: Schedule) -> Unit = {
+        ScheduleItem(
+            schedule = it, onNavigateToEditPage = onNavigateToEditPage
+        )
+    },
     onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
 ) {
-    val multipleDaySchedules: List<Schedule> = uiState.multipleDaySchedules
-    if (multipleDaySchedules.isNotEmpty()) {
-        Layout(content = {
-            multipleDaySchedules.forEach { schedule ->
-                ScheduleItem(
-                    schedule = schedule, onNavigateToEditPage = onNavigateToEditPage
+    val schedules = uiState.multipleDaySchedules
+    val currentWeek = uiState.currentWeek
+
+    Layout(modifier = modifier ,content = {
+        schedules.sortedBy(Schedule::startTime).forEach { schedule ->
+            Box(modifier = Modifier.scheduleData(schedule = schedule)) {
+                scheduleContent(schedule)
+            }
+        }
+
+    }) { measureables, constraints ->
+        val width = (dayWidth * 7).roundToPx()
+        val schedulesByDayOfWeek = IntArray(7) { 0 }
+        schedules.forEach { schedule ->
+            val dayOfWeek = Calendar.getInstance().apply { time = schedule.startTime }.get(Calendar.DAY_OF_WEEK) - Calendar.SUNDAY
+            val duration = calculateDateDifference(schedule.startTime, schedule.endTime, currentWeek.first, currentWeek.second)
+            for(i: Int in dayOfWeek until dayOfWeek+duration) {
+                schedulesByDayOfWeek[i]++
+            }
+        }
+        val maxOverlap = schedulesByDayOfWeek.maxOrNull() ?: 0
+        val height = maxOverlap * 45
+        val placeableWithSchedules = measureables.map { measurable ->
+            val schedule = measurable.parentData as Schedule
+            val itemWidth = dayWidth * calculateDateDifference(
+                schedule.startTime,
+                schedule.endTime,
+                currentWeek.first,
+                currentWeek.second
+            )
+            Log.d("jm", "schedule: ${schedule.title}, width: $itemWidth")
+            val placeable = measurable.measure(
+                constraints.copy(
+                    minWidth = max((itemWidth-3.dp).roundToPx(),1),
+                    maxWidth = max((itemWidth-3.dp).roundToPx(),1),
+                    minHeight = 40,
+                    maxHeight = 40,
                 )
-            }
-
-        }) { measurables, constraints ->
-            val placeables = measurables.map { measurable ->
-                measurable.measure(constraints)
-            }
-
-            layout(constraints.maxWidth, constraints.maxHeight) {
-                var yPosition = 0
-
-                val showMore = placeables.subList(0, placeables.count() - 1).map {
-                    it.height
-                }.sum() > constraints.maxHeight
-
-                val availableHeight = constraints.maxHeight - placeables.last().height
-
-                placeables.subList(0, placeables.count() - 1).forEach { placeable ->
-                    if (!showMore || (yPosition + placeable.height < availableHeight)) {
-                        placeable.placeRelative(x = 0, y = yPosition)
-                        yPosition += placeable.height
-                    }
+            )
+            Pair(placeable, schedule)
+        }
+        layout(width, height) {
+            val itemYPositions = mutableMapOf<Int, MutableList<Boolean>>().apply {
+                for (dayOfWeek in 0..6) { // 요일별로 초기화
+                    this[dayOfWeek] = MutableList(height / 43) { false }
                 }
-                if (showMore) {
-                    val more = placeables.last()
-                    more.placeRelative(x = constraints.maxWidth - more.width - 5, y = yPosition)
+            }
+            placeableWithSchedules.forEach { (placeable, schedule) ->
+                val offset = Calendar.getInstance()
+                    .apply { time = schedule.startTime }
+                    .get(Calendar.DAY_OF_WEEK) - Calendar.SUNDAY
+                val duration = calculateDateDifference(schedule.startTime, schedule.endTime, currentWeek.first, currentWeek.second)
+                val itemX = ((dayWidth * offset)+1.5.dp).roundToPx()
+                val itemYList = itemYPositions[offset]!!
+                val itemYIndex = itemYList.indexOfFirst { !it }
+                val itemY = itemYIndex * 45
+                placeable.place(itemX, itemY)
+                for(i: Int in offset until offset+duration) {
+                    itemYPositions[i]!![itemYIndex] = true
                 }
             }
         }
     }
+
 }
+
+fun calculateDateDifference(start: Date, end: Date, weekStartDate: Date ,weekLastDate: Date): Int {
+    val calendar = Calendar.getInstance()
+    if (start.after(weekLastDate) || end.before(weekStartDate)) {
+        return 0
+    }
+
+    val startDate = if (start.after(weekStartDate)) start else weekStartDate
+    calendar.time = startDate
+    val startDayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
+    val startYear = calendar.get(Calendar.YEAR)
+
+    val endDate = if (end.before(weekLastDate)) end else weekLastDate
+    calendar.time = endDate
+    val endHour = calendar.get(Calendar.HOUR_OF_DAY)
+    val endMinutes = calendar.get(Calendar.MINUTE)
+    val endSeconds = calendar.get(Calendar.SECOND)
+    val endMilliseconds = calendar.get(Calendar.MILLISECOND)
+
+    val isEndDateAtMidnight = endHour == 0 && endMinutes == 0 && endSeconds == 0 && endMilliseconds == 0
+    if (isEndDateAtMidnight) {
+        calendar.add(Calendar.DATE, -1)
+    }
+    val endDayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
+    val endYear = calendar.get(Calendar.YEAR)
+
+    return if (startYear==endYear) {
+        endDayOfYear - startDayOfYear + 1
+    } else {
+        var totalDays = 0
+
+        for (year in startYear until endYear) {
+            calendar.set(Calendar.YEAR, year)
+            totalDays += if (calendar.getActualMaximum(Calendar.DAY_OF_YEAR) > 365) 366 else 365
+        }
+        totalDays - startDayOfYear + endDayOfYear + 1
+    }
+}
+
+fun isSameDay(date1: Date, date2: Date): Boolean {
+    val cal1 = Calendar.getInstance().apply { time = date1 }
+    val cal2 = Calendar.getInstance().apply { time = date2 }
+
+    // date2가 자정인지 확인
+    val isMidnight = cal2.get(Calendar.HOUR_OF_DAY) == 0 &&
+            cal2.get(Calendar.MINUTE) == 0 &&
+            cal2.get(Calendar.SECOND) == 0 &&
+            cal2.get(Calendar.MILLISECOND) == 0
+
+    // 두 날짜가 같은 해, 같은 일인지 확인
+    val isSameDay = cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+            cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
+
+    if (isSameDay) {
+        return true
+    }
+
+    // date2가 자정이고 date1보다 하루 뒤인 경우
+    if (isMidnight) {
+        val cal1NextDay = Calendar.getInstance().apply {
+            time = date1
+            add(Calendar.DAY_OF_YEAR, 1)
+        }
+        return cal1NextDay.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                cal1NextDay.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
+    }
+
+    return false
+}
+
 
 @Composable
 fun balloonShape(
@@ -594,11 +706,6 @@ fun balloonShape(
         }
     }
 }
-
-// 기존 Schedule 객체를 날짜별로 분할하는 함수
-
-
-
 
 
 @Preview(showBackground = true, name = "WeekSidebar Preview")

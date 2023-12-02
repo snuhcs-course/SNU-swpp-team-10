@@ -122,6 +122,7 @@ fun WeekPager(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WeekScreen(
     uiState: WeeklyUiState,
@@ -150,7 +151,6 @@ fun WeekScreen(
             WeekHeader(
                 uiState = uiState,
                 onNavigateToEditPage = onNavigateToEditPage,
-                startDate = uiState.currentWeek.first,
                 dayWidth = dayWidth,
                 modifier = Modifier
                     .padding(start = sidebarWidth)
