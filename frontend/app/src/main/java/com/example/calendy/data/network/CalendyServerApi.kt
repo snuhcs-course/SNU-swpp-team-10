@@ -9,6 +9,12 @@ interface CalendyServerApi {
         @Body
         body: MessageBody
     ): String
+
+    @POST("manager/briefing")
+    suspend fun sendBriefingRequestToServer(
+        @Body
+        allPlans: String
+    ): String
 }
 
 // TODO: time 자동으로 생성해주는 함수

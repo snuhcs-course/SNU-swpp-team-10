@@ -4,8 +4,8 @@ import com.example.calendy.data.BaseRepository
 import kotlinx.coroutines.flow.Flow
 import java.util.Date
 
-interface IMessageRepository : BaseRepository<Message> {
-    fun getAllMessagesStream(): Flow<List<Message>>
-
-    fun getMessagesStream(startTime: Date, endTime: Date): Flow<List<Message>>
+abstract class IMessageRepository(messageDao: MessageDao) : BaseRepository<Message>(messageDao) {
+    abstract fun getAllMessagesStream(): Flow<List<Message>>
+    abstract fun getMessagesStream(startTime: Date, endTime: Date): Flow<List<Message>>
+    abstract suspend fun getResponseMessageGroup(userMessageId: Int): List<Message>
 }

@@ -6,11 +6,11 @@ import com.example.calendy.data.maindb.plan.Schedule
 import kotlinx.coroutines.flow.Flow
 import java.util.Date
 
-interface IScheduleRepository : BaseRepository<Schedule> {
-    fun getAllSchedulesStream(): Flow<List<Schedule>>
-    fun getSchedulesStream(startTime: Date, endTime: Date): Flow<List<Schedule>>
-    fun getScheduleById(id: Int): Schedule
-    fun getSchedulesViaQuery(query: SupportSQLiteQuery): List<Schedule>
-    fun getSchedulesByIds(ids: List<Int>): List<Schedule>
-    fun getMonthlySchedulesStream(startTime: Date, endTime: Date): Flow<List<Schedule>>
+abstract class IScheduleRepository(scheduleDao: ScheduleDao) : BaseRepository<Schedule>(scheduleDao) {
+    abstract fun getAllSchedulesStream(): Flow<List<Schedule>>
+    abstract fun getSchedulesStream(startTime: Date, endTime: Date): Flow<List<Schedule>>
+    abstract fun getScheduleById(id: Int): Schedule
+    abstract fun getSchedulesViaQuery(query: SupportSQLiteQuery): List<Schedule>
+    abstract fun getSchedulesByIds(ids: List<Int>): List<Schedule>
+    abstract fun getMonthlySchedulesStream(startTime: Date, endTime: Date): Flow<List<Schedule>>
 }

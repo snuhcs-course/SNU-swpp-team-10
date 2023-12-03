@@ -2,40 +2,55 @@ package com.example.calendy.view.todolistview
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowLeft
 import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.calendy.R
-import com.example.calendy.data.maindb.plan.PlanType
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.calendy.AppViewModelProvider
 import com.example.calendy.data.maindb.plan.Todo
-import com.example.calendy.ui.theme.getColor
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import com.example.calendy.view.popup.EditButton
-import com.example.calendy.view.popup.PlanDetailPopup
-import com.example.calendy.view.popup.PopupHeaderTitle
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -43,7 +58,8 @@ import java.util.Date
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ToDoListPage(
-    viewModel: TodoListViewModel, onNavigateToEditPage: (id: Int?, date: Date?) -> Unit
+    viewModel: TodoListViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    onNavigateToEditPage: (Int?, Date?, Date?) -> Unit
 ) {
     val uiState: TodoListUiState by viewModel.uiState.collectAsState()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -135,7 +151,7 @@ fun ToDoListPage(
 fun OneMonthTodos(
     viewModel: TodoListViewModel,
     uiState: TodoListUiState,
-    onNavigateToEditPage: (id: Int?, date: Date?) -> Unit
+    onNavigateToEditPage: (Int?, Date?, Date?) -> Unit
 ) {
     viewModel.updateMonthTodos()
     Column {
@@ -170,12 +186,12 @@ fun ToDoItem(
     todo: Todo,
     viewModel: TodoListViewModel,
     uiState: TodoListUiState,
-    onNavigateToEditPage: (id: Int?, date: Date?) -> Unit
+    onNavigateToEditPage: (Int?, Date?, Date?) -> Unit
 ) {
     var isChecked by remember(todo.complete) { mutableStateOf(todo.complete) }
 
     val clickAction = {
-        onNavigateToEditPage(todo.id, null)
+        onNavigateToEditPage(todo.id, null, null)
     }
     Row(
         modifier = Modifier

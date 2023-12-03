@@ -62,6 +62,8 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.calendy.AppViewModelProvider
 import com.example.calendy.data.dummy.DummyCategoryRepository
 import com.example.calendy.data.dummy.DummyPlanRepository
 import com.example.calendy.data.dummy.DummyRepeatGroupRepository
@@ -75,7 +77,10 @@ import kotlinx.coroutines.sync.Mutex
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Unit) {
+fun EditPlanPage(
+    editPlanViewModel: EditPlanViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    onNavigateBack: () -> Unit
+) {
     val editPlanUiState: EditPlanUiState by editPlanViewModel.uiState.collectAsState()
     val categoryList: List<Category> by editPlanViewModel.categoryListState.collectAsState()
 
@@ -272,16 +277,17 @@ fun EditPlanPage(editPlanViewModel: EditPlanViewModel, onNavigateBack: () -> Uni
         //endregion
 
         //region Show In Monthly View Switch
-        FieldWithLeadingText(
-            leadingText = "월별 캘린더에 표시",
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(commonHeight),
-            textWidth = 240.dp
-        ) {
-            Checkbox(checked = editPlanUiState.showInMonthlyView,
-                     onCheckedChange = { editPlanViewModel.setShowInMonthlyView(it) })
-        }
+        // TODO: RepeatGroup Feature Give up
+//        FieldWithLeadingText(
+//            leadingText = "월별 캘린더에 표시",
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .height(commonHeight),
+//            textWidth = 240.dp
+//        ) {
+//            Checkbox(checked = editPlanUiState.showInMonthlyView,
+//                     onCheckedChange = { editPlanViewModel.setShowInMonthlyView(it) })
+//        }
         //endregion
 
     }
