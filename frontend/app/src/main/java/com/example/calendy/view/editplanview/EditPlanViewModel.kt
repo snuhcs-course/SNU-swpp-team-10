@@ -45,12 +45,22 @@ class EditPlanViewModel(
 
 
     // set once when navigating to EditPlanPage
+    /**
+     * @param id: null if new plan
+     * @param type: PlanType.SCHEDULE or PlanType.TOD0
+     * @param startDate: set startDate for new plan. null if existing plan
+     * @param endDate: set endDate for new plan. if null for new plan, endDate = startDate
+     */
     fun initialize(id: Int?, type: PlanType, startDate: Date?, endDate: Date?) {
         if (id==null) {
             // new plan
             val (_, _, _, currentHour, currentMinute) = Date().extract()
             // selected (year, month, day) + current (hour, minute)
-            val time = (startDate ?: Date()).applyTime(currentHour, currentMinute)
+            // TODO: Should I use current (hour, minute?)
+            // In Weekly Page: startDate.hour is important
+            // In Monthly Page:
+            // In TodoList Page:
+            val time = (startDate ?: Date()) //.applyTime(currentHour, currentMinute)
             val endTime = endDate ?: time // If not specified, set endTime to startTime
 
             _uiState.value = EditPlanUiState(

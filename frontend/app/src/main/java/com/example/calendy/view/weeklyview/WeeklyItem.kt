@@ -53,11 +53,13 @@ import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
 import com.example.calendy.ui.theme.getColor
+import com.example.calendy.utils.applyTime
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import kotlin.math.max
 import kotlin.math.roundToInt
 
 
@@ -208,7 +210,7 @@ fun WeekHeader(
     uiState: WeeklyUiState,
     dayWidth: Dp,
     modifier: Modifier = Modifier,
-    onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
+    onNavigateToEditPage: (id: Int?, type: PlanType, startDate: Date?, endDate: Date?) -> Unit,
 ) {
     val multipleDaySchedules: List<Schedule> = uiState.multipleDaySchedules.filterNot { schedule ->  isSameDay(schedule.startTime, schedule.endTime) }
     val calendar = Calendar.getInstance()
@@ -487,7 +489,7 @@ fun ClickableTimeSlotBox(
     hour: Int,
     dayWidth: Dp,
     hourHeight: Dp,
-    onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
+    onNavigateToEditPage: (Int?, PlanType, Date?, Date?) -> Unit
 ) {
     val boxX = day * dayWidth.value
     val boxY = hour * hourHeight.value
@@ -497,12 +499,13 @@ fun ClickableTimeSlotBox(
         add(Calendar.DAY_OF_YEAR, day)
         set(Calendar.HOUR_OF_DAY, hour)
     }.time
+    val endDate = clickedDateTime.applyTime(hour + 1, 0)
 
     Box(modifier = Modifier
         .offset(x = boxX.dp, y = boxY.dp)
         .size(dayWidth, hourHeight)
         .clickable {
-            onNavigateToEditPage(null, PlanType.SCHEDULE, clickedDateTime)
+            onNavigateToEditPage(null, PlanType.SCHEDULE, clickedDateTime, endDate)
         }) {
 
     }
@@ -513,12 +516,12 @@ fun LongPlanStack(
     modifier: Modifier = Modifier,
     uiState: WeeklyUiState,
     dayWidth: Dp,
+    onNavigateToEditPage: (id: Int?, type: PlanType, startDate: Date?, endDate: Date?) -> Unit,
     scheduleContent: @Composable (schedule: Schedule) -> Unit = {
         ScheduleItem(
             schedule = it, onNavigateToEditPage = onNavigateToEditPage
         )
-    },
-    onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
+    }
 ) {
     val schedules = uiState.multipleDaySchedules
     val currentWeek = uiState.currentWeek

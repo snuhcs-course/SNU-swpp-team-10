@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowLeft
 import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.material.icons.filled.Check
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -51,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.calendy.AppViewModelProvider
 import com.example.calendy.data.maindb.plan.Todo
+import com.example.calendy.ui.theme.getColor
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -122,7 +125,7 @@ fun ToDoListPage(
                 onNavigateToEditPage(null, Calendar.getInstance().apply {
                     set(Calendar.YEAR, uiState.year)
                     set(Calendar.MONTH, uiState.month - 1)
-                }.time)
+                }.time, null)
             },
             containerColor = Color(0xFF80ACFF),
             contentColor = Color.Black,
