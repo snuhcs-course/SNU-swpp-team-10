@@ -6,11 +6,11 @@ import com.example.calendy.data.maindb.plan.Todo
 import kotlinx.coroutines.flow.Flow
 import java.util.Date
 
-interface ITodoRepository : BaseRepository<Todo> {
-    fun getAllTodosStream(): Flow<List<Todo>>
-    fun getTodosStream(startTime: Date, endTime: Date): Flow<List<Todo>>
-    fun getTodoById(id: Int): Todo
-    fun getTodosViaQuery(query: SupportSQLiteQuery): List<Todo>
-    fun getTodosByIds(iDs: List<Int>): List<Todo>
-    fun getMonthlyTodosStream(startTime: Date, endTime: Date): Flow<List<Todo>>
+abstract class ITodoRepository(todoDao: TodoDao) : BaseRepository<Todo>(todoDao) {
+    abstract fun getAllTodosStream(): Flow<List<Todo>>
+    abstract fun getTodosStream(startTime: Date, endTime: Date): Flow<List<Todo>>
+    abstract fun getTodoById(id: Int): Todo
+    abstract fun getTodosViaQuery(query: SupportSQLiteQuery): List<Todo>
+    abstract fun getTodosByIds(iDs: List<Int>): List<Todo>
+    abstract fun getMonthlyTodosStream(startTime: Date, endTime: Date): Flow<List<Todo>>
 }

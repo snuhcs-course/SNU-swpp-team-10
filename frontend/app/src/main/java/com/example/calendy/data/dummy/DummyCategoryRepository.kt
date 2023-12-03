@@ -1,23 +1,35 @@
 package com.example.calendy.data.dummy
 
 import com.example.calendy.data.maindb.category.Category
+import com.example.calendy.data.maindb.category.CategoryDao
 import com.example.calendy.data.maindb.category.ICategoryRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 
-class DummyCategoryRepository : ICategoryRepository {
-    override suspend fun insert(category: Category): Long {
+class DummyCategoryDao : CategoryDao {
+    override fun getAllCategoriesStream(): Flow<List<Category>> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun delete(category: Category) {
+    override fun getCategoryById(id: Int): Category {
         TODO("Not yet implemented")
     }
 
-    override suspend fun update(category: Category) {
+    override suspend fun insert(entity: Category): Long {
         TODO("Not yet implemented")
     }
 
+    override suspend fun update(entity: Category) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun delete(entity: Category) {
+        TODO("Not yet implemented")
+    }
+
+}
+
+class DummyCategoryRepository : ICategoryRepository(DummyCategoryDao()) {
     override fun getCategoriesStream(): Flow<List<Category>> = listOf(
         listOf(
             Category(title = "One", defaultPriority = 3),

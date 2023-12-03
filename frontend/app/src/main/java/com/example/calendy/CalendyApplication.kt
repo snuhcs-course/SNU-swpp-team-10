@@ -2,6 +2,7 @@ package com.example.calendy
 
 import android.app.Application
 import android.content.Context
+import androidx.work.Configuration
 import com.example.calendy.data.maindb.CalendyDatabase
 import com.example.calendy.data.maindb.category.CategoryRepository
 import com.example.calendy.data.maindb.category.ICategoryRepository
@@ -20,16 +21,31 @@ import com.example.calendy.data.maindb.repeatgroup.RepeatGroupRepository
 import com.example.calendy.data.network.CalendyServerApi
 import com.example.calendy.data.network.RetrofitClient
 import com.example.calendy.data.rawsqldb.RawSqlDatabase
+import com.example.calendy.view.messageview.CustomWorkerFactory
 
-class CalendyApplication : Application() {
+class CalendyApplication : Application(), Configuration.Provider {
     lateinit var container: IAppContainer
     override fun onCreate() {
         super.onCreate()
         container = AppContainer(this)
     }
+
+    override fun getWorkManagerConfiguration(): Configuration =
+        Configuration.Builder().setWorkerFactory(
+            CustomWorkerFactory(
+                calendyDatabase = container.db,
+                calendyServerApi = container.calendyServerApi,
+                messageRepository = container.messageRepository,
+                planRepository = container.planRepository,
+                historyRepository = container.historyRepository,
+                categoryRepository = container.categoryRepository,
+                rawSqlDatabase = container.rawSqlDatabase
+            )
+        ).build()
 }
 
 interface IAppContainer {
+    val db: CalendyDatabase
     val planRepository: IPlanRepository
     val scheduleRepository: IScheduleRepository
     val todoRepository: ITodoRepository
@@ -42,7 +58,7 @@ interface IAppContainer {
 }
 
 class AppContainer(private val context: Context) : IAppContainer {
-    val db: CalendyDatabase by lazy { CalendyDatabase.getDatabase(context) }
+    override val db: CalendyDatabase by lazy { CalendyDatabase.getDatabase(context) }
 
     override val planRepository: IPlanRepository by lazy {
         PlanRepository(

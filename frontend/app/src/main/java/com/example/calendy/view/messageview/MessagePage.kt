@@ -37,6 +37,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -108,11 +109,11 @@ fun MessagePage(
             onValueChanged = messagePageViewModel::setUserInputText,
             onSendButtonClicked = messagePageViewModel::onSendButtonClicked,
             onMicButtonClicked = messagePageViewModel::onMicButtonClicked,
+            onHelpButtonClicked = messagePageViewModel::onHelpButtonClicked,
             text = userInput,
             isListening = messageUiState.isMicButtonClicked,
             keyboardController = keyboardController,
             modifier = Modifier
-
                 .imePadding()   //TODO : why not working???
                 .navigationBarsPadding()
                 .displayCutoutPadding()
@@ -130,6 +131,7 @@ fun MessagePage(
 fun MessageInputField(
     onSendButtonClicked: () -> Unit = {},
     onMicButtonClicked: (Context) -> Unit = {},
+    onHelpButtonClicked: () -> Unit = {},
     onValueChanged: (text: String) -> Unit = {},
     text: String = "",
     isListening: Boolean = false,
@@ -158,36 +160,9 @@ fun MessageInputField(
             .fillMaxWidth()
             .background(color = Color(0xFFF1F1F1))
     ) {
-        IconButton(onClick = {
-            when (PackageManager.PERMISSION_GRANTED) { // Check permission
-                ContextCompat.checkSelfPermission(
-                    context, Manifest.permission.RECORD_AUDIO
-                )    -> {
-                    // Permission OK
-                    onMicButtonClicked(context)
-                }
-
-                else -> {
-                    // NO Permission
-                    // Use launcher to ask for permission
-                    launcher.launch(Manifest.permission.RECORD_AUDIO)
-                }
-            }
-        }) {
-            if (!isListening) {
-                Icon(
-                    imageVector = Icons.Default.Mic, contentDescription = "Start Speech Recognition"
-                )
-            } else {
-                // Is Listening, ... animation
-                LoadingAnimation2(
-                    circleColor = Blue3,
-                    circleSize = 8.dp,
-                    spaceBetween = 4.dp,
-                    animationDelay = 400,
-                    initialAlpha = 0.3f
-                )
-            }
+        // Help Button
+        IconButton(onClick = { onHelpButtonClicked() }) {
+            Icon(imageVector = Icons.Default.QuestionMark, contentDescription = "Help")
         }
 
         BasicTextField(
@@ -199,7 +174,7 @@ fun MessageInputField(
                 .fillMaxWidth()
                 .weight(1f)
                 .background(
-                    color = if (!isListening) Color(0xFFFFFEFE) else Color(0xFF888888),
+                    color = if (!isListening) Color(0xFFFFFEFE) else Color(0xFFAAAAAA),
                     shape = RoundedCornerShape(size = 25.dp)
                 )
                 .then(Modifier.padding(horizontal = 12.dp, vertical = 5.dp)), // Remove padding
@@ -242,7 +217,8 @@ fun MessageList(
     for (msg in messageLogList) {
         var currDate = msg.sentTime
         if (prevDate!=null && !(prevDate!!.equalDay(currDate))) {
-            listItems.add { DateDivider(prevDate) } // since messages are sorted in descending order, add prevDate
+            val date = prevDate
+            listItems.add { DateDivider(date) } // since messages are sorted in descending order, add prevDate
             prevDate = currDate
         }
         listItems.add { MessageItem(msg) }

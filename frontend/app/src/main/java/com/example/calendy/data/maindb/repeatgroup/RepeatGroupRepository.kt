@@ -2,17 +2,7 @@ package com.example.calendy.data.maindb.repeatgroup
 
 import kotlinx.coroutines.flow.Flow
 
-class RepeatGroupRepository(private val repeatGroupDao: RepeatGroupDao) : IRepeatGroupRepository {
-    override suspend fun insert(repeatGroup: RepeatGroup): Long = repeatGroupDao.insert(repeatGroup)
-
-    override suspend fun update(repeatGroup: RepeatGroup) {
-        repeatGroupDao.update(repeatGroup)
-    }
-
-    override suspend fun delete(repeatGroup: RepeatGroup) {
-        repeatGroupDao.delete(repeatGroup)
-    }
-
+class RepeatGroupRepository(private val repeatGroupDao: RepeatGroupDao) : IRepeatGroupRepository(repeatGroupDao) {
     override suspend fun deleteRepeatGroupById(id: Int) {
         return repeatGroupDao.deleteRepeatGroupById(id)
     }

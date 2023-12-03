@@ -9,7 +9,6 @@ import com.example.calendy.data.maindb.plan.schedule.IScheduleRepository
 import com.example.calendy.data.maindb.plan.todo.ITodoRepository
 import com.example.calendy.data.maindb.repeatgroup.IRepeatGroupRepository
 import com.example.calendy.data.maindb.repeatgroup.RepeatGroup
-import com.example.calendy.utils.dateOnly
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -120,7 +119,7 @@ class PlanRepository(
     }
 
     // setting priority value & foreign key validation included
-    override suspend fun insert(plan: Plan): Long {
+    override suspend fun insert(plan: Plan): Int {
         return validatePlan(plan).let {
             when (it) {
                 is Schedule -> scheduleRepository.insert(it.copy(id = 0))
