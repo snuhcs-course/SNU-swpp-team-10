@@ -8,8 +8,6 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.calendy.AppViewModelProvider
 import com.example.calendy.data.maindb.category.ICategoryRepository
 import com.example.calendy.data.maindb.history.IHistoryRepository
 import com.example.calendy.data.maindb.message.IMessageRepository
@@ -52,7 +50,7 @@ class VoiceAssistanceViewModel(
         managerAi.request(request)
     }
     fun startVoiceRecognition(context: Context) {
-        if(_uiState.value.isListening) return
+        if(_uiState.value.listenerState == VoiceAssistanceState.LISTENING) return
         // Permission is already granted
 
         resetState()
@@ -71,14 +69,14 @@ class VoiceAssistanceViewModel(
 
         _uiState.update { VoiceAssistanceUiState(
             userInputText = "",
-            voiceListenerState = "캘린디가 듣고 있어요!",
-            isListening = true
+            AiText = "캘린디가 듣고 있어요!",
+            listenerState = VoiceAssistanceState.LISTENING
         ) }
     }
 
     fun stopVoiceRecognition(context: Context) {
         getSpeechRecognizer(context).stopListening()
-        _uiState.update { current -> current.copy(isListening = false) }
+        _uiState.update { current -> current.copy(listenerState = VoiceAssistanceState.DONE) }
     }
 
     // Event Listener for speech recognizer
@@ -131,7 +129,7 @@ class VoiceAssistanceViewModel(
                 else                                            -> "알 수 없는 오류임"
             }
             Log.d("VoiceAssistanceViewModel", "onError: $message")
-            _uiState.update { current -> current.copy(voiceListenerState = "죄송해요. 문제가 생긴 것 같아요😢", isListening = false) }
+            _uiState.update { current -> current.copy(AiText = "죄송해요. 문제가 생긴 것 같아요😢", listenerState = VoiceAssistanceState.ERROR) }
             deactivateSpeechRecognition()
         }
 
@@ -141,7 +139,7 @@ class VoiceAssistanceViewModel(
             // Note: matches[1]은 더 확률이 낮은 인식 결과이다
             val text=matches?.firstOrNull() ?: ""
 
-            _uiState.update { current -> current.copy(userInputText = text, voiceListenerState = "알겠습니다. 제게 맡겨주세요!😊", isListening = false) }
+            _uiState.update { current -> current.copy(userInputText = text, AiText = "알겠습니다. 제게 맡겨주세요!😊", listenerState = VoiceAssistanceState.DONE) }
             sendRequest(text)
             deactivateSpeechRecognition()
         }
@@ -166,6 +164,10 @@ class VoiceAssistanceViewModel(
         }
     }
 
+}
 
-
+enum class VoiceAssistanceState {
+    LISTENING,
+    DONE,
+    ERROR,
 }

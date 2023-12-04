@@ -1,7 +1,6 @@
 package com.example.calendy.view.voiceAssistance
 
 import LoadingAnimation2
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.MoodBad
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -51,7 +51,7 @@ fun VoiceAssistancePopup(
         ) {
 
             Text(
-                text = uiState.voiceListenerState,
+                text = uiState.AiText,
                 textAlign = TextAlign.Center,
                 fontSize = 14.sp,
                 color = Color(0xC0FFFFFF),
@@ -62,7 +62,7 @@ fun VoiceAssistancePopup(
             Box(
                 modifier = Modifier.padding(vertical = 16.dp)
             ) {
-                if(uiState.isListening)
+                if(uiState.listenerState== VoiceAssistanceState.LISTENING)
                     LoadingAnimation2(
                         circleColor = Blue3,
                         circleSize = 16.dp,
@@ -70,10 +70,18 @@ fun VoiceAssistancePopup(
                         animationDelay = 300,
                         initialAlpha = 0.5f
                     )
-                else{
+                else if (uiState.listenerState== VoiceAssistanceState.ERROR){
                     Icon(
                         imageVector = Icons.Filled.MoodBad,
                         contentDescription = "Bad",
+                        tint = Color(0x40FFFFFF),
+                        modifier = Modifier.size(48.dp)
+                    )
+                }
+                else if(uiState.listenerState== VoiceAssistanceState.DONE){
+                    Icon(
+                        imageVector = Icons.Filled.CheckCircleOutline,
+                        contentDescription = "Good",
                         tint = Color(0x40FFFFFF),
                         modifier = Modifier.size(48.dp)
                     )

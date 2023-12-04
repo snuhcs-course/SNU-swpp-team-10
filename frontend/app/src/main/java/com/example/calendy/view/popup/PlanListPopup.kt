@@ -1,10 +1,13 @@
 package com.example.calendy.view.popup
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -52,7 +55,6 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -66,6 +68,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.example.calendy.data.maindb.plan.Plan
 import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
+import com.example.calendy.ui.theme.Blue_White
 import com.example.calendy.ui.theme.Light_Gray
 import com.example.calendy.ui.theme.Light_Green
 import com.example.calendy.ui.theme.getColor
@@ -82,6 +85,7 @@ fun PlanRevisionListPopup(
     header: @Composable ()->Unit = {},
     addButton:  @Composable() (BoxScope.() -> Unit)={},
     onItemClick: (Plan) -> Unit = {},
+    deletePlan: (Plan) -> Unit = {},
     onCheckboxClicked:(Plan, Boolean) -> Unit ={ plan, check->},
     onDismissed:()->Unit={}
 ){
@@ -97,10 +101,11 @@ fun PlanRevisionListPopup(
                         val (savedPlan, currentPlan) = it
                         if (savedPlan != null) {
                             when(savedPlan) {
-                                is Schedule -> ScheduleListItem(schedule = savedPlan, onItemClick)
+                                is Schedule -> ScheduleListItem(schedule = savedPlan, onItemClick, deletePlan)
                                 is Todo     -> TodoListItem(
                                     todo = savedPlan,
                                     onItemClick = onItemClick,
+                                    deletePlan = deletePlan,
                                     onChecked = onCheckboxClicked
                                 )
                             }
@@ -110,10 +115,11 @@ fun PlanRevisionListPopup(
 
                         if (currentPlan != null) {
                             when (currentPlan) {
-                                is Schedule -> ScheduleListItem(schedule = currentPlan, onItemClick)
+                                is Schedule -> ScheduleListItem(schedule = currentPlan, onItemClick, deletePlan)
                                 is Todo     -> TodoListItem(
                                     todo = currentPlan,
                                     onItemClick = onItemClick,
+                                    deletePlan = deletePlan,
                                     onChecked = onCheckboxClicked
                                 )
                             }
@@ -199,6 +205,7 @@ fun SwitchablePlanListPopup(
     header: @Composable ()->Unit = {},
     addButton:  @Composable() (BoxScope.() -> Unit),
     onItemClick: (Plan) -> Unit = {},
+    deletePlan: (Plan) -> Unit = {},
     onCheckboxClicked:(Plan, Boolean) -> Unit ={ plan, check->},
     onDismissed:()->Unit={},
     onLeftButton:()->Unit={},
@@ -238,10 +245,11 @@ fun SwitchablePlanListPopup(
                 content = {
                     items(planList!!) {
                         when (it) {
-                            is Schedule -> ScheduleListItem(schedule = it, onItemClick)
+                            is Schedule -> ScheduleListItem(schedule = it, onItemClick, deletePlan)
                             is Todo     -> TodoListItem(
                                 todo = it,
                                 onItemClick = onItemClick,
+                                deletePlan = deletePlan,
                                 onChecked = onCheckboxClicked
                             )
                         }
@@ -283,7 +291,7 @@ fun ListPopupBox(
         .shadow(
             elevation = 4.dp, spotColor = Color(0x40000000), ambientColor = Color(0x40000000)
         )
-        .background(color = Color(0xFFF9FBFF), shape = RoundedCornerShape(size = 20.dp))
+        .background(color = Blue_White, shape = RoundedCornerShape(size = 20.dp))
         .padding(25.dp)
     ) {
 
@@ -364,14 +372,19 @@ fun PopupHeaderDate(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ScheduleListItem(
     schedule : Schedule,
-    onItemClick: (Plan) -> Unit = {}
+    onItemClick: (Plan) -> Unit = {},
+    deletePlan: (Plan) -> Unit = {},
 ){
+    var expandMenu :Boolean by remember {mutableStateOf(false)}
+    var alertDialogOpen by remember { mutableStateOf(false) }
     Row(
         modifier= Modifier
-            .clickable { onItemClick(schedule) }
+            .combinedClickable(onClick = { onItemClick(schedule) },
+                               onLongClick = { expandMenu = true; })
             .padding(vertical = 5.dp, horizontal = 0.dp)
             .fillMaxWidth(),
         verticalAlignment = Alignment.Top,
@@ -412,17 +425,44 @@ fun ScheduleListItem(
                 .background(color = schedule.getColor(), shape = CircleShape)
         )
     }
+    DropdownMenu(expanded = expandMenu, onDismissRequest = { expandMenu=false }) {
+        DropdownMenuItem(text = { Text(text="일정 수정") }, onClick = { onItemClick(schedule); expandMenu=false })
+        DropdownMenuItem(text = { Text(text="일정 삭제") }, onClick = { alertDialogOpen=true; expandMenu=false })
+    }
+
+    AnimatedVisibility(visible = alertDialogOpen) {
+        AlertDialog(
+            onDismissRequest = { alertDialogOpen    =false },
+            title = { Text("Confirm action") },
+            text = { Text("Are you sure you want to do this?") },
+            confirmButton = {
+                TextButton(onClick = { deletePlan(schedule) }) {
+                    Text("Confirm")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { alertDialogOpen = false }) {
+                    Text("Cancel")
+                }
+            },
+            containerColor = Blue_White,
+        )
+    }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TodoListItem(
     todo : Todo,
     onItemClick: (Plan) -> Unit ={},
-    onChecked : (Plan, Boolean) -> Unit = { plan, check->}
+    deletePlan: (Plan) -> Unit = {},
+    onChecked : (Plan, Boolean) -> Unit = { plan, check->},
 ){
+    var expandMenu :Boolean by remember {mutableStateOf(false)}
+    var alertDialogOpen by remember { mutableStateOf(false)}
     Row(
         modifier= Modifier
-            .clickable { onItemClick(todo) }
+            .combinedClickable(onClick = { onItemClick(todo) }, onLongClick = { expandMenu = true })
             .padding(vertical = 5.dp, horizontal = 0.dp)
             .fillMaxWidth(),
         verticalAlignment = Alignment.Top,
@@ -474,6 +514,28 @@ fun TodoListItem(
             )
         )
 
+    }
+    DropdownMenu(expanded = expandMenu, onDismissRequest = { expandMenu=false }) {
+        DropdownMenuItem(text = { Text(text="일정 수정") }, onClick = { onItemClick(todo); expandMenu=false })
+        DropdownMenuItem(text = { Text(text="일정 삭제") }, onClick = { alertDialogOpen=true; expandMenu=false })
+    }
+    AnimatedVisibility(visible = alertDialogOpen) {
+        AlertDialog(
+            onDismissRequest = { alertDialogOpen    =false },
+            title = { Text("Confirm action") },
+            text = { Text("Are you sure you want to do this?") },
+            confirmButton = {
+                TextButton(onClick = { deletePlan(todo) }) {
+                    Text("Confirm")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { alertDialogOpen = false }) {
+                    Text("Cancel")
+                }
+            },
+            containerColor = Blue_White,
+        )
     }
 }
 

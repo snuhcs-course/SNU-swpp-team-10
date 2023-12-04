@@ -34,6 +34,7 @@ import com.example.calendy.data.maindb.plan.Plan
 import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
+import com.example.calendy.ui.theme.Blue_White
 import com.example.calendy.ui.theme.Light_Gray
 import com.example.calendy.utils.equalDay
 import com.example.calendy.utils.getPriorityString
@@ -59,7 +60,7 @@ fun PlanDetailPopup(
             .shadow(
                 elevation = 4.dp, spotColor = Color(0x40000000), ambientColor = Color(0x40000000)
             )
-            .background(color = Color(0xFFF9FBFF), shape = RoundedCornerShape(size = 20.dp))
+            .background(color = Blue_White, shape = RoundedCornerShape(size = 20.dp))
             .padding(25.dp)
         ) {
             Column(

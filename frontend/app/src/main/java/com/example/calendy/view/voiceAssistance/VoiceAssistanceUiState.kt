@@ -2,6 +2,6 @@ package com.example.calendy.view.voiceAssistance
 
 data class VoiceAssistanceUiState(
     val userInputText: String = "",
-    val voiceListenerState: String = "",
-    val isListening: Boolean = false,
+    val AiText: String = "",
+    val listenerState: VoiceAssistanceState = VoiceAssistanceState.LISTENING,
 )

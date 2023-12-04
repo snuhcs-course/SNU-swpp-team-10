@@ -193,6 +193,9 @@ fun MonthlyPageKT(
             onItemClick = { plan ->
                 onNavigateToEditPage(plan.id, plan.getPlanType(), null)
             },
+            deletePlan = { plan ->
+                monthlyViewModel.deletePlan(plan)
+            },
             onCheckboxClicked =
             { plan, checked ->
                 val todo = plan as Todo

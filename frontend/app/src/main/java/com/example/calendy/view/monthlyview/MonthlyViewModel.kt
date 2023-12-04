@@ -85,4 +85,8 @@ class MonthlyViewModel(
 
         titleDecorators.update { decos }
     }
+
+    fun deletePlan(plan: Plan) {
+        viewModelScope.launch { planRepository.delete(plan) }
+    }
 }
