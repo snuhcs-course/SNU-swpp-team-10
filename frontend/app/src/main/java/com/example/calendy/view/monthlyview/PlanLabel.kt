@@ -20,7 +20,7 @@ import java.util.Hashtable
 class PlanLabelContainer : Iterable<Pair<Date, LabelSlot<Plan>>> {
     private val slots = Hashtable<Date, LabelSlot<Plan>>() // date, slot. date should be dateOnly
 
-    fun setPlans(plans: List<Plan>): PlanLabelContainer {
+    fun setPlans(plans: List<Plan>,startDate:Date, endDate: Date): PlanLabelContainer {
         // convert plans to plan labels
 
         // clear slots, preventing duplicate plans
@@ -44,11 +44,21 @@ class PlanLabelContainer : Iterable<Pair<Date, LabelSlot<Plan>>> {
                 (plan as Schedule).startTime
             } else {
                 (plan as Todo).dueTime
+            }.apply {
+                // if start time is before start date, set start time to start date
+                if (this.before(startDate)) {
+                    this.time = startDate.time
+                }
             }
             val endTime = if (planType == PlanType.SCHEDULE) {
                 (plan as Schedule).endTime
             } else {
                 (plan as Todo).dueTime
+            }.apply {
+                // if end time is after end date, set end time to end date
+                if (this.after(endDate)) {
+                    this.time = endDate.time
+                }
             }
 
             // get date list between start and end date

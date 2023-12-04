@@ -68,7 +68,11 @@ class MonthlyViewModel(
     private fun updatePlanList(planList:List<Plan>)
     {
 //        _uiState.update { current -> current.copy(planLabelContainer = PlanLabelContainer().setPlans(planList)) }
-        val container = PlanLabelContainer().setPlans(planList)
+        val container = PlanLabelContainer().setPlans(
+            planList,
+            _uiState.value.currentMonth.afterMonths(-1).toFirstDateOfMonth().afterDays(-14),
+            _uiState.value.currentMonth.afterMonths(1).toLastDateOfMonth().afterDays(14)
+        )
         _uiState.update { current -> current.copy(planLabelContainer = container) }
         val decos= mutableListOf<TitleDecorator>()
         for((date,slot) in container)
