@@ -25,6 +25,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Undo
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
@@ -222,9 +224,9 @@ fun SwitchablePlanListPopup(
                     .requiredWidthIn(min = 50.dp, max = 60.dp)
             ) {
                 Icon(
-                    painter = painterResource(id = com.prolificinteractive.materialcalendarview.R.drawable.mcv_action_previous),
+                    imageVector = Icons.Filled.ChevronLeft,
                     contentDescription = "prev",
-                    tint=Color.DarkGray,
+                    tint=Color(0x20FFFFFF),
                     modifier = Modifier
                         .size(50.dp)
 
@@ -255,9 +257,9 @@ fun SwitchablePlanListPopup(
                     .requiredWidthIn(min = 50.dp, max = 60.dp)
             ) {
                 Icon(
-                    painter = painterResource(id = com.prolificinteractive.materialcalendarview.R.drawable.mcv_action_next),
+                    imageVector = Icons.Filled.ChevronRight,
                     contentDescription = "next",
-                    tint=Color.DarkGray,
+                    tint=Color(0x20FFFFFF),
                     modifier = Modifier
                         .size(50.dp)
 
@@ -281,7 +283,7 @@ fun ListPopupBox(
         .shadow(
             elevation = 4.dp, spotColor = Color(0x40000000), ambientColor = Color(0x40000000)
         )
-        .background(color = Color(0xFFF1F5FB), shape = RoundedCornerShape(size = 20.dp))
+        .background(color = Color(0xFFF9FBFF), shape = RoundedCornerShape(size = 20.dp))
         .padding(25.dp)
     ) {
 
@@ -369,21 +371,15 @@ fun ScheduleListItem(
 ){
     Row(
         modifier= Modifier
+            .clickable { onItemClick(schedule) }
             .padding(vertical = 5.dp, horizontal = 0.dp)
             .fillMaxWidth(),
-        verticalAlignment = Alignment.Top
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Box(
-            modifier = Modifier
-                .padding(vertical = 5.dp, horizontal = 0.dp)
-                .width(15.dp)
-                .height(15.dp)
-                .background(color = schedule.getColor(), shape = CircleShape)
-        )
+
         Column(
-            modifier= Modifier
-                .fillMaxWidth()
-                .clickable { onItemClick(schedule) }
+            modifier= Modifier.weight(2f)
         ) {
             Text(
                 text = schedule.title,
@@ -394,7 +390,7 @@ fun ScheduleListItem(
                     color = Color(0xFF000000),
                     ),
                 modifier = Modifier
-                    .padding(horizontal = 10.dp),
+                    .padding(end = 10.dp),
             )
             Text(
                 text = schedule.getInfoText(),
@@ -405,9 +401,16 @@ fun ScheduleListItem(
                     color = Color(0xFF646464),
                     ),
                 modifier = Modifier
-                    .padding(horizontal = 10.dp),
+                    .padding(end = 10.dp),
             )
         }
+        Box(
+            modifier = Modifier
+                .padding(vertical = 5.dp, horizontal = 10.dp)
+                .width(15.dp)
+                .height(15.dp)
+                .background(color = schedule.getColor(), shape = CircleShape)
+        )
     }
 }
 
@@ -419,28 +422,14 @@ fun TodoListItem(
 ){
     Row(
         modifier= Modifier
+            .clickable { onItemClick(todo) }
             .padding(vertical = 5.dp, horizontal = 0.dp)
             .fillMaxWidth(),
-        verticalAlignment = Alignment.Top
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Checkbox(
-            checked = todo.complete!!,
-            onCheckedChange = {check -> onChecked(todo,check)},
-            modifier = Modifier
-                .padding(vertical = 5.dp, horizontal = 0.dp)
-                .width(15.dp)
-                .height(15.dp)
-                .scale(0.8f),
-            colors = CheckboxDefaults.colors(
-                checkedColor = todo.getColor(),
-                uncheckedColor = todo.getColor(),
-                checkmarkColor = Color.White
-            )
-        )
         Column(
-            modifier= Modifier
-                .fillMaxWidth()
-                .clickable(onClick = { onItemClick(todo) })
+            modifier= Modifier.weight(2f)
 
         ) {
             Text(
@@ -453,7 +442,7 @@ fun TodoListItem(
                     textDecoration = if (todo.complete!!) TextDecoration.LineThrough else TextDecoration.None,
                 ),
                 modifier = Modifier
-                    .padding(horizontal = 10.dp),
+                    .padding(end = 10.dp),
             )
             val todoText=todo.getInfoText()
             if(todoText.isNotEmpty())
@@ -467,9 +456,24 @@ fun TodoListItem(
                         textDecoration = if (todo.complete!!) TextDecoration.LineThrough else TextDecoration.None,
                     ),
                     modifier = Modifier
-                        .padding(horizontal = 10.dp),
+                        .padding(end = 10.dp),
             )
         }
+        Checkbox(
+            checked = todo.complete!!,
+            onCheckedChange = {check -> onChecked(todo,check)},
+            modifier = Modifier
+                .padding(vertical = 5.dp, horizontal = 10.dp)
+                .width(15.dp)
+                .height(15.dp)
+                .scale(0.8f),
+            colors = CheckboxDefaults.colors(
+                checkedColor = todo.getColor(),
+                uncheckedColor = todo.getColor(),
+                checkmarkColor = Color.White
+            )
+        )
+
     }
 }
 
@@ -498,7 +502,7 @@ fun PlanModifiedItem(
         openDetail = true
     }
 
-    Column(
+    Row(
         modifier = when(modifiedPlanItem.isValid){
             false -> Modifier
                 .fillMaxWidth()
@@ -507,39 +511,16 @@ fun PlanModifiedItem(
                 .fillMaxWidth()
                 .padding(vertical = 5.dp, horizontal = 0.dp)
                 .clickable { expandMenu = true }
-        }
+        },
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.Top,
-        ) {
-            // color of circle set to plan after
-            when(titlePlan){
-                is Schedule -> Box(
-                    modifier = Modifier
-                        .padding(vertical = 5.dp, horizontal = 0.dp)
-                        .width(15.dp)
-                        .height(15.dp)
-                        .background(color = titlePlan.getColor(), shape = CircleShape)
-                )
-                is Todo -> Checkbox(
-                    checked = titlePlan.complete!!,
-                    onCheckedChange = {},
-                    enabled=false,
-                    modifier = Modifier
-                        .padding(vertical = 5.dp, horizontal = 0.dp)
-                        .width(15.dp)
-                        .height(15.dp)
-                        .scale(0.8f),
-                    colors = CheckboxDefaults.colors(
-                        disabledCheckedColor = titlePlan.getColor(),
-                        disabledUncheckedColor = titlePlan.getColor(),
-                        checkmarkColor = Color.White
-                    )
-                )
-            }
+        Column(modifier = Modifier
+            .weight(2f)
+            .wrapContentHeight(),
+               verticalArrangement = Arrangement.spacedBy(0.dp),
+
+               ) {
             // title set to plan after
             Text(
                 text = titlePlan.title,
@@ -549,16 +530,8 @@ fun PlanModifiedItem(
                     lineHeight = 18.sp,
                     color = Color(0xFF000000),
                 ),
-                modifier = Modifier.padding(horizontal = 10.dp),
             )
-        }
 
-        Column(modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight(),
-            verticalArrangement = Arrangement.spacedBy(0.dp),
-
-        ) {
             if(!modifiedBeforeText.isNullOrEmpty())
                 ModifiedText(ModifiedTextType.DELETE, modifiedBeforeText)
             if(!modifiedAfterText.isNullOrEmpty())
@@ -566,6 +539,30 @@ fun PlanModifiedItem(
                     ModifiedText(ModifiedTextType.SHOW, modifiedAfterText)
                 else
                     ModifiedText(ModifiedTextType.ADD, modifiedAfterText)
+        }
+        when(titlePlan){
+            is Schedule -> Box(
+                modifier = Modifier
+                    .padding(vertical = 5.dp, horizontal = 10.dp)
+                    .width(15.dp)
+                    .height(15.dp)
+                    .background(color = titlePlan.getColor(), shape = CircleShape)
+            )
+            is Todo -> Checkbox(
+                checked = titlePlan.complete!!,
+                onCheckedChange = {},
+                enabled=false,
+                modifier = Modifier
+                    .padding(vertical = 5.dp, horizontal = 10.dp)
+                    .width(15.dp)
+                    .height(15.dp)
+                    .scale(0.8f),
+                colors = CheckboxDefaults.colors(
+                    disabledCheckedColor = titlePlan.getColor(),
+                    disabledUncheckedColor = titlePlan.getColor(),
+                    checkmarkColor = Color.White
+                )
+            )
         }
     }
 
@@ -665,7 +662,6 @@ private fun ModifiedText(
 
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.spacedBy(5.dp)
     ) {
@@ -680,7 +676,7 @@ private fun ModifiedText(
                 color = textColor,
                 textAlign = TextAlign.End,
             ),
-            modifier = Modifier.width(20.dp),
+            modifier = Modifier.width(10.dp),
         )
         Text(
             text = modifiedBeforeText,
@@ -710,7 +706,7 @@ fun AddButton(
             .wrapContentWidth()
             .wrapContentHeight(),
         containerColor = Color(0xFF80ACFF),
-        contentColor = Color.Black,
+        contentColor = Color.White,
 
     ) {
         Icon(

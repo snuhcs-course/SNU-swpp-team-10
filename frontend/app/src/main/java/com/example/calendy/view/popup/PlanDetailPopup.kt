@@ -59,7 +59,7 @@ fun PlanDetailPopup(
             .shadow(
                 elevation = 4.dp, spotColor = Color(0x40000000), ambientColor = Color(0x40000000)
             )
-            .background(color = Color(0xFFF1F5FB), shape = RoundedCornerShape(size = 20.dp))
+            .background(color = Color(0xFFF9FBFF), shape = RoundedCornerShape(size = 20.dp))
             .padding(25.dp)
         ) {
             Column(

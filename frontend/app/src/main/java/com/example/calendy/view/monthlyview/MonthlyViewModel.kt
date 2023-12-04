@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -51,12 +52,14 @@ class MonthlyViewModel(
     }
     private fun getPlansOfMonth(month: CalendarDay)
     {
-        viewModelScope.launch {
-//            val flow = planRepository.getAllPlansStream()
-            val flow = planRepository.getMonthlyPlansStream(month.afterMonths(-1).toFirstDateOfMonth().afterDays(-14),
-                                                            month.afterMonths(1).toLastDateOfMonth().afterDays(14))
-            val plans=flow.first()
-            updatePlanList(plans)
+        val flow = planRepository.getMonthlyPlansStream(month.afterMonths(-1).toFirstDateOfMonth().afterDays(-14),
+                                                        month.afterMonths(1).toLastDateOfMonth().afterDays(14))
+
+        job?.cancel()
+        job = viewModelScope.launch {
+            flow.collect{
+                updatePlanList(it)
+            }
         }
     }
 
