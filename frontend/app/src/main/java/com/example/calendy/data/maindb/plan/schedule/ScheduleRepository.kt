@@ -5,14 +5,7 @@ import com.example.calendy.data.maindb.plan.Schedule
 import kotlinx.coroutines.flow.Flow
 import java.util.Date
 
-class ScheduleRepository(private val scheduleDao: ScheduleDao) : IScheduleRepository {
-    override suspend fun insert(schedule: Schedule): Long = scheduleDao.insert(schedule)
-
-    override suspend fun update(schedule: Schedule) = scheduleDao.update(schedule)
-
-    override suspend fun delete(schedule: Schedule) = scheduleDao.delete(schedule)
-
-
+class ScheduleRepository(private val scheduleDao: ScheduleDao) : IScheduleRepository(scheduleDao) {
     override fun getAllSchedulesStream(): Flow<List<Schedule>> = scheduleDao.getAllSchedulesStream()
 
     override fun getSchedulesStream(startTime: Date, endTime: Date): Flow<List<Schedule>> =

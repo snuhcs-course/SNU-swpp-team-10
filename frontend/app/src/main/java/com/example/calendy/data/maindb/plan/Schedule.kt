@@ -47,4 +47,8 @@ data class Schedule(
     override val repeatGroupId: Int? = null,
     @ColumnInfo(name = "is_overridden")
     override val isOverridden: Boolean = false,
-) : Plan
+) : Plan {
+    override fun typedSummary(): Pair<String, String> {
+        return ("Schedule" to "startTime=$startTime, endTime=$endTime")
+    }
+}

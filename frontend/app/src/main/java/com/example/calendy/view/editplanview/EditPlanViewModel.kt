@@ -12,8 +12,9 @@ import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
 import com.example.calendy.data.maindb.repeatgroup.IRepeatGroupRepository
 import com.example.calendy.data.maindb.repeatgroup.RepeatGroup
+import com.example.calendy.utils.DateHelper.extract
+import com.example.calendy.utils.applyTime
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +23,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Calendar
 import java.util.Date
 import kotlin.math.max
 import kotlin.math.min
@@ -45,25 +45,30 @@ class EditPlanViewModel(
 
 
     // set once when navigating to EditPlanPage
-    fun initialize(id: Int?, type: PlanType, date: Date?) {
+    /**
+     * @param id: null if new plan
+     * @param type: PlanType.SCHEDULE or PlanType.TOD0
+     * @param startDate: set startDate for new plan. null if existing plan
+     * @param endDate: set endDate for new plan. if null for new plan, endDate = startDate
+     */
+    fun initialize(id: Int?, type: PlanType, startDate: Date?, endDate: Date?) {
         if (id==null) {
             // new plan
-            val calendar = Calendar.getInstance()
-            val providedCalendar = Calendar.getInstance().apply {
-                time = date ?: Date()
-            }
-            calendar.set(Calendar.YEAR, providedCalendar.get(Calendar.YEAR))
-            calendar.set(Calendar.MONTH, providedCalendar.get(Calendar.MONTH))
-            calendar.set(Calendar.DAY_OF_MONTH, providedCalendar.get(Calendar.DAY_OF_MONTH))
-            calendar.set(Calendar.HOUR_OF_DAY, providedCalendar.get(Calendar.HOUR_OF_DAY))
-            calendar.set(Calendar.MINUTE, providedCalendar.get(Calendar.MINUTE))
+            val (_, _, _, currentHour, currentMinute) = Date().extract()
+            // selected (year, month, day) + current (hour, minute)
+            // TODO: Should I use current (hour, minute?)
+            // In Weekly Page: startDate.hour is important
+            // In Monthly Page:
+            // In TodoList Page:
+            val time = (startDate ?: Date()) //.applyTime(currentHour, currentMinute)
+            val endTime = endDate ?: time // If not specified, set endTime to startTime
 
             _uiState.value = EditPlanUiState(
                 isAddPage = true,
                 entryType = type,
-                startTime = calendar.time,
-                endTime = calendar.time,
-                dueTime = calendar.time
+                startTime = time,
+                endTime = endTime,
+                dueTime = time
             )
         } else {
             // edit existing plan

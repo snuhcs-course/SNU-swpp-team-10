@@ -38,7 +38,7 @@ class DummyPlanRepository : IPlanRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun insert(entity: Plan): Long {
+    override suspend fun insert(entity: Plan): Int {
         TODO("Not yet implemented")
     }
 

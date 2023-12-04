@@ -1,9 +1,15 @@
 package com.example.calendy.data
 
-interface BaseRepository<T> {
-    suspend fun insert(entity: T): Long
+abstract class BaseRepository<T>(private val dao: BaseDao<T>) {
+    suspend fun insert(entity: T): Int {
+        return dao.insert(entity).toInt()
+    }
 
-    suspend fun update(entity: T)
+    suspend fun update(entity: T) {
+        dao.update(entity)
+    }
 
-    suspend fun delete(entity: T)
+    suspend fun delete(entity: T) {
+        dao.delete(entity)
+    }
 }

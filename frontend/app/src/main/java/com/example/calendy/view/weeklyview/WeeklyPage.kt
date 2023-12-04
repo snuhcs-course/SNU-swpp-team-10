@@ -15,11 +15,8 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowLeft
 import androidx.compose.material.icons.filled.ArrowRight
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +39,8 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.calendy.AppViewModelProvider
 import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
@@ -55,8 +54,8 @@ import kotlin.math.roundToInt
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WeeklyPage(
-    viewModel: WeeklyViewModel,
-    onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
+    viewModel: WeeklyViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    onNavigateToEditPage: (Int?, PlanType, Date?, Date?) -> Unit
 ) {
     val uiState: WeeklyUiState by viewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
@@ -84,7 +83,7 @@ fun WeeklyPage(
                    onNextWeekClick = {})
         },
 
-    ) { paddingValues ->
+        ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
             WeekPager(
                 pagerState = pagerState,
@@ -103,7 +102,7 @@ fun WeekPager(
     pagerState: PagerState,
     uiState: WeeklyUiState,
     viewModel: WeeklyViewModel,
-    onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
+    onNavigateToEditPage: (Int?, PlanType, Date?, Date?) -> Unit
 ) {
     CompositionLocalProvider(
         // ui 상에서 스와이프 시 나타나는 오버스크롤 효과 제거
@@ -128,9 +127,20 @@ fun WeekScreen(
     uiState: WeeklyUiState,
     viewModel: WeeklyViewModel,
     modifier: Modifier = Modifier,
-    scheduleContent: @Composable (schedule: Schedule) -> Unit = { ScheduleItem(schedule = it, onNavigateToEditPage = onNavigateToEditPage) },
-    todoContent: @Composable (todo: Todo) -> Unit = { TodoItem(viewModel = viewModel ,todo = it, onNavigateToEditPage = onNavigateToEditPage) },
-    onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
+    onNavigateToEditPage: (id: Int?, type: PlanType, startDate: Date?, endDate: Date?) -> Unit,
+    scheduleContent: @Composable (schedule: Schedule) -> Unit = {
+        ScheduleItem(
+            schedule = it,
+            onNavigateToEditPage = onNavigateToEditPage
+        )
+    },
+    todoContent: @Composable (todo: Todo) -> Unit = {
+        TodoItem(
+            viewModel = viewModel,
+            todo = it,
+            onNavigateToEditPage = onNavigateToEditPage
+        )
+    },
 ) {
     val hourHeight = 40.dp
     val verticalScrollState = rememberScrollState()
@@ -152,18 +162,18 @@ fun WeekScreen(
                 uiState = uiState,
                 onNavigateToEditPage = onNavigateToEditPage,
                 dayWidth = dayWidth,
-                modifier = Modifier
-                    .padding(start = sidebarWidth)
+                modifier = Modifier.padding(start = sidebarWidth)
             )
-            Row(modifier = Modifier
-                .weight(1f)
-                .verticalScroll(verticalScrollState)) {
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(verticalScrollState)
+            ) {
                 WeekSidebar(hourHeight = hourHeight,
                             modifier = Modifier.onGloballyPositioned { layoutCoordinates ->
                                 // Update sidebarWidth within the context of the composable
                                 sidebarWidth = with(density) { layoutCoordinates.size.width.toDp() }
-                            }
-                )
+                            })
                 WeeklyTable(
                     uiState = uiState,
                     viewModel = viewModel,
@@ -172,8 +182,7 @@ fun WeekScreen(
                     scheduleContent = scheduleContent,
                     todoContent = todoContent,
                     onNavigateToEditPage = onNavigateToEditPage,
-                    modifier = Modifier
-                        .weight(1f)
+                    modifier = Modifier.weight(1f)
 
                 )
             }

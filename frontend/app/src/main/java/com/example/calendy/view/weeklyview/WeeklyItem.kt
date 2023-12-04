@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -54,12 +53,13 @@ import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
 import com.example.calendy.ui.theme.getColor
-import java.lang.Integer.max
+import com.example.calendy.utils.applyTime
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import kotlin.math.max
 import kotlin.math.roundToInt
 
 
@@ -67,10 +67,10 @@ import kotlin.math.roundToInt
 fun ScheduleItem(
     schedule: Schedule,
     modifier: Modifier = Modifier,
-    onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
+    onNavigateToEditPage: (Int?, PlanType, Date?, Date?) -> Unit
 ) {
     val clickAction = {
-        onNavigateToEditPage(schedule.id, PlanType.SCHEDULE, null)
+        onNavigateToEditPage(schedule.id, PlanType.SCHEDULE, null, null)
     }
     Box(
         modifier = modifier
@@ -98,10 +98,10 @@ fun TodoItem(
     modifier: Modifier = Modifier,
     todo: Todo,
     tailHeight: Dp = 10.dp,
-    onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
+    onNavigateToEditPage: (Int?, PlanType, Date?, Date?) -> Unit
 ) {
     val clickAction = {
-        onNavigateToEditPage(todo.id, PlanType.TODO, null)
+        onNavigateToEditPage(todo.id, PlanType.TODO, null, null)
     }
     // duetime이 자정 ~ am 1:30인 경우 말풍선을 밑쪽으로 배치
     val calendar = Calendar.getInstance().apply {
@@ -210,7 +210,7 @@ fun WeekHeader(
     uiState: WeeklyUiState,
     dayWidth: Dp,
     modifier: Modifier = Modifier,
-    onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
+    onNavigateToEditPage: (id: Int?, type: PlanType, startDate: Date?, endDate: Date?) -> Unit,
 ) {
     val multipleDaySchedules: List<Schedule> = uiState.multipleDaySchedules.filterNot { schedule ->  isSameDay(schedule.startTime, schedule.endTime) }
     val calendar = Calendar.getInstance()
@@ -291,7 +291,7 @@ fun WeeklyTable(
     },
     dayWidth: Dp,
     hourHeight: Dp,
-    onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
+    onNavigateToEditPage: (Int?, PlanType, Date?, Date?) -> Unit
 ) {
     val schedules = uiState.weekSchedules.filter { schedule -> isSameDay(schedule.startTime, schedule.endTime)  }
     val todos = uiState.weekTodos
@@ -489,7 +489,7 @@ fun ClickableTimeSlotBox(
     hour: Int,
     dayWidth: Dp,
     hourHeight: Dp,
-    onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
+    onNavigateToEditPage: (Int?, PlanType, Date?, Date?) -> Unit
 ) {
     val boxX = day * dayWidth.value
     val boxY = hour * hourHeight.value
@@ -499,12 +499,13 @@ fun ClickableTimeSlotBox(
         add(Calendar.DAY_OF_YEAR, day)
         set(Calendar.HOUR_OF_DAY, hour)
     }.time
+    val endDate = clickedDateTime.applyTime(hour + 1, 0)
 
     Box(modifier = Modifier
         .offset(x = boxX.dp, y = boxY.dp)
         .size(dayWidth, hourHeight)
         .clickable {
-            onNavigateToEditPage(null, PlanType.SCHEDULE, clickedDateTime)
+            onNavigateToEditPage(null, PlanType.SCHEDULE, clickedDateTime, endDate)
         }) {
 
     }
@@ -515,12 +516,12 @@ fun LongPlanStack(
     modifier: Modifier = Modifier,
     uiState: WeeklyUiState,
     dayWidth: Dp,
+    onNavigateToEditPage: (id: Int?, type: PlanType, startDate: Date?, endDate: Date?) -> Unit,
     scheduleContent: @Composable (schedule: Schedule) -> Unit = {
         ScheduleItem(
             schedule = it, onNavigateToEditPage = onNavigateToEditPage
         )
-    },
-    onNavigateToEditPage: (id: Int?, type: PlanType, date: Date?) -> Unit
+    }
 ) {
     val schedules = uiState.multipleDaySchedules
     val currentWeek = uiState.currentWeek

@@ -8,6 +8,7 @@ import com.example.calendy.data.maindb.category.Category
 import com.example.calendy.data.maindb.plan.Plan.Companion.PRIORITY_DEFAULT
 import com.example.calendy.data.maindb.repeatgroup.RepeatGroup
 import java.util.Date
+import java.util.Locale
 
 // table name tod0(=t0do) in 'calendy_database.db'
 @Entity(
@@ -45,4 +46,8 @@ data class Todo(
     override val repeatGroupId: Int? = null,
     @ColumnInfo(name = "is_overridden")
     override val isOverridden: Boolean = false
-) : Plan
+) : Plan {
+    override fun typedSummary(): Pair<String, String> {
+        return ("Todo" to "dueTime=$dueTime, complete=$complete")
+    }
+}

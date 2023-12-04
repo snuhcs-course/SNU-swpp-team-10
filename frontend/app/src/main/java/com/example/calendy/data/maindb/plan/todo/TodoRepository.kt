@@ -5,13 +5,7 @@ import com.example.calendy.data.maindb.plan.Todo
 import kotlinx.coroutines.flow.Flow
 import java.util.Date
 
-class TodoRepository(private val todoDao: TodoDao) : ITodoRepository {
-    override suspend fun insert(todo: Todo): Long = todoDao.insert(todo)
-
-    override suspend fun update(todo: Todo) = todoDao.update(todo)
-
-    override suspend fun delete(todo: Todo) = todoDao.delete(todo)
-
+class TodoRepository(private val todoDao: TodoDao) : ITodoRepository(todoDao) {
     override fun getAllTodosStream(): Flow<List<Todo>> = todoDao.getAllTodosStream()
 
     override fun getTodosStream(startTime: Date, endTime: Date): Flow<List<Todo>> =
