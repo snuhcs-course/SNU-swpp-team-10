@@ -131,6 +131,7 @@ fun PlanModifiedListPopup(
     headerMessage:String = "Modified Plans",
     modifiedPlanItems: List<ModifiedPlanItem> = emptyList(),
     onDismissed:()->Unit={},
+    callback: (Any) -> Unit = {},
     viewModel:MessagePlanLogViewModel
 ){
     val context = LocalContext.current
@@ -164,12 +165,15 @@ fun PlanModifiedListPopup(
 //                    if(it.isValid)
                         PlanModifiedItem(
                             it,
-                            openEditPlan = {},
                             undoModify =
                             { modifiedPlanItem ->
                                 viewModel.undoModify(modifiedPlanItem)
                             },
-                            forceRecompose = ::forceRecompose
+                            forceRecompose = ::forceRecompose,
+                            openEditPlan = { plan ->
+                                callback(plan)
+                                onDismissed()
+                            }
                         )
                 }
                 if (modifiedPlanItems.isEmpty()) items(1) {
@@ -572,16 +576,16 @@ fun PlanModifiedItem(
         onDismissRequest = { expandMenu=false }) {
         when(type){
             QueryType.INSERT     ->
-                DropdownMenuItem(text = { Text(text="추가된 일정 보기") }, onClick = { openDetailOf(modifiedPlanItem.planAfter!!) })
+                DropdownMenuItem(text = { Text(text="추가된 일정 보기") }, onClick = { openEditPlan(titlePlan) })
             QueryType.UPDATE     ->
             {
                 DropdownMenuItem(text = { Text(text="수정 전 일정 보기") }, onClick = { openDetailOf(modifiedPlanItem.planBefore!!) })
-                DropdownMenuItem(text = { Text(text="수정 후 일정 보기") }, onClick = { openDetailOf(modifiedPlanItem.planAfter!!) })
+                DropdownMenuItem(text = { Text(text="수정 후 일정 보기") }, onClick = { openEditPlan(modifiedPlanItem.planAfter!!) })
             }
             QueryType.DELETE     ->
                 DropdownMenuItem(text = { Text(text="삭제된 일정 보기") }, onClick = { openDetailOf(modifiedPlanItem.planBefore!!)})
             QueryType.SELECT     -> 
-                DropdownMenuItem(text = { Text(text="발견한 일정 보기") }, onClick = { openDetailOf(modifiedPlanItem.planAfter!!)})
+                DropdownMenuItem(text = { Text(text="발견한 일정 보기") }, onClick = { openEditPlan(modifiedPlanItem.planAfter!!)})
             else                 -> {}
         }
 

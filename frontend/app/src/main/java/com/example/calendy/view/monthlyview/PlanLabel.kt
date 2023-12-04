@@ -59,6 +59,10 @@ class PlanLabelContainer : Iterable<Pair<Date, LabelSlot<Plan>>> {
                 if (this.after(endDate)) {
                     this.time = endDate.time
                 }
+                if (this.before(startDate.afterDays(1))){
+                    Log.d("PlanLabelContainer", "wrong format of plan. start time is after end time. title: ${plan.title}")
+                    this.time = startDate.afterDays(1).time
+                }
             }
 
             // get date list between start and end date

@@ -96,6 +96,7 @@ fun MonthlyPageKT(
                 selectionColor = android.graphics.Color.TRANSPARENT
                 selectedDate = uiState.selectedDate
                 showOtherDates = MaterialCalendarView.SHOW_OTHER_MONTHS
+
                 state().edit()
                     .setFirstDayOfWeek(Calendar.SUNDAY)
                     .setMinimumDate(DateHelper.worldStart().toCalendarDay())   //from 2000.1.1
@@ -168,7 +169,7 @@ fun MonthlyPageKT(
                 onNavigateToEditPage(null, PlanType.SCHEDULE, uiState.selectedDate.toDate())
             },
             containerColor = Color(0xFF80ACFF),
-            contentColor = androidx.compose.ui.graphics.Color.Black,
+            contentColor = androidx.compose.ui.graphics.Color.White,
         ) {
             Icon(Icons.Filled.Add, contentDescription = "Add")
         }

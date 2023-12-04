@@ -56,7 +56,8 @@ fun MessageContentUser(
 
 @Composable
 fun MessageContentManager(
-    messageLog: Message
+    messageLog: Message,
+    callback: (Any) -> Unit = {}
 ) {
 //    when (messageLog.hasRevision) {
 //        false -> MessageContentManagerDefault(messageLog)
@@ -69,7 +70,7 @@ fun MessageContentManager(
             false -> MessageContentManagerDefault(messageLog)
         }
 
-        true -> MessageContentManagerWithButton(messageLog)
+        true -> MessageContentManagerWithButton(messageLog,callback)
     }
 }
 
@@ -131,6 +132,7 @@ fun MessageContentManagerThinking(){
 @Composable
 fun MessageContentManagerWithButton(
     messageLog: Message,
+    callback: (Any) -> Unit = {},
     messageContentViewModel: MessagePlanLogViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
 //    val logPlanList: List<Plan> by messageContentViewModel.modifiedPlans.collectAsState()
@@ -199,6 +201,7 @@ fun MessageContentManagerWithButton(
             headerMessage = "일정 변경 사항",
             modifiedPlanItems = modifiedPlanItems,
             onDismissed = { openListPopup = false },
+            callback=callback,
             viewModel= messageContentViewModel
         )
     }

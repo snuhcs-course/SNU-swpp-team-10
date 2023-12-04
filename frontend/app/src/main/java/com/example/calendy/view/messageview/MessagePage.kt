@@ -10,6 +10,7 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -65,6 +66,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.calendy.AppViewModelProvider
 import com.example.calendy.R
 import com.example.calendy.data.maindb.message.Message
+import com.example.calendy.data.maindb.plan.Plan
 import com.example.calendy.ui.theme.Blue3
 import com.example.calendy.utils.equalDay
 import com.example.calendy.utils.toDateDayString
@@ -75,12 +77,20 @@ import java.util.Date
 @Composable
 fun MessagePage(
     messagePageViewModel: MessagePageViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    onNavigateToEditPage: (Plan) -> Unit
 ) {
     val messageUiState: MessageUIState by messagePageViewModel.uiState.collectAsState()
     val userInput = messageUiState.userInputText
     val messageLogList: List<Message> = messageUiState.messageLogs
 
     val keyboardController = LocalSoftwareKeyboardController.current
+
+    fun openEditPlan(plan: Any) {
+        onNavigateToEditPage(plan as Plan)
+    }
+    fun copyToInputField(text: Any) {
+        messagePageViewModel.setUserInputText(text as String)
+    }
 
     Column(
         modifier = Modifier
@@ -100,9 +110,12 @@ fun MessagePage(
             }
     ) {
         MessageList(
-            messageLogList, modifier = Modifier
+            messageLogList,
+            modifier = Modifier
                 .weight(1f)
-                .fillMaxHeight()
+                .fillMaxHeight(),
+            openEditPlan = ::openEditPlan,
+            copyToInputField = ::copyToInputField
         )
         MessageInputField(
             onValueChanged = messagePageViewModel::setUserInputText,
@@ -156,7 +169,7 @@ fun MessageInputField(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth()
-            .background(color = Color(0xFFF1F1F1))
+            .background(color = Color(0xFFE8E8E8))
     ) {
         IconButton(onClick = {
             when (PackageManager.PERMISSION_GRANTED) { // Check permission
@@ -199,7 +212,7 @@ fun MessageInputField(
                 .fillMaxWidth()
                 .weight(1f)
                 .background(
-                    color = if (!isListening) Color(0xFFFFFEFE) else Color(0xFF888888),
+                    color = if (!isListening) Color(0xFFFFFFFF) else Color(0xFFF0F0F0),
                     shape = RoundedCornerShape(size = 25.dp)
                 )
                 .then(Modifier.padding(horizontal = 12.dp, vertical = 5.dp)), // Remove padding
@@ -229,7 +242,10 @@ fun MessageInputField(
 
 @Composable
 fun MessageList(
-    messageLogList: List<Message> = emptyList(), modifier: Modifier = Modifier
+    messageLogList: List<Message> = emptyList(),
+    modifier: Modifier = Modifier,
+    openEditPlan: (Any)->Unit={},
+    copyToInputField: (Any)->Unit={}
 ) {
     var prevDate: Date? = null
 
@@ -245,7 +261,8 @@ fun MessageList(
             listItems.add { DateDivider(prevDate) } // since messages are sorted in descending order, add prevDate
             prevDate = currDate
         }
-        listItems.add { MessageItem(msg) }
+        val _callback : (Any)->Unit = if(msg.messageFromManager) openEditPlan else copyToInputField
+        listItems.add { MessageItem(msg,Modifier,_callback) }
     }
     if (prevDate!=null) {
         // first date divider
@@ -263,12 +280,22 @@ fun MessageList(
 }
 
 @Composable
-fun MessageItem(messageLog: Message, modifier: Modifier = Modifier) {
+fun MessageItem(messageLog: Message, modifier: Modifier = Modifier, callback: (Any) -> Unit = {}) {
     val fromManager = messageLog.messageFromManager
     val chatBackground = when (fromManager) {
         true  -> Color(0xFFACC7FA)
         false -> Color(0xFFDBE2F6)
     }
+    val shape = when (fromManager) {
+        true  -> RoundedCornerShape(0.dp, 15.dp, 15.dp, 15.dp)
+        false -> RoundedCornerShape(15.dp, 0.dp, 15.dp, 15.dp)
+    }
+
+    val boxModifier = when (fromManager) {
+        true  -> Modifier
+        false -> Modifier.clickable { callback(messageLog.content) }    // copy to input field
+    }
+
     Row(
         modifier = modifier.fillMaxWidth(),
 
@@ -284,18 +311,18 @@ fun MessageItem(messageLog: Message, modifier: Modifier = Modifier) {
                 SentTime(messageLog)
             }
             Box(
-                modifier = Modifier
+                modifier = boxModifier
                     .widthIn(20.dp, 320.dp)
                     .wrapContentWidth()
                     .padding(vertical = 10.dp, horizontal = 5.dp)
                     .background(
-                        color = chatBackground, shape = RoundedCornerShape(size = 15.dp)
+                        color = chatBackground, shape = shape
                     )
                     //            .border(width = 2.dp, color = Color.Black, shape = RoundedCornerShape(15.dp, 15.dp, 15.dp, 15.dp))
-                    .clip(shape = RoundedCornerShape(15.dp))
+                    .clip(shape = shape)
             ) {
                 when (fromManager) {
-                    true  -> MessageContentManager(messageLog)
+                    true  -> MessageContentManager(messageLog,callback)
                     false -> MessageContentUser(messageLog)
                 }
             }

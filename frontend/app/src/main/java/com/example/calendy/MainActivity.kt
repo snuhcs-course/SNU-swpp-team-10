@@ -49,6 +49,7 @@ import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.ui.theme.CalendyTheme
 import com.example.calendy.utils.DateHelper.parseLocalTimeString
 import com.example.calendy.utils.DateHelper.toLocalTimeString
+import com.example.calendy.utils.getPlanType
 import com.example.calendy.view.editplanview.EditPlanPage
 import com.example.calendy.view.editplanview.EditPlanViewModel
 import com.example.calendy.view.messagepage.MessagePageViewModel
@@ -332,7 +333,12 @@ fun NavigationGraph(
         }
         composable(BottomNavItem.AiManager.screenRoute) {
             showBottomNavigation(true)
-            MessagePage()
+            MessagePage(
+                messagePageViewModel = viewModel(factory = AppViewModelProvider.Factory),
+                onNavigateToEditPage = {
+                    navController.navigateToEditPage(id = it.id, type = it.getPlanType(),date=null)
+                },
+            )
         }
         //endregion
         composable(
