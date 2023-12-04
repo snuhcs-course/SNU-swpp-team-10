@@ -1,5 +1,10 @@
 package com.prolificinteractive.materialcalendarview;
 
+import static com.prolificinteractive.materialcalendarview.MaterialCalendarView.INVALID_TILE_DIMENSION;
+import static com.prolificinteractive.materialcalendarview.MaterialCalendarView.SHOW_DEFAULTS;
+import static com.prolificinteractive.materialcalendarview.MaterialCalendarView.showOtherMonths;
+import static java.util.Calendar.DATE;
+
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
@@ -17,10 +22,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
-
-import static com.prolificinteractive.materialcalendarview.MaterialCalendarView.SHOW_DEFAULTS;
-import static com.prolificinteractive.materialcalendarview.MaterialCalendarView.showOtherMonths;
-import static java.util.Calendar.DATE;
 
 abstract class CalendarPagerView extends ViewGroup implements View.OnClickListener, View.OnLongClickListener {
 
@@ -46,12 +47,14 @@ abstract class CalendarPagerView extends ViewGroup implements View.OnClickListen
     public CalendarPagerView(@NonNull MaterialCalendarView view,
                              CalendarDay firstViewDay,
                              int firstDayOfWeek,
-                             boolean showWeekDays) {
+                             boolean showWeekDays,
+                             int weekdayBarHeight) {
         super(view.getContext());
         this.mcv = view;
         this.firstViewDay = firstViewDay;
         this.firstDayOfWeek = firstDayOfWeek;
         this.showWeekDays = showWeekDays;
+        this.weekdayBarHeight = weekdayBarHeight;
 
         setClipChildren(false);
         setClipToPadding(false);
@@ -69,6 +72,8 @@ abstract class CalendarPagerView extends ViewGroup implements View.OnClickListen
                 weekDayView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
             }
             weekDayViews.add(weekDayView);
+            // GUN
+            weekDayView.setId(R.id.mcv_weekday_bar);
             addView(weekDayView, new LayoutParams());
             calendar.add(DATE, 1);
         }
@@ -234,6 +239,18 @@ abstract class CalendarPagerView extends ViewGroup implements View.OnClickListen
         return new LayoutParams();
     }
 
+    // GUN
+    private int weekdayBarHeight = INVALID_TILE_DIMENSION;
+
+    public int getWeekdayBarHeight() {
+        return weekdayBarHeight;
+    }
+
+    public void setWeekdayBarHeight(int heightPx) {
+        weekdayBarHeight = heightPx;
+        requestLayout();
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -251,7 +268,15 @@ abstract class CalendarPagerView extends ViewGroup implements View.OnClickListen
 
         //The spec width should be a correct multiple
         final int measureTileWidth = specWidthSize / DEFAULT_DAYS_IN_WEEK;
-        final int measureTileHeight = specHeightSize / getRows();
+        // GUN
+        final boolean weekdayBarHeightSpecified = showWeekDays && (weekdayBarHeight >= 0);
+
+        final int totalTileHeight = getRows();
+        final int fixedTileHeight = (weekdayBarHeightSpecified ? 1 : 0);
+        final int unfixedTileHeight = totalTileHeight - fixedTileHeight;
+
+        // desiredHeight 를 unfixedTileHeight 가 나눠먹는다.
+        final int measureTileHeight = (weekdayBarHeightSpecified ? (specHeightSize - weekdayBarHeight) : specHeightSize) / unfixedTileHeight;
 
         //Just use the spec sizes
         setMeasuredDimension(specWidthSize, specHeightSize);
@@ -271,6 +296,12 @@ abstract class CalendarPagerView extends ViewGroup implements View.OnClickListen
                     MeasureSpec.EXACTLY
             );
 
+            if (child.getId() == R.id.mcv_weekday_bar) {
+                childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(
+                        weekdayBarHeight,
+                        MeasureSpec.EXACTLY
+                );
+            }
             child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
         }
     }
@@ -295,8 +326,8 @@ abstract class CalendarPagerView extends ViewGroup implements View.OnClickListen
         int childLeft = parentLeft;
 
         // for week days
-        int startFrom = showWeekDays? 7 : 0;
-        startFrom=0;
+        int startFrom = showWeekDays ? 7 : 0;
+        startFrom = 0;
 //        if(showWeekDays) {
 //            for (int i = 0; i < startFrom; i++) {
 //

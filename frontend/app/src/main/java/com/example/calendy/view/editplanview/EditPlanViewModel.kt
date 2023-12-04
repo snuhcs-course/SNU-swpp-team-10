@@ -54,12 +54,9 @@ class EditPlanViewModel(
     fun initialize(id: Int?, type: PlanType, startDate: Date?, endDate: Date?) {
         if (id==null) {
             // new plan
-            val (_, _, _, currentHour, currentMinute) = Date().extract()
-            // selected (year, month, day) + current (hour, minute)
-            // TODO: Should I use current (hour, minute?)
             // In Weekly Page: startDate.hour is important
             // In Monthly Page:
-            // In TodoList Page:
+            // In TodoList Page: startDate.hour is set to current time
             val time = (startDate ?: Date()) //.applyTime(currentHour, currentMinute)
             val endTime = endDate ?: time // If not specified, set endTime to startTime
 

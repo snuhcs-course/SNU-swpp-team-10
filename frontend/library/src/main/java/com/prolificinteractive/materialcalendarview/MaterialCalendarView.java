@@ -9,7 +9,6 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -234,6 +233,9 @@ public class MaterialCalendarView extends ViewGroup {
     private Drawable rightArrowMask;
     private int tileHeight = INVALID_TILE_DIMENSION;
     private int tileWidth = INVALID_TILE_DIMENSION;
+    // GUN
+    private int topBarHeight = INVALID_TILE_DIMENSION; // Unspecified
+    private int weekdayBarHeight = INVALID_TILE_DIMENSION;
     @SelectionMode
     private int selectionMode = SELECTION_MODE_SINGLE;
     private boolean allowClickDaysOutsideCurrentMonth = true;
@@ -398,7 +400,7 @@ public class MaterialCalendarView extends ViewGroup {
 
         if (isInEditMode()) {
             removeView(pager);
-            MonthView monthView = new MonthView(this, currentMonth, getFirstDayOfWeek(), true);
+            MonthView monthView = new MonthView(this, currentMonth, getFirstDayOfWeek(), true, weekdayBarHeight);
             monthView.setSelectionColor(getSelectionColor());
             monthView.setDateTextAppearance(adapter.getDateTextAppearance());
             monthView.setWeekDayTextAppearance(adapter.getWeekDayTextAppearance());
@@ -412,7 +414,10 @@ public class MaterialCalendarView extends ViewGroup {
         topbar.setOrientation(LinearLayout.HORIZONTAL);
         topbar.setClipChildren(false);
         topbar.setClipToPadding(false);
-        addView(topbar, new LayoutParams(1));
+//        addView(topbar, new LayoutParams(1));
+        // GUN
+        addView(topbar, new ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, topBarHeight));
+        topbar.setId(R.id.mcv_topbar);
 
         buttonPast.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
         topbar.addView(buttonPast, new LinearLayout.LayoutParams(0, LayoutParams.MATCH_PARENT, 1));
@@ -598,6 +603,33 @@ public class MaterialCalendarView extends ViewGroup {
      */
     public void setTileWidthDp(int tileWidthDp) {
         setTileWidth(dpToPx(tileWidthDp));
+    }
+
+    // GUN
+    public int getTopBarHeight() {
+        return topBarHeight;
+    }
+
+    public void setTopBarHeightDp(int dp) {
+        if (dp == -1) {
+            topBarHeight = INVALID_TILE_DIMENSION;
+        }
+
+        topBarHeight = dpToPx(dp);
+        requestLayout();
+    }
+
+    public int getWeekdayBarHeight() {
+        return weekdayBarHeight;
+    }
+
+    public void setWeekdayBarHeightDp(int dp) {
+        if (dp == -1) {
+            weekdayBarHeight = INVALID_TILE_DIMENSION;
+        }
+
+        weekdayBarHeight = dpToPx(dp);
+        requestLayout();
     }
 
     private int dpToPx(int dp) {
@@ -1642,17 +1674,25 @@ public class MaterialCalendarView extends ViewGroup {
         final int specHeightSize = MeasureSpec.getSize(heightMeasureSpec);
         final int specHeightMode = MeasureSpec.getMode(heightMeasureSpec);
 
+        // GUN
+        // topBar, weekdayBar 이 Specified 된 경우 tile height 계산에서 제외된다.
+        final boolean topBarHeightSpecified = (topBarHeight >= 0);
+        final boolean weekdayBarHeightSpecified = showWeekDays && (weekdayBarHeight >= 0);
+
+        final int totalTileHeight = getWeekCountBasedOnMode() + 1; // [TopBar, Weeks] or [TopBar, WeekdayBar, Weeks]
+        final int fixedTileHeight = (topBarHeightSpecified ? 1 : 0) + (weekdayBarHeightSpecified ? 1 : 0);
+        final int unfixedTileHeight = totalTileHeight - fixedTileHeight;
+
+        // desiredHeight 를 unfixedTileHeight 가 나눠먹는다.
+        final int fixedHeight = (topBarHeightSpecified ? topBarHeight : 0) + (weekdayBarHeightSpecified ? weekdayBarHeight : 0);
+
         //We need to disregard padding for a while. This will be added back later
         final int desiredWidth = specWidthSize - getPaddingLeft() - getPaddingRight();
-        final int desiredHeight = specHeightSize - getPaddingTop() - getPaddingBottom();
-
-        final int weekCount = getWeekCountBasedOnMode();
-
-        final int viewTileHeight = getTopbarVisible() ? (weekCount + 1) : weekCount;
+        final int desiredHeight = (specHeightSize - fixedHeight) - getPaddingTop() - getPaddingBottom();
 
         //Calculate independent tile sizes for later
         int desiredTileWidth = desiredWidth / DEFAULT_DAYS_IN_WEEK;
-        int desiredTileHeight = desiredHeight / viewTileHeight;
+        int desiredTileHeight = desiredHeight / unfixedTileHeight;
 
         int measureTileSize = -1;
         int measureTileWidth = -1;
@@ -1701,11 +1741,11 @@ public class MaterialCalendarView extends ViewGroup {
 
         //Calculate our size based off our measured tile size
         int measuredWidth = measureTileWidth * DEFAULT_DAYS_IN_WEEK;
-        int measuredHeight = measureTileHeight * viewTileHeight;
+        int measuredHeight = measureTileHeight * unfixedTileHeight;
 
         //Put padding back in from when we took it away
         measuredWidth += getPaddingLeft() + getPaddingRight();
-        measuredHeight += getPaddingTop() + getPaddingBottom();
+        measuredHeight += fixedHeight + getPaddingTop() + getPaddingBottom();
 
         //Contract fulfilled, setting out measurements
         setMeasuredDimension(
@@ -1718,7 +1758,6 @@ public class MaterialCalendarView extends ViewGroup {
 
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
-
             LayoutParams p = (LayoutParams) child.getLayoutParams();
 
             int childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(
@@ -1726,12 +1765,21 @@ public class MaterialCalendarView extends ViewGroup {
                     MeasureSpec.EXACTLY
             );
 
-            int childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(
-                    p.height * measureTileHeight,
-                    MeasureSpec.EXACTLY
-            );
+            if (topBarHeight < 0) {
+                int childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(
+                        p.height * measureTileHeight,
+                        MeasureSpec.EXACTLY
+                );
 
-            child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+                child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+            } else {
+                if (child.getId() == R.id.mcv_topbar) {
+                    child.measure(childWidthMeasureSpec, MeasureSpec.makeMeasureSpec(topBarHeight, MeasureSpec.EXACTLY));
+                } else {
+                    // This child (CalendarPagerView) has weekdayBar
+                    child.measure(childWidthMeasureSpec, MeasureSpec.makeMeasureSpec(measuredHeight - topBarHeight, MeasureSpec.EXACTLY));
+                }
+            }
         }
     }
 
@@ -1909,6 +1957,7 @@ public class MaterialCalendarView extends ViewGroup {
         private final CalendarDay maxDate;
         private final boolean cacheCurrentPosition;
         private final boolean showWeekDays;
+        private final int weekdayBarHeight;
 
         private State(final StateBuilder builder) {
             calendarMode = builder.calendarMode;
@@ -1917,6 +1966,7 @@ public class MaterialCalendarView extends ViewGroup {
             maxDate = builder.maxDate;
             cacheCurrentPosition = builder.cacheCurrentPosition;
             showWeekDays = builder.showWeekDays;
+            weekdayBarHeight = builder.weekdayBarHeight;
         }
 
         /**
@@ -1935,6 +1985,7 @@ public class MaterialCalendarView extends ViewGroup {
         private CalendarDay minDate = null;
         private CalendarDay maxDate = null;
         private boolean showWeekDays;
+        private int weekdayBarHeight;
 
         public StateBuilder() {
         }
@@ -1946,6 +1997,7 @@ public class MaterialCalendarView extends ViewGroup {
             maxDate = state.maxDate;
             cacheCurrentPosition = state.cacheCurrentPosition;
             showWeekDays = state.showWeekDays;
+            weekdayBarHeight = state.weekdayBarHeight;
         }
 
         /**
@@ -2022,6 +2074,12 @@ public class MaterialCalendarView extends ViewGroup {
             return this;
         }
 
+        // GUN
+        public StateBuilder setWeekdayBarHeightDp(int dp) {
+            this.weekdayBarHeight = dpToPx(dp);
+            return this;
+        }
+
         /**
          * @param showWeekDays true to show week days names
          */
@@ -2089,6 +2147,7 @@ public class MaterialCalendarView extends ViewGroup {
         minDate = state.minDate;
         maxDate = state.maxDate;
         showWeekDays = state.showWeekDays;
+        weekdayBarHeight = state.weekdayBarHeight;
 
         // Recreate adapter
         final CalendarPagerAdapter<?> newAdapter;
@@ -2108,6 +2167,7 @@ public class MaterialCalendarView extends ViewGroup {
             adapter = adapter.migrateStateAndReturn(newAdapter);
         }
         adapter.setShowWeekDays(showWeekDays);
+        adapter.setWeekdayBarHeight(weekdayBarHeight); // GUN
         pager.setAdapter(adapter);
         setRangeDates(minDate, maxDate);
 

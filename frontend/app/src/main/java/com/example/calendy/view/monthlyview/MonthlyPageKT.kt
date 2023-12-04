@@ -24,7 +24,9 @@ import com.example.calendy.data.dummy.DummyPlanRepository
 import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.data.maindb.plan.Todo
 import com.example.calendy.utils.DateHelper
+import com.example.calendy.utils.DateHelper.extract
 import com.example.calendy.utils.afterDays
+import com.example.calendy.utils.applyTime
 import com.example.calendy.utils.getPlanType
 import com.example.calendy.utils.toCalendarDay
 import com.example.calendy.utils.toDate
@@ -51,8 +53,8 @@ fun MonthlyPageKT(
 ) {
     val customMonths = stringArrayResource(id = R.array.custom_months)
     val customWeekdays = stringArrayResource(id = R.array.custom_weekdays)
-    val uiState:MonthlyPageUIState by monthlyViewModel.uiState.collectAsState()
-    val titleDecorators : List<TitleDecorator> by monthlyViewModel.titleDecorators.collectAsState()
+    val uiState: MonthlyPageUIState by monthlyViewModel.uiState.collectAsState()
+    val titleDecorators: List<TitleDecorator> by monthlyViewModel.titleDecorators.collectAsState()
     var selectedDayDecorator: SelectedDayDecorator? by remember { mutableStateOf(null) }
     var saturdayDecorator = SaturdayDecorator(uiState.currentMonth.month)
     var sundayDecorator = SundayDecorator(uiState.currentMonth.month)
@@ -62,21 +64,18 @@ fun MonthlyPageKT(
     var showListPopup by remember { mutableStateOf(false) }
 
 
-    fun openListPopup(selectedDate: CalendarDay)
-    {
-        popupDate=selectedDate
+    fun openListPopup(selectedDate: CalendarDay) {
+        popupDate = selectedDate
         showListPopup = true
     }
 
 
-    fun onListPopupDismissed()
-    {
-        showListPopup=false
+    fun onListPopupDismissed() {
+        showListPopup = false
     }
 
     Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
     ) {
 
 
@@ -88,6 +87,8 @@ fun MonthlyPageKT(
                 setTitleFormatter(MonthArrayTitleFormatter(customMonths))
                 setWeekDayFormatter(ArrayWeekDayFormatter(customWeekdays))
                 setTileHeightDp(-1)
+                setTopBarHeightDp(60)
+
                 selectionColor = Color.TRANSPARENT
                 selectedDate = uiState.selectedDate
                 showOtherDates = MaterialCalendarView.SHOW_OTHER_MONTHS
@@ -96,6 +97,7 @@ fun MonthlyPageKT(
                     .setMinimumDate(DateHelper.worldStart().toCalendarDay())   //from 2000.1.1
                     .setMaximumDate(DateHelper.worldEnd().toCalendarDay()) //to 2030.12.31
                     .setCalendarDisplayMode(CalendarMode.MONTHS)
+                    .setWeekdayBarHeightDp(40)
                     .commit();
 
 
@@ -104,11 +106,10 @@ fun MonthlyPageKT(
                 setOnDateChangedListener { widget, date, selected ->
 
 
-                    if (date == uiState.selectedDate) {
+                    if (date==uiState.selectedDate) {
                         openListPopup(date)
                     } else {
-                        if (selectedDayDecorator != null)
-                            removeDecorator(selectedDayDecorator!!)
+                        if (selectedDayDecorator!=null) removeDecorator(selectedDayDecorator!!)
                         selectedDayDecorator = SelectedDayDecorator(date, context)
                         addDecorator(selectedDayDecorator!!)
                         monthlyViewModel.setSelectedDate(date)
@@ -136,58 +137,58 @@ fun MonthlyPageKT(
                 // decorator
                 selectedDayDecorator = SelectedDayDecorator(uiState.selectedDate, context)
                 addDecorators(
-                    saturdayDecorator,
-                    sundayDecorator,
-                    selectedDayDecorator,
-                    OneDayDecorator()
+                    saturdayDecorator, sundayDecorator, selectedDayDecorator, OneDayDecorator()
                 )
 
 
                 Log.d("BANG", "mcv initialize")
             }
-        },
-            update =
-            { mcv ->
-                mcv.removeDecoratorsOfType(TitleDecorator::class.java)
-                mcv.addDecorators(titleDecorators)
+        }, update = { mcv ->
+            mcv.removeDecoratorsOfType(TitleDecorator::class.java)
+            mcv.addDecorators(titleDecorators)
 
-                Log.d("BANG", "mcv redraw")
-            }
-        )
+            Log.d("BANG", "mcv redraw")
+        })
 
     }
-        //list popup
+    //list popup
     if (showListPopup) {
         val planList = uiState.planLabelContainer.getPlansAt(popupDate.toDate())
         SwitchablePlanListPopup(
-            planList = if (planList != null) planList else emptyList(),
+            planList = if (planList!=null) planList else emptyList(),
             header = { PopupHeaderDate(popupDate.toDate()) },
             onDismissed = ::onListPopupDismissed,
             addButton = {
                 AddButton(
-                    onButtonClick = {onNavigateToEditPage(null,PlanType.SCHEDULE,popupDate.toDate(), null)},
+                    onButtonClick = {
+                        val date = popupDate.toDate()
+                        val (_, _, _, hour, minute) = Date().extract()
+                        onNavigateToEditPage(
+                            null,
+                            PlanType.SCHEDULE,
+                            date.applyTime(hour, minute),
+                            null,
+                        )
+                    },
                     modifier = Modifier
                         .padding(8.dp)
-                        .align(Alignment.BottomEnd)
+                        .align(Alignment.BottomEnd),
                 )
             },
             onItemClick = { plan ->
                 onNavigateToEditPage(plan.id, plan.getPlanType(), null, null)
             },
-            onCheckboxClicked =
-            { plan, checked ->
+            onCheckboxClicked = { plan, checked ->
                 val todo = plan as Todo
                 monthlyViewModel.updatePlan(todo.copy(complete = !todo.complete))
             },
             onLeftButton = { popupDate = popupDate.afterDays(-1) },
-            onRightButton = { popupDate = popupDate.afterDays(1) }
+            onRightButton = { popupDate = popupDate.afterDays(1) },
         )
         Log.d("BANG", "list popup opened")
     }
 
 }
-
-
 
 
 @Preview(showBackground = false, name = "Monthly Calendar Preview")
