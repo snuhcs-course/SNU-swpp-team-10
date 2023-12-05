@@ -8,25 +8,30 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.work.Data
+import androidx.work.OneTimeWorkRequest
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.calendy.data.maindb.category.ICategoryRepository
 import com.example.calendy.data.maindb.history.IHistoryRepository
 import com.example.calendy.data.maindb.message.IMessageRepository
+import com.example.calendy.data.maindb.message.Message
 import com.example.calendy.data.maindb.plan.IPlanRepository
 import com.example.calendy.data.network.CalendyServerApi
 import com.example.calendy.data.rawsqldb.RawSqlDatabase
 import com.example.calendy.view.messageview.ManagerAI
+import com.example.calendy.view.messageview.SendMessageWorker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import java.util.Date
 
 
 class VoiceAssistanceViewModel(
-    private val planRepository: IPlanRepository,
     private val messageRepository: IMessageRepository,
-    private val categoryRepository: ICategoryRepository,
-    private val calendyServerApi: CalendyServerApi,
-    private val rawSqlDatabase: RawSqlDatabase,
-    private val historyRepository: IHistoryRepository,
+    private val workManager: WorkManager,
 ) : ViewModel(){
 
     private val _uiState= MutableStateFlow(VoiceAssistanceUiState(
@@ -39,7 +44,7 @@ class VoiceAssistanceViewModel(
     // Created when getSpeechRecognizer is called
     private var speechRecognizer: SpeechRecognizer? = null
 
-    private val managerAi = ManagerAI(planRepository, messageRepository, categoryRepository, calendyServerApi, rawSqlDatabase, historyRepository)
+//    private val managerAi = ManagerAI(planRepository, messageRepository, categoryRepository, calendyServerApi, rawSqlDatabase, historyRepository)
 
     private fun resetState() {
         _uiState.update { VoiceAssistanceUiState() }
@@ -50,8 +55,9 @@ class VoiceAssistanceViewModel(
     }
 
     fun sendRequest(request: String) {
-        Log.d("VoiceAssistanceViewModel", "sendRequest: $request")
-        managerAi.request(request)
+//        Log.d("VoiceAssistanceViewModel", "sendRequest: $request")
+//        managerAi.request(request)
+        sendQuery(request)
     }
 
     fun startVoiceRecognition(context: Context) {
@@ -140,6 +146,7 @@ class VoiceAssistanceViewModel(
 
         // 인식 결과가 준비되면 호출
         override fun onResults(results: Bundle) {
+            if(_uiState.value.listenerState == VoiceAssistanceState.DONE) return
             val matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
             // Note: matches[1]은 더 확률이 낮은 인식 결과이다
             val text=matches?.firstOrNull() ?: ""
@@ -166,6 +173,40 @@ class VoiceAssistanceViewModel(
             setRecognitionListener(recognitionListener)
         }.also {
             speechRecognizer = it
+        }
+    }
+
+
+    private suspend fun addUserMessage(requestMessage: String): Int {
+        val newMessage = Message(
+            sentTime = Date(), messageFromManager = false, content = requestMessage
+        )
+        val userMessageId = messageRepository.insert(newMessage)
+        // Add Self reference
+        messageRepository.update(
+            newMessage.copy(
+                id = userMessageId, userMessageId = userMessageId
+            )
+        )
+        return userMessageId
+    }
+
+    private fun sendQuery(requestMessage: String) {
+        // add user input in text input field to db
+        if (requestMessage.isEmpty()) return
+        viewModelScope.launch {
+            val userMessageId = addUserMessage(requestMessage)
+
+            // Send request to server and ExecuteSQL
+            val inputData = Data.Builder()
+                .putString("requestMessage", requestMessage)
+                .putInt("userMessageId", userMessageId)
+                .build()
+
+            val sendWorkRequest: OneTimeWorkRequest =
+                OneTimeWorkRequestBuilder<SendMessageWorker>().setInputData(inputData).build()
+
+            workManager.enqueue(sendWorkRequest)
         }
     }
 

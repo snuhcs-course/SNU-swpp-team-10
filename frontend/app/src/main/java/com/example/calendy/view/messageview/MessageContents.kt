@@ -65,7 +65,7 @@ fun MessageContentManager(
 //    }
     // OnProgress...
     when (messageLog.hasRevision) {
-        false -> when (messageLog.content == "AI_THINKING") {
+        false -> when (messageLog.content == ManagerResponse.PLEASE_WAIT) {
             true -> MessageContentManagerThinking()
             false -> MessageContentManagerDefault(messageLog)
         }

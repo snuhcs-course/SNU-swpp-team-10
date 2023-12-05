@@ -77,12 +77,8 @@ object AppViewModelProvider {
         initializer {
             getContainer().run {
                 VoiceAssistanceViewModel(
-                     planRepository = planRepository,
                      messageRepository = messageRepository,
-                     categoryRepository = categoryRepository,
-                     calendyServerApi = calendyServerApi,
-                     rawSqlDatabase = rawSqlDatabase,
-                     historyRepository = historyRepository,
+                     workManager = WorkManager.getInstance(calendyApplication())
                 )
             }
         }

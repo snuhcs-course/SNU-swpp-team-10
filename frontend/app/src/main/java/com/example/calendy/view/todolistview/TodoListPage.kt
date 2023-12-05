@@ -128,7 +128,7 @@ fun ToDoListPage(
                 }.time, null)
             },
             containerColor = Color(0xFF80ACFF),
-            contentColor = Color.Black,
+            contentColor = Color.White,
         ) {
             Icon(Icons.Filled.Add, contentDescription = "Add")
         }

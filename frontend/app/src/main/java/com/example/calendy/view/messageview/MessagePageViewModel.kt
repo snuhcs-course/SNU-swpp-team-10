@@ -15,6 +15,7 @@ import androidx.work.WorkManager
 import com.example.calendy.data.maindb.message.IMessageRepository
 import com.example.calendy.data.maindb.message.Message
 import com.example.calendy.data.maindb.plan.IPlanRepository
+import com.example.calendy.utils.afterDays
 import com.example.calendy.view.messageview.ManagerHelp
 import com.example.calendy.view.messageview.MessageUIState
 import com.example.calendy.view.messageview.SendMessageWorker
@@ -40,10 +41,10 @@ class MessagePageViewModel(
     private var messageStreamJob: Job? = null
 
     init {
-        getMessages(Date(2023, 0, 1, 0, 0, 0), Date(2024, 0, 1, 0, 0, 0))
+        getMessages()
     }
 
-    private fun getMessages(startTime: Date, endTime: Date) {
+    private fun getMessages() {
         val flow = messageRepository.getAllMessagesStream()
         messageStreamJob?.cancel()
         messageStreamJob = viewModelScope.launch {

@@ -139,7 +139,7 @@ fun MessagePage(
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun MessageInputField(
     onSendButtonClicked: () -> Unit = {},
