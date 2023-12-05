@@ -29,7 +29,11 @@ class VoiceAssistanceViewModel(
     private val historyRepository: IHistoryRepository,
 ) : ViewModel(){
 
-    private val _uiState= MutableStateFlow(VoiceAssistanceUiState())
+    private val _uiState= MutableStateFlow(VoiceAssistanceUiState(
+        userInputText = "",
+        AiText = "캘린디가 듣고 있어요!",
+        listenerState = VoiceAssistanceState.LISTENING
+    ))
     val uiState = _uiState.asStateFlow()
 
     // Created when getSpeechRecognizer is called
@@ -49,6 +53,7 @@ class VoiceAssistanceViewModel(
         Log.d("VoiceAssistanceViewModel", "sendRequest: $request")
         managerAi.request(request)
     }
+
     fun startVoiceRecognition(context: Context) {
         if(_uiState.value.listenerState == VoiceAssistanceState.LISTENING) return
         // Permission is already granted
@@ -139,7 +144,7 @@ class VoiceAssistanceViewModel(
             // Note: matches[1]은 더 확률이 낮은 인식 결과이다
             val text=matches?.firstOrNull() ?: ""
 
-            _uiState.update { current -> current.copy(userInputText = text, AiText = "알겠습니다. 제게 맡겨주세요!😊", listenerState = VoiceAssistanceState.DONE) }
+            _uiState.update { current -> current.copy(userInputText = text, AiText = "알겠습니다. 조금만 기다려주세요!😊", listenerState = VoiceAssistanceState.DONE) }
             sendRequest(text)
             deactivateSpeechRecognition()
         }

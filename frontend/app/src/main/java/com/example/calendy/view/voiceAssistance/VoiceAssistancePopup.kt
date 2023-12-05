@@ -53,7 +53,7 @@ fun VoiceAssistancePopup(
             Text(
                 text = uiState.AiText,
                 textAlign = TextAlign.Center,
-                fontSize = 14.sp,
+                fontSize = 18.sp,
                 color = Color(0xC0FFFFFF),
                 modifier = Modifier.padding(bottom = 24.dp, top = 48.dp).fillMaxWidth()
             )
