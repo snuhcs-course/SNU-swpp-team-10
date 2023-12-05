@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -50,13 +52,19 @@ import com.example.calendy.BottomNavItem.Week
 import com.example.calendy.ScreenRoute.EditPlan
 import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.ui.theme.CalendyTheme
+import com.example.calendy.utils.DateHelper.parseLocalTimeString
+import com.example.calendy.utils.DateHelper.toLocalTimeString
+import com.example.calendy.utils.getPlanType
 import com.example.calendy.view.editplanview.EditPlanPage
 import com.example.calendy.view.editplanview.EditPlanViewModel
 import com.example.calendy.view.messagepage.MessagePageViewModel
 import com.example.calendy.view.messageview.MessagePage
 import com.example.calendy.view.monthlyview.MonthlyPageKT
+import com.example.calendy.view.voiceAssistance.VoiceAssistancePopup
 import com.example.calendy.view.todolistview.ToDoListPage
 import com.example.calendy.view.weeklyview.WeeklyPage
+import com.example.calendy.view.weeklyview.WeeklyViewModel
+
 import java.util.Date
 
 
@@ -141,7 +149,8 @@ fun BottomNavigation(
         AiManager,
         //BottomNavItem.Setting
     )
-    var selectedNavItem by remember { mutableStateOf<BottomNavItem>(Month) }
+    var selectedNavItem by remember { mutableStateOf<BottomNavItem>(BottomNavItem.Month) }
+    var micOn by remember { mutableStateOf(false) }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -195,23 +204,37 @@ fun BottomNavigation(
                 )
             } else {
                 FloatingActionButton(
-                    modifier = Modifier.padding(top = 2.dp),
+                    modifier = Modifier.padding(top = 8.dp),
                     onClick = {
-                        if (selectedNavItem==Todo) {
-                            navigateToEditPageWhenPlus(PlanType.TODO)
-                        } else {
-                            navigateToEditPageWhenPlus(PlanType.SCHEDULE)
-                        }
+                      micOn = true
+//                        if (selectedNavItem==BottomNavItem.Todo) {
+//                            val route = EditPageRoute.AddTodo(date = Date()).route
+//                            navController.navigate(route)
+//                        } else {
+//                            val route = EditPageRoute.AddSchedule(date = Date()).route
+//                            navController.navigate(route)
+//                        }
                     },
                     containerColor = Color(0xFF80ACFF),
-                    contentColor = Color.Black,
-                    //elevation = FloatingActionButtonDefaults.elevation(0.dp)
+                    contentColor = Color.White,
+                    elevation = FloatingActionButtonDefaults.elevation(4.dp),
+                    shape = CircleShape,
                 ) {
-                    Icon(imageVector = Icons.Filled.Add, contentDescription = "add plan")
+
+                    Icon(imageVector = Icons.Filled.GraphicEq, contentDescription = "add plan")
                 }
             }
 
         }
+    }
+
+    if(micOn) {
+        VoiceAssistancePopup (
+            viewModel = viewModel(factory = AppViewModelProvider.Factory),
+            onDismissRequest = {
+                micOn = false
+            }
+        )
     }
 }
 
@@ -287,7 +310,12 @@ fun NavigationGraph(
         }
         composable(AiManager.screenRoute) {
             showBottomNavigation(true)
-            MessagePage()
+            MessagePage(
+                messagePageViewModel = viewModel(factory = AppViewModelProvider.Factory),
+                onNavigateToEditPage = {
+                    navigateToEditPage(it.id, it.getPlanType(), null, null)
+                },
+            )
         }
         //endregion
         composable(EditPlan.screenRoute) {

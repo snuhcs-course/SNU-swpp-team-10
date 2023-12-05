@@ -90,7 +90,8 @@ object DateHelper {
     )
 
 
-    private val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+//    private val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+    private val format = DateFormatter()
     fun Date.toLocalTimeString(): String = format.format(this)
     fun parseLocalTimeString(dateString: String): Date = format.parse(dateString)!!
 

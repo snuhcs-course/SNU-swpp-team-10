@@ -10,7 +10,8 @@ class RoomConverters {
     @TypeConverter
     fun fromString(value: String): Date {
         return try {
-            DateHelper.parseLocalTimeString(value)
+            val date = DateHelper.parseLocalTimeString(value)
+            date
         } catch (e: ParseException) {
             e.printStackTrace()
             DateHelper.getDate(2023, 12 - 1, 31)

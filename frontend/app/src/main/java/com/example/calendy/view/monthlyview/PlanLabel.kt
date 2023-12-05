@@ -1,6 +1,5 @@
 package com.example.calendy.view.monthlyview
 
-import android.util.Log
 import com.example.calendy.data.maindb.plan.Plan
 import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.data.maindb.plan.Schedule
@@ -20,7 +19,7 @@ import java.util.Hashtable
 class PlanLabelContainer : Iterable<Pair<Date, LabelSlot<Plan>>> {
     private val slots = Hashtable<Date, LabelSlot<Plan>>() // date, slot. date should be dateOnly
 
-    fun setPlans(plans: List<Plan>): PlanLabelContainer {
+    fun setPlans(plans: List<Plan>, dateFrom:Date, dateTo: Date): PlanLabelContainer {
         // convert plans to plan labels
 
         // clear slots, preventing duplicate plans
@@ -40,28 +39,32 @@ class PlanLabelContainer : Iterable<Pair<Date, LabelSlot<Plan>>> {
         for (planLabel in planLabels) {
             val plan = planLabel.item
             val planType = plan.getPlanType()
-            val startTime = if (planType == PlanType.SCHEDULE) {
-                (plan as Schedule).startTime
-            } else {
-                (plan as Todo).dueTime
-            }
-            val endTime = if (planType == PlanType.SCHEDULE) {
-                (plan as Schedule).endTime
-            } else {
-                (plan as Todo).dueTime
-            }
+
+
+            var st = if (planType==PlanType.SCHEDULE) (plan as Schedule).startTime else (plan as Todo).dueTime
+            // if start time is before start date, set start time to start date
+            st = if (st <= dateFrom) dateFrom else st
+
+            var et = if (planType==PlanType.SCHEDULE) (plan as Schedule).endTime else (plan as Todo).dueTime
+            // if end time is after end date, set end time to end date
+            et = if (et >= dateTo) dateTo else et
+            // if end time is before start time, set end time to start time
+            et = if (et <= st) st else et
+
+            val startDate = st.dateOnly()
+            val endDate = et.dateOnly()
 
             // get date list between start and end date
             val dateList = mutableListOf<Date>()
-            var currentDate = startTime.dateOnly()
-            val endDate = endTime.afterDays(1).dateOnly()
+            var currentDate = startDate
+            val lastDate = endDate.afterDays(1)
             do {
                 // add label to slot
                 slots.putIfAbsent(currentDate, LabelSlot())
                 // add date to date list
                 dateList.add(currentDate)
                 currentDate = currentDate.afterDays(1)
-            } while (!currentDate.equalDay(endDate))
+            } while (!currentDate.equalDay(lastDate))
 
             // find smallest index that does not have a plan label
             var index = -1
@@ -147,6 +150,9 @@ class PlanLabel(
         this.startDate = if(getPlanType() == PlanType.SCHEDULE) (plan as Schedule).startTime.dateOnly() else (plan as Todo).dueTime.dateOnly()
         this.endDate = if(getPlanType() == PlanType.SCHEDULE) (plan as Schedule).endTime.dateOnly() else (plan as Todo).dueTime.dateOnly()
         this.weight = getDiffBetweenDates(startDate,endDate)+1
+
+        //prevent weight from less than or equal to 0
+        if(this.weight <= 0) this.weight = 1
     }
 
 

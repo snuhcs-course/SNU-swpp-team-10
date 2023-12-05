@@ -1,10 +1,13 @@
 package com.example.calendy.view.popup
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -25,6 +28,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Undo
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
@@ -50,7 +55,6 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -64,6 +68,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.example.calendy.data.maindb.plan.Plan
 import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
+import com.example.calendy.ui.theme.Blue_White
 import com.example.calendy.ui.theme.Light_Gray
 import com.example.calendy.ui.theme.Light_Green
 import com.example.calendy.ui.theme.getColor
@@ -80,6 +85,7 @@ fun PlanRevisionListPopup(
     header: @Composable ()->Unit = {},
     addButton:  @Composable() (BoxScope.() -> Unit)={},
     onItemClick: (Plan) -> Unit = {},
+    deletePlan: (Plan) -> Unit = {},
     onCheckboxClicked:(Plan, Boolean) -> Unit ={ plan, check->},
     onDismissed:()->Unit={}
 ){
@@ -95,10 +101,11 @@ fun PlanRevisionListPopup(
                         val (savedPlan, currentPlan) = it
                         if (savedPlan != null) {
                             when(savedPlan) {
-                                is Schedule -> ScheduleListItem(schedule = savedPlan, onItemClick)
+                                is Schedule -> ScheduleListItem(schedule = savedPlan, onItemClick, deletePlan)
                                 is Todo     -> TodoListItem(
                                     todo = savedPlan,
                                     onItemClick = onItemClick,
+                                    deletePlan = deletePlan,
                                     onChecked = onCheckboxClicked
                                 )
                             }
@@ -108,10 +115,11 @@ fun PlanRevisionListPopup(
 
                         if (currentPlan != null) {
                             when (currentPlan) {
-                                is Schedule -> ScheduleListItem(schedule = currentPlan, onItemClick)
+                                is Schedule -> ScheduleListItem(schedule = currentPlan, onItemClick, deletePlan)
                                 is Todo     -> TodoListItem(
                                     todo = currentPlan,
                                     onItemClick = onItemClick,
+                                    deletePlan = deletePlan,
                                     onChecked = onCheckboxClicked
                                 )
                             }
@@ -131,6 +139,7 @@ fun PlanModifiedListPopup(
     headerMessage:String = "Modified Plans",
     modifiedPlanItems: List<ModifiedPlanItem> = emptyList(),
     onDismissed:()->Unit={},
+    callback: (Any) -> Unit = {},
     viewModel:MessagePlanLogViewModel
 ){
     val context = LocalContext.current
@@ -164,12 +173,15 @@ fun PlanModifiedListPopup(
 //                    if(it.isValid)
                         PlanModifiedItem(
                             it,
-                            openEditPlan = {},
                             undoModify =
                             { modifiedPlanItem ->
                                 viewModel.undoModify(modifiedPlanItem)
                             },
-                            forceRecompose = ::forceRecompose
+                            forceRecompose = ::forceRecompose,
+                            openEditPlan = { plan ->
+                                callback(plan)
+                                onDismissed()
+                            }
                         )
                 }
                 if (modifiedPlanItems.isEmpty()) items(1) {
@@ -193,6 +205,7 @@ fun SwitchablePlanListPopup(
     header: @Composable ()->Unit = {},
     addButton:  @Composable() (BoxScope.() -> Unit),
     onItemClick: (Plan) -> Unit = {},
+    deletePlan: (Plan) -> Unit = {},
     onCheckboxClicked:(Plan, Boolean) -> Unit ={ plan, check->},
     onDismissed:()->Unit={},
     onLeftButton:()->Unit={},
@@ -218,9 +231,9 @@ fun SwitchablePlanListPopup(
                     .requiredWidthIn(min = 50.dp, max = 60.dp)
             ) {
                 Icon(
-                    painter = painterResource(id = com.prolificinteractive.materialcalendarview.R.drawable.mcv_action_previous),
+                    imageVector = Icons.Filled.ChevronLeft,
                     contentDescription = "prev",
-                    tint=Color.DarkGray,
+                    tint=Color(0x20FFFFFF),
                     modifier = Modifier
                         .size(50.dp)
 
@@ -232,10 +245,11 @@ fun SwitchablePlanListPopup(
                 content = {
                     items(planList!!) {
                         when (it) {
-                            is Schedule -> ScheduleListItem(schedule = it, onItemClick)
+                            is Schedule -> ScheduleListItem(schedule = it, onItemClick, deletePlan)
                             is Todo     -> TodoListItem(
                                 todo = it,
                                 onItemClick = onItemClick,
+                                deletePlan = deletePlan,
                                 onChecked = onCheckboxClicked
                             )
                         }
@@ -251,9 +265,9 @@ fun SwitchablePlanListPopup(
                     .requiredWidthIn(min = 50.dp, max = 60.dp)
             ) {
                 Icon(
-                    painter = painterResource(id = com.prolificinteractive.materialcalendarview.R.drawable.mcv_action_next),
+                    imageVector = Icons.Filled.ChevronRight,
                     contentDescription = "next",
-                    tint=Color.DarkGray,
+                    tint=Color(0x20FFFFFF),
                     modifier = Modifier
                         .size(50.dp)
 
@@ -277,7 +291,7 @@ fun ListPopupBox(
         .shadow(
             elevation = 4.dp, spotColor = Color(0x40000000), ambientColor = Color(0x40000000)
         )
-        .background(color = Color(0xFFF1F5FB), shape = RoundedCornerShape(size = 20.dp))
+        .background(color = Blue_White, shape = RoundedCornerShape(size = 20.dp))
         .padding(25.dp)
     ) {
 
@@ -358,28 +372,27 @@ fun PopupHeaderDate(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ScheduleListItem(
     schedule : Schedule,
-    onItemClick: (Plan) -> Unit = {}
+    onItemClick: (Plan) -> Unit = {},
+    deletePlan: (Plan) -> Unit = {},
 ){
+    var expandMenu :Boolean by remember {mutableStateOf(false)}
+    var alertDialogOpen by remember { mutableStateOf(false) }
     Row(
         modifier= Modifier
+            .combinedClickable(onClick = { onItemClick(schedule) },
+                               onLongClick = { expandMenu = true; })
             .padding(vertical = 5.dp, horizontal = 0.dp)
             .fillMaxWidth(),
-        verticalAlignment = Alignment.Top
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Box(
-            modifier = Modifier
-                .padding(vertical = 5.dp, horizontal = 0.dp)
-                .width(15.dp)
-                .height(15.dp)
-                .background(color = schedule.getColor(), shape = CircleShape)
-        )
+
         Column(
-            modifier= Modifier
-                .fillMaxWidth()
-                .clickable { onItemClick(schedule) }
+            modifier= Modifier.weight(2f)
         ) {
             Text(
                 text = schedule.title,
@@ -390,7 +403,7 @@ fun ScheduleListItem(
                     color = Color(0xFF000000),
                     ),
                 modifier = Modifier
-                    .padding(horizontal = 10.dp),
+                    .padding(end = 10.dp),
             )
             Text(
                 text = schedule.getInfoText(),
@@ -401,42 +414,62 @@ fun ScheduleListItem(
                     color = Color(0xFF646464),
                     ),
                 modifier = Modifier
-                    .padding(horizontal = 10.dp),
+                    .padding(end = 10.dp),
             )
         }
+        Box(
+            modifier = Modifier
+                .padding(vertical = 5.dp, horizontal = 10.dp)
+                .width(15.dp)
+                .height(15.dp)
+                .background(color = schedule.getColor(), shape = CircleShape)
+        )
+    }
+    DropdownMenu(expanded = expandMenu, onDismissRequest = { expandMenu=false }) {
+        DropdownMenuItem(text = { Text(text="일정 수정") }, onClick = { onItemClick(schedule); expandMenu=false })
+        DropdownMenuItem(text = { Text(text="일정 삭제") }, onClick = { alertDialogOpen=true; expandMenu=false })
+    }
+
+    AnimatedVisibility(visible = alertDialogOpen) {
+        AlertDialog(
+            onDismissRequest = { alertDialogOpen    =false },
+            title = { Text("Confirm action") },
+            text = { Text("Are you sure you want to do this?") },
+            confirmButton = {
+                TextButton(onClick = { deletePlan(schedule) }) {
+                    Text("Confirm")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { alertDialogOpen = false }) {
+                    Text("Cancel")
+                }
+            },
+            containerColor = Blue_White,
+        )
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TodoListItem(
     todo : Todo,
     onItemClick: (Plan) -> Unit ={},
-    onChecked : (Plan, Boolean) -> Unit = { plan, check->}
+    deletePlan: (Plan) -> Unit = {},
+    onChecked : (Plan, Boolean) -> Unit = { plan, check->},
 ){
+    var expandMenu :Boolean by remember {mutableStateOf(false)}
+    var alertDialogOpen by remember { mutableStateOf(false)}
     Row(
         modifier= Modifier
+            .combinedClickable(onClick = { onItemClick(todo) }, onLongClick = { expandMenu = true })
             .padding(vertical = 5.dp, horizontal = 0.dp)
             .fillMaxWidth(),
-        verticalAlignment = Alignment.Top
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Checkbox(
-            checked = todo.complete!!,
-            onCheckedChange = {check -> onChecked(todo,check)},
-            modifier = Modifier
-                .padding(vertical = 5.dp, horizontal = 0.dp)
-                .width(15.dp)
-                .height(15.dp)
-                .scale(0.8f),
-            colors = CheckboxDefaults.colors(
-                checkedColor = todo.getColor(),
-                uncheckedColor = todo.getColor(),
-                checkmarkColor = Color.White
-            )
-        )
         Column(
-            modifier= Modifier
-                .fillMaxWidth()
-                .clickable(onClick = { onItemClick(todo) })
+            modifier= Modifier.weight(2f)
 
         ) {
             Text(
@@ -449,7 +482,7 @@ fun TodoListItem(
                     textDecoration = if (todo.complete!!) TextDecoration.LineThrough else TextDecoration.None,
                 ),
                 modifier = Modifier
-                    .padding(horizontal = 10.dp),
+                    .padding(end = 10.dp),
             )
             val todoText=todo.getInfoText()
             if(todoText.isNotEmpty())
@@ -463,9 +496,46 @@ fun TodoListItem(
                         textDecoration = if (todo.complete!!) TextDecoration.LineThrough else TextDecoration.None,
                     ),
                     modifier = Modifier
-                        .padding(horizontal = 10.dp),
+                        .padding(end = 10.dp),
             )
         }
+        Checkbox(
+            checked = todo.complete!!,
+            onCheckedChange = {check -> onChecked(todo,check)},
+            modifier = Modifier
+                .padding(vertical = 5.dp, horizontal = 10.dp)
+                .width(15.dp)
+                .height(15.dp)
+                .scale(0.8f),
+            colors = CheckboxDefaults.colors(
+                checkedColor = todo.getColor(),
+                uncheckedColor = todo.getColor(),
+                checkmarkColor = Color.White
+            )
+        )
+
+    }
+    DropdownMenu(expanded = expandMenu, onDismissRequest = { expandMenu=false }) {
+        DropdownMenuItem(text = { Text(text="일정 수정") }, onClick = { onItemClick(todo); expandMenu=false })
+        DropdownMenuItem(text = { Text(text="일정 삭제") }, onClick = { alertDialogOpen=true; expandMenu=false })
+    }
+    AnimatedVisibility(visible = alertDialogOpen) {
+        AlertDialog(
+            onDismissRequest = { alertDialogOpen    =false },
+            title = { Text("Confirm action") },
+            text = { Text("Are you sure you want to do this?") },
+            confirmButton = {
+                TextButton(onClick = { deletePlan(todo) }) {
+                    Text("Confirm")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { alertDialogOpen = false }) {
+                    Text("Cancel")
+                }
+            },
+            containerColor = Blue_White,
+        )
     }
 }
 
@@ -494,7 +564,7 @@ fun PlanModifiedItem(
         openDetail = true
     }
 
-    Column(
+    Row(
         modifier = when(modifiedPlanItem.isValid){
             false -> Modifier
                 .fillMaxWidth()
@@ -503,39 +573,16 @@ fun PlanModifiedItem(
                 .fillMaxWidth()
                 .padding(vertical = 5.dp, horizontal = 0.dp)
                 .clickable { expandMenu = true }
-        }
+        },
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.Top,
-        ) {
-            // color of circle set to plan after
-            when(titlePlan){
-                is Schedule -> Box(
-                    modifier = Modifier
-                        .padding(vertical = 5.dp, horizontal = 0.dp)
-                        .width(15.dp)
-                        .height(15.dp)
-                        .background(color = titlePlan.getColor(), shape = CircleShape)
-                )
-                is Todo -> Checkbox(
-                    checked = titlePlan.complete!!,
-                    onCheckedChange = {},
-                    enabled=false,
-                    modifier = Modifier
-                        .padding(vertical = 5.dp, horizontal = 0.dp)
-                        .width(15.dp)
-                        .height(15.dp)
-                        .scale(0.8f),
-                    colors = CheckboxDefaults.colors(
-                        disabledCheckedColor = titlePlan.getColor(),
-                        disabledUncheckedColor = titlePlan.getColor(),
-                        checkmarkColor = Color.White
-                    )
-                )
-            }
+        Column(modifier = Modifier
+            .weight(2f)
+            .wrapContentHeight(),
+               verticalArrangement = Arrangement.spacedBy(0.dp),
+
+               ) {
             // title set to plan after
             Text(
                 text = titlePlan.title,
@@ -545,16 +592,8 @@ fun PlanModifiedItem(
                     lineHeight = 18.sp,
                     color = Color(0xFF000000),
                 ),
-                modifier = Modifier.padding(horizontal = 10.dp),
             )
-        }
 
-        Column(modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight(),
-            verticalArrangement = Arrangement.spacedBy(0.dp),
-
-        ) {
             if(!modifiedBeforeText.isNullOrEmpty())
                 ModifiedText(ModifiedTextType.DELETE, modifiedBeforeText)
             if(!modifiedAfterText.isNullOrEmpty())
@@ -562,6 +601,30 @@ fun PlanModifiedItem(
                     ModifiedText(ModifiedTextType.SHOW, modifiedAfterText)
                 else
                     ModifiedText(ModifiedTextType.ADD, modifiedAfterText)
+        }
+        when(titlePlan){
+            is Schedule -> Box(
+                modifier = Modifier
+                    .padding(vertical = 5.dp, horizontal = 10.dp)
+                    .width(15.dp)
+                    .height(15.dp)
+                    .background(color = titlePlan.getColor(), shape = CircleShape)
+            )
+            is Todo -> Checkbox(
+                checked = titlePlan.complete!!,
+                onCheckedChange = {},
+                enabled=false,
+                modifier = Modifier
+                    .padding(vertical = 5.dp, horizontal = 10.dp)
+                    .width(15.dp)
+                    .height(15.dp)
+                    .scale(0.8f),
+                colors = CheckboxDefaults.colors(
+                    disabledCheckedColor = titlePlan.getColor(),
+                    disabledUncheckedColor = titlePlan.getColor(),
+                    checkmarkColor = Color.White
+                )
+            )
         }
     }
 
@@ -572,16 +635,16 @@ fun PlanModifiedItem(
         onDismissRequest = { expandMenu=false }) {
         when(type){
             QueryType.INSERT     ->
-                DropdownMenuItem(text = { Text(text="추가된 일정 보기") }, onClick = { openDetailOf(modifiedPlanItem.planAfter!!) })
+                DropdownMenuItem(text = { Text(text="추가된 일정 보기") }, onClick = { openEditPlan(titlePlan) })
             QueryType.UPDATE     ->
             {
                 DropdownMenuItem(text = { Text(text="수정 전 일정 보기") }, onClick = { openDetailOf(modifiedPlanItem.planBefore!!) })
-                DropdownMenuItem(text = { Text(text="수정 후 일정 보기") }, onClick = { openDetailOf(modifiedPlanItem.planAfter!!) })
+                DropdownMenuItem(text = { Text(text="수정 후 일정 보기") }, onClick = { openEditPlan(modifiedPlanItem.planAfter!!) })
             }
             QueryType.DELETE     ->
                 DropdownMenuItem(text = { Text(text="삭제된 일정 보기") }, onClick = { openDetailOf(modifiedPlanItem.planBefore!!)})
             QueryType.SELECT     -> 
-                DropdownMenuItem(text = { Text(text="발견한 일정 보기") }, onClick = { openDetailOf(modifiedPlanItem.planAfter!!)})
+                DropdownMenuItem(text = { Text(text="발견한 일정 보기") }, onClick = { openEditPlan(modifiedPlanItem.planAfter!!)})
             else                 -> {}
         }
 
@@ -661,7 +724,6 @@ private fun ModifiedText(
 
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.spacedBy(5.dp)
     ) {
@@ -676,7 +738,7 @@ private fun ModifiedText(
                 color = textColor,
                 textAlign = TextAlign.End,
             ),
-            modifier = Modifier.width(20.dp),
+            modifier = Modifier.width(10.dp),
         )
         Text(
             text = modifiedBeforeText,
@@ -706,7 +768,7 @@ fun AddButton(
             .wrapContentWidth()
             .wrapContentHeight(),
         containerColor = Color(0xFF80ACFF),
-        contentColor = Color.Black,
+        contentColor = Color.White,
 
     ) {
         Icon(

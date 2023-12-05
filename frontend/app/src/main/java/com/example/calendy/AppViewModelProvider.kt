@@ -11,6 +11,7 @@ import com.example.calendy.view.messagepage.MessagePageViewModel
 import com.example.calendy.view.messageview.CustomWorkerFactory
 import com.example.calendy.view.messageview.MessagePlanLogViewModel
 import com.example.calendy.view.monthlyview.MonthlyViewModel
+import com.example.calendy.view.voiceAssistance.VoiceAssistanceViewModel
 import com.example.calendy.view.todolistview.TodoListViewModel
 import com.example.calendy.view.weeklyview.WeeklyViewModel
 
@@ -70,6 +71,18 @@ object AppViewModelProvider {
                     messageRepository = messageRepository,
                     planRepository = planRepository,
                     historyRepository = historyRepository,
+                )
+            }
+        }
+        initializer {
+            getContainer().run {
+                VoiceAssistanceViewModel(
+                     planRepository = planRepository,
+                     messageRepository = messageRepository,
+                     categoryRepository = categoryRepository,
+                     calendyServerApi = calendyServerApi,
+                     rawSqlDatabase = rawSqlDatabase,
+                     historyRepository = historyRepository,
                 )
             }
         }

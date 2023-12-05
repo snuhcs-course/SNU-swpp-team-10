@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -51,7 +53,8 @@ class MonthlyViewModel(
     private fun getPlansOfMonth(month: CalendarDay)
     {
         val flow = planRepository.getMonthlyPlansStream(month.afterMonths(-1).toFirstDateOfMonth().afterDays(-14),
-                                                 month.afterMonths(1).toLastDateOfMonth().afterDays(14))
+                                                        month.afterMonths(1).toLastDateOfMonth().afterDays(14))
+
         job?.cancel()
         job = viewModelScope.launch {
             flow.collect{
@@ -68,7 +71,11 @@ class MonthlyViewModel(
     private fun updatePlanList(planList:List<Plan>)
     {
 //        _uiState.update { current -> current.copy(planLabelContainer = PlanLabelContainer().setPlans(planList)) }
-        val container = PlanLabelContainer().setPlans(planList)
+        val container = PlanLabelContainer().setPlans(
+            planList,
+            _uiState.value.currentMonth.afterMonths(-1).toFirstDateOfMonth().afterDays(-14),
+            _uiState.value.currentMonth.afterMonths(1).toLastDateOfMonth().afterDays(14)
+        )
         _uiState.update { current -> current.copy(planLabelContainer = container) }
         val decos= mutableListOf<TitleDecorator>()
         for((date,slot) in container)
@@ -77,5 +84,9 @@ class MonthlyViewModel(
         }
 
         titleDecorators.update { decos }
+    }
+
+    fun deletePlan(plan: Plan) {
+        viewModelScope.launch { planRepository.delete(plan) }
     }
 }
