@@ -20,7 +20,7 @@ class MessagePlanLogViewModel(
     val historyRepository: IHistoryRepository
 ) : ViewModel() {
 
-
+    val isRevision: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val modifiedPlanItems: MutableStateFlow<List<ModifiedPlanItem>> = MutableStateFlow(emptyList())
 
     // call on message show popup button clicked
@@ -61,9 +61,9 @@ class MessagePlanLogViewModel(
                         currentPlan,
                         history.revisionType
                     )
-
-
                 }
+                val hasRevision = histories.any { it.revisionType == QueryType.INSERT || it.revisionType == QueryType.UPDATE || it.revisionType == QueryType.DELETE }
+                isRevision.update { hasRevision }
                 modifiedPlanItems.update { modifiedItems }
             }
         }

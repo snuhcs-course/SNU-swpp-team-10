@@ -76,6 +76,8 @@ class SendMessageWorker(
             managerContent = ManagerResponse.PLEASE_WAIT, userMessageId = userMessageId
         )
 
+        val containsSemicolon = requestMessage.contains(";")
+
         //region 모든 DB 정보 string 으로 변환하기
         val allCategories = categoryRepository.getCategoriesStream().first()
         // ex) (1, 과제), (2, 운동), ..., (5, 약속)
@@ -114,25 +116,33 @@ class SendMessageWorker(
                     managerContent = ManagerResponse.PLEASE_WAIT, userMessageId = userMessageId
                 )
                 for (query in queries) {
-                    val selectedPlanList =
-                        sqlExecute(query.trim(), gptMessage) ?: emptyList()
+                    val selectedPlanList = sqlExecute(
+                        gptQuery = query.trim(),
+                        gptMessage = gptMessage,
+                        containsSemicolon = containsSemicolon,
+                        userMessageId = userMessageId
+                    ) ?: emptyList()
                     briefingPlanList.addAll(selectedPlanList)
                 }
             }
+
+            messageRepository.delete(managerReadyingMessage)
+            if (isBriefing) {
+                sendBriefing(briefingPlanList, allCategories, userMessageId = userMessageId)
+            }
         } catch (e: Throwable) {
-            Log.e("GUN Message Worker", e.stackTraceToString())
+            Log.e("GUN Message Worker - doWork", e.stackTraceToString())
             // This may be server error. Because sqlExecute has error handling
             addManagerMessage(
                 managerContent = ManagerResponse.ERROR, userMessageId = userMessageId
-            ) // TODO: 유저에게 어떻게 설명해야 하지?
+            )
+            addManagerMessage(
+                managerContent = ManagerResponse.ERROR_SERVER, userMessageId = userMessageId
+            )
 
             return Result.failure()
         } finally {
             messageRepository.delete(managerReadyingMessage)
-
-            if (isBriefing) {
-                sendBriefing(briefingPlanList, allCategories, userMessageId = userMessageId)
-            }
         }
 
         return Result.success()
@@ -148,9 +158,9 @@ class SendMessageWorker(
     }
 
     // should update information to gptMessage
-    private suspend fun sqlExecute(gptQuery: String, gptMessage: Message): List<Plan>? {
-
-
+    private suspend fun sqlExecute(
+        gptQuery: String, gptMessage: Message, containsSemicolon: Boolean, userMessageId: Int
+    ): List<Plan>? {
         // TODO: Refactor Me
         Log.d("GUN Worker", "Query Start: $gptQuery")
         val startsWith = gptQuery.takeWhile { it!=' ' }.uppercase()
@@ -231,26 +241,27 @@ class SendMessageWorker(
         suspend fun updateGptResponseMessage(
             gptMessage: Message, planListSize: Int, queryType: QueryType, isSchedule: Boolean
         ) {
-            val log : RevisionLog = if(gptMessage.content == ManagerResponse.PLEASE_WAIT) RevisionLog() else deserialize(gptMessage.content)
+            val log: RevisionLog =
+                if (gptMessage.content==ManagerResponse.PLEASE_WAIT) RevisionLog() else deserialize(
+                    gptMessage.content
+                )
 
 
-            when(queryType){
-                QueryType.INSERT     ->
-                    if(planListSize==0) log.added_fail++
-                    else log.added_success+=planListSize
-                QueryType.UPDATE     ->
-                    if(planListSize==0) log.updated_fail++
-                    else log.updated_success+=planListSize
-                QueryType.DELETE     ->
-                    if(planListSize==0) log.deleted_fail++
-                    else log.deleted_success+=planListSize
-                QueryType.SELECT     ->
-                    if(planListSize==0) log.select_fail++
-                    else log.select_success+=planListSize
-                QueryType.NOT_FOUND  ->
-                    log.select_fail++
-                QueryType.UNEXPECTED ->
-                    log.select_fail++
+            when (queryType) {
+                QueryType.INSERT     -> if (planListSize==0) log.added_fail++
+                else log.added_success += planListSize
+
+                QueryType.UPDATE     -> if (planListSize==0) log.updated_fail++
+                else log.updated_success += planListSize
+
+                QueryType.DELETE     -> if (planListSize==0) log.deleted_fail++
+                else log.deleted_success += planListSize
+
+                QueryType.SELECT     -> if (planListSize==0) log.select_fail++
+                else log.select_success += planListSize
+
+                QueryType.NOT_FOUND  -> log.select_fail++
+                QueryType.UNEXPECTED -> log.select_fail++
             }
 
             val messageString = log.serialize()
@@ -410,10 +421,16 @@ class SendMessageWorker(
             updateGptResponseMessage(gptMessage, planListSize, queryType, isSchedule)
         } catch (e: Throwable) {
             // Catching all throwable may not be good
-            Log.e("GUN Message Worker", e.stackTraceToString())
-            messageRepository.update(
-                gptMessage.copy(content = "으악! 에러다!", hasRevision = false)
+            Log.e("GUN Message Worker - SQL EXEC", e.stackTraceToString())
+            updateGptResponseMessage(gptMessage, 0, queryType, isSchedule)
+            addManagerMessage(
+                managerContent = ManagerResponse.ERROR, userMessageId = userMessageId
             )
+            if (containsSemicolon) {
+                addManagerMessage(
+                    managerContent = ManagerResponse.ERROR_SEMICOLON, userMessageId = userMessageId
+                )
+            }
         }
 
         // TODO: Refactor Me
@@ -424,6 +441,8 @@ class SendMessageWorker(
     private suspend fun sendBriefing(
         briefingPlanList: List<Plan>, allCategories: List<Category>, userMessageId: Int
     ) {
+        if (briefingPlanList.isEmpty()) return
+
         val briefingReadyingMessage = addManagerMessage(
             managerContent = ManagerResponse.BRIEFING_PLAN_PLEASE_WAIT,
             userMessageId = userMessageId
@@ -435,9 +454,8 @@ class SendMessageWorker(
                     allCategories.find { category -> category.id==categoryId }?.title ?: "None"
                 }
             }
-            val body=BriefingBody(
-                plansString = plansString,
-                time = Date().toLocalTimeString()
+            val body = BriefingBody(
+                plansString = plansString, time = Date().toLocalTimeString()
             )
             val briefingResult = calendyServerApi.sendBriefingRequestToServer(body)
             addManagerMessage(managerContent = briefingResult, userMessageId = userMessageId)

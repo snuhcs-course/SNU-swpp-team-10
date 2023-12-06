@@ -21,7 +21,10 @@ data class RevisionLog(
     }
 
     fun hasFailures(): Boolean {
-        return added_fail >0 || updated_fail >0 || deleted_fail >0 || select_fail >0
+        return (added_success == 0 && added_fail >0) ||
+                (updated_success == 0 && updated_fail >0) ||
+                (deleted_success == 0 && deleted_fail >0) ||
+                (select_success == 0 && select_fail >0)
     }
 
     fun getSuccessLog(): String {

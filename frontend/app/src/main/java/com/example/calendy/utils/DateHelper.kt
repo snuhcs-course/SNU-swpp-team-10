@@ -1,5 +1,6 @@
 package com.example.calendy.utils
 
+import com.example.calendy.utils.DateHelper.timestampUTC
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -114,6 +115,7 @@ object DateHelper {
     fun Date.timestampUTC(): Long {
         // treat GMT Date as UTC for DatePicker Library
         val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        calendar.clear()
         val (year, monthZeroIndexed, date, hour, minute) = extract()
         calendar.set(
             year,
@@ -130,9 +132,8 @@ object DateHelper {
 }
 
 fun getDiffBetweenDates(startDate: Date, endDate: Date): Int {
-    val t1 = startDate.time / (1000 * 60 * 60 * 24) //start date 00:00:00
-    // Consider (endDate - 1) if endDate is 00:00
-    val t2 = (endDate.time - 1) / (1000 * 60 * 60 * 24) //end date 00:00:00
+    val t1 = startDate.timestampUTC() / (1000 * 60 * 60 * 24) //start date 00:00:00
+    val t2 = endDate.timestampUTC() / (1000 * 60 * 60 * 24) //end date 00:00:00
     return (t2 - t1).toInt()
 }
 
@@ -156,6 +157,8 @@ fun Date.toCalendarDay(): CalendarDay = CalendarDay.from(this)
 
 // remove time
 fun Date.dateOnly(): Date = Date(year, month, date)
+
+fun Date.isZeroTime(): Boolean = hours == 0 && minutes == 0
 
 fun Date.toDateDayString(showYear: Boolean = false): String =
     toDateString(showYear) + " " + dayOfWeek()

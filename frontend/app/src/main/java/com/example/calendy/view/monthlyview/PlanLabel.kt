@@ -10,6 +10,7 @@ import com.example.calendy.utils.dateOnly
 import com.example.calendy.utils.equalDay
 import com.example.calendy.utils.getDiffBetweenDates
 import com.example.calendy.utils.getPlanType
+import com.example.calendy.utils.isZeroTime
 import java.util.Date
 import java.util.Hashtable
 
@@ -152,7 +153,8 @@ class PlanLabel(
     init{
         this.startDate = if(getPlanType() == PlanType.SCHEDULE) (plan as Schedule).startTime.dateOnly() else (plan as Todo).dueTime.dateOnly()
         this.endDate = if(getPlanType() == PlanType.SCHEDULE) (plan as Schedule).endTime.dateOnly() else (plan as Todo).dueTime.dateOnly()
-        this.weight = getDiffBetweenDates(startDate,endDate)+1
+        val endTime = if(getPlanType() == PlanType.SCHEDULE) (plan as Schedule).endTime else (plan as Todo).dueTime
+        this.weight = getDiffBetweenDates(startDate, endDate) + (if (!endTime.isZeroTime()) 1 else 0)
 
         //prevent weight from less than or equal to 0
         if(this.weight <= 0) this.weight = 1

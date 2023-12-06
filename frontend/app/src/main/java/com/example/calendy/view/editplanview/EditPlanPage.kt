@@ -54,6 +54,7 @@ import androidx.compose.ui.input.pointer.consumeDownChange
 import androidx.compose.ui.input.pointer.isOutOfBounds
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChangeConsumed
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -96,6 +97,8 @@ fun EditPlanPage(
     val verticalScrollState = rememberScrollState(initial = 0)
     var timePickerOpen by remember { mutableStateOf(false) }
 
+    val focusManager = LocalFocusManager.current
+
     Column(
         modifier = Modifier
             .verticalScroll(verticalScrollState)
@@ -104,6 +107,7 @@ fun EditPlanPage(
             .pointerInput(Unit) {
                 detectTapAndPressUnconsumed(onTap = {
                     timePickerOpen = false
+                    focusManager.clearFocus()
                 })
             }, verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {

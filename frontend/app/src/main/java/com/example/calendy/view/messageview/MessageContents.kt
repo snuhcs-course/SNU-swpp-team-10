@@ -135,6 +135,7 @@ fun MessageContentManagerWithRevision(
     messageContentViewModel: MessagePlanLogViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
 //    val logPlanList: List<Plan> by messageContentViewModel.modifiedPlans.collectAsState()
+    val isRevision: Boolean by messageContentViewModel.isRevision.collectAsState()
     val modifiedPlanItems: List<ModifiedPlanItem> by messageContentViewModel.modifiedPlanItems.collectAsState()
 
     var openListPopup: Boolean by remember { mutableStateOf(false) }
@@ -217,7 +218,8 @@ fun MessageContentManagerWithRevision(
     if (openListPopup) {
 
         PlanModifiedListPopup(
-            headerMessage = "일정 변경 사항",
+            // modifiedPlanItems.isEmpty() -> Because of undoModify()
+            headerMessage = if (isRevision || modifiedPlanItems.isEmpty()) "일정 변경 사항" else "일정",
             modifiedPlanItems = modifiedPlanItems,
             onDismissed = { openListPopup = false },
             callback=callback,

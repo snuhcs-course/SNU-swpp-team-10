@@ -57,7 +57,7 @@ fun Schedule.getTimeInfo():String{
 fun Schedule.getInfoText(): String {
     val info=StringBuilder()
     // time info
-    if(!startTime.equalDay(endTime)){
+    if(getDiffBetweenDates(startTime, endTime) + (if (!endTime.isZeroTime()) 1 else 0) >= 2){
         // long day plan
         info.append(startTime.toDateString(false))
         info.append(" ~ ")

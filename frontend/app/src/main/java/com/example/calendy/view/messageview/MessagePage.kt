@@ -2,13 +2,7 @@
 
 package com.example.calendy.view.messageview
 
-import LoadingAnimation2
-import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
-import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -37,7 +31,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -53,7 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -62,7 +55,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.calendy.AppViewModelProvider
 import com.example.calendy.R
@@ -70,7 +62,6 @@ import com.example.calendy.data.maindb.message.Message
 import com.example.calendy.data.maindb.plan.Plan
 import com.example.calendy.ui.theme.Blue1
 import com.example.calendy.ui.theme.Blue2
-import com.example.calendy.ui.theme.Blue3
 import com.example.calendy.utils.equalDay
 import com.example.calendy.utils.toDateDayString
 import com.example.calendy.view.messagepage.MessagePageViewModel
@@ -86,32 +77,34 @@ fun MessagePage(
     val userInput = messageUiState.userInputText
     val messageLogList: List<Message> = messageUiState.messageLogs
 
-    val keyboardController = LocalSoftwareKeyboardController.current
+    // FocusManager instead of keyboardController
+//    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
 
     fun openEditPlan(plan: Any) {
         onNavigateToEditPage(plan as Plan)
     }
+
     fun copyToInputField(text: Any) {
         messagePageViewModel.setUserInputText(text as String)
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxHeight()
-            .fillMaxWidth()
-            .imePadding()   //TODO : why not working???
-            .navigationBarsPadding()
-            .displayCutoutPadding()
-            .captionBarPadding()
-            .systemGesturesPadding()
-            .systemBarsPadding()
-            .waterfallPadding()
-            .pointerInput(Unit) {
-                detectTapGestures(onTap = {
-                    keyboardController?.hide()
-                })
-            }
-    ) {
+    Column(modifier = Modifier
+        .fillMaxHeight()
+        .fillMaxWidth()
+        .imePadding()   //TODO : why not working???
+        .navigationBarsPadding()
+        .displayCutoutPadding()
+        .captionBarPadding()
+        .systemGesturesPadding()
+        .systemBarsPadding()
+        .waterfallPadding()
+        .pointerInput(Unit) {
+            detectTapGestures(onTap = {
+//                    keyboardController?.hide()
+                focusManager.clearFocus()
+            })
+        }) {
         MessageList(
             messageLogList,
             modifier = Modifier
@@ -122,12 +115,17 @@ fun MessagePage(
         )
         MessageInputField(
             onValueChanged = messagePageViewModel::setUserInputText,
-            onSendButtonClicked = messagePageViewModel::onSendButtonClicked,
-            onMicButtonClicked = messagePageViewModel::onMicButtonClicked,
-            onHelpButtonClicked = messagePageViewModel::onHelpButtonClicked,
+            onSendButtonClicked = {
+                focusManager.clearFocus()
+                messagePageViewModel.onSendButtonClicked()
+            },
+            onHelpButtonClicked = {
+                focusManager.clearFocus()
+                messagePageViewModel.onHelpButtonClicked()
+            },
             text = userInput,
             isListening = messageUiState.isMicButtonClicked,
-            keyboardController = keyboardController,
+//            keyboardController = keyboardController,
             modifier = Modifier
                 .imePadding()   //TODO : why not working???
                 .navigationBarsPadding()
@@ -135,7 +133,7 @@ fun MessagePage(
                 .captionBarPadding()
                 .systemGesturesPadding()
                 .systemBarsPadding()
-                .waterfallPadding()
+                .waterfallPadding(),
         )
     }
 
@@ -145,7 +143,6 @@ fun MessagePage(
 @Composable
 fun MessageInputField(
     onSendButtonClicked: () -> Unit = {},
-    onMicButtonClicked: (Context) -> Unit = {},
     onHelpButtonClicked: () -> Unit = {},
     onValueChanged: (text: String) -> Unit = {},
     text: String = "",
@@ -182,9 +179,11 @@ fun MessageInputField(
             ),
             maxLines = 5,
 
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(
-                onDone = {keyboardController?.hide()})
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+            keyboardActions = KeyboardActions(onSend = {
+//                    keyboardController?.hide()
+                onSendButtonClicked()
+            })
         )
 
         IconButton(
@@ -205,8 +204,8 @@ fun MessageInputField(
 fun MessageList(
     messageLogList: List<Message> = emptyList(),
     modifier: Modifier = Modifier,
-    openEditPlan: (Any)->Unit={},
-    copyToInputField: (Any)->Unit={}
+    openEditPlan: (Any) -> Unit = {},
+    copyToInputField: (Any) -> Unit = {}
 ) {
     var prevDate: Date? = null
 
@@ -223,8 +222,9 @@ fun MessageList(
             listItems.add { DateDivider(date) } // since messages are sorted in descending order, add prevDate
             prevDate = currDate
         }
-        val _callback : (Any)->Unit = if(msg.messageFromManager) openEditPlan else copyToInputField
-        listItems.add { MessageItem(msg,Modifier,_callback) }
+        val _callback: (Any) -> Unit =
+            if (msg.messageFromManager) openEditPlan else copyToInputField
+        listItems.add { MessageItem(msg, Modifier, _callback) }
     }
     if (prevDate!=null) {
         // first date divider
@@ -284,7 +284,7 @@ fun MessageItem(messageLog: Message, modifier: Modifier = Modifier, callback: (A
                     .clip(shape = shape)
             ) {
                 when (fromManager) {
-                    true  -> MessageContentManager(messageLog,callback)
+                    true  -> MessageContentManager(messageLog, callback)
                     false -> MessageContentUser(messageLog)
                 }
             }

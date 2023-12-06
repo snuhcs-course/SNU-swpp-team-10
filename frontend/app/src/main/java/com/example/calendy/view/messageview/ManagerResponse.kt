@@ -4,6 +4,8 @@ object ManagerResponse {
     const val NO_INTERNET = "인터넷에 연결되어 있지 않아요."
     const val PLEASE_WAIT = "AI_THINKING"
     const val ERROR = "매니저가 고장났어요."
+    const val ERROR_SERVER = "AI Manager 서버가 응답하지 않아요. 서비스가 종료되었을 수 있어요."
+    const val ERROR_SEMICOLON = "세미콜론(;) 때문일 수 있어요"
     const val BRIEFING_PLAN_PLEASE_WAIT = "제가 요약해드릴게요. 잠시만 기다려주세요."
     const val SUCCESS_REVISION = "말씀하신 요청을 반영했어요!"
     const val FAIL_REVISION_1 = "일부 요청에 대한 일정은 찾을 수 없었어요." // SUCCESS_REVISION 있을 때
