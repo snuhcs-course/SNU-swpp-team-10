@@ -236,21 +236,21 @@ fun MonthlyPageKT(
              },
             onDismissed = ::onListPopupDismissed,
             addButton = {
-                AddButton(
-                    onButtonClick = {
-                        val date = popupDate.toDate()
-                        val (_, _, _, hour, minute) = Date().extract()
-                        onNavigateToEditPage(
-                            null,
-                            PlanType.SCHEDULE,
-                            date.applyTime(hour, minute),
-                            null,
-                        )
-                    },
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .align(Alignment.BottomEnd),
-                )
+//                AddButton(
+//                    onButtonClick = {
+//                        val date = popupDate.toDate()
+//                        val (_, _, _, hour, minute) = Date().extract()
+//                        onNavigateToEditPage(
+//                            null,
+//                            PlanType.SCHEDULE,
+//                            date.applyTime(hour, minute),
+//                            null,
+//                        )
+//                    },
+//                    modifier = Modifier
+//                        .padding(8.dp)
+//                        .align(Alignment.BottomEnd),
+//                )
             },
             onItemClick = { plan ->
                 onNavigateToEditPage(plan.id, plan.getPlanType(), null, null)
