@@ -12,9 +12,8 @@ import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
 import com.example.calendy.data.maindb.repeatgroup.IRepeatGroupRepository
 import com.example.calendy.data.maindb.repeatgroup.RepeatGroup
-import com.example.calendy.utils.DateHelper.extract
-import com.example.calendy.utils.applyTime
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -36,7 +35,7 @@ class EditPlanViewModel(
     private val _uiState = MutableStateFlow(EditPlanUiState(isAddPage = true))
     val uiState: StateFlow<EditPlanUiState> = _uiState.asStateFlow()
 
-
+    // Will be shown in category popup
     val categoryListState = (categoryRepository.getCategoriesStream()).stateIn(
         scope = viewModelScope,
         initialValue = emptyList(),
@@ -54,12 +53,9 @@ class EditPlanViewModel(
     fun initialize(id: Int?, type: PlanType, startDate: Date?, endDate: Date?) {
         if (id==null) {
             // new plan
-            val (_, _, _, currentHour, currentMinute) = Date().extract()
-            // selected (year, month, day) + current (hour, minute)
-            // TODO: Should I use current (hour, minute?)
             // In Weekly Page: startDate.hour is important
             // In Monthly Page:
-            // In TodoList Page:
+            // In TodoList Page: startDate.hour is set to current time
             val time = (startDate ?: Date()) //.applyTime(currentHour, currentMinute)
             val endTime = endDate ?: time // If not specified, set endTime to startTime
 
@@ -78,6 +74,9 @@ class EditPlanViewModel(
             viewModelScope.launch() {
                 withContext(Dispatchers.IO) {
                     val plan = planRepository.getPlanById(id, type)
+
+                    getCategoryUpdated(plan.categoryId)
+
                     _uiState.update {
                         fillIn(plan)
                     }
@@ -89,12 +88,6 @@ class EditPlanViewModel(
 
     private fun fillIn(plan: Plan?): EditPlanUiState {
         if (plan!=null) {
-            val category: Category? = if (plan.categoryId!=null) {
-                categoryRepository.getCategoryById(plan.categoryId!!)
-            } else {
-                null
-            }
-
             val repeatGroup: RepeatGroup? = if (plan.repeatGroupId!=null) {
                 repeatGroupRepository.getRepeatGroupById(plan.repeatGroupId!!)
             } else null
@@ -105,7 +98,7 @@ class EditPlanViewModel(
                         titleField = plan.title,
                         startTime = plan.startTime,
                         endTime = plan.endTime,
-                        category = category,
+                        // Category is updated in getCategoryUpdated
                         repeatGroupId = plan.repeatGroupId,
                         repeatGroup = repeatGroup,
                         priority = plan.priority,
@@ -119,7 +112,7 @@ class EditPlanViewModel(
                         titleField = plan.title,
                         isComplete = plan.complete,
                         dueTime = plan.dueTime,
-                        category = category,
+                        // Category is updated in getCategoryUpdated
                         repeatGroupId = plan.repeatGroupId,
                         repeatGroup = repeatGroup,
                         priority = plan.priority,
@@ -181,8 +174,26 @@ class EditPlanViewModel(
 
     //region Category
     fun setCategory(category: Category?) {
-        _uiState.update { currentState -> currentState.copy(category = category) }
+        getCategoryUpdated(category?.id)
         if (category!=null) setPriority(category.defaultPriority)
+    }
+
+    private var job: Job? = null
+    // Update category even when category is deleted
+    private fun getCategoryUpdated(id: Int?) {
+        job?.cancel()
+
+        if (id==null || id <= 0) {
+            _uiState.update { currentState -> currentState.copy(category = null) }
+            return
+        }
+
+        val flow = categoryRepository.getCategoryStreamById(id)
+        job = viewModelScope.launch {
+            flow.collect {
+                _uiState.update { currentState -> currentState.copy(category = it) }
+            }
+        }
     }
 
     fun addCategory(title: String, defaultPriority: Int) {
@@ -297,33 +308,16 @@ class EditPlanViewModel(
         viewModelScope.launch(context = Dispatchers.IO) {
             if (currentState.repeatGroupId==null) {
                 // id: Int? is smart casted into type Int
-                val updatedPlan = when (currentState.entryType) {
-                    PlanType.SCHEDULE -> Schedule(
-                        id = currentState.id,
-                        title = currentState.titleField,
-                        startTime = currentState.startTime,
-                        endTime = currentState.endTime,
-                        memo = currentState.memoField,
-                        repeatGroupId = currentState.repeatGroup?.id,
-                        categoryId = currentState.category?.id,
-                        priority = currentState.priority,
-                        showInMonthlyView = currentState.showInMonthlyView,
-                        isOverridden = false
-                    )
+                val updatedPlan = when (val newPlan = generatePlanFromCurrentState()) {
+                    is Schedule -> {
+                        newPlan.copy(id = currentState.id)
+                    }
 
-                    PlanType.TODO     -> Todo(
-                        id = currentState.id,
-                        title = currentState.titleField,
-                        dueTime = currentState.dueTime,
-                        memo = currentState.memoField,
-                        complete = currentState.isComplete,
-                        repeatGroupId = currentState.repeatGroup?.id,
-                        categoryId = currentState.category?.id,
-                        priority = currentState.priority,
-                        showInMonthlyView = currentState.showInMonthlyView,
-                        isOverridden = false
-                    )
+                    is Todo     -> {
+                        newPlan.copy(id = currentState.id)
+                    }
                 }
+
                 planRepository.update(updatedPlan)
             } else {
                 // TODO: Repeat Group Feature Give up

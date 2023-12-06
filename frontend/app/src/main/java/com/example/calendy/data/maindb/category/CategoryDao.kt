@@ -12,4 +12,7 @@ interface CategoryDao : BaseDao<Category> {
 
     @Query("SELECT * FROM category WHERE id = :id")
     fun getCategoryById(id: Int): Category
+
+    @Query("SELECT * FROM category WHERE id = :id")
+    fun getCategoryStreamById(id: Int): Flow<Category?>
 }

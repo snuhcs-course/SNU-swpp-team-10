@@ -10,4 +10,8 @@ class CategoryRepository(private val categoryDao: CategoryDao) : ICategoryReposi
     override fun getCategoryById(id: Int): Category {
         return categoryDao.getCategoryById(id)
     }
+
+    override fun getCategoryStreamById(id: Int): Flow<Category?> {
+        return categoryDao.getCategoryStreamById(id)
+    }
 }

@@ -2,5 +2,7 @@
 <resources>
 
     <item name="mcv_pager" type="id" />
+    <item name="mcv_topbar" type="id" />
+    <item name="mcv_weekday_bar" type="id" />
 
 </resources>

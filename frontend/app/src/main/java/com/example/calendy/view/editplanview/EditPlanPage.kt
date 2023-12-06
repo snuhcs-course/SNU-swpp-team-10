@@ -42,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.AwaitPointerEventScope
@@ -54,7 +55,6 @@ import androidx.compose.ui.input.pointer.isOutOfBounds
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChangeConsumed
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -174,27 +174,36 @@ fun EditPlanPage(
 
         //region Title Text Field & Checkbox
         Row(verticalAlignment = Alignment.CenterVertically) {
-            BasicTextField(value = editPlanUiState.titleField,
-                           onValueChange = { value -> editPlanViewModel.setTitle(value) },
-                           modifier = Modifier
-                               .weight(1f)
-                               .then(
-                                   Modifier.padding(
-                                       horizontal = 12.dp, vertical = 5.dp
-                                   )
-                               ), // Remove paddingc
-                           textStyle = TextStyle( fontSize = 32.sp, fontWeight = FontWeight.Bold),
-                           decorationBox = { innerTextField ->
-                               if (editPlanUiState.titleField.isEmpty()) {
-                                   Text(
-                                       text = "제목",
-                                       fontSize = 32.sp,
-                                       fontWeight = FontWeight.ExtraBold,
-                                       color = Color.LightGray
-                                   )
-                               }
-                               innerTextField()
-                           })
+            BasicTextField(
+                value = editPlanUiState.titleField,
+                onValueChange = { value -> editPlanViewModel.setTitle(value) },
+                modifier = Modifier
+                    .weight(1f)
+                    .then(
+                        Modifier.padding(
+                            horizontal = 12.dp, vertical = 5.dp,
+                        ),
+                    ), // Remove paddingc
+                textStyle = TextStyle(fontSize = 32.sp, fontWeight = FontWeight.Bold),
+                decorationBox = { innerTextField ->
+                    if (editPlanUiState.titleField.isEmpty()) {
+                        Text(
+                            text = "제목",
+                            fontSize = 32.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color.LightGray,
+                        )
+                    }
+                    innerTextField()
+                },
+            )
+            if (isPageTodo && isPageEdit) {
+                Checkbox(
+                    checked = editPlanUiState.isComplete,
+                    onCheckedChange = { editPlanViewModel.setIsComplete(it) },
+                    modifier = Modifier.scale(1.5f)
+                )
+            }
         }
         //endregion
 

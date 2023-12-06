@@ -43,6 +43,7 @@ abstract class CalendarPagerAdapter<V extends CalendarPagerView> extends PagerAd
     private List<DecoratorResult> decoratorResults = null;
     private boolean selectionEnabled = true;
     boolean showWeekDays;
+    int weekdayBarHeight;
 
     CalendarPagerAdapter(MaterialCalendarView mcv) {
         this.mcv = mcv;
@@ -168,6 +169,11 @@ abstract class CalendarPagerAdapter<V extends CalendarPagerView> extends PagerAd
         pagerView.setDayViewDecorators(decoratorResults);
 
         return pagerView;
+    }
+
+    // GUN
+    public void setWeekdayBarHeight(int heightPx) {
+        this.weekdayBarHeight = heightPx;
     }
 
     public void setShowWeekDays(boolean showWeekDays) {

@@ -15,6 +15,10 @@ class DummyCategoryDao : CategoryDao {
         TODO("Not yet implemented")
     }
 
+    override fun getCategoryStreamById(id: Int): Flow<Category> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun insert(entity: Category): Long {
         TODO("Not yet implemented")
     }
@@ -39,6 +43,10 @@ class DummyCategoryRepository : ICategoryRepository(DummyCategoryDao()) {
     ).asFlow()
 
     override fun getCategoryById(id: Int): Category {
+        TODO("Not yet implemented")
+    }
+
+    override fun getCategoryStreamById(id: Int): Flow<Category?> {
         TODO("Not yet implemented")
     }
 }

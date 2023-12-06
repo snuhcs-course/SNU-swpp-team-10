@@ -15,8 +15,8 @@ import java.util.Collection;
 class MonthView extends CalendarPagerView {
 
     public MonthView(@NonNull MaterialCalendarView view, CalendarDay month,
-                     int firstDayOfWeek, boolean showWeekDays) {
-        super(view, month, firstDayOfWeek, showWeekDays);
+                     int firstDayOfWeek, boolean showWeekDays, int weekdayBarHeight) {
+        super(view, month, firstDayOfWeek, showWeekDays, weekdayBarHeight);
     }
 
     @Override
