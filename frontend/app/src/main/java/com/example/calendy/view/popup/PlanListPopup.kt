@@ -154,20 +154,32 @@ fun PlanModifiedListPopup(
             onDismissRequest = onDismissed
         ) {
             ListPopupBox(
-                header = { PopupHeaderTitle(headerMessage) },
-                addButton = {
-                    if(showUndoAllButton){
-                        UndoButton(
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd),
-                            onUndoClick = {
+                header = {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        PopupHeaderTitle(headerMessage)
+                        if(showUndoAllButton) {
+                            IconButton(onClick = {
                                 viewModel.undoAllModify(modifiedPlanItems)
                                 onDismissed()
-                                Toast.makeText(context, "변경 사항을 모두 되돌렸습니다.", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "변경 사항을 모두 되돌렸습니다.", Toast.LENGTH_SHORT)
+                                    .show()
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Undo,
+                                    contentDescription = "undo",
+                                    tint = Color(0xFF000000),
+                                    modifier = Modifier.size(20.dp)
+                                )
                             }
-                        )
+                        }
                     }
-                }
+                 },
+                addButton = {}
             ) {
                 items(modifiedPlanItems) {
 //                    if(it.isValid)

@@ -5,6 +5,9 @@ object ManagerResponse {
     const val PLEASE_WAIT = "AI_THINKING"
     const val ERROR = "매니저가 고장났어요."
     const val BRIEFING_PLAN_PLEASE_WAIT = "제가 요약해드릴게요. 잠시만 기다려주세요."
+    const val SUCCESS_REVISION = "말씀하신 요청을 반영했어요!"
+    const val FAIL_REVISION_1 = "일부 요청에 대한 일정은 찾을 수 없었어요." // SUCCESS_REVISION 있을 때
+    const val FAIL_REVISION_2 = "죄송해요. 요청에 대한 일정을 찾을 수 없었어요."     // SUCCESS_REVISION 없을 때
 }
 
 object ManagerHelp {

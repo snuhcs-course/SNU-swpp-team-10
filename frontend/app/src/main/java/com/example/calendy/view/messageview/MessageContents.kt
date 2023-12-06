@@ -1,7 +1,6 @@
 package com.example.calendy.view.messageview
 
 import LoadingAnimation1
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -33,11 +32,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.calendy.AppViewModelProvider
 import com.example.calendy.data.maindb.message.Message
-import com.example.calendy.data.maindb.plan.Plan
-import com.example.calendy.data.maindb.plan.Todo
 import com.example.calendy.ui.theme.Blue1
 import com.example.calendy.utils.toTimeString
-import com.example.calendy.view.popup.PlanDetailPopup
+import com.example.calendy.view.messageview.ManagerResponse.FAIL_REVISION_1
+import com.example.calendy.view.messageview.ManagerResponse.FAIL_REVISION_2
+import com.example.calendy.view.messageview.ManagerResponse.SUCCESS_REVISION
 import com.example.calendy.view.popup.PlanModifiedListPopup
 import java.util.Date
 
@@ -70,7 +69,7 @@ fun MessageContentManager(
             false -> MessageContentManagerDefault(messageLog)
         }
 
-        true -> MessageContentManagerWithButton(messageLog,callback)
+        true -> MessageContentManagerWithRevision(messageLog, callback)
     }
 }
 
@@ -111,7 +110,7 @@ fun MessageContentManagerThinking(){
     ) {
           //OnProgress...
         LoadingAnimation1(
-            modifier=Modifier
+            modifier= Modifier
                 .width(90.dp)
                 .height(30.dp),
             circleColor = Blue1,
@@ -130,7 +129,7 @@ fun MessageContentManagerThinking(){
     }
 }
 @Composable
-fun MessageContentManagerWithButton(
+fun MessageContentManagerWithRevision(
     messageLog: Message,
     callback: (Any) -> Unit = {},
     messageContentViewModel: MessagePlanLogViewModel = viewModel(factory = AppViewModelProvider.Factory)
@@ -139,7 +138,7 @@ fun MessageContentManagerWithButton(
     val modifiedPlanItems: List<ModifiedPlanItem> by messageContentViewModel.modifiedPlanItems.collectAsState()
 
     var openListPopup: Boolean by remember { mutableStateOf(false) }
-
+    val revisionLog = deserialize(messageLog.content)
 
     fun onButtonClick() {
         // TODO: make popup global scope
@@ -150,38 +149,58 @@ fun MessageContentManagerWithButton(
         modifier = Modifier
 
     ) {
-        Text(
-            text = messageLog.content, modifier = Modifier
-                .wrapContentSize()
-                .padding(top = 10.dp, bottom = 5.dp, end = 10.dp, start = 10.dp),
-            fontSize = 14.sp,
-        )
-        // TODO: 위아래 padding 조절
-        Button(
-            onClick = ::onButtonClick,
-            colors = ButtonDefaults.buttonColors(Color(0xFFF1F1F1)),
-            contentPadding = PaddingValues(0.dp),
-            modifier = Modifier
-                .padding(horizontal = 15.dp, vertical = 5.dp)
-                .fillMaxWidth()
-                .wrapContentHeight()
-//                .background(color = Color(0xFFF1F1F1), shape = CircleShape)
-                .align(Alignment.CenterHorizontally)
-        ) {
+        if(revisionLog.hasRevision()){
+            // header
             Text(
-                text = "해당 일정 자세히 보기",
-                color = Color.Black,
-                modifier = Modifier.padding(0.dp),
+                text = SUCCESS_REVISION, modifier = Modifier
+                    .wrapContentSize()
+                    .padding(top = 10.dp, bottom = 5.dp, end = 10.dp, start = 10.dp),
                 fontSize = 14.sp,
-                style = TextStyle(
-                    fontSize = 14.sp,
-                    lineHeight = 14.sp,
-                    fontWeight = FontWeight(500),
-                    color = Color(0xFF000000),
-
-                    textAlign = TextAlign.Center,
-                )
             )
+            if(revisionLog.added_success>0) RevisionLogText(text = " ${revisionLog.added_success} 개의 일정을 추가했어요.")
+            if(revisionLog.updated_success>0) RevisionLogText(text = " ${revisionLog.updated_success} 개의 일정을 수정했어요.")
+            if(revisionLog.deleted_success>0) RevisionLogText(text = " ${revisionLog.deleted_success} 개의 일정을 삭제했어요.")
+            if(revisionLog.select_success>0) RevisionLogText(text = " ${revisionLog.select_success} 개의 일정을 발견했어요.")
+        }
+        if(revisionLog.hasFailures()){
+            // header
+            Text(
+                text = if(revisionLog.hasRevision()) FAIL_REVISION_1 else FAIL_REVISION_2,
+                modifier = Modifier
+                    .wrapContentSize()
+                    .padding(top = 10.dp, bottom = 10.dp, end = 10.dp, start = 10.dp),
+                fontSize = 14.sp,
+            )
+        }
+
+        // TODO: 위아래 padding 조절
+        if(revisionLog.hasRevision()){
+            Button(
+                onClick = ::onButtonClick,
+                colors = ButtonDefaults.buttonColors(Color(0xFFF8F8F8)),
+                contentPadding = PaddingValues(0.dp),
+                modifier = Modifier
+                    .padding(horizontal = 15.dp, vertical = 5.dp)
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    //                .background(color = Color(0xFFF1F1F1), shape = CircleShape)
+                    .align(Alignment.CenterHorizontally)
+            ) {
+                Text(
+                    text = "해당 일정 자세히 보기",
+                    color = Color.Black,
+                    modifier = Modifier.padding(0.dp),
+                    fontSize = 14.sp,
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        lineHeight = 14.sp,
+                        fontWeight = FontWeight(500),
+                        color = Color(0xFF000000),
+
+                        textAlign = TextAlign.Center,
+                    )
+                )
+            }
         }
 //        Text(
 //            text = "자세히",
@@ -206,6 +225,21 @@ fun MessageContentManagerWithButton(
         )
     }
 
+}
+
+@Composable
+fun RevisionLogText(
+    text: String,
+    modifier: Modifier = Modifier
+){
+    Text(
+        text = text,
+        modifier = modifier
+            .wrapContentSize()
+            .padding(top = 0.dp, bottom = 0.dp, end = 10.dp, start = 15.dp),
+        fontSize = 12.sp,
+        color = Color.Gray,
+    )
 }
 
 @Preview

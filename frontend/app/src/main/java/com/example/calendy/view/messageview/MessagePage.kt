@@ -68,6 +68,8 @@ import com.example.calendy.AppViewModelProvider
 import com.example.calendy.R
 import com.example.calendy.data.maindb.message.Message
 import com.example.calendy.data.maindb.plan.Plan
+import com.example.calendy.ui.theme.Blue1
+import com.example.calendy.ui.theme.Blue2
 import com.example.calendy.ui.theme.Blue3
 import com.example.calendy.utils.equalDay
 import com.example.calendy.utils.toDateDayString
@@ -183,7 +185,7 @@ fun MessageInputField(
             onValueChange = onValueChanged,
             enabled = !isListening,
             modifier = modifier
-                .padding(top = 10.dp, bottom = 10.dp, start = 10.dp)
+                .padding(top = 10.dp, bottom = 10.dp)
                 .fillMaxWidth()
                 .weight(1f)
                 .background(
@@ -259,8 +261,8 @@ fun MessageList(
 fun MessageItem(messageLog: Message, modifier: Modifier = Modifier, callback: (Any) -> Unit = {}) {
     val fromManager = messageLog.messageFromManager
     val chatBackground = when (fromManager) {
-        true  -> Color(0xFFACC7FA)
-        false -> Color(0xFFDBE2F6)
+        true  -> Blue2
+        false -> Blue1
     }
     val shape = when (fromManager) {
         true  -> RoundedCornerShape(0.dp, 15.dp, 15.dp, 15.dp)

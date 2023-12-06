@@ -2,13 +2,21 @@ package com.example.calendy.view.monthlyview
 
 
 import android.util.Log
+import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddCircleOutline
+import androidx.compose.material.icons.filled.Undo
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -40,6 +48,7 @@ import com.example.calendy.view.monthlyview.decorator.SundayDecorator
 import com.example.calendy.view.monthlyview.decorator.TitleDecorator
 import com.example.calendy.view.popup.AddButton
 import com.example.calendy.view.popup.PopupHeaderDate
+import com.example.calendy.view.popup.PopupHeaderTitle
 import com.example.calendy.view.popup.SwitchablePlanListPopup
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.CalendarMode
@@ -180,15 +189,34 @@ fun MonthlyPageKT(
         val planList = uiState.planLabelContainer.getPlansAt(popupDate.toDate())
         SwitchablePlanListPopup(
             planList = if (planList != null) planList else emptyList(),
-            header = { PopupHeaderDate(popupDate.toDate()) },
+            header = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    PopupHeaderDate(popupDate.toDate())
+                    IconButton(
+                        onClick = {onNavigateToEditPage(null,PlanType.SCHEDULE,popupDate.toDate(), null)},
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = "undo",
+                            tint = Color(0xFF000000),
+                            modifier = Modifier.size(30.dp)
+                        )
+                    }
+                }
+             },
             onDismissed = ::onListPopupDismissed,
             addButton = {
-                AddButton(
-                    onButtonClick = {onNavigateToEditPage(null,PlanType.SCHEDULE,popupDate.toDate(), null)},
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .align(Alignment.BottomEnd)
-                )
+//                AddButton(
+//                    onButtonClick = {onNavigateToEditPage(null,PlanType.SCHEDULE,popupDate.toDate(), null)},
+//                    modifier = Modifier
+//                        .padding(8.dp)
+//                        .align(Alignment.BottomEnd)
+//                )
             },
             onItemClick = { plan ->
                 onNavigateToEditPage(plan.id, plan.getPlanType(), null, null)

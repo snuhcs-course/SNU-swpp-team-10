@@ -109,9 +109,12 @@ class SendMessageWorker(
                 // handle result
                 // TODO: memo에 ; 가 들어가면, GPT가 SQL Injection이나 버그를 유발하는 SQL Query를 반환한다.
                 val queries = resultFromServer.trim('"').split(";").dropLast(1)
+                val gptMessage = addManagerMessage(
+                    managerContent = ManagerResponse.PLEASE_WAIT, userMessageId = userMessageId
+                )
                 for (query in queries) {
                     val selectedPlanList =
-                        sqlExecute(query.trim(), userMessageId = userMessageId) ?: emptyList()
+                        sqlExecute(query.trim(), gptMessage) ?: emptyList()
                     briefingPlanList.addAll(selectedPlanList)
                 }
             }
@@ -144,10 +147,8 @@ class SendMessageWorker(
     }
 
     // should update information to gptMessage
-    private suspend fun sqlExecute(gptQuery: String, userMessageId: Int): List<Plan>? {
-        val gptMessage = addManagerMessage(
-            managerContent = ManagerResponse.PLEASE_WAIT, userMessageId = userMessageId
-        )
+    private suspend fun sqlExecute(gptQuery: String, gptMessage: Message): List<Plan>? {
+
 
         // TODO: Refactor Me
         Log.d("GUN Worker", "Query Start: $gptQuery")
@@ -229,45 +230,68 @@ class SendMessageWorker(
         suspend fun updateGptResponseMessage(
             gptMessage: Message, planListSize: Int, queryType: QueryType, isSchedule: Boolean
         ) {
-            var messageString: String
-            var hasRevision = true
-            if (QueryType.NOT_FOUND==queryType) {
-                hasRevision = false
-                messageString = "찾으시는 플랜이 없어요"
-            } else if (planListSize==0) {
-                val planType = if (isSchedule) "일정" else "할 일"
-                messageString = when (queryType) {
-                    QueryType.INSERT                                     -> "말씀하신 ${planType}을 추가하지 못했어요."
-                    QueryType.UPDATE, QueryType.DELETE, QueryType.SELECT -> "말씀하신 ${planType}을 찾지 못했어요."
-                    else                                                 -> "죄송해요. 잘 이해하지 못했어요. "
-                }
-                hasRevision = false
+            val log : RevisionLog = if(gptMessage.content == ManagerResponse.PLEASE_WAIT) RevisionLog() else deserialize(gptMessage.content)
 
-            } else {
-                messageString = "AI 매니저가 "
-                if (isSchedule) messageString += "일정 "
-                else messageString += "할 일 "
-                when (queryType) {
-                    QueryType.INSERT -> messageString += "${planListSize}개를 추가했어요"
-                    QueryType.UPDATE -> messageString += "${planListSize}개를 수정했어요"
-                    QueryType.DELETE -> messageString += "${planListSize}개를 삭제했어요"
-                    QueryType.SELECT -> messageString += "${planListSize}개를 발견했어요"
-//                    QueryType.NOT_FOUND -> {messageString = "찾으시는 플랜이 없어요"
-//                        hasRevision=false
-//                    }
-                    else             -> {
-                        messageString = "죄송해요. 잘 이해하지 못했어요."
-                        hasRevision = false
-                    }
-                }
-                if (planListSize <= 0) hasRevision = false
 
+            when(queryType){
+                QueryType.INSERT     ->
+                    if(planListSize==0) log.added_fail++
+                    else log.added_success+=planListSize
+                QueryType.UPDATE     ->
+                    if(planListSize==0) log.updated_fail++
+                    else log.updated_success+=planListSize
+                QueryType.DELETE     ->
+                    if(planListSize==0) log.deleted_fail++
+                    else log.deleted_success+=planListSize
+                QueryType.SELECT     ->
+                    if(planListSize==0) log.select_fail++
+                    else log.select_success+=planListSize
+                QueryType.NOT_FOUND  ->
+                    log.select_fail++
+                QueryType.UNEXPECTED ->
+                    log.select_fail++
             }
-            messageRepository.update(
-                gptMessage.copy(
-                    content = messageString, hasRevision = hasRevision
-                )
-            )
+
+            val messageString = log.serialize()
+            val hasRevision = true  //always true. messages will be mapped in ui level
+
+//            var messageString: String
+//            var hasRevision = if(addTextMode) gptMessage.hasRevision else true
+//            if (QueryType.NOT_FOUND==queryType) {
+//                hasRevision = hasRevision || false
+//                messageString = "찾으시는 플랜이 없어요"
+//            } else if (planListSize==0) {
+//                val planType = if (isSchedule) "일정" else "할 일"
+//                messageString = when (queryType) {
+//                    QueryType.INSERT                                     -> "말씀하신 ${planType}을 추가하지 못했어요."
+//                    QueryType.UPDATE, QueryType.DELETE, QueryType.SELECT -> "말씀하신 ${planType}을 찾지 못했어요."
+//                    else                                                 -> "죄송해요. 잘 이해하지 못했어요. "
+//                }
+//                hasRevision = hasRevision || false
+//
+//            } else {
+//                messageString = "AI 매니저가 "
+//                if (isSchedule) messageString += "일정 "
+//                else messageString += "할 일 "
+//                when (queryType) {
+//                    QueryType.INSERT -> messageString += "${planListSize}개를 추가했어요"
+//                    QueryType.UPDATE -> messageString += "${planListSize}개를 수정했어요"
+//                    QueryType.DELETE -> messageString += "${planListSize}개를 삭제했어요"
+//                    QueryType.SELECT -> messageString += "${planListSize}개를 발견했어요"
+////                    QueryType.NOT_FOUND -> {messageString = "찾으시는 플랜이 없어요"
+////                        hasRevision=false
+////                    }
+//                    else             -> {
+//                        messageString = "죄송해요. 잘 이해하지 못했어요."
+//                        hasRevision = hasRevision || false
+//                    }
+//                }
+//                if (planListSize <= 0) hasRevision = hasRevision || false
+//
+//            }
+            gptMessage.content = messageString
+            gptMessage.hasRevision = hasRevision
+            messageRepository.update(gptMessage)
         }
 
         // 우선 기존 data를 모두 삭제해둔다.
