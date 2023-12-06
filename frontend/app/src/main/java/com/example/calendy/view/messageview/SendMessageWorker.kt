@@ -17,6 +17,7 @@ import com.example.calendy.data.maindb.plan.IPlanRepository
 import com.example.calendy.data.maindb.plan.Plan
 import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
+import com.example.calendy.data.network.BriefingBody
 import com.example.calendy.data.network.CalendyServerApi
 import com.example.calendy.data.network.MessageBody
 import com.example.calendy.data.rawsqldb.RawSqlDatabase
@@ -429,12 +430,16 @@ class SendMessageWorker(
         )
 
         try {
-            val allPlans = briefingPlanList.joinToString {
+            val plansString = briefingPlanList.joinToString {
                 it.toSummary { categoryId ->
                     allCategories.find { category -> category.id==categoryId }?.title ?: "None"
                 }
             }
-            val briefingResult = calendyServerApi.sendBriefingRequestToServer(allPlans)
+            val body=BriefingBody(
+                plansString = plansString,
+                time = Date().toLocalTimeString()
+            )
+            val briefingResult = calendyServerApi.sendBriefingRequestToServer(body)
             addManagerMessage(managerContent = briefingResult, userMessageId = userMessageId)
         } catch (e: Throwable) {
             Log.e("GUN Message Worker - Briefing", e.stackTraceToString())

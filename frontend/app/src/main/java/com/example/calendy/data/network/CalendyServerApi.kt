@@ -13,7 +13,7 @@ interface CalendyServerApi {
     @POST("manager/briefing")
     suspend fun sendBriefingRequestToServer(
         @Body
-        allPlans: String
+        body : BriefingBody
     ): String
 }
 
@@ -24,4 +24,9 @@ data class MessageBody(
     val category: String,
     val todo: String,
     val schedule: String
+)
+
+data class BriefingBody(
+    val plansString: String,
+    val time: String
 )
