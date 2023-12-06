@@ -5,6 +5,7 @@ import com.example.calendy.data.maindb.plan.Plan
 import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
+import com.example.calendy.utils.DateHelper.extract
 import com.example.calendy.utils.afterDays
 import com.example.calendy.utils.dateOnly
 import com.example.calendy.utils.equalDay
@@ -55,6 +56,8 @@ class PlanLabelContainer : Iterable<Pair<Date, LabelSlot<Plan>>> {
             val dateList = mutableListOf<Date>()
             var currentDate = startTime.dateOnly()
             val endDate = endTime.afterDays(1).dateOnly()
+            // val (_, _, _, hour, minute) = endTime.extract()
+            // val endDate = if (!(hour == 0 && minute == 0)) endTime.afterDays(1).dateOnly() else endTime.dateOnly()
             do {
                 // add label to slot
                 slots.putIfAbsent(currentDate, LabelSlot())

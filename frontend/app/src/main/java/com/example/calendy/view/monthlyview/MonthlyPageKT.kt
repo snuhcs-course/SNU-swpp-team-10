@@ -42,9 +42,12 @@ import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.CalendarMode
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView
 import com.prolificinteractive.materialcalendarview.format.ArrayWeekDayFormatter
+import com.prolificinteractive.materialcalendarview.format.DateFormatTitleFormatter
 import com.prolificinteractive.materialcalendarview.format.MonthArrayTitleFormatter
+import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 
 @Composable
 fun MonthlyPageKT(
@@ -84,7 +87,12 @@ fun MonthlyPageKT(
             calendar.apply {
 
                 // initial setting for calendar view
-                setTitleFormatter(MonthArrayTitleFormatter(customMonths))
+                setTitleFormatter(
+                    DateFormatTitleFormatter(
+                        SimpleDateFormat("yy년 MM월", Locale.KOREA)
+                    )
+                )
+                setHeaderTextAppearance(R.style.CalendarHeader)
                 setWeekDayFormatter(ArrayWeekDayFormatter(customWeekdays))
                 setTileHeightDp(-1)
                 setTopBarHeightDp(60)
