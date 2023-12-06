@@ -220,3 +220,54 @@ app.post('/manager/send', async (req, res) => {
 });
 
 
+
+app.post('/manager/briefing', async (req, res) => {
+    const plansString = req.body.plansString;
+    const time = req.body.time;
+    const userMessage=`Current Time: ${time}
+    ${plansString}`
+   
+   
+    const systemPrompt = `SCHEDULE is an event that has both start time & end time. TODO is a task that only has due time. The term PLAN includes both TODO and SCHEDULE. Priority is from 1~5, higher the more important. In TODO, complete is a boolean value that represents whether TODO is complete or not.
+
+    You will be given records from SCHEDULE and TODO tables. As the user's personal manager, your job is to give a brief summary of the user's plans in Korean. Start with "매니저가 찾은 계획들을 요약해드릴게요!". End with encouraging text. Do not output any other text.
+    
+    Be as friendly and casual as possible. Omit unimportant information. Do not include year when addressing time unless it is far from current time.`;
+   
+    const messages=[
+        {
+            role: "system",
+            content: systemPrompt 
+        }]
+
+    messages.push({
+        role: "user",
+        content: userMessage 
+    })
+    
+
+
+    try {
+        const response = await axios.post(OPENAI_API_URL, {
+            model: "gpt-4",
+            messages: messages,
+            temperature: 0
+        }, {
+            headers: {
+                'Authorization': `Bearer ${OPENAI_API_KEY}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const gptResponse = response.data.choices[0].message.content;
+        //gptResponse is a string-formatted json with array of string sql queries in attribute "queries"
+        res.send(gptResponse); 
+
+    } catch (error) {
+        console.error('Error querying OpenAI:', error.response.data);
+        res.status(500).json({ error: 'Failed to get a response from OpenAI' });
+    }
+});
+
+
+
