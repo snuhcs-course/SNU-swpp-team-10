@@ -9,8 +9,8 @@ import com.example.calendy.data.maindb.category.ICategoryRepository
 import com.example.calendy.data.maindb.history.IHistoryRepository
 import com.example.calendy.data.maindb.message.IMessageRepository
 import com.example.calendy.data.maindb.plan.IPlanRepository
+import com.example.calendy.data.maindb.rawplan.RawPlanRepository
 import com.example.calendy.data.network.CalendyServerApi
-import com.example.calendy.data.rawsqldb.RawSqlDatabase
 
 class CustomWorkerFactory(
     private val calendyDatabase: CalendyDatabase,
@@ -19,7 +19,7 @@ class CustomWorkerFactory(
     private val messageRepository: IMessageRepository,
     private val historyRepository: IHistoryRepository,
     private val calendyServerApi: CalendyServerApi,
-    private val rawSqlDatabase: RawSqlDatabase
+    private val rawPlanRepository: RawPlanRepository
 ) : WorkerFactory() {
     /**
      * Override this method to implement your custom worker-creation logic.  Use
@@ -49,12 +49,13 @@ class CustomWorkerFactory(
                 SendMessageWorker(
                     appContext,
                     workerParameters,
+                    calendyDatabase = calendyDatabase,
                     calendyServerApi = calendyServerApi,
                     messageRepository = messageRepository,
                     planRepository = planRepository,
                     historyRepository = historyRepository,
                     categoryRepository = categoryRepository,
-                    rawSqlDatabase = rawSqlDatabase
+                    rawPlanRepository = rawPlanRepository
                 )
             }
 

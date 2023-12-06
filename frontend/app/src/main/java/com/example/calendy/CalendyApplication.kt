@@ -16,15 +16,16 @@ import com.example.calendy.data.maindb.plan.schedule.IScheduleRepository
 import com.example.calendy.data.maindb.plan.schedule.ScheduleRepository
 import com.example.calendy.data.maindb.plan.todo.ITodoRepository
 import com.example.calendy.data.maindb.plan.todo.TodoRepository
+import com.example.calendy.data.maindb.rawplan.RawPlanRepository
 import com.example.calendy.data.maindb.repeatgroup.IRepeatGroupRepository
 import com.example.calendy.data.maindb.repeatgroup.RepeatGroupRepository
 import com.example.calendy.data.network.CalendyServerApi
 import com.example.calendy.data.network.RetrofitClient
-import com.example.calendy.data.rawsqldb.RawSqlDatabase
+
 import com.example.calendy.view.messageview.CustomWorkerFactory
 
 class CalendyApplication : Application(), Configuration.Provider {
-    lateinit var container: IAppContainer
+    lateinit var container: AppContainer
     override fun onCreate() {
         super.onCreate()
         container = AppContainer(this)
@@ -39,7 +40,7 @@ class CalendyApplication : Application(), Configuration.Provider {
                 planRepository = container.planRepository,
                 historyRepository = container.historyRepository,
                 categoryRepository = container.categoryRepository,
-                rawSqlDatabase = container.rawSqlDatabase
+                rawPlanRepository = container.rawPlanRepository
             )
         ).build()
 }
@@ -53,7 +54,7 @@ interface IAppContainer {
     val messageRepository: IMessageRepository
     val repeatGroupRepository: IRepeatGroupRepository
     val historyRepository: IHistoryRepository
-    val rawSqlDatabase: RawSqlDatabase
+    val rawPlanRepository: RawPlanRepository
     val calendyServerApi: CalendyServerApi // Network
 }
 
@@ -88,7 +89,9 @@ class AppContainer(private val context: Context) : IAppContainer {
     override val historyRepository: IHistoryRepository by lazy {
         HistoryRepository(db.managerHistoryDao(), db.savedScheduleDao(), db.savedTodoDao())
     }
-    override val rawSqlDatabase: RawSqlDatabase = RawSqlDatabase.getDatabase(context)
+    override val rawPlanRepository: RawPlanRepository by lazy {
+        RawPlanRepository(rawScheduleDao = db.rawScheduleDao(), rawTodoDao = db.rawTodoDao())
+    }
 
     override val calendyServerApi: CalendyServerApi by lazy {
         RetrofitClient.instance

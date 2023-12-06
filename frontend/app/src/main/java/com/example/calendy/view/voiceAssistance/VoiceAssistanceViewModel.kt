@@ -19,7 +19,6 @@ import com.example.calendy.data.maindb.message.IMessageRepository
 import com.example.calendy.data.maindb.message.Message
 import com.example.calendy.data.maindb.plan.IPlanRepository
 import com.example.calendy.data.network.CalendyServerApi
-import com.example.calendy.data.rawsqldb.RawSqlDatabase
 import com.example.calendy.view.messageview.ManagerAI
 import com.example.calendy.view.messageview.SendMessageWorker
 import kotlinx.coroutines.Job

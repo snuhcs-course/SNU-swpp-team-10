@@ -5,6 +5,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.viewModelScope
 import androidx.sqlite.db.SimpleSQLiteQuery
+import com.example.calendy.data.maindb.CalendyDatabase
 import com.example.calendy.data.maindb.category.ICategoryRepository
 import com.example.calendy.data.maindb.history.IHistoryRepository
 import com.example.calendy.data.maindb.history.ManagerHistory
@@ -14,9 +15,9 @@ import com.example.calendy.data.maindb.plan.IPlanRepository
 import com.example.calendy.data.maindb.plan.Plan
 import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
+import com.example.calendy.data.maindb.rawplan.RawPlanRepository
 import com.example.calendy.data.network.CalendyServerApi
 import com.example.calendy.data.network.MessageBody
-import com.example.calendy.data.rawsqldb.RawSqlDatabase
 import com.example.calendy.utils.DateHelper.toLocalTimeString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,11 +27,12 @@ import kotlinx.coroutines.withContext
 import java.util.Date
 
 class ManagerAI(
+    private val calendyDatabase: CalendyDatabase,
     private val planRepository: IPlanRepository,
     private val messageRepository: IMessageRepository,
     private val categoryRepository: ICategoryRepository,
     private val calendyServerApi: CalendyServerApi,
-    private val rawSqlDatabase: RawSqlDatabase,
+    private val rawPlanRepository: RawPlanRepository,
     private val historyRepository: IHistoryRepository,
 ) {
 
@@ -249,16 +251,17 @@ class ManagerAI(
             )
         }
         // 우선 기존 data를 모두 삭제해둔다.
-        rawSqlDatabase.deleteAll()
+        rawPlanRepository.deleteAll()
 
         try {
             val planListSize: Int
             when(queryType){
                 QueryType.INSERT -> {
                     // RawSqlDB에 INSERT sqlQuery 실행
-                    rawSqlDatabase.execSql(gptQuery)
+                    val rawGptQuery=gptQuery.substring(0, 12)+"raw_"+gptQuery.substring(12)
+                    calendyDatabase.execSql(gptQuery)
                     // RawSqlDB에서 Select All
-                    val planList = rawSqlDatabase.getAllPlans()
+                    val planList = rawPlanRepository.getAllPlans()
 
                     for (plan in planList) {
                         // 그 결과를 MainDB에 삽입
@@ -276,31 +279,13 @@ class ManagerAI(
                 QueryType.UPDATE -> {
                     val originalPlanList = getAffectedPlansFromGptQuery()
 
-                    // RawSqlDB에 복사
-                    for (plan in originalPlanList) {
-                        val originalPlanId = plan.id
 
-                        // Saved Plan에 변경되기 전의 plan 저장하기
-                        val savedPlanId = historyRepository.insertSavedPlanFromPlan(plan).toInt()
 
-                        // 결과를 Empty DB에 삽입. 이때 plan의 id가 유지된다.
-                        rawSqlDatabase.insertFromPlan(plan)
+                    calendyDatabase.execSql(gptQuery)
 
-                        // Manager가 변경할 예정인 사항을 기록
-                        insertHistory(gptMessage, isSchedule, QueryType.UPDATE, currentId = originalPlanId, savedId = savedPlanId)
-                    }
-
-                    // RawSqlDB에 update sqlQuery 실행
-                    rawSqlDatabase.execSql(gptQuery)
-                    // RawSqlDB에 Select All
-                    val planList = rawSqlDatabase.getAllPlans()
-                    // 그 결과를 MainDB에 반영하기
-                    for (plan in planList) {
-                        planRepository.update(plan)
-                    }
 
                     //initialize planListSize for updating message
-                    planListSize= planList.size
+                    planListSize= originalPlanList.size
 
                 }
                 QueryType.DELETE ->{
