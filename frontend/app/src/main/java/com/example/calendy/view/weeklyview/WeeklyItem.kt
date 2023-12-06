@@ -499,7 +499,7 @@ fun ClickableTimeSlotBox(
         add(Calendar.DAY_OF_YEAR, day)
         set(Calendar.HOUR_OF_DAY, hour)
     }.time
-    val endDate = clickedDateTime.applyTime(hour + 1, 0)
+    val endDate = clickedDateTime.applyTime(hour+1, 0)
 
     Box(modifier = Modifier
         .offset(x = boxX.dp, y = boxY.dp)
@@ -556,8 +556,8 @@ fun LongPlanStack(
             Log.d("jm", "schedule: ${schedule.title}, width: $itemWidth")
             val placeable = measurable.measure(
                 constraints.copy(
-                    minWidth = max((itemWidth-3.dp).roundToPx(),1),
-                    maxWidth = max((itemWidth-3.dp).roundToPx(),1),
+                    minWidth = max((itemWidth-3.dp).roundToPx(),0),
+                    maxWidth = max((itemWidth-3.dp).roundToPx(),0),
                     minHeight = 40,
                     maxHeight = 40,
                 )

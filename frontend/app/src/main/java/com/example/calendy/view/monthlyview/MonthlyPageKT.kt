@@ -169,13 +169,23 @@ fun MonthlyPageKT(
                 Log.d("BANG", "mcv redraw")
             }
         )
-
+        fun clickAction() {
+            val currentTime = Calendar.getInstance()
+            val startCalendar = Calendar.getInstance()
+            val endCalendar = Calendar.getInstance()
+            startCalendar.time = uiState.selectedDate.toDate()
+            endCalendar.time = uiState.selectedDate.toDate()
+            startCalendar.set(Calendar.HOUR_OF_DAY, currentTime.get(Calendar.HOUR_OF_DAY))
+            endCalendar.set(Calendar.HOUR_OF_DAY, currentTime.get(Calendar.HOUR_OF_DAY))
+            endCalendar.add(Calendar.HOUR_OF_DAY, 1)
+            onNavigateToEditPage(null, PlanType.SCHEDULE, startCalendar.time, endCalendar.time)
+        }
         FloatingActionButton(
             modifier = Modifier
                 .padding(16.dp)
                 .align(Alignment.BottomEnd),
             onClick = {
-                onNavigateToEditPage(null, PlanType.SCHEDULE, uiState.selectedDate.toDate(), null)
+                clickAction()
             },
             containerColor = Color(0xFF80ACFF),
             contentColor = androidx.compose.ui.graphics.Color.White,
@@ -197,8 +207,19 @@ fun MonthlyPageKT(
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     PopupHeaderDate(popupDate.toDate())
+                    fun clickAction() {
+                        val currentTime = Calendar.getInstance()
+                        val startCalendar = Calendar.getInstance()
+                        val endCalendar = Calendar.getInstance()
+                        startCalendar.time = popupDate.toDate()
+                        endCalendar.time = popupDate.toDate()
+                        startCalendar.set(Calendar.HOUR_OF_DAY, currentTime.get(Calendar.HOUR_OF_DAY))
+                        endCalendar.set(Calendar.HOUR_OF_DAY, currentTime.get(Calendar.HOUR_OF_DAY))
+                        endCalendar.add(Calendar.HOUR_OF_DAY, 1)
+                        onNavigateToEditPage(null, PlanType.SCHEDULE, startCalendar.time, endCalendar.time)
+                    }
                     IconButton(
-                        onClick = {onNavigateToEditPage(null,PlanType.SCHEDULE,popupDate.toDate(), null)},
+                        onClick = {clickAction()},
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Add,
