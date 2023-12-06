@@ -22,7 +22,7 @@ public class MultiPlanSpan implements LineBackgroundSpan {
     public MultiPlanSpan(int index, int priority, String title, PlanType planType) {
         this.index = index;
         this.bgColor = PriorityColor(priority);
-        if (priority > 3) this.textColor= 0xffffffff;
+        if (priority >= 3) this.textColor= 0xffffffff;
         else this.textColor = 0xff000000;
         this.title=title;
         this.planType=planType;

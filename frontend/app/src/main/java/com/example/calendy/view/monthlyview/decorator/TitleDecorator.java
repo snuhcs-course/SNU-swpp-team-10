@@ -38,7 +38,7 @@ public class TitleDecorator implements DayViewDecorator {
 
     @Override
     public void decorate(DayViewFacade view) {
-        int max=5;  //prevent rendering too many plans
+        int max=7;  //prevent rendering too many plans
         for(int i =0;i<max;i++){
             var label=planLabel.getItemAt(i);
             if(label == null) continue;

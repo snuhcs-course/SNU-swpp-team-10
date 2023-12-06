@@ -27,7 +27,7 @@ public class SinglePlanSpan implements LineBackgroundSpan {
 public SinglePlanSpan(int index, int priority, String title, PlanType planType, int dayLength, int dayOffset, Boolean completed){
         this.index = index;
         this.bgColor = PriorityColor(priority);
-        if (planType==PlanType.SCHEDULE && priority > 3) this.textColor= 0xffffffff;
+        if (planType==PlanType.SCHEDULE && priority >= 3) this.textColor= 0xffffffff;
         else this.textColor = completed? 0xff808080 : 0xff000000;
         this.title=title;
         this.planType=planType;
