@@ -22,6 +22,7 @@ import com.example.calendy.data.network.CalendyServerApi
 import com.example.calendy.data.rawsqldb.RawSqlDatabase
 import com.example.calendy.view.messageview.ManagerAI
 import com.example.calendy.view.messageview.SendMessageWorker
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -43,11 +44,14 @@ class VoiceAssistanceViewModel(
 
     // Created when getSpeechRecognizer is called
     private var speechRecognizer: SpeechRecognizer? = null
+    private var onCloseCallback: () -> Unit = {}
+    private var closeJob: Job? = null
 
 //    private val managerAi = ManagerAI(planRepository, messageRepository, categoryRepository, calendyServerApi, rawSqlDatabase, historyRepository)
 
     private fun resetState() {
         _uiState.update { VoiceAssistanceUiState() }
+        closeJob?.cancel()
     }
 
     fun setUserInputText(text: String) {
@@ -60,13 +64,14 @@ class VoiceAssistanceViewModel(
         sendQuery(request)
     }
 
-    fun startVoiceRecognition(context: Context) {
+    fun startVoiceRecognition(context: Context, onCloseCallback: () -> Unit) {
         // Permission is already granted in MainActivity
 
         // Not sure why returning. Commented out for now
 //        if(_uiState.value.listenerState == VoiceAssistanceState.LISTENING) return
 
         resetState()
+        deactivateSpeechRecognition()
 
         // Toggle Speech Recognition
 
@@ -80,6 +85,7 @@ class VoiceAssistanceViewModel(
 
         getSpeechRecognizer(context).startListening(intent)
 
+        this.onCloseCallback=onCloseCallback
         _uiState.update { VoiceAssistanceUiState(
             userInputText = "",
             AiText = "캘린디가 듣고 있어요!",
@@ -87,6 +93,18 @@ class VoiceAssistanceViewModel(
         ) }
     }
 
+    private fun closeDialog() {
+        // call function after 2 seconds
+        closeJob = viewModelScope.launch {
+            kotlinx.coroutines.delay(2500)
+            onCloseCallback()
+        }
+    }
+    private fun deactivateSpeechRecognition() {
+        speechRecognizer?.cancel()
+        speechRecognizer?.destroy()
+        speechRecognizer = null
+    }
     fun stopVoiceRecognition(context: Context) {
         getSpeechRecognizer(context).stopListening()
         _uiState.update { current -> current.copy(listenerState = VoiceAssistanceState.DONE) }
@@ -94,19 +112,10 @@ class VoiceAssistanceViewModel(
 
     // Event Listener for speech recognizer
     private val recognitionListener: RecognitionListener = object : RecognitionListener {
-        private fun activateSpeechRecognition() {
 
-        }
-
-        private fun deactivateSpeechRecognition() {
-            speechRecognizer?.cancel()
-            speechRecognizer?.destroy()
-            speechRecognizer = null
-        }
 
         // 말하기 시작할 준비가되면 호출
         override fun onReadyForSpeech(params: Bundle) {
-            activateSpeechRecognition()
         }
 
         // 말하기 시작했을 때 호출
@@ -144,6 +153,7 @@ class VoiceAssistanceViewModel(
             Log.d("VoiceAssistanceViewModel", "onError: $message")
             _uiState.update { current -> current.copy(AiText = "죄송해요. 문제가 생긴 것 같아요😢", listenerState = VoiceAssistanceState.ERROR) }
             deactivateSpeechRecognition()
+            closeDialog()
         }
 
         // 인식 결과가 준비되면 호출
@@ -156,6 +166,7 @@ class VoiceAssistanceViewModel(
             _uiState.update { current -> current.copy(userInputText = text, AiText = "알겠습니다. 조금만 기다려주세요!😊", listenerState = VoiceAssistanceState.DONE) }
             sendRequest(text)
             deactivateSpeechRecognition()
+            closeDialog()
         }
 
         // 부분 인식 결과를 사용할 수 있을 때 호출
