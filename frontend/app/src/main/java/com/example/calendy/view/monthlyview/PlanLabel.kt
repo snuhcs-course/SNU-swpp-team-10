@@ -58,9 +58,8 @@ class PlanLabelContainer : Iterable<Pair<Date, LabelSlot<Plan>>> {
             // get date list between start and end date
             val dateList = mutableListOf<Date>()
             var currentDate = startDate
-            val lastDate = endDate.afterDays(1)
-            // val (_, _, _, hour, minute) = endTime.extract()
-            // val endDate = if (!(hour == 0 && minute == 0)) endTime.afterDays(1).dateOnly() else endTime.dateOnly()
+            val (_, _, _, hour, minute) = et.extract()
+            val lastDate = if (!(hour == 0 && minute == 0)) endDate.afterDays(1) else endDate
 
             do {
                 // add label to slot
@@ -68,7 +67,7 @@ class PlanLabelContainer : Iterable<Pair<Date, LabelSlot<Plan>>> {
                 // add date to date list
                 dateList.add(currentDate)
                 currentDate = currentDate.afterDays(1)
-            } while (!currentDate.equalDay(lastDate))
+            } while (currentDate.before(lastDate))
 
             // find smallest index that does not have a plan label
             var index = -1

@@ -131,7 +131,8 @@ object DateHelper {
 
 fun getDiffBetweenDates(startDate: Date, endDate: Date): Int {
     val t1 = startDate.time / (1000 * 60 * 60 * 24) //start date 00:00:00
-    val t2 = endDate.time / (1000 * 60 * 60 * 24) //end date 00:00:00
+    // Consider (endDate - 1) if endDate is 00:00
+    val t2 = (endDate.time - 1) / (1000 * 60 * 60 * 24) //end date 00:00:00
     return (t2 - t1).toInt()
 }
 

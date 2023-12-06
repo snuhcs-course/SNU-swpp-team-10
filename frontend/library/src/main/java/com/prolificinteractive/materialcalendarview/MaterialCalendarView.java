@@ -235,7 +235,7 @@ public class MaterialCalendarView extends ViewGroup {
     private int tileWidth = INVALID_TILE_DIMENSION;
     // GUN
     private int topBarHeight = INVALID_TILE_DIMENSION; // Unspecified
-    private int weekdayBarHeight = INVALID_TILE_DIMENSION;
+    private int weekdayBarHeight = INVALID_TILE_DIMENSION; // You should set this by state
     @SelectionMode
     private int selectionMode = SELECTION_MODE_SINGLE;
     private boolean allowClickDaysOutsideCurrentMonth = true;
@@ -621,15 +621,6 @@ public class MaterialCalendarView extends ViewGroup {
 
     public int getWeekdayBarHeight() {
         return weekdayBarHeight;
-    }
-
-    public void setWeekdayBarHeightDp(int dp) {
-        if (dp == -1) {
-            weekdayBarHeight = INVALID_TILE_DIMENSION;
-        }
-
-        weekdayBarHeight = dpToPx(dp);
-        requestLayout();
     }
 
     private int dpToPx(int dp) {

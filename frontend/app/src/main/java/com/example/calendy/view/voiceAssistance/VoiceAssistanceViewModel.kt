@@ -61,8 +61,10 @@ class VoiceAssistanceViewModel(
     }
 
     fun startVoiceRecognition(context: Context) {
-        if(_uiState.value.listenerState == VoiceAssistanceState.LISTENING) return
-        // Permission is already granted
+        // Permission is already granted in MainActivity
+
+        // Not sure why returning. Commented out for now
+//        if(_uiState.value.listenerState == VoiceAssistanceState.LISTENING) return
 
         resetState()
 

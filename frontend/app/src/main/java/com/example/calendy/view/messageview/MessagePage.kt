@@ -153,22 +153,6 @@ fun MessageInputField(
     modifier: Modifier = Modifier,
     keyboardController: SoftwareKeyboardController? = LocalSoftwareKeyboardController.current
 ) {
-    val context = LocalContext.current
-
-    // This is the launcher for permission request
-    val launcher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            // Permission Accepted: Do something
-            Log.d("GUN", "MIC PERMISSION GRANTED")
-
-        } else {
-            // Permission Denied: Do something
-            Log.d("GUN", "MIC PERMISSION DENIED")
-        }
-    }
-
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
