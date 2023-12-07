@@ -155,6 +155,14 @@ const assistant_exemplars=[
     {
         "role": "assistant",
         "content": `"INSERT INTO TODO (title, due_time, category_id) VALUES ('알골 과제', '2023-11-23 23:59:59', 1);"`
+    },
+    {
+        "role": "user",
+        "content": "밥먹기 3시간 이후에 공과금 내기"
+    },
+    {
+        "role": "assistant",
+        "content": `"INSERT INTO TODO (title, due_time) SELECT '공과금 내기', datetime(due_time, '+3 hours') FROM TODO WHERE id=2;"`
     }
 
 ]
