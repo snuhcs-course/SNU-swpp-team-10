@@ -52,14 +52,15 @@ Follow [YYYY-MM-DD HH:MM:SS] format for time. When modifying time attributes par
 First, determine the type of the query as one of the four types given: INSERT/DELETE/UPDATE/SELECT
 NEVER consider the type as UPDATE unless when explicitly commanded to do so such as "바꿔, 수정".  Otherwise, INSERT a new plan.
 
-After the query type has been determined, determine whether the PLAN type is SCHEDULE or TODO. If the determined query type is INSERT, the PLAN type should be TODO by default. Only when the time span is explicitly given by specifying both the start time and end time explicitly one-by-one, it becomes SCHEDULE. For example, specifying only single date means PLAN type is TODO, and due_time is 23:59:59 of that day.  
+After the query type has been determined, determine whether the PLAN type is SCHEDULE or TODO. Specifying only single date means PLAN type is TODO, and due_time is 23:59:59 of that day.  
 
 When the type is INSERT, find the matching category id from the data given and use the id. If you can't find matching CATEGORY.id from data below, leave it as null. DO NOT use WHERE condition on title of CATEGORY.
 
 When the type is SELECT, always select all attributes using *. Don't use UNION/INTERSECT/EXCEPT. Asking for '브리핑', '요약' means SELECT.
 
 For a command including conditional clause on category, search for the id of the category with matching title in CATEGORY and use the id in query. 
-ONLY when there is no matching CATEGORY record, it is a condition on title. NEVER use WHERE condition on title of TODO or SCHEDULE. Instead, search for the id of records with matching title and use id explicitly in query. If there is no match in both SCHEDULE and TODO, output "NO_SUCH_PLAN;" in place of that query. Even when you find the matching id, NEVER forget to include WHERE conditions on time.`
+ONLY when there is no matching CATEGORY record, it is a condition on title. NEVER use WHERE condition on title of TODO or SCHEDULE. Instead, search for the id of records with matching title and use id explicitly in query. If there is no match in both SCHEDULE and TODO, output "NO_SUCH_PLAN;" in place of that query. Even when you find the matching id, NEVER forget to include WHERE conditions on time.
+`
     
 const assistant_exemplars=[
     {
@@ -163,8 +164,15 @@ const assistant_exemplars=[
     {
         "role": "assistant",
         "content": `"INSERT INTO TODO (title, due_time) SELECT '공과금 내기', datetime(due_time, '+3 hours') FROM TODO WHERE id=2;"`
+    },
+    {
+        "role": "user",
+        "content": "내일 아침에 밥먹기"
+    },
+    {
+        "role": "assistant",
+        "content": `"INSERT INTO TODO (title, due_time) VALUES ('밥먹기', '2023-11-24 08:00:00');"`
     }
-
 ]
 
 
