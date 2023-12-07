@@ -10,6 +10,7 @@ import com.example.calendy.utils.toFirstDateOfMonth
 import com.example.calendy.utils.toLastDateOfMonth
 import com.example.calendy.view.monthlyview.decorator.TitleDecorator
 import com.prolificinteractive.materialcalendarview.CalendarDay
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,7 +66,7 @@ class MonthlyViewModel(
 
     //to toggle tod0's isComplete
     fun updatePlan(plan: Plan){
-        viewModelScope.launch { planRepository.update(plan) }
+        viewModelScope.launch(context = Dispatchers.IO) { planRepository.update(plan) }
     }
 
     private fun updatePlanList(planList:List<Plan>)
