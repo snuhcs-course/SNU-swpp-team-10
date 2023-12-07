@@ -248,13 +248,29 @@ app.post('/manager/briefing', async (req, res) => {
 
     You will be given records from SCHEDULE and TODO tables. As the user's personal manager, your job is to give a brief summary of the user's plans in Korean. Start with "매니저가 찾은 계획들을 요약해드릴게요!". End with encouraging text. Do not output any other text.
     
-    Be as friendly and casual as possible. Omit unimportant information. Do not include year when addressing time unless it is far from current time.`;
-   
+    Be as friendly and casual as possible. Omit unimportant information. Do not include year when addressing time unless it is  far from current time. Try not to exceed 500 characters including blank spaces. `
+    
     const messages=[
         {
             role: "system",
             content: systemPrompt 
-        }]
+        },
+        {
+            role: "user",
+            content: `Current Time:2023-10-21 09:00:00
+            Todo(title=안녕, dueTime=Tue Dec 05 20:10:52 GMT+09:00 2023, complete=false, memo=, category=만남, priority=3), Todo(title=시험, dueTime=Thu Dec 07 20:11:15 GMT+09:00 2023, complete=false, memo=, category=학교, priority=4), Schedule(title=수업, startTime=Wed Dec 06 14:11:00 GMT+09:00 2023, endTime=Sat Dec 02 15:11:00 GMT+09:00 2023, memo=, category=None, priority=4)`
+
+        },
+        {
+            role: "assistant",
+            content:`매니저가 찾은 계획들을 요약해드릴게요! 
+
+            먼저, 2023년 12월 5일 화요일에 '안녕'이라는 만남이 예정되어 있어요. 중요도는 3으로, 꽤 중요한 일정이네요. 그리고 12월 7일 목요일에는 '시험'이 있어요. 이건 중요도가 4로, 꽤 중요한 일정이니 잊지 마세요! 그리고 12월 6일 수요일에는 '수업'이 있어요. 이것도 중요도가 4로, 꼭 참석해야 할 일정이에요.
+            
+            모든 일정을 잘 기억하고, 준비해두세요! 화이팅하세요!`
+
+        }
+    ]
 
     messages.push({
         role: "user",
