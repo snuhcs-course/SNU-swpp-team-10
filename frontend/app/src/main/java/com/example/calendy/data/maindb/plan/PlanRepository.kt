@@ -44,12 +44,15 @@ class PlanRepository(
             }
 
             return schedule.let {
-                // Check if categoryId satisfies foreign key constraint
-                if (category==null) {
-                    it.copy(categoryId = null)
+                // Check if startTime <= endTime
+                if (it.startTime > it.endTime) {
+                    it.copy(endTime = it.startTime)
                 } else {
-                    it.copy(categoryId = category.id)
+                    it
                 }
+            }.run {
+                // Check if categoryId satisfies foreign key constraint (if not, set categoryId to null)
+                copy(categoryId = category?.id)
             }.let {
                 // Check if repeatGroupId satisfies foreign key constraint
                 if (repeatGroup==null) {
