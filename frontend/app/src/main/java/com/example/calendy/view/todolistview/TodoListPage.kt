@@ -118,7 +118,7 @@ fun ToDoListPage(
                 text = "TODO List",
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(vertical = 10.dp, horizontal = 20.dp).fillMaxWidth(),
+                modifier = Modifier.padding(top = 20.dp, bottom = 10.dp, start=20.dp,end=20.dp).fillMaxWidth(),
 //                textAlign = TextAlign.Center
             )
           },
@@ -211,7 +211,7 @@ fun ToDoItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(top = 8.dp, bottom = 8.dp, start = 16.dp, end =8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {

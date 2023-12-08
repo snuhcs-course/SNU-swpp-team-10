@@ -330,12 +330,14 @@ fun WeeklyTable(
         }
         Layout(
             content = {
-                schedules.sortedBy(Schedule::startTime).forEach { schedule ->
+                schedules.filter{ s-> s.startTime.before(uiState.currentWeek.second) && s.endTime.after(uiState.currentWeek.first)}
+                    .sortedBy(Schedule::startTime).forEach { schedule ->
                     Box(modifier = Modifier.scheduleData(schedule = schedule)) {
                         scheduleContent(schedule)
                     }
                 }
-                todos.sortedBy(Todo::dueTime).forEach { todo ->
+                todos.filter{ t-> t.dueTime.before(uiState.currentWeek.second) && t.dueTime.after(uiState.currentWeek.first)}
+                    .sortedBy(Todo::dueTime).forEach { todo ->
                     Box(modifier = Modifier.todoData(todo = todo)) {
                         todoContent(todo)
                     }
