@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -40,6 +43,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.ParentDataModifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -49,9 +53,11 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.calendy.data.maindb.plan.PlanType
 import com.example.calendy.data.maindb.plan.Schedule
 import com.example.calendy.data.maindb.plan.Todo
+import com.example.calendy.ui.theme.bottomBorder
 import com.example.calendy.ui.theme.getColor
 import com.example.calendy.utils.applyTime
 import java.text.SimpleDateFormat
@@ -77,8 +83,9 @@ fun ScheduleItem(
             .fillMaxSize()
             .background(
                 schedule
-                    .getColor()
-                    .copy(alpha = 0.6f)
+                    .getColor(),
+//                    .copy(alpha = 0.6f),
+                RoundedCornerShape(4.dp)
             )
             .clickable(onClick = clickAction)
             .padding(), contentAlignment = Alignment.Center
@@ -86,8 +93,10 @@ fun ScheduleItem(
         Text(
             text = schedule.title,
             style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Bold,
+//            fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
+            color = if( schedule.priority>=3) Color.White else Color.Black,
+            maxLines = 1,
         )
     }
 }
@@ -216,8 +225,8 @@ fun WeekHeader(
     val calendar = Calendar.getInstance()
     calendar.time = uiState.currentWeek.first
     val dayFormatter = SimpleDateFormat("E\nd", Locale.getDefault())
-    Column {
-        Row(modifier = modifier) {
+    Column(modifier= Modifier.bottomBorder(0.5f.dp,Color.LightGray)) {
+        Row(modifier = modifier.bottomBorder(0.5f.dp,Color.LightGray)) {
             val numDays = 7
             repeat(numDays) { _ ->
                 val dateText = dayFormatter.format(calendar.time)
@@ -227,21 +236,27 @@ fun WeekHeader(
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(4.dp)
+                            .padding(4.dp),
+                        fontSize= 12.sp,
+                        color = when (calendar.get(Calendar.DAY_OF_WEEK)) {
+                            Calendar.SUNDAY -> Color.Red
+                            Calendar.SATURDAY -> Color.Blue
+                            else -> Color.Black
+                        }
                     )
                 }
                 calendar.add(Calendar.DAY_OF_MONTH, 1)
             }
         }
-        if(multipleDaySchedules.isNotEmpty()){
+//        if(multipleDaySchedules.isNotEmpty()){
             LongPlanStack(
                 modifier = modifier,
                 uiState = uiState,
                 dayWidth = dayWidth,
                 onNavigateToEditPage = onNavigateToEditPage
             )
-        }
-        Spacer(modifier = modifier.padding(bottom = 10.dp))
+//        }
+//        Spacer(modifier = modifier.padding(bottom = 10.dp))
     }
 
 }
@@ -259,14 +274,15 @@ fun WeekSidebar(
         set(Calendar.MILLISECOND, 0)
     }
 
-    Column(modifier = modifier) {
+    Column(modifier = modifier.border(0.5f.dp, Color.LightGray)) {
         repeat(24) { _ ->
             val hourText = hourFormatter.format(calendar.time)
-            Box(modifier = Modifier.height(hourHeight)) {
+            Box(modifier = Modifier.height(hourHeight).bottomBorder((0.5f).dp,Color.LightGray)) {
                 Text(
                     text = hourText, modifier = modifier
                         .fillMaxHeight()
-                        .padding(4.dp)
+                        .padding(4.dp),
+                    fontSize= 12.sp,
                 )
             }
             calendar.add(Calendar.HOUR_OF_DAY, 1)
@@ -333,7 +349,7 @@ fun WeeklyTable(
                             dividerColor,
                             start = Offset(0f, (it + 1) * hourHeight.toPx()),
                             end = Offset(size.width, (it + 1) * hourHeight.toPx()),
-                            strokeWidth = 1.dp.toPx()
+                            strokeWidth = 0.5f.dp.toPx()
                         )
                     }
                     repeat(numDays - 1) {
@@ -341,7 +357,7 @@ fun WeeklyTable(
                             dividerColor,
                             start = Offset((it + 1) * dayWidth.toPx(), 0f),
                             end = Offset((it + 1) * dayWidth.toPx(), size.height),
-                            strokeWidth = 1.dp.toPx()
+                            strokeWidth = 0.5f.dp.toPx()
                         )
                     }
                 },
@@ -526,7 +542,7 @@ fun LongPlanStack(
     val schedules = uiState.multipleDaySchedules
     val currentWeek = uiState.currentWeek
 
-    Layout(modifier = modifier ,content = {
+    Layout(modifier = modifier.padding(vertical=5.dp).height(36.dp) ,content = {
         schedules.sortedBy(Schedule::startTime).forEach { schedule ->
             Box(modifier = Modifier.scheduleData(schedule = schedule)) {
                 scheduleContent(schedule)
@@ -709,6 +725,16 @@ fun balloonShape(
     }
 }
 
+
+@Preview(showBackground = true, name = "Header Preview")
+@Composable
+fun HeaderPreview() {
+    WeekHeader(
+        uiState = WeeklyUiState(),
+        dayWidth = 64.dp,
+        onNavigateToEditPage = { _, _, _, _ -> }
+    )
+}
 
 @Preview(showBackground = true, name = "WeekSidebar Preview")
 @Composable

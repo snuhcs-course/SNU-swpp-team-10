@@ -2,13 +2,16 @@ package com.example.calendy.view.weeklyview
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalOverscrollConfiguration
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -38,6 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.calendy.AppViewModelProvider
@@ -57,16 +61,16 @@ fun WeeklyPage(
     viewModel: WeeklyViewModel = viewModel(factory = AppViewModelProvider.Factory),
     onNavigateToEditPage: (Int?, PlanType, Date?, Date?) -> Unit
 ) {
-    val uiState: WeeklyUiState by viewModel.uiState.collectAsState()
+    val uiStateCurr: WeeklyUiState by viewModel.uiStateCurr.collectAsState()
     val coroutineScope = rememberCoroutineScope()
-    val pagerState = rememberPagerState(initialPage = uiState.currentPosition)
+    val pagerState = rememberPagerState(initialPage = uiStateCurr.currentPosition)
 
     // 페이지 변화 시 uiState 값 업데이트
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }.collect { currentPage ->
-            if (currentPage > uiState.currentPosition) {
+            if (currentPage > uiStateCurr.currentPosition) {
                 viewModel.increaseCurrentWeek()
-            } else if (currentPage < uiState.currentPosition) {
+            } else if (currentPage < uiStateCurr.currentPosition) {
                 viewModel.decreaseCurrentWeek()
             }
             viewModel.updatePosition(currentPage)
@@ -76,7 +80,7 @@ fun WeeklyPage(
 
     Scaffold(
         topBar = {
-            Header(uiState = uiState,
+            Header(uiState = uiStateCurr,
                    coroutineScope = coroutineScope,
                    pagerState = pagerState,
                    onPreviousWeekClick = {},
@@ -87,7 +91,8 @@ fun WeeklyPage(
         Column(modifier = Modifier.padding(paddingValues)) {
             WeekPager(
                 pagerState = pagerState,
-                uiState = uiState,
+//                uiState = uiStateCurr,
+                pageCount = uiStateCurr.pageCount,
                 viewModel = viewModel,
                 onNavigateToEditPage = onNavigateToEditPage
             )
@@ -100,21 +105,46 @@ fun WeeklyPage(
 @Composable
 fun WeekPager(
     pagerState: PagerState,
-    uiState: WeeklyUiState,
+//    uiState: WeeklyUiState,
+    pageCount: Int ,
     viewModel: WeeklyViewModel,
     onNavigateToEditPage: (Int?, PlanType, Date?, Date?) -> Unit
 ) {
+    val uiStatePrev: WeeklyUiState by viewModel.uiStatePrev.collectAsState()
+    val uiStateCurr: WeeklyUiState by viewModel.uiStateCurr.collectAsState()
+    val uiStateNext: WeeklyUiState by viewModel.uiStateNext.collectAsState()
+
+    val hourHeight = 40.dp
+    // table 시작 시간 설정
+    val dpValue = hourHeight * 7
+    val pixelValue = with(LocalDensity.current) { dpValue.toPx() }
+    val verticalScrollState = rememberScrollState(pixelValue.roundToInt())
+
+
+    LaunchedEffect(Unit) {
+        // 이미 계산된 픽셀 값으로 스크롤 이동
+        verticalScrollState.scrollTo(pixelValue.roundToInt())
+    }
+
     CompositionLocalProvider(
         // ui 상에서 스와이프 시 나타나는 오버스크롤 효과 제거
         LocalOverscrollConfiguration provides null
     ) {
         HorizontalPager(
-            modifier = Modifier.fillMaxSize(), state = pagerState, pageCount = uiState.pageCount
-        ) { _ ->
+            modifier = Modifier.fillMaxSize(), state = pagerState, pageCount = pageCount
+        ) { page ->
+            val uiState = when (page) {
+                pagerState.currentPage - 1 -> uiStatePrev
+                pagerState.currentPage -> uiStateCurr
+                pagerState.currentPage + 1 -> uiStateNext
+                else -> uiStateCurr
+            }
             WeekScreen(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().fillMaxHeight(),
                 uiState = uiState,
                 viewModel = viewModel,
+                hourHeight = hourHeight,
+                verticalScrollState = verticalScrollState,
                 onNavigateToEditPage = onNavigateToEditPage
             )
         }
@@ -127,6 +157,8 @@ fun WeekScreen(
     uiState: WeeklyUiState,
     viewModel: WeeklyViewModel,
     modifier: Modifier = Modifier,
+    hourHeight: Dp,
+    verticalScrollState : ScrollState,
     onNavigateToEditPage: (id: Int?, type: PlanType, startDate: Date?, endDate: Date?) -> Unit,
     scheduleContent: @Composable (schedule: Schedule) -> Unit = {
         ScheduleItem(
@@ -142,16 +174,8 @@ fun WeekScreen(
         )
     },
 ) {
-    val hourHeight = 40.dp
-    val verticalScrollState = rememberScrollState()
     var sidebarWidth by remember { mutableStateOf(0.dp) }
-    // table 시작 시간 설정
-    val dpValue = hourHeight * 7
-    val pixelValue = with(LocalDensity.current) { dpValue.toPx() }
-    LaunchedEffect(Unit) {
-        // 이미 계산된 픽셀 값으로 스크롤 이동
-        verticalScrollState.scrollTo(pixelValue.roundToInt())
-    }
+
 
     BoxWithConstraints(modifier = modifier) {
         val totalWidth = maxWidth
@@ -170,7 +194,7 @@ fun WeekScreen(
                     .verticalScroll(verticalScrollState)
             ) {
                 WeekSidebar(hourHeight = hourHeight,
-                            modifier = Modifier.onGloballyPositioned { layoutCoordinates ->
+                            modifier = Modifier.fillMaxHeight().onGloballyPositioned { layoutCoordinates ->
                                 // Update sidebarWidth within the context of the composable
                                 sidebarWidth = with(density) { layoutCoordinates.size.width.toDp() }
                             })
@@ -182,7 +206,7 @@ fun WeekScreen(
                     scheduleContent = scheduleContent,
                     todoContent = todoContent,
                     onNavigateToEditPage = onNavigateToEditPage,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f).fillMaxHeight()
 
                 )
             }
@@ -205,7 +229,7 @@ fun Header(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -220,7 +244,8 @@ fun Header(
             },
         ) {
             Icon(
-                Icons.Filled.ArrowLeft, contentDescription = "Previous Week", tint = Color.Black
+                Icons.Filled.ArrowLeft, contentDescription = "Previous Week", tint = Color.Black,
+                modifier = Modifier.padding(0.dp).size(32.dp)
             )
         }
         Text(
@@ -240,7 +265,8 @@ fun Header(
             },
         ) {
             Icon(
-                Icons.Filled.ArrowRight, contentDescription = "Next Week", tint = Color.Black
+                Icons.Filled.ArrowRight, contentDescription = "Next Week", tint = Color.Black,
+                modifier = Modifier.padding(0.dp).size(32.dp)
             )
         }
     }

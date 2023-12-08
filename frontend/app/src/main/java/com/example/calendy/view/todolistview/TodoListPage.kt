@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -48,8 +49,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.calendy.AppViewModelProvider
 import com.example.calendy.data.maindb.plan.Todo
@@ -111,15 +114,15 @@ fun ToDoListPage(
     }
 
     Scaffold(topBar = {
-        TopAppBar(title = {
             Text(
                 text = "TODO List",
                 fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(vertical = 10.dp, horizontal = 20.dp).fillMaxWidth(),
+//                textAlign = TextAlign.Center
             )
-
-        }, actions = { hideToggle(viewModel, uiState) })
-    }, floatingActionButton = {
+          },
+    floatingActionButton = {
         FloatingActionButton(
             onClick = {
                 onNavigateToEditPage(null, Calendar.getInstance().apply {
@@ -132,22 +135,31 @@ fun ToDoListPage(
         ) {
             Icon(Icons.Filled.Add, contentDescription = "Add")
         }
-    }) { innerPadding ->
+    })
+    { innerPadding ->
         Column(
             modifier = Modifier.padding(innerPadding)
         ) {
-            MonthSelector(
-                year = uiState.year,
-                month = uiState.month,
-                onPreviousClick = onPreviousClick,
-                onNextClick = onNextClick,
-                onTextClick = onTextClick
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+
+                MonthSelector(
+                    modifier = Modifier.weight(1f),
+                    year = uiState.year,
+                    month = uiState.month,
+                    onPreviousClick = onPreviousClick,
+                    onNextClick = onNextClick,
+                    onTextClick = onTextClick
+                )
+                hideToggle(viewModel, uiState)
+            }
             OneMonthTodos(viewModel, uiState, onNavigateToEditPage)
         }
-
     }
+
 }
+
 
 
 @Composable
@@ -209,15 +221,15 @@ fun ToDoItem(
                 .clickable(onClick = clickAction)
                 .weight(1f)
         ) {
-            Canvas(
-                modifier = Modifier
-                    .size(30.dp)
-                    .padding(8.dp)
-            ) {
-                drawCircle(
-                    color = todo.getColor(), radius = size.minDimension / 2
-                )
-            }
+//            Canvas(
+//                modifier = Modifier
+//                    .size(30.dp)
+//                    .padding(8.dp)
+//            ) {
+//                drawCircle(
+//                    color = todo.getColor(), radius = size.minDimension / 2
+//                )
+//            }
             Column(modifier = Modifier.padding(3.dp)) {
                 Text(
                     text = todo.title,
@@ -233,15 +245,22 @@ fun ToDoItem(
                 )
             }
         }
-        Checkbox(checked = todo.complete, onCheckedChange = {
-            viewModel.updateCompletionOfTodo(todo, it)
-        })
+        Checkbox(
+             checked = todo.complete,
+             onCheckedChange = {viewModel.updateCompletionOfTodo(todo, it)},
+             colors = CheckboxDefaults.colors(
+                 checkedColor = todo.getColor(),
+                 uncheckedColor = todo.getColor(),
+                 checkmarkColor = Color.White
+             )
+        )
 
     }
 }
 
 @Composable
 fun MonthSelector(
+    modifier: Modifier= Modifier,
     year: Int,
     month: Int,
     onPreviousClick: () -> Unit,
@@ -256,7 +275,7 @@ fun MonthSelector(
         "${year}년 ${month}월"
     }
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(top = 5.dp, start = 4.dp, end = 16.dp, bottom = 5.dp),
         horizontalArrangement = Arrangement.Start,
@@ -361,12 +380,16 @@ fun MonthSelectionSheet(
 
 @Composable
 fun hideToggle(viewModel: TodoListViewModel, uiState: TodoListUiState) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .padding(end = 16.dp)
+    ){
         Text(
             text = "완료된 TODO 숨기기",
-            color = Color(0xFF337AFF),
+            color = Color.Gray,
             style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Bold
+//            fontWeight = FontWeight.Bold,
+            fontSize=12.sp
         )
         Spacer(modifier = Modifier.width(8.dp))
         Switch(checked = uiState.hidedStatus,
