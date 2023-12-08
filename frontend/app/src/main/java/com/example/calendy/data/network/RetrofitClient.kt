@@ -18,9 +18,9 @@ object RetrofitClient {
     val instance: CalendyServerApi by lazy {
         // Create Retrofit Instance
         val okHttpClient = OkHttpClient().newBuilder()
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(120, TimeUnit.SECONDS)
+            .readTimeout(120, TimeUnit.SECONDS)
+            .writeTimeout(120, TimeUnit.SECONDS)
             .build()
 
         // Request: Any -> RequestBody
