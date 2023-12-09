@@ -1,0 +1,1739 @@
+[33mcommit 1a462c6c28b574f46234f75cff0f5810f152ba1f[m[33m ([m[1;36mHEAD -> [m[1;32mdev[m[33m, [m[1;31morigin/dev[m[33m)[m
+Author: Yoonjae Jung <darwinj07@snu.ac.kr>
+Date:   Thu Dec 7 06:19:54 2023 +0000
+
+    add prompr exemplar for referencing existing plans
+
+[33mcommit 5f6d04ad96c3b341845ede8b6c07b0d3d9991f20[m
+Merge: 7ca98c1 83d9e71
+Author: darwinj07 <darwinj07@snu.ac.kr>
+Date:   Thu Dec 7 00:44:29 2023 +0900
+
+    Merge remote-tracking branch 'origin/refactor-rawdb' into dev
+
+[33mcommit 7ca98c115ad8685fd793c931b814acbd28e334ac[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Wed Dec 6 23:47:01 2023 +0900
+
+    endTime 24:00 Changed. EditText clearFocus. Add Manager Error Response
+
+[33mcommit 23e88a55070808c9f8da2d27331180ee363cc479[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Wed Dec 6 21:42:34 2023 +0900
+
+    FIX: Mic Permission, voice recognition return bug
+
+[33mcommit e016716d23d8d578bd7c31c2cd65814f3dd12498[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Wed Dec 6 20:57:21 2023 +0900
+
+    Merge conflict
+
+[33mcommit 8a862ef6f24fe2fa87b83629b76f53d0306cbedf[m
+Merge: 81cf06b e38a561
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Wed Dec 6 20:57:07 2023 +0900
+
+    Merge branch 'Bug-Refine2' into dev
+
+[33mcommit e38a5611942a18c9bc67ca76ef0aba162ffc3b7b[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Wed Dec 6 20:49:35 2023 +0900
+
+    Monthly Title Font & content. Edit Page Checkbox. Category Delete Bug Fix
+
+[33mcommit 81cf06b8cdd6f11a3f06f5ba579cc9a236b5097b[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Wed Dec 6 20:46:14 2023 +0900
+
+    fix : set addPlan default time
+
+[33mcommit cc219c06f4ceda43cbc3d81d65e4c41f4da3de83[m
+Author: Darwin Jung <darwinj07@snu.ac.kr>
+Date:   Wed Dec 6 15:08:59 2023 +0900
+
+    implement briefing feature on local application
+
+[33mcommit ccdd97a97d38bbae81377cfb6008c4c201e39019[m
+Author: Yoonjae Jung <darwinj07@snu.ac.kr>
+Date:   Wed Dec 6 06:00:11 2023 +0000
+
+    implement briefing feature on server
+
+[33mcommit 8c0d1a8727c8d439394273851121f9cb90f9bb97[m
+Author: hochanb <hochan0115@gmail.com>
+Date:   Wed Dec 6 14:47:52 2023 +0900
+
+    feat : revision logs can be seen in merged list popup
+
+[33mcommit f9e6645be1f048559ec96c78354d0b37e708119f[m
+Author: hochanb <hochan0115@gmail.com>
+Date:   Tue Dec 5 18:31:47 2023 +0900
+
+    fix structures merged dev and feature-voice-assistance
+
+[33mcommit 26da00d8b5e8b0ea2b71c6ff45cbc4dab0aa8c72[m
+Merge: dcbe00e 3677e6d
+Author: hochanb <hochan0115@gmail.com>
+Date:   Tue Dec 5 17:34:48 2023 +0900
+
+    merged dev and feature-voice-assistance
+
+[33mcommit 3677e6de2275ba4d24322679a0c152bc979aef84[m[33m ([m[1;31morigin/feature-voice-button[m[33m)[m
+Author: hochanb <hochan0115@gmail.com>
+Date:   Tue Dec 5 16:55:21 2023 +0900
+
+    fix : fixed simple ui
+
+[33mcommit 9401ac2b219590c62f6ea2fb7c7b4dffb7809ea2[m
+Author: hochanb <hochan0115@gmail.com>
+Date:   Tue Dec 5 02:13:59 2023 +0900
+
+    feat : add long click delete function, fix voice ai icons etc.
+
+[33mcommit 436873311bdf3ebe3530b7ee2d3cafeb91b797e9[m
+Author: hochanb <hochan0115@gmail.com>
+Date:   Tue Dec 5 01:33:59 2023 +0900
+
+    fix : date formatting issue fix. +some plan list item ui fix
+
+[33mcommit 0797e170ce12f315d159f770f040da653055c319[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Mon Dec 4 20:29:30 2023 +0900
+
+    Monthly Topbar Height Changes
+
+[33mcommit 3bab5d4bbc0100ce088eb8714ea2ecf0276114a2[m
+Author: hochanb <hochan0115@gmail.com>
+Date:   Mon Dec 4 19:18:32 2023 +0900
+
+    fix : fixing bug in monthly view
+
+[33mcommit 531f9825beac51bbf0ca8b0f27f61b4fbab2ef77[m
+Author: hochanb <hochan0115@gmail.com>
+Date:   Mon Dec 4 13:47:51 2023 +0900
+
+    feat : fix long plan label memory exceeding problem, and added add button
+
+[33mcommit 733bf237dc5d6000540672e0b44b7af672935dc3[m
+Author: hochanb <hochan0115@gmail.com>
+Date:   Mon Dec 4 13:14:00 2023 +0900
+
+    feat : added AI voice manager button and popup
+
+[33mcommit dcbe00e7aec9f4e553550aca1a1cd17b28f01ed3[m
+Merge: b1385bd 1815b16
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Mon Dec 4 10:49:41 2023 +0900
+
+    Merge branch 'dev' of github.com:snuhcs-course/swpp-2023-project-team-10 into dev
+
+[33mcommit 1815b16c0f1bb209b3eaa9b984493f6e311ee703[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Sun Dec 3 23:07:37 2023 +0900
+
+    Merge Conflict: Add Schedule in WeeklyPage
+
+[33mcommit 6fafc68341fbf375a086214514e9989f6565a884[m
+Merge: 6c9f168 dd6e4d1
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Sun Dec 3 23:07:17 2023 +0900
+
+    Merge branch 'Bug-Refine' into dev
+
+[33mcommit dd6e4d1a390b11b26aa0f9e7bbc1e96fa070bbd8[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Sun Dec 3 22:47:29 2023 +0900
+
+    AI Manager in Background. Fix Message Date Bug. Help Button.
+    
+    Use WorkManager
+
+[33mcommit 6c9f16883e4ab0b35f4380d7931e841ea1658db9[m
+Author: Yoonjae Jung <darwinj07@snu.ac.kr>
+Date:   Sat Dec 2 19:02:10 2023 +0000
+
+    improved AI manager to support '남은 거', '이번 주', '브리핑', and plan type changing
+
+[33mcommit 83d9e7113b497ab9b21dd02c9419a6fc5331514b[m[33m ([m[1;31morigin/refactor-rawdb[m[33m)[m
+Author: darwinj07 <darwinj07@snu.ac.kr>
+Date:   Sun Dec 3 03:41:24 2023 +0900
+
+    rename rawsqldb to rawdb and integrate into maindb
+
+[33mcommit b1385bdbea0658951147ad053a773e17e43e1211[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Sun Dec 3 01:10:18 2023 +0900
+
+    fix: fix minior bug in week page
+
+[33mcommit 70cc75defea427070d65ef2437b768830fa6d220[m
+Merge: 8f1116e ce81c58
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Sun Dec 3 00:57:18 2023 +0900
+
+    Merge branches 'dev' and 'dev' of github.com:snuhcs-course/swpp-2023-project-team-10 into dev
+
+[33mcommit 8f1116e6c5225210c561e410e547cb6a0648f036[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Sun Dec 3 00:57:09 2023 +0900
+
+    feat: set multipleDay schedule ui
+
+[33mcommit 30f9cd493e3643a3fccfa33c8f4e195560e0048a[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Sat Dec 2 21:04:36 2023 +0900
+
+    Send Briefing to Server, Route to Edit Plan Page
+
+[33mcommit ce81c583ba150d2bef237ac88bd0e70eda18bc0e[m
+Author: HHCHU <ded06031@snu.ac.kr>
+Date:   Sat Dec 2 16:02:12 2023 +0900
+
+    chore: Update VerticalWheelPickerWrapper size
+
+[33mcommit 1b93db1a02ae3da09c63d5f14c4af6e07e8e6996[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Sat Dec 2 11:55:11 2023 +0900
+
+    fix : todo page ui refine / remove font
+
+[33mcommit 098b8befeb88d312e1f48c3ad9d59c40f3b61b02[m
+Merge: 1f5465c 3f12879
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Sat Dec 2 11:22:12 2023 +0900
+
+    Merge branch 'dev' of github.com:snuhcs-course/swpp-2023-project-team-10 into dev
+
+[33mcommit 3f128791f45faf7823941b048fd2210b78cb281f[m
+Merge: f3ee86d 3eab224
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Fri Dec 1 21:56:43 2023 +0900
+
+    Merge branch 'feat-RepeatGroup' into dev
+
+[33mcommit 3eab224b097b53d5d6b1df0945346a8df0c47fea[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Fri Dec 1 21:48:50 2023 +0900
+
+    MessagePage UI. No RepeatGroup
+
+[33mcommit 1f5465ca343b1734cc28d093a5344924852c4419[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Fri Dec 1 10:05:27 2023 +0900
+
+    feat: implement todo update ui in week page
+
+[33mcommit b0842a761d078021b2aca7adb325861fc3046ad9[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Fri Dec 1 09:13:39 2023 +0900
+
+    feat: enable tab in week page
+
+[33mcommit f3ee86d8133d245adaeaaee2573992df9a98f734[m
+Author: HHCHU <ded06031@snu.ac.kr>
+Date:   Thu Nov 30 16:38:00 2023 +0900
+
+    chore: minor UI detail updated
+    
+    navbar color change and detail UX writing to Korean
+
+[33mcommit db9b7022c1a2e67d798e1ff33e0e4eb6d924d801[m
+Author: Yoonjae Jung <darwinj07@snu.ac.kr>
+Date:   Thu Nov 30 06:58:35 2023 +0000
+
+    refactor gpt api call
+
+[33mcommit 3567ccc967f1af3e32d38df653191af3bd6595f1[m
+Merge: d81c953 c28f536
+Author: hochanb <hochan0115@gmail.com>
+Date:   Thu Nov 30 15:26:56 2023 +0900
+
+    Merge branch 'feature-monthly' into dev
+
+[33mcommit c28f5360c710d001c1e83ad2749a6973c0c63f9d[m
+Author: hochanb <hochan0115@gmail.com>
+Date:   Thu Nov 30 15:25:32 2023 +0900
+
+    fix : fixed monthly plan lagging, plan label error, etc.
+
+[33mcommit d81c953406e6eb84616072885d84454af2433cd0[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Thu Nov 30 14:56:36 2023 +0900
+
+    chore : modify theme
+
+[33mcommit c624e29f4710df4652dddf4db450eddcb3b67784[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Thu Nov 30 14:23:07 2023 +0900
+
+    chore : set default color
+
+[33mcommit 2172943f72c6c4b879f1e9be45ca88038bf7af2c[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Thu Nov 30 01:14:36 2023 +0900
+
+    chore: set Splash Screen loading time
+
+[33mcommit 11f625e1d4693630729e954371da65d5c5366465[m
+Merge: c78221f 8008864
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Wed Nov 29 23:13:05 2023 +0900
+
+    Merge branch 'feature-nav' into dev
+
+[33mcommit 80088646be062b78e2d594e220b79397284999c8[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Wed Nov 29 23:07:37 2023 +0900
+
+    fix: change nav ui / font setting
+
+[33mcommit c78221f506d6a86694fcbc7b4191172a91b15eb4[m
+Author: hochanb <hochan0115@gmail.com>
+Date:   Wed Nov 29 20:30:32 2023 +0900
+
+    feat : manager keyboard closing if touching outside
+
+[33mcommit 882adbcef9d54a400aed553815cb6a55c6116e86[m
+Author: hochanb <hochan0115@gmail.com>
+Date:   Wed Nov 29 19:01:25 2023 +0900
+
+    feat : manager plan list ui refine. added undo all button, set appropriate text style to selected query result
+
+[33mcommit 6eab1119fad17a8df5d853a66a2161bed38c78d1[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Nov 28 23:43:22 2023 +0900
+
+    fix: Manager Tab Bug. GPT SELECT Working
+
+[33mcommit 9356c735f28020c3e361c50a6764c1f388c7b6f2[m
+Merge: 28200a5 a9facd6
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Nov 28 18:25:09 2023 +0900
+
+    Merge branch 'rev-edit-ui' into dev
+
+[33mcommit 28200a5d1319abe138cbbb93dfba2b06c558a8f0[m
+Merge: 03b8a74 9987ff0
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Nov 28 18:17:01 2023 +0900
+
+    Merge branch 'bixby-briefing' into dev
+
+[33mcommit a9facd6a33be7b7030d72fe1537abd3cb67d8804[m
+Merge: 06c4bb7 9987ff0
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Nov 28 18:16:49 2023 +0900
+
+    Merge branch 'bixby-briefing' into rev-edit-ui
+
+[33mcommit 9987ff0558a4f388407a58a2241646ec03f9f6ce[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Nov 28 18:16:39 2023 +0900
+
+    Bixby Briefing
+
+[33mcommit 06c4bb7f313bb56c2d024cb981887bd75f807d3a[m
+Merge: e2a6362 03b8a74
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Nov 28 18:15:41 2023 +0900
+
+    Merge branch 'dev' into rev-edit-ui
+
+[33mcommit e2a6362af15af565ae8140a940a0614891b4850b[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Nov 28 18:12:30 2023 +0900
+
+    DeepLink, Edit Page, RepeatGroup
+
+[33mcommit 03b8a74a56fcce0b3a0bb5c5d472c7b52c219681[m
+Merge: e8db664 11fcc61
+Author: hochanb <hochan0115@snu.ac.kr>
+Date:   Tue Nov 28 16:58:51 2023 +0900
+
+    Merge branch 'feature-messagepage' into dev
+
+[33mcommit 11fcc61ff5121af3ebf6825fd8f0ef14f4d53b54[m
+Author: hochanb <hochan0115@snu.ac.kr>
+Date:   Tue Nov 28 16:58:03 2023 +0900
+
+    feat : implemented control on plan revision, and fixed some UI (manager messages, todo checkbox color, etc.)
+
+[33mcommit e8db6642f65837d22eb248884b5ade15e63cacac[m
+Merge: e913764 6adeead
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Tue Nov 28 16:45:09 2023 +0900
+
+    Merge branch 'feature-weekPage' into dev
+
+[33mcommit 6adeead16ba5d87278b8d656c05329ab41380ef7[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Tue Nov 28 16:27:37 2023 +0900
+
+    feat: implement splash screen and fix week page
+
+[33mcommit e9137643ebd3f2c2c52765f3d6a1898a2b6f75e8[m
+Merge: 1cdaa4d 0753311
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Nov 23 22:08:56 2023 +0900
+
+    Merge branch 'dev' into rev-edit-ui
+
+[33mcommit 1cdaa4da8e03b953c89df0d389efbb8c0be77ddb[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Nov 23 22:04:45 2023 +0900
+
+    Rev: Edit Page - Schedule/Todo Button UI & DateTime Selection
+
+[33mcommit 0753311461f37f3fe575053ee7286a2e6aa1318e[m
+Merge: b1f297a e3088d4
+Author: darwinj07 <darwinj07@snu.ac.kr>
+Date:   Thu Nov 23 19:44:51 2023 +0900
+
+    Merge branch 'dev' of github.com:snuhcs-course/swpp-2023-project-team-10 into dev
+
+[33mcommit e3088d425ef177c5e3114af583c5a0cd8a847b57[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Nov 23 19:42:31 2023 +0900
+
+    FIX: Merge Conflicts
+
+[33mcommit b1f297ae20ba8e1242a4fab70abfc2e626dd6681[m
+Merge: f7ff8eb beb8f72
+Author: darwinj07 <darwinj07@snu.ac.kr>
+Date:   Thu Nov 23 19:42:22 2023 +0900
+
+    Merge branch 'dev' of github.com:snuhcs-course/swpp-2023-project-team-10 into dev
+
+[33mcommit 8e7067b5b758d14160b3014b1dd3533fbdddb911[m
+Merge: beb8f72 89e332a
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Nov 23 19:42:14 2023 +0900
+
+    Merge branch 'feature-bixby' into dev
+
+[33mcommit beb8f72edc0b6664834fd1949b967ef7acd8874f[m
+Author: Yoonjae Jung <darwinj07@snu.ac.kr>
+Date:   Thu Nov 23 10:29:12 2023 +0000
+
+    distinguish insert/update commands accurately
+
+[33mcommit f7ff8eb22c939851944eb25fe8cbd52f879657bf[m
+Author: darwinj07 <darwinj07@snu.ac.kr>
+Date:   Thu Nov 23 18:42:33 2023 +0900
+
+    fixed typo gptOriginalMessage to gptFirstMessage in MessagePageViewModel
+
+[33mcommit a283cf22b169ae27a86b539fe7eadf86d2273fbc[m
+Merge: 86a556c 1780dcb
+Author: darwinj07 <darwinj07@snu.ac.kr>
+Date:   Thu Nov 23 18:31:20 2023 +0900
+
+    resolved merge conflicts
+
+[33mcommit 86a556c5ceafb16fdb53125187a46044a81004f9[m
+Author: darwinj07 <darwinj07@snu.ac.kr>
+Date:   Thu Nov 23 18:24:47 2023 +0900
+
+    refactored MessagePageViewModel
+
+[33mcommit 1780dcb1bb295468ef120bd75839e9f96518a5c6[m
+Merge: 7c1a425 190cd32
+Author: hochan <hochan0115@gmail.com>
+Date:   Thu Nov 23 18:02:57 2023 +0900
+
+    Merge branch 'feature-monthly' into dev
+
+[33mcommit 190cd329d4cdea93e4612c19a5a716ff76646bdd[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Thu Nov 23 17:39:09 2023 +0900
+
+    feat: Message page UI Refactoring on progress
+
+[33mcommit 7c1a4256cd9c514e3069b9b6574ffdffa06e8042[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Thu Nov 23 15:26:08 2023 +0900
+
+    feat: enable edit category
+
+[33mcommit 563fc71e3e95146ecd25bdf4c6edb143a1195def[m
+Author: Yoonjae Jung <darwinj07@snu.ac.kr>
+Date:   Thu Nov 23 03:56:27 2023 +0000
+
+    update exemplars
+
+[33mcommit dce2f51b800de5adf6558fa9d47574e907455d23[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Thu Nov 23 10:25:19 2023 +0900
+
+    Imported MCV library
+
+[33mcommit 50567d9c6e1ecfb834bb95ab6787545d70785fd1[m
+Author: Yoonjae Jung <darwinj07@snu.ac.kr>
+Date:   Wed Nov 22 14:58:01 2023 +0000
+
+    removed turbo endpoint and updated system prompt & exemplars to remove data specificity
+
+[33mcommit 0ba10f0ff92e037ac21423cb35dd7236ee1d1510[m
+Author: Yoonjae Jung <darwinj07@snu.ac.kr>
+Date:   Wed Nov 22 11:31:23 2023 +0000
+
+    correctly distinguish am/pm time
+
+[33mcommit a0904eb00b2a4813c3a4854894661677a1d9c07f[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Wed Nov 22 20:08:51 2023 +0900
+
+    FIX: fix mutilple day schedule error
+
+[33mcommit ccac37166201e7fd076a8afc05487a825d5a42b2[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Wed Nov 22 18:54:37 2023 +0900
+
+    feat: enable mutiple day schedule
+
+[33mcommit e40e8b475690599c3416232782310299744a8636[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Wed Nov 22 14:19:39 2023 +0900
+
+    FIX: update TODO page ui
+
+[33mcommit cc474418a4696ab50c2602fa9faf0e786da8a84a[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Wed Nov 22 13:55:17 2023 +0900
+
+    FIX: View Plans for other months
+
+[33mcommit b38486cb8d98bc1bd9a12da77b81b9189b5a74d7[m[33m ([m[1;31morigin/feature-gpt-sql-back[m[33m)[m
+Author: EC2 Default User <ec2-user@ip-172-31-33-104.ap-northeast-2.compute.internal>
+Date:   Tue Nov 21 17:26:18 2023 +0000
+
+    remove config.json from tracking
+
+[33mcommit a896572d89c5c4419cbf7d0b539c3b339b26e9b4[m
+Author: EC2 Default User <ec2-user@ip-172-31-33-104.ap-northeast-2.compute.internal>
+Date:   Tue Nov 21 17:13:16 2023 +0000
+
+    fixed errors from HE & extended capabilities
+
+[33mcommit fc410f2cc2a2267a7a6ba8d2296afecc9f7840a2[m
+Author: EC2 Default User <ec2-user@ip-172-31-33-104.ap-northeast-2.compute.internal>
+Date:   Wed Nov 8 10:21:56 2023 +0000
+
+    separate key from main.js
+
+[33mcommit 9734a66e27bdf542d6758fbe16776d2e84e6c383[m
+Author: EC2 Default User <ec2-user@ip-172-31-33-104.ap-northeast-2.compute.internal>
+Date:   Wed Nov 8 10:10:57 2023 +0000
+
+    apply given time
+
+[33mcommit e31d96a05610c7e6d80f0afd46c3e426e955a171[m
+Author: EC2 Default User <ec2-user@ip-172-31-33-104.ap-northeast-2.compute.internal>
+Date:   Sun Nov 5 13:27:37 2023 +0000
+
+    updated openapi key to yoonjae's
+
+[33mcommit ef9c6cbbea21089d98e6ad04374d906a962cdfba[m
+Author: EC2 Default User <ec2-user@ip-172-31-33-104.ap-northeast-2.compute.internal>
+Date:   Sun Nov 5 11:45:49 2023 +0000
+
+    changed openai api key from yoonjae's to hyehyun's
+
+[33mcommit bc59cd59f87f74097efbd5d791509a1c7a65121d[m
+Author: EC2 Default User <ec2-user@ip-172-31-33-104.ap-northeast-2.compute.internal>
+Date:   Sun Nov 5 11:30:04 2023 +0000
+
+    server setup for gpt sql extraction
+
+[33mcommit 08378f39ae344e29a1dfb4fe74691879f86a4219[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Nov 21 23:04:03 2023 +0900
+
+    FIX: List Popup in Monthly. Date Picker GMT Bug
+
+[33mcommit fdc54f5fdd563767ced8ef147282c94ea3d1a966[m
+Author: HHCHU <ded06031@snu.ac.kr>
+Date:   Tue Nov 21 17:58:33 2023 +0900
+
+    Fix: Add import Check Icon
+
+[33mcommit d2c3009fe9a70f7f7244ea66a8d4d5c83d93cf5e[m
+Merge: 742dc7b ee244db
+Author: HHCHU <ded06031@snu.ac.kr>
+Date:   Tue Nov 21 17:55:40 2023 +0900
+
+    Merge branch 'feature-editpage-ui' into dev
+
+[33mcommit 742dc7b28c4d6a2288b7c90639fac7c8f9732df0[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Nov 21 17:43:10 2023 +0900
+
+    Merge Conflict Resolved: Works Good
+
+[33mcommit 51322c39d056aa762c33f47632ba6fd33341ec15[m
+Merge: 0926af6 aa5620d
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Nov 21 17:38:56 2023 +0900
+
+    Merge remote-tracking branch 'origin/feature-weekly-ui' into testing-2
+
+[33mcommit 0926af663edfb7dc7766ff757eea79da65d1a301[m
+Merge: f8fb4a4 a951c9e
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Nov 21 16:53:07 2023 +0900
+
+    Merge branch 'testing' into dev
+
+[33mcommit aa5620d3aaccc750bfa6d98a7f814c3512d455a2[m[33m ([m[1;31morigin/feature-weekly-ui[m[33m)[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Tue Nov 21 16:47:12 2023 +0900
+
+    Fix: fix weeklyPage UI
+
+[33mcommit a951c9ecade0f31444b094a1c0373f7a5a662daa[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Nov 21 16:46:21 2023 +0900
+
+    Speech Recognition UI. View Revision History
+
+[33mcommit ee244db7b233aa595d95bbdb31ce3d3d9ad1ac48[m[33m ([m[1;31morigin/feature-editpage-ui[m[33m)[m
+Author: HHCHU <ded06031@snu.ac.kr>
+Date:   Tue Nov 21 16:41:56 2023 +0900
+
+    Fix: Add paddings to DateTimeSelect Dialog
+
+[33mcommit af9a964147025a20609f66e112d0455eee819ae3[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Tue Nov 21 13:39:10 2023 +0900
+
+    Fix: fix crash on navigating editPlan page
+
+[33mcommit 2471679f1ef113b45fe82ee5c1549810de8248cb[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Sun Nov 19 18:47:51 2023 +0900
+
+    FIX: getSchedulesStream Works Correctly
+
+[33mcommit f8fb4a49e694d080d892b9a85194101174b85f77[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Thu Nov 16 16:55:57 2023 +0900
+
+    feat: implemented long day plan decorator
+
+[33mcommit b538e924e45847eb628b8c11b63fc80ae3f14b28[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Nov 16 15:21:13 2023 +0900
+
+    PlanRepository Testing
+
+[33mcommit e9f3d3bae004067005422e7608d67aa433921983[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Thu Nov 16 14:48:42 2023 +0900
+
+    feat: implement weeklyPage basic ui
+
+[33mcommit fd4278d876009e73572b03b12c8da28eae3502ce[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Nov 16 13:12:40 2023 +0900
+
+    Jacoco Aggregated Report Works! for local testing
+
+[33mcommit 7b209c5288287fe1fe2d5d8c314ebd0a5c0c7c26[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Nov 16 12:59:15 2023 +0900
+
+    Implementing Testing
+
+[33mcommit 13b0d16bd98402ad33f87c1b09170b8df6e840ca[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Nov 16 12:58:45 2023 +0900
+
+    PlanRepository: Validate plan
+
+[33mcommit b31d3e4b789d466a75ae28316ef5febeb1c8e005[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Nov 14 17:41:15 2023 +0900
+
+    Merge All: All Working Great
+
+[33mcommit 9f7bb387748f6dba71813e2fd399ce5048cd0596[m
+Merge: 55112df eeef70b
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Nov 14 17:41:06 2023 +0900
+
+    Merge branch 'db-under-construction' into dev
+
+[33mcommit 55112df7ef3670b40dae47988fc41f9d4f3b39c1[m
+Merge: b34167f abe91ca
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Nov 14 17:21:52 2023 +0900
+
+    Merge remote-tracking branch 'origin/feature-monthly' into dev
+
+[33mcommit abe91caa46cdf6ccaa10b5ff9fb65e0e684266ac[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Tue Nov 14 17:15:47 2023 +0900
+
+    feat: implemented long day plan decorator
+
+[33mcommit 47ac3b777228f2a91cca9a9fb729845bf99d3fe6[m
+Author: HHCHU <ded06031@snu.ac.kr>
+Date:   Tue Nov 14 16:39:04 2023 +0900
+
+    Fix: Change button size and check button
+
+[33mcommit b34167f15a16f6f31e41a7219ea7d91dd1da191d[m
+Merge: 1d468fd e77cfa0
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Nov 14 15:41:04 2023 +0900
+
+    Merge pull request #12 from snuhcs-course/feature-todo
+    
+    Todo Page: Use Month Selection
+
+[33mcommit e77cfa0f69d6807fb0e998bfa0a20a37a8349b82[m
+Merge: 5f25886 5e78c09
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Nov 14 15:39:02 2023 +0900
+
+    Merge branch 'feature-todo' of https://github.com/snuhcs-course/swpp-2023-project-team-10 into feature-todo
+
+[33mcommit 5f25886607f8175bc0fc1c7d94716fb0a9673300[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Nov 14 15:38:42 2023 +0900
+
+    Revert "Update CalendyDatabase.kt"
+    
+    This reverts commit f54683ca756b6589eb240ada8231258dc23e3c2f.
+
+[33mcommit b1068e1c98a459979c511b0cfae86f395b9c7e50[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Nov 14 15:38:34 2023 +0900
+
+    Revert "MainActivity Merge Conflict (Navigation)"
+    
+    This reverts commit eb7d6ebdb971160ad87cac0e56628c490505486d.
+
+[33mcommit f5f0c3006a9fcaf64342c522412cdaa65ef88e29[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Nov 14 15:37:58 2023 +0900
+
+    Revert 9769581
+
+[33mcommit 89e332a9b648e59d97c1c33234938ad529bc59ac[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Nov 14 15:28:42 2023 +0900
+
+    Initial Bixby: deep link enabled
+
+[33mcommit 5e78c09a1873c4a34860346de6b9fd14ba17befd[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Tue Nov 14 15:22:58 2023 +0900
+
+    Fix: fix typo
+
+[33mcommit 8459c32515a879c4954b057c7a0a8d19bf431b03[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Mon Nov 13 01:06:08 2023 +0900
+
+    ui: add AddPlan button in main calendar view
+
+[33mcommit 4e6f181f5e24a6ee19baaca14c70ee60040b0de7[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Mon Nov 13 00:28:49 2023 +0900
+
+    fix: fix dependency of mcv to hochanb:material-calendarview:1.6.2
+
+[33mcommit eeef70b486e163a1c526a842aefada7da21120e9[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Sun Nov 12 16:28:27 2023 +0900
+
+    DB Changes
+
+[33mcommit 9145886ad740bdf999a0cd6c4779923b196e9891[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Sat Nov 11 20:50:32 2023 +0900
+
+    feat: fix todoPage UI
+
+[33mcommit 3ded04088575297819cda1549743038536aba779[m
+Author: HHCHU <ded06031@snu.ac.kr>
+Date:   Sat Nov 11 20:20:22 2023 +0900
+
+    Fix: Fix TypeButton color bug
+
+[33mcommit f54683ca756b6589eb240ada8231258dc23e3c2f[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Nov 9 15:25:42 2023 +0900
+
+    Update CalendyDatabase.kt
+
+[33mcommit 804bf11be60db1cb51fae7ccacc4eac94e1c8237[m
+Merge: 9769581 1d468fd
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Nov 9 15:25:33 2023 +0900
+
+    Merge branch 'dev' into HE
+
+[33mcommit 1d468fda0f9e7d0f8ed66b2bb6b9ec7f0ce11e30[m
+Merge: 4de2001 eb7d6eb
+Author: hochan <hochan0115@gmail.com>
+Date:   Thu Nov 9 15:21:53 2023 +0900
+
+    Merge remote-tracking branch 'origin/dev' into dev
+
+[33mcommit eb7d6ebdb971160ad87cac0e56628c490505486d[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Nov 9 15:15:02 2023 +0900
+
+    MainActivity Merge Conflict (Navigation)
+
+[33mcommit 9769581ec35ff5964736557f6ac116846dc2459b[m
+Author: darwinj07 <darwinj07@snu.ac.kr>
+Date:   Thu Nov 9 15:07:11 2023 +0900
+
+    enabled priority referencing when inserting using AI manager
+    
+    removed foreign key constraint on category_id
+
+[33mcommit 4de2001b77b128b8432697192cfe06558f721f6d[m
+Merge: a20c000 111a544
+Author: hochan <hochan0115@gmail.com>
+Date:   Thu Nov 9 15:02:59 2023 +0900
+
+    Merge remote-tracking branch 'origin/dev' into dev
+    
+    # Conflicts:
+    #       frontend/app/src/main/java/com/example/calendy/view/popup/PlanListPopup.kt
+
+[33mcommit a20c0008b7b563fe45e724c346039265c68610d7[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Thu Nov 9 15:01:00 2023 +0900
+
+    feat : implemented getting and showing modified plans
+
+[33mcommit 111a54465aa1c1ba0242edf75ef5325e1cf9a52f[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Thu Nov 9 14:46:57 2023 +0900
+
+    chore: change navigation structure
+
+[33mcommit 74a33681d42d925e3154881376b0191d443a6747[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Thu Nov 9 14:01:42 2023 +0900
+
+    feat: implement setting UI
+
+[33mcommit 017c638b50613f1d59f67bf4fe8e6a59d3efa5c2[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Wed Nov 8 21:56:47 2023 +0900
+
+    feat: set simple todoPage
+
+[33mcommit ccf97ec16a7afb974d7fec850e0e5890c69fbc9e[m
+Merge: 51bee8a 94f81fc
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Wed Nov 8 19:35:50 2023 +0900
+
+    Merge remote-tracking branch 'origin/dev' into dev
+
+[33mcommit 51bee8a9a7bb58b09ff8b62f310ff3a4fd28dd75[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Wed Nov 8 19:35:31 2023 +0900
+
+    feat: enable using repeat-plans
+
+[33mcommit 94f81fca30f36f052afec1ac14e357d061b0f73c[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Tue Nov 7 23:57:49 2023 +0900
+
+    feat : connected message log db and message page ui
+
+[33mcommit 722078d7fca40255c1d2ad44bc7af094be71c896[m
+Merge: 58c0a91 f2cdcc8
+Author: hochan <hochan0115@gmail.com>
+Date:   Tue Nov 7 17:37:40 2023 +0900
+
+    Merge remote-tracking branch 'origin/feature-LogDB' into dev
+
+[33mcommit f2cdcc854a90890b5afbe8f4faa9e0bc17b1e2b7[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Nov 7 17:36:57 2023 +0900
+
+    feaet: Add Log DB
+
+[33mcommit 58c0a9120504549845d2ecd484d87be1370fae6f[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Tue Nov 7 17:29:19 2023 +0900
+
+    on progress : edit page ui refine
+
+[33mcommit 86ee9cfeb88c617eda3c5ed2896399478b7bdf4f[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Mon Nov 6 21:25:00 2023 +0900
+
+    feat: revised monthly components. including popup refactoring
+
+[33mcommit 4696791fbf3b766b4e859b1df9b627556bc3f002[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Sun Nov 5 20:55:39 2023 +0900
+
+    merged WeeklyView
+
+[33mcommit 00646c70bf2ab870970e96d8403238863295b28c[m
+Merge: c874a08 348f2a7
+Author: hochan <hochan0115@gmail.com>
+Date:   Sun Nov 5 20:50:06 2023 +0900
+
+    Merge remote-tracking branch 'origin/feature-weekly' into dev
+    
+    # Conflicts:
+    #       frontend/app/build.gradle.kts
+    #       frontend/app/src/main/AndroidManifest.xml
+    #       frontend/app/src/main/res/values/strings.xml
+    #       frontend/app/src/main/res/values/themes.xml
+    #       frontend/settings.gradle.kts
+
+[33mcommit c874a082a905cbce146d2b0ebc6fb72b307552a8[m
+Merge: 7fae6cb 500d31c
+Author: hochan <hochan0115@gmail.com>
+Date:   Sun Nov 5 20:37:29 2023 +0900
+
+    Merge branch 'demo-monthly-revised' into dev
+
+[33mcommit 500d31cb0f15e9af3ed0eb8b100f740d613c5222[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Sun Nov 5 20:33:54 2023 +0900
+
+    merged all
+
+[33mcommit 19f0517c29069e575aba4e9de8d89492e3f6d1f5[m
+Merge: 152568b 93e5409
+Author: hochan <hochan0115@gmail.com>
+Date:   Sun Nov 5 20:25:36 2023 +0900
+
+    Merge remote-tracking branch 'origin/feature-gpt-sql-front' into demo-monthly-revised
+    
+    # Conflicts:
+    #       frontend/app/src/main/java/com/example/calendy/AppViewModelProvider.kt
+    #       frontend/app/src/main/java/com/example/calendy/SqlExecutionTest.kt
+    #       frontend/app/src/main/java/com/example/calendy/utils/DateHelper.kt
+    #       frontend/app/src/main/java/com/example/calendy/view/monthlyview/MonthlyPageKT.kt
+
+[33mcommit 152568bdad02f658cadf313f9600170b5f9db8b4[m[33m ([m[1;31morigin/demo-monthly-revised[m[33m)[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Sun Nov 5 20:04:48 2023 +0900
+
+    onprogress: refactoring
+
+[33mcommit 93e5409cf23aea0b740f879173e7d892cc4b85bd[m[33m ([m[1;31morigin/feature-gpt-sql-front[m[33m, [m[1;32mfeature-gpt-sql-front[m[33m)[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Sun Nov 5 20:03:42 2023 +0900
+
+    GPT Inteface Changed
+
+[33mcommit 31a3109f932dd98ff298f0e78887d49f8e0d9d54[m
+Merge: 6662eb1 ff9d7fa
+Author: hochan <hochan0115@gmail.com>
+Date:   Sun Nov 5 15:51:12 2023 +0900
+
+    Merge branch 'feature-chatpage' into demo-monthly-revised
+
+[33mcommit 6662eb17044a728186a756b6a1e5bff07f6be5eb[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Sun Nov 5 15:49:16 2023 +0900
+
+    feat: Implemented title label under day number, and fixed some ui stuffs
+
+[33mcommit 3e0da80ddc0aba28b77968ffae9ec6a89f902ae2[m
+Merge: 7d9a9e9 c8d7a82
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Sat Nov 4 22:48:23 2023 +0900
+
+    Merge c8d7a82 (repeat-page)
+
+[33mcommit 7d9a9e9cc9aea6f7164080f49c9b5ffbecfb473c[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Sat Nov 4 22:33:10 2023 +0900
+
+    GPT Inteface Changed
+
+[33mcommit ec2fc92553d51c5489df9720a118cbbfb09d5cba[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Sat Nov 4 21:01:49 2023 +0900
+
+    Feat: SELECT RawQuery || GPTQuery Execution || STT
+
+[33mcommit c8d7a829c4cda41876cc6191197f318e5cc3b9e2[m[33m ([m[1;31morigin/feature-repeat[m[33m)[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Sat Nov 4 19:04:36 2023 +0900
+
+    feat: implement setRepeat page
+
+[33mcommit ff9d7fa0a20b896be2aaffaeb42fc0b00528ac00[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Sat Nov 4 15:56:10 2023 +0900
+
+    feat: Implemented popup view frames
+
+[33mcommit c0c32402161566ae61835133bb07d1860c1b5874[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Sat Nov 4 11:02:03 2023 +0900
+
+    feat: Implemented basic message page
+
+[33mcommit c1b33e97a37d1481263155ccfec397f5e59fba6a[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Nov 2 18:06:09 2023 +0900
+
+    WIP: SQL Execute.
+    
+    Revert ae25424. SQL Table Default Value
+    Create Empty DB
+    Retrofit - Timeout set to 30 sec
+
+[33mcommit cc597bce0fd9e3f84245597432136152b26a0a4b[m[33m ([m[1;31morigin/demo[m[33m)[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Mon Oct 30 23:06:59 2023 +0900
+
+    Demo Version
+
+[33mcommit 57a637ccf3d699476ba58bee8c0eb8e0202d93cd[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Mon Oct 30 22:41:28 2023 +0900
+
+    Update MonthlyPageKT.kt
+
+[33mcommit 495aa4b3c12b816f6cbd797d2e54dd7741f87a44[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Mon Oct 30 22:26:50 2023 +0900
+
+    FIx: dot decorator removed 실시간으로
+
+[33mcommit 510b4feb2073d476f394917ab89fdd6e1a262734[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Mon Oct 30 21:57:27 2023 +0900
+
+    FIX: DateHelper.getDate called when today is 10/30
+
+[33mcommit e804cf3baadd2b7b4a2f8dabaf31f1f0bf6fa0a4[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Mon Oct 30 21:31:30 2023 +0900
+
+    Feat: Plan List shows only Select Day
+
+[33mcommit b808f7f0d9bd976e00d9e82ed0cc4bf058979f03[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Mon Oct 30 21:16:42 2023 +0900
+
+    Feat: Navigate to Edit Page from Monthly View
+
+[33mcommit 7839d4f3e977b04c1a147a352140095cf8e2eeb6[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Mon Oct 30 20:51:53 2023 +0900
+
+    fix: popup can show list with all schedule and todos
+
+[33mcommit 94628539a2847f03ae7fcff00f82f854ff90195c[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Mon Oct 30 16:56:28 2023 +0900
+
+    fix: update roomconverter
+
+[33mcommit d4203b1c413cc31adf9bf3afad6e85c51f0392e0[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Mon Oct 30 16:37:50 2023 +0900
+
+    chore : fix icon
+
+[33mcommit 7d5de56c02066154c8fd375404ec9bfb4c166c10[m
+Merge: ae25424 d6c479a
+Author: hochan <hochan0115@gmail.com>
+Date:   Mon Oct 30 11:52:41 2023 +0900
+
+    Merge branch 'feature-ui-monthlypage-saved' into demo-merge-monthly
+    
+    # Conflicts:
+    #       frontend/app/src/main/java/com/example/calendy/MainActivity.kt
+    #       frontend/app/src/main/java/com/example/calendy/utils/DateHelper.kt
+
+[33mcommit d6c479af150ed2b9afe0f9cf36a9210d27d7e28d[m[33m ([m[1;31morigin/feature-ui-monthlypage-saved[m[33m)[m
+Merge: a4f84fc 289226a
+Author: hochan <hochan0115@gmail.com>
+Date:   Mon Oct 30 05:52:59 2023 +0900
+
+    Merge remote-tracking branch 'origin/feature-ui-monthlypage-saved' into feature-ui-monthlypage-saved
+    
+    # Conflicts:
+    #       frontend/app/src/main/java/com/example/calendy/MainActivity.kt
+
+[33mcommit a4f84fc9bcbdc12fd9cb9ff17d03c590f15a3f21[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Mon Oct 30 05:50:02 2023 +0900
+
+    feat : add popups on monthly page
+
+[33mcommit ae254244c136697d7a1d30b83cae49b86b06fc1e[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Sun Oct 29 23:43:26 2023 +0900
+
+    Demo: Can compile without error.
+    
+    Time Format in db not matching.
+    GPT Response: Text (with datetime function)
+    Our App: Long (time in millis)
+
+[33mcommit f8d0f090dff64c28c1fbfacf08a4d6b033ebef7f[m[33m ([m[1;31morigin/feature-ui[m[33m)[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Sun Oct 29 23:23:09 2023 +0900
+
+    FIX: Not closing all category dialog when Add Category when completed
+    
+    UI Change: New Category Dialog is now Dialog (instead of BottomSheet)
+
+[33mcommit 46a27c901a9e0d80ce9e1996099f259bb7145342[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Sun Oct 29 09:16:05 2023 +0900
+
+    Feat: Retrofit Connection Success
+
+[33mcommit d1b10597e33e167cfb58ee90df56b6873f0d4fb7[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Sat Oct 28 21:38:37 2023 +0900
+
+    Feat: SQL Execution test Succeded
+
+[33mcommit 194760976f5fd4cb89de2a5f941a131dafd52ea7[m
+Merge: 62b1730 011c5b3
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Sat Oct 28 21:23:38 2023 +0900
+
+    Merge branch 'feature-manager-page' into feature-ui
+
+[33mcommit 62b173050962bff21f4a157c754481efa89f1f67[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Sat Oct 28 21:08:11 2023 +0900
+
+    feat: update, delete in edit plan apge
+
+[33mcommit 202c472c0155b95688b1a33db50de01df66399f1[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Sat Oct 28 20:41:44 2023 +0900
+
+    Feat: Date Range Picker in Edit Page (Schedule)
+
+[33mcommit 011c5b322adbb499637243431218578805263a2e[m[33m ([m[1;31morigin/feature-manager-page[m[33m)[m
+Author: darwinj07 <darwinj07@snu.ac.kr>
+Date:   Sat Oct 28 05:14:33 2023 +0900
+
+    retrofit setup for gpt api usage through server
+
+[33mcommit 4b8815f8125bc0c8876d484ad84954f06b426180[m
+Author: darwinj07 <54761229+darwinj07@users.noreply.github.com>
+Date:   Thu Oct 26 19:31:24 2023 +0900
+
+    removed redundant navigation dependencies
+
+[33mcommit 34bc8355b57bab30f1e7b2bf16b4470e5bd029c1[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Oct 26 23:19:51 2023 +0900
+
+    Merge: Conflict Solved
+
+[33mcommit 8742f4645dc82626d00d2256ee33834bb301e52e[m
+Merge: 2ba6f74 289226a
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Oct 26 23:19:40 2023 +0900
+
+    Merge branch 'feature-ui-monthlypage-saved' into feature-ui
+
+[33mcommit 289226a14cf2eb55d19538cb577684b32af8cab6[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Oct 26 23:15:41 2023 +0900
+
+    Test: Add Plan Repository Test
+
+[33mcommit 988d6a75000f706ed44a8d9a94ff6011279f3300[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Thu Oct 26 23:10:35 2023 +0900
+
+    fix: fixed data not coming error
+
+[33mcommit ca5ab2f5931f16d5e6bc01ab7450297185d92abd[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Thu Oct 26 22:36:15 2023 +0900
+
+    feat : add getAll function to schedule and todo
+
+[33mcommit 6bddb83c73fdf49ddde4d1c3c8c6945945424358[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Thu Oct 26 21:15:50 2023 +0900
+
+    work in progress...
+
+[33mcommit 7fae6cb2810910113b404e4a8e9ca7cb9ca2b787[m
+Author: darwinj07 <54761229+darwinj07@users.noreply.github.com>
+Date:   Thu Oct 26 19:31:24 2023 +0900
+
+    removed redundant avigation dependencies
+
+[33mcommit 9e5e51d334f8e0a8ddd0adedc3567aa6733acc9c[m
+Author: darwinj07 <54761229+darwinj07@users.noreply.github.com>
+Date:   Thu Oct 26 19:17:03 2023 +0900
+
+    Re-add navigation dependencies
+
+[33mcommit 2ba6f74190504b083ca3e007aecc60f60292b1b9[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Oct 26 19:15:00 2023 +0900
+
+    Feat: Navigating to EditPlanPage available
+
+[33mcommit bc5ba35a72567a41d30b052b8af8eaba7f8dd564[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Oct 26 18:14:29 2023 +0900
+
+    Test: DateHelper object
+
+[33mcommit e1ac82b51386ea95cdbec5e8b8b0ce697376cf23[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Oct 26 15:56:06 2023 +0900
+
+    Refactor: Date Selector & Category Selector
+    
+    Testing navigation to Edit Plan Page
+
+[33mcommit fc07966d885f95df0653b453e51f63416dd9fe5b[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Wed Oct 25 23:46:21 2023 +0900
+
+    feat: Set Repeat Page WIP
+
+[33mcommit ecff6dd6ddb9e8e5c4276b527ae4257b70b97f08[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Oct 24 20:22:51 2023 +0900
+
+    feat: MonthlyPage can be shown.
+
+[33mcommit 56e7b15aa4e5eeef52e1065a45480bc8bbdf5401[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Oct 24 19:44:20 2023 +0900
+
+    feat: MonthlyPage working in Navigation
+
+[33mcommit 45c3202e58cc4a03cd3336f78bb1a7644de186a8[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Oct 24 18:41:09 2023 +0900
+
+    Show MonthlyView in Compose WIP
+
+[33mcommit 65f37bac60fe5baca24bfb901bb1ad118fdede52[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Oct 24 18:03:18 2023 +0900
+
+    Feat: Add Plan Success
+
+[33mcommit 0e7a4a1801ddbba0303dca96057be176d1e5cfbd[m
+Merge: bfb7987 154688f
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Tue Oct 24 17:08:27 2023 +0900
+
+    Merge pull request #10 from snuhcs-course/feature-monthlyview
+    
+    Feature monthlyview
+
+[33mcommit bfb7987f94231ac8138948c07cd1565ef8e59dc7[m
+Merge: a34cab7 9915207
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Tue Oct 24 17:07:48 2023 +0900
+
+    Merge pull request #9 from snuhcs-course/feature-editpage
+    
+    Feature editpage
+
+[33mcommit 154688fceeceb9843e28b712586999827e796275[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Tue Oct 24 17:04:47 2023 +0900
+
+    feat: add Add plan button and edit plan button
+
+[33mcommit 9915207eb90ebcfc59e23a760ec7df14c56c0823[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Oct 24 16:59:35 2023 +0900
+
+    Test: Refactor Test Directory
+
+[33mcommit 2881e6466e333d8916f3e200b2d28718e8af2bea[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Tue Oct 24 15:34:54 2023 +0900
+
+    feat: add monthly day detail popup with dummy data (local data not linked yet)
+
+[33mcommit 7bf90c14e2ce79ccadafe08e8f263f4b0890ca52[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Oct 24 15:33:57 2023 +0900
+
+    Feat: Divide Schedule/Todo & Add/Edit Page. Date Range Picker WIP
+
+[33mcommit e5e2d9584501ac77970cb59908aed4224a2548c5[m
+Merge: 464212e a34cab7
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Oct 24 00:07:36 2023 +0900
+
+    Merge remote-tracking branch 'origin/dev' into feature-editpage
+    
+    # Conflicts:
+    #       frontend/app/build.gradle.kts
+    #       frontend/app/src/main/java/com/example/calendy/utils/DateHelper.kt
+    #       frontend/app/src/main/res/values/strings.xml
+
+[33mcommit 464212e5e41284d9c180da6101ed35cedc37aa17[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Mon Oct 23 19:48:43 2023 +0900
+
+    fix : fix setRepeat ui
+
+[33mcommit a34cab7e7a4a5e74abb42a120dde02ef637d01e1[m
+Merge: 712f11c 28a7c45
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Mon Oct 23 14:17:58 2023 +0900
+
+    Merge pull request #8 from snuhcs-course/feature-monthlyview
+    
+    Feature monthlyview
+
+[33mcommit 348f2a70d08ebde2af6f6c224ca04781a98ace05[m[33m ([m[1;31morigin/feature-weekly[m[33m)[m
+Author: HHCHU <ded06031@snu.ac.kr>
+Date:   Mon Oct 23 11:10:00 2023 +0900
+
+    fix: Add vertical line for timetable
+
+[33mcommit cfe945aff20a6fc0c0345da23f0f494a416cb402[m
+Author: HHCHU <ded06031@snu.ac.kr>
+Date:   Sun Oct 22 23:57:22 2023 +0900
+
+    feat: Add WeeklyView background UI
+
+[33mcommit 28a7c452a45fc2785d8fa4be10138ae055f62d4a[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Sun Oct 22 23:30:46 2023 +0900
+
+    feat: add view model class to monthly day plan list.
+
+[33mcommit 477ec5b2651abb2ac2567b18815ed6128fc24b95[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Sun Oct 22 23:26:48 2023 +0900
+
+    feat: separate layout of plan list item by schedule and plan. add event listener for each items
+
+[33mcommit a70d44a6e9e2d0dce16aad8acf512354cbca5347[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Sun Oct 22 23:25:02 2023 +0900
+
+    fix: add navigation dependency
+
+[33mcommit 245ff4ad41635d57cc2588c61cb5f8cb27d45a76[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Sun Oct 22 09:25:15 2023 +0900
+
+    FIX: Correct FieldWithLeadingText arguments
+
+[33mcommit bfcbbf849d603cedaa38c319fd11ed26570564dd[m
+Merge: 550f110 14b79b0
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Sun Oct 22 09:19:30 2023 +0900
+
+    Merge branch 'feature-editpage-UI22' into feature-editpage
+
+[33mcommit 14b79b05f62d7e6a34833553c10868c89c87b8e8[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Sun Oct 22 09:17:12 2023 +0900
+
+    feat: Date Picker & Time Picker complete
+
+[33mcommit 550f1106cf0ebc844d557042f018a0cc5be762d2[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Sun Oct 22 01:02:43 2023 +0900
+
+    feat: implement setRepeat Ui
+
+[33mcommit 1475be5a130e8527c7512582b7280d61a707043d[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Sat Oct 21 15:21:03 2023 +0900
+
+    fix: fix problems caused by changed data structure
+
+[33mcommit 305e04c743437ee020c628e88e4246f59aabec85[m
+Merge: 0b3705c 712f11c
+Author: hochan <hochan0115@gmail.com>
+Date:   Sat Oct 21 15:05:07 2023 +0900
+
+    Merge branch 'dev' into feature-monthlyview
+
+[33mcommit 0b3705ccd6c1dc93df02721b9d53efdb7923c73f[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Sat Oct 21 14:58:45 2023 +0900
+
+    feat: Separate item view to schedule and todo
+
+[33mcommit 7d8f9924ba62634bd658f75022497a48cd644f21[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Sat Oct 21 14:58:07 2023 +0900
+
+     refactor: change name of monthly view to monthly page
+
+[33mcommit 712f11cc3d797dd1fd9a9c72720b419bdbf53b0b[m
+Merge: a1a8676 946005b
+Author: darwinj07 <54761229+darwinj07@users.noreply.github.com>
+Date:   Sat Oct 21 00:57:32 2023 +0900
+
+    Merge pull request #7 from snuhcs-course/feature-editpage
+    
+    WIP Merge: Data Layer & (Edit Page)
+
+[33mcommit 946005bf96d4366b6c59ffca1edddd1668cb006b[m
+Merge: ca4099c a1a8676
+Author: darwinj07 <54761229+darwinj07@users.noreply.github.com>
+Date:   Sat Oct 21 00:56:04 2023 +0900
+
+    Merge branch 'dev' into feature-editpage
+
+[33mcommit ca4099c292d020fcb1bce587380b8294e2ff404e[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Fri Oct 20 21:05:51 2023 +0900
+
+    UI Work In Progress. Test Succeds
+    
+    App Build Succeded.
+    Repository Test Succeeded.
+
+[33mcommit 961201fd097c5e3a356a616b9f6dc629c6792ff3[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Fri Oct 20 20:51:19 2023 +0900
+
+    Feat: add repeatGroup table & setRepeat Ui in progress
+
+[33mcommit 0c9875946dead575c8c24dab5adf8905f355cf61[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Fri Oct 20 18:48:48 2023 +0900
+
+    Fix: Category default id should be 0
+
+[33mcommit 92aaf5a9d9e63a4eb4cdceafbb45186a3715b982[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Oct 19 23:37:09 2023 +0900
+
+    feat: Plan Repository
+
+[33mcommit f20667ff485f6ef6e3000e61327875db169db8ae[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Oct 19 23:13:49 2023 +0900
+
+    Refactor: Create Plan class
+
+[33mcommit bbd5548642a0b689c654812331122eb8b03d0ec7[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Oct 19 20:50:15 2023 +0900
+
+    Fix: Schedule & Todo
+
+[33mcommit 2b937693fd3ccbd96e4d299024fc7980eba64401[m
+Author: HHCHU <ded06031@snu.ac.kr>
+Date:   Thu Oct 19 19:27:56 2023 +0900
+
+    feat: Change styling of week calendar
+
+[33mcommit e9953a49c67d91526c6a4205f48fb0dc7c0a023f[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Thu Oct 19 19:09:22 2023 +0900
+
+    feat: Add Adaptor to link day list popup and data from monthly view. (using dummy data and some temporary codes)
+
+[33mcommit 9e7c17b961dae1ffd7746b2741abe9badf42888b[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Oct 19 18:47:36 2023 +0900
+
+    Feat: Show Dummy Category List in BottomSheet
+
+[33mcommit 86a1d7fc75366563f993992e5ca9fd5e2ab3c99c[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Thu Oct 19 18:37:20 2023 +0900
+
+    fix: fix local db entity error
+
+[33mcommit 800c82a036bb391feacbd9746e0bc804319e1586[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Oct 19 17:59:28 2023 +0900
+
+    feat, FIX: Bottom Sheet Dialog. Retrofit baesurl crash fix
+
+[33mcommit 36acf28118baf582d393dd4832b7a133bdd811f6[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Thu Oct 19 17:00:25 2023 +0900
+
+    feat: add remoteDataSoruce
+
+[33mcommit ced08650ac700f9af25f4292a822bf0b6ae662cd[m
+Author: HHCHU <ded06031@snu.ac.kr>
+Date:   Thu Oct 19 16:55:28 2023 +0900
+
+    feat: Import weekly calendar library
+
+[33mcommit 8af097413c9b34de90cecb9139ef5609243cdf0d[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Oct 19 16:44:02 2023 +0900
+
+    FIX: Merge 39cb5db error
+
+[33mcommit 39cb5db0dd212ac960d57d916ab1627934232e0d[m
+Merge: 32796bf 0543c7a
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Oct 19 16:41:31 2023 +0900
+
+    Merge branch 'feature-wheel' into feature-editpage
+
+[33mcommit 559a02e5c4f5a6a55bb8dac53c1d50c13f11510e[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Thu Oct 19 14:23:53 2023 +0900
+
+    feat: Add modal popup frame for selecting plans of the day
+
+[33mcommit 32796bfb06e1e7eff0d9d66f40c928a067a6dd85[m
+Merge: 6753703 1650565
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Oct 19 13:59:29 2023 +0900
+
+    Merge branch 'feature-editpage' of https://github.com/snuhcs-course/swpp-2023-project-team-10 into feature-editpage
+
+[33mcommit 0543c7ae37f7e361b3d7e9342ffbbb4c7dffdf41[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Oct 19 13:58:58 2023 +0900
+
+    feat: Wheel-picker & RatingBar
+    
+    Breaking Change: maven("https://jitpack.io")
+
+[33mcommit 8654f66cf886551d87f483d029d0b97a3487f780[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Thu Oct 19 12:05:22 2023 +0900
+
+    feat: Add View Model for Monthly view and add dot decorator
+
+[33mcommit 675370328091a4531b3c18b87fb133b4f1551822[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Thu Oct 19 00:37:28 2023 +0900
+
+    Chore: modify editorconfig - wrap enabled
+
+[33mcommit 165056554b480e878b8ba995a4c982ab18cbc9e8[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Wed Oct 18 20:50:22 2023 +0900
+
+    feat: implement db table entity
+
+[33mcommit a1a8676eb973d8dd9f67184cd9675845d96755ce[m
+Merge: 5ccf87c ed3a0be
+Author: darwinj07 <54761229+darwinj07@users.noreply.github.com>
+Date:   Wed Oct 18 05:53:51 2023 +0900
+
+    Merge pull request #5 from snuhcs-course/feature-bottomnav
+    
+    feat: implement bottomNavgiationBar
+
+[33mcommit 43d545639a26d691575bf2593b759d09c87ffa7f[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Wed Oct 18 02:31:50 2023 +0900
+
+    feat: implement local db api
+
+[33mcommit 1f043727d44b5ef72220a3b54b2ddb59bfaec349[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Oct 17 20:50:31 2023 +0900
+
+    feat: Type Changes, Daily Button
+
+[33mcommit ed3a0befcb77b5128ba69490702f996e3d672acb[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Tue Oct 17 20:14:55 2023 +0900
+
+    feat: implement bottomNavgiationBar
+
+[33mcommit 4f9227888b32481edd54e0492268e14361c6dee2[m
+Author: HHCHU <ded06031@snu.ac.kr>
+Date:   Tue Oct 17 19:34:27 2023 +0900
+
+    feat: Change MonthlyView layout ratio
+
+[33mcommit 11d74dec01e4f010eb6c9f0b6023a825a32a884f[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Tue Oct 17 19:24:30 2023 +0900
+
+    feat: Add decorator for selected date
+
+[33mcommit 095dd4859fece9ceee634bf019af07a67ea416c5[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Oct 17 18:54:51 2023 +0900
+
+    feat: Select Date and Time
+
+[33mcommit b4ccaea17763f6dc5f79d7f4ad4fd2b2c8502de6[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Tue Oct 17 16:51:22 2023 +0900
+
+    chore: update SchduleDaoTest
+
+[33mcommit d4ffd4aff855a06c6f7ba843b225332358245d48[m
+Merge: 8ad445d 465c65b
+Author: hochan <hochan0115@gmail.com>
+Date:   Tue Oct 17 12:13:57 2023 +0900
+
+    merge: merged
+
+[33mcommit 8ad445d9fb70650828b1a3a3a0bafd6f138eb4ac[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Tue Oct 17 12:00:37 2023 +0900
+
+    feat: Added decorators to sunday, saturday, today
+
+[33mcommit 465c65b1c574711ac9106d9088617df630435990[m
+Author: HHCHU <ded06031@snu.ac.kr>
+Date:   Tue Oct 17 11:02:17 2023 +0900
+
+    feat: Change Month and Week to Korean
+
+[33mcommit f98b0fae7623f7cc8f96e333c2f385935c2367c7[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Sun Oct 15 16:26:10 2023 +0900
+
+    feat: Added monthly view layout to MonthlyView Activity
+
+[33mcommit 2458ca2a4ecac51a2149ad0aca362b6ecd0fd846[m
+Author: hochan <hochan0115@gmail.com>
+Date:   Sun Oct 15 15:41:43 2023 +0900
+
+    feat: Added MonthlyView.java with layout files and changed material to 1.8.0 from 1.10.0
+
+[33mcommit 23bf5bf257b7acdfc442fc069e47cab2a3f6331e[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Fri Oct 13 16:35:51 2023 +0900
+
+    feat : implement structure of EditPlanViewModel
+
+[33mcommit 789d3f5e08e06275da65ef904d868edafb2fb848[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Fri Oct 13 15:47:49 2023 +0900
+
+    Update EditPlanPage.kt
+
+[33mcommit 1f1298f574b005547f50a136b74fe105c22d2c2a[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Fri Oct 13 12:49:57 2023 +0900
+
+    feat: implement editPlanPage UI roughly && add some configure to gradle
+    
+    add ViewModel dependencies in module.gradle
+
+[33mcommit 5ccf87c315f627a5cd8498cab3e4f1a65a68d9d2[m
+Author: darwinj07 <54761229+darwinj07@users.noreply.github.com>
+Date:   Thu Oct 12 16:33:40 2023 +0900
+
+    Create pull_request_template.md
+
+[33mcommit 8dcb1abbb32d191b0aa0b1b1ba8f43f06bb31b4d[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Oct 10 18:49:59 2023 +0900
+
+    chore: Change db entity attribute
+
+[33mcommit 0626bbc2484e1917b26b2a3cadcdac240d306684[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Tue Oct 10 18:36:48 2023 +0900
+
+    refactor: Use only one database. Create DateHelper
+
+[33mcommit 65e85120916a9628bade20555e37c85cc1ce47d3[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Tue Oct 10 18:34:47 2023 +0900
+
+    refactor: modify structure of Dao
+
+[33mcommit 0b16b5c48b5850e48431c117050c974560b7a203[m
+Merge: ed4c1f3 352e677
+Author: darwinj07 <54761229+darwinj07@users.noreply.github.com>
+Date:   Tue Oct 10 17:29:35 2023 +0900
+
+    Merge pull request #3 from snuhcs-course/feature-data
+    
+    Feature-data merge
+
+[33mcommit 352e677191aa193c858545fddab4120f863f2f30[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Mon Oct 9 21:25:58 2023 +0900
+
+    feat: implement schedule repository
+
+[33mcommit 83cda2903ea2e6b72817677a7f4810f07b0d4dc0[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Mon Oct 9 21:15:23 2023 +0900
+
+    feat: Implement Todo Repository
+    
+    Breaking Change: Java Version Change
+
+[33mcommit 09aed7fee0f964d0f1eecfeec365d53abc821d36[m
+Merge: ef5eeb3 f0ac3a4
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Mon Oct 9 18:45:54 2023 +0900
+
+    Merge branch 'feature-data' of github.com:snuhcs-course/swpp-2023-project-team-10 into feature-data
+
+[33mcommit ef5eeb331bf51aa802b1f5befcbe7814c213a973[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Mon Oct 9 18:45:32 2023 +0900
+
+    feat: implemeting schedule repository...
+
+[33mcommit f0ac3a4c3d5a890e0b4352b385d003876c5f117c[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Mon Oct 9 18:44:52 2023 +0900
+
+    feat: Implementing Todo Repository...
+    
+    Work In Progrss
+
+[33mcommit 7aeedd4c38991de0bfef6f6ee151cc650011de36[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Mon Oct 9 15:18:16 2023 +0900
+
+    chore: import room api settings
+
+[33mcommit ed4c1f3e1fc6576a3582f418e4d1c8e630dcd7b5[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Mon Oct 9 15:09:19 2023 +0900
+
+    chore: delete backend/node_modules directory
+
+[33mcommit 11db64c4a4e247b51eabc2c3e3880d31a943284c[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Mon Oct 9 15:06:54 2023 +0900
+
+    Setting: add gitignore
+
+[33mcommit a86ec740e9f5a8e399c2cb302c5841243aed670b[m
+Author: Jaemin Choi <jmchoi1993@snu.ac.kr>
+Date:   Sun Oct 8 18:01:31 2023 +0900
+
+    Setup: create basic nodejs server
+
+[33mcommit 76468deb49825f6b308e0ebf9d8bea5c876a46ef[m
+Author: kimkun07 <kimkun07@naver.com>
+Date:   Sat Oct 7 20:19:23 2023 +0900
+
+    Setup: Split into two folders. Create Android Project.
+
+[33mcommit 022102f4df999a187ee5fd66f630744f5911499f[m
+Author: github-classroom[bot] <66690702+github-classroom[bot]@users.noreply.github.com>
+Date:   Mon Sep 11 13:31:35 2023 +0000
+
+    Initial commit

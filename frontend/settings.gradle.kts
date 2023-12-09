@@ -2,6 +2,7 @@ pluginManagement {
     repositories {
         google()
         mavenCentral()
+        maven( url = "https://jitpack.io")
         gradlePluginPortal()
     }
 }
@@ -10,9 +11,12 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven("https://jitpack.io")
     }
 }
 
 rootProject.name = "Calendy"
 include(":app")
+include(":library")
+
  

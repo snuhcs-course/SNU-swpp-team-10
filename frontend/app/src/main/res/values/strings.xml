@@ -1,3 +1,35 @@
 <resources>
     <string name="app_name">Calendy</string>
+    <string name="text_weekly_view">Week</string>
+    <string name="text_monthly_view">Month</string>
+    <string name="text_todo_view">Todo</string>
+    <string name="text_manager_view">Manager</string>
+    <string name="setting_view">Setting</string>
+
+    <string-array name="custom_weekdays">
+        <item>일</item>
+        <item>월</item>
+        <item>화</item>
+        <item>수</item>
+        <item>목</item>
+        <item>금</item>
+        <item>토</item>
+    </string-array>
+
+    <string-array name="custom_months">
+        <item>1월</item>
+        <item>2월</item>
+        <item>3월</item>
+        <item>4월</item>
+        <item>5월</item>
+        <item>6월</item>
+        <item>7월</item>
+        <item>8월</item>
+        <item>9월</item>
+        <item>10월</item>
+        <item>11월</item>
+        <item>12월</item>
+    </string-array>
+
+
 </resources>

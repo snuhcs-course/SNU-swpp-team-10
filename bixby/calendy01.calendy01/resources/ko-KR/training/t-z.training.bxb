@@ -1,0 +1,16 @@
+train (t-ziocsen1eftu5aopl1hquoe3e) {
+  utterance ("[g:UserQuery] (일요일 17시에 롤드컵봐야해)[v:UserQuery]")
+  last-modified (1701007009607)
+}
+train (t-zl5wd3ubggl5dcqgvy5kiza6d) {
+  utterance ("[g:UserQuery] (매주 금요일 오후 7시~9시에 세미나 일정 잡아줘)[v:UserQuery]")
+  last-modified (1701007096467)
+}
+train (t-zxl0t1myitjb68tfl5folw4o3) {
+  utterance ("[g:BriefingTime] (다음 주)[v:BriefingTime:'다음 주'] 브리핑해줘")
+  last-modified (1701007766054)
+}
+train (t-zv2qe54mk39yhj5clrhq8l1l7) {
+  utterance ("[g:BriefingTime] (이번 달)[v:BriefingTime:'이번 달'] 요약")
+  last-modified (1701007777250)
+}

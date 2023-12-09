@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Calendy" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.Calendy" parent="android:Theme.Material.Light.NoActionBar"/>
+    <style name="RoundCornerModalStyle" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@drawable/white_round</item>
+    </style>
+
+    <style name="Theme.Calendy.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="windowSplashScreenBackground">@color/blue_2</item>
+        <item name="postSplashScreenTheme">@style/Theme.Calendy</item>
+    </style>
+
 </resources>

@@ -1,0 +1,3 @@
+text (UserQuery) {
+  description (유저의 입력으로, Manager에 Query할 문장)
+}

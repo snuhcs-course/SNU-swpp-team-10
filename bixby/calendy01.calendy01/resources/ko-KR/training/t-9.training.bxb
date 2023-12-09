@@ -1,0 +1,8 @@
+train (t-9l9erb46lz4zxk2d387a6xvgb) {
+  utterance ("[g:UserQuery] (데이트 취소해줘)[v:UserQuery]")
+  last-modified (1701006879943)
+}
+train (t-9a9f8yfep8emglj1jdukgozmv) {
+  utterance ("[g:BriefingTime] (일요일)[v:BriefingTime:일요일] 브리핑")
+  last-modified (1701007748950)
+}

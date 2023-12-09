@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/monthlyDayDetailPopup"
+    android:layout_width="300dp"
+    android:layout_height="400dp"
+    android:minHeight="400dp"
+    android:background="@drawable/white_round"
+    android:orientation="vertical">
+
+    <!-- 타이틀바 -->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="80dp">
+
+        <TextView
+            android:id="@+id/monthlyPlanDetailTitle"
+            android:layout_width="250dp"
+            android:layout_height="43dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginBottom="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="일정이름 이름이름"
+            android:textColor="#000"
+            android:textSize="34sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <View
+            android:id="@+id/divider2"
+            android:layout_width="250dp"
+            android:layout_height="0.5dp"
+            android:background="#646464"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Button
+            android:id="@+id/editPlanButton"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_gravity="top|end"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="24dp"
+            android:background="@drawable/edit_plan_button"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/monthlyPlanDetailStartTime"
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="10월 6일 오전 9:00"
+            android:textSize="16dp"
+            android:lineHeight="25dp"
+            android:textFontWeight="500"
+            android:textColor="@color/black"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/monthlyPlanDetailEndTime"
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
+            android:text="10월 8일 오후 12:30"
+            android:textSize="16dp"
+            android:lineHeight="25dp"
+            android:textFontWeight="500"
+            android:textColor="@color/black"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/monthlyPlanDetailStartTime" />
+
+        <TextView
+            android:id="@+id/monthlyPlanDetailMemo"
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:ellipsize="end"
+            android:lineHeight="25dp"
+            android:maxLines="5"
+            android:text="일정에 대한 세부 설명 및 기타 정보 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 메모 "
+            android:textColor="#737373"
+            android:textFontWeight="400"
+            android:textSize="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/monthlyPlanDetailEndTime" />
+
+        <TextView
+            android:id="@+id/monthlyPlanDetailLocation"
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="위치 정보"
+            android:textSize="16dp"
+            android:lineHeight="25dp"
+            android:textFontWeight="400"
+            android:textColor="#737373"
+            android:maxLines="1"
+            android:ellipsize="end"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/monthlyPlanDetailMemo" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</LinearLayout>

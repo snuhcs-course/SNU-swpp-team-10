@@ -1,0 +1,12 @@
+train (t-bfd7tu68xeuuqy55ravoi1dfi) {
+  utterance ("[g:UserQuery] (일요일 축구)[v:UserQuery]")
+  last-modified (1701006899859)
+}
+train (t-b5bbub14lxck8v5srgi1we5vi) {
+  utterance ("[g:UserQuery] (내일 컴퓨터구조 과제 추가해줘)[v:UserQuery]")
+  last-modified (1701006924223)
+}
+train (t-bqmup8ile77q5vh7c33wy3hei) {
+  utterance ("[g:BriefingTime] (다음 달)[v:BriefingTime:'다음 달'] 일정을 브리핑해줘")
+  last-modified (1701042707372)
+}
