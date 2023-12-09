@@ -39,8 +39,8 @@ class DateHelperTest {
     }
 
     @Test
-    fun getDateFromMillis() {
-        val expected = testDateExpected
+    fun getDateFromUTCMillis() {
+        val expected = Date(2023 - 1900, 10 - 1, 26, 16 - 9, 14)
         val actual = DateHelper.getDateFromUTCMillis(testDateExpected.time)
 
         assertEquals(/* expected = */ expected, /* actual = */ actual)
