@@ -60,6 +60,8 @@ import com.example.calendy.ui.theme.getColor
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
+import kotlin.math.max
+import kotlin.math.min
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -317,7 +319,7 @@ fun MonthSelectionSheet(
     onDismiss: () -> Unit
 ) {
     val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-    val years = (currentYear - 2..currentYear + 2).toList()
+    val years = (min(selectedYear - 2, currentYear)..max(selectedYear + 2, currentYear)).toList()
     val months = (1..12).toList()
     // (year,list) 형태의 리스트로 변환
     val yearMonthCombinations = years.flatMap { year -> months.map { month -> year to month } }
