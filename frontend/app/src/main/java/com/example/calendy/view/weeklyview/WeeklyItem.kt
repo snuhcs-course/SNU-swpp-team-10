@@ -95,7 +95,7 @@ fun ScheduleItem(
 //            fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
             color = if (schedule.priority >= 3) Color.White else Color.Black,
-            maxLines = 1,
+            maxLines = 2,
         )
     }
 }
@@ -187,7 +187,7 @@ fun TodoItem(
                     textAlign = TextAlign.Center,
                     overflow = TextOverflow.Ellipsis,
                     textDecoration = if (todo.complete) TextDecoration.LineThrough else null,
-                    color = if (todo.complete) Color.Gray else Color.Black
+                    color = if (todo.complete) Color.Gray else if(todo.priority>=3) Color.White else Color.Black
                 )
             }
         }
