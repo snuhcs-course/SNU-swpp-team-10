@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.calendy"
+    namespace = "com.swpp10.calendy"
     compileSdk = 33
 
     defaultConfig {
-        applicationId = "com.example.calendy"
+        applicationId = "com.swpp10.calendy"
         minSdk = 24
         targetSdk = 33
         versionCode = 1
