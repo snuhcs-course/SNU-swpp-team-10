@@ -83,9 +83,8 @@ fun ScheduleItem(
             .fillMaxSize()
             .background(
                 schedule
-                    .getColor(),
-//                    .copy(alpha = 0.6f),
-                RoundedCornerShape(4.dp)
+                    .getColor()
+                    .copy(alpha = 0.6f), RoundedCornerShape(4.dp)
             )
             .clickable(onClick = clickAction)
             .padding(), contentAlignment = Alignment.Center
@@ -95,7 +94,7 @@ fun ScheduleItem(
             style = MaterialTheme.typography.labelSmall,
 //            fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
-            color = if( schedule.priority>=3) Color.White else Color.Black,
+            color = if (schedule.priority >= 3) Color.White else Color.Black,
             maxLines = 1,
         )
     }
@@ -221,12 +220,17 @@ fun WeekHeader(
     modifier: Modifier = Modifier,
     onNavigateToEditPage: (id: Int?, type: PlanType, startDate: Date?, endDate: Date?) -> Unit,
 ) {
-    val multipleDaySchedules: List<Schedule> = uiState.multipleDaySchedules.filterNot { schedule ->  isSameDay(schedule.startTime, schedule.endTime) }
+    val multipleDaySchedules: List<Schedule> = uiState.multipleDaySchedules.filterNot { schedule ->
+        isSameDay(
+            schedule.startTime,
+            schedule.endTime
+        )
+    }
     val calendar = Calendar.getInstance()
     calendar.time = uiState.currentWeek.first
     val dayFormatter = SimpleDateFormat("E\nd", Locale.getDefault())
-    Column(modifier= Modifier.bottomBorder(0.5f.dp,Color.LightGray)) {
-        Row(modifier = modifier.bottomBorder(0.5f.dp,Color.LightGray)) {
+    Column(modifier = Modifier.bottomBorder(0.5f.dp, Color.LightGray)) {
+        Row(modifier = modifier.bottomBorder(0.5f.dp, Color.LightGray)) {
             val numDays = 7
             repeat(numDays) { _ ->
                 val dateText = dayFormatter.format(calendar.time)
@@ -237,11 +241,11 @@ fun WeekHeader(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(4.dp),
-                        fontSize= 12.sp,
+                        fontSize = 12.sp,
                         color = when (calendar.get(Calendar.DAY_OF_WEEK)) {
-                            Calendar.SUNDAY -> Color.Red
+                            Calendar.SUNDAY   -> Color.Red
                             Calendar.SATURDAY -> Color.Blue
-                            else -> Color.Black
+                            else              -> Color.Black
                         }
                     )
                 }
@@ -249,14 +253,14 @@ fun WeekHeader(
             }
         }
 //        if(multipleDaySchedules.isNotEmpty()){
-            LongPlanStack(
-                modifier = modifier,
-                uiState = uiState,
-                dayWidth = dayWidth,
-                onNavigateToEditPage = onNavigateToEditPage
-            )
+        LongPlanStack(
+            modifier = modifier,
+            uiState = uiState,
+            dayWidth = dayWidth,
+            onNavigateToEditPage = onNavigateToEditPage
+        )
 //        }
-//        Spacer(modifier = modifier.padding(bottom = 10.dp))
+
     }
 
 }
@@ -277,12 +281,15 @@ fun WeekSidebar(
     Column(modifier = modifier.border(0.5f.dp, Color.LightGray)) {
         repeat(24) { _ ->
             val hourText = hourFormatter.format(calendar.time)
-            Box(modifier = Modifier.height(hourHeight).bottomBorder((0.5f).dp,Color.LightGray)) {
+            Box(modifier = Modifier
+                .height(hourHeight)
+                .bottomBorder((0.5f).dp, Color.LightGray)) {
                 Text(
-                    text = hourText, modifier = modifier
+                    text = hourText,
+                    modifier = modifier
                         .fillMaxHeight()
                         .padding(4.dp),
-                    fontSize= 12.sp,
+                    fontSize = 12.sp,
                 )
             }
             calendar.add(Calendar.HOUR_OF_DAY, 1)
@@ -309,7 +316,8 @@ fun WeeklyTable(
     hourHeight: Dp,
     onNavigateToEditPage: (Int?, PlanType, Date?, Date?) -> Unit
 ) {
-    val schedules = uiState.weekSchedules.filter { schedule -> isSameDay(schedule.startTime, schedule.endTime)  }
+    val schedules =
+        uiState.weekSchedules.filter { schedule -> isSameDay(schedule.startTime, schedule.endTime) }
     val todos = uiState.weekTodos
     val numDays = 7
     val dividerColor = Color.LightGray
@@ -330,18 +338,24 @@ fun WeeklyTable(
         }
         Layout(
             content = {
-                schedules.filter{ s-> s.startTime.before(uiState.currentWeek.second) && s.endTime.after(uiState.currentWeek.first)}
-                    .sortedBy(Schedule::startTime).forEach { schedule ->
-                    Box(modifier = Modifier.scheduleData(schedule = schedule)) {
-                        scheduleContent(schedule)
+                schedules.filter { s ->
+                    s.startTime.before(uiState.currentWeek.second) && s.endTime.after(
+                        uiState.currentWeek.first
+                    )
+                }.sortedBy(Schedule::startTime).forEach { schedule ->
+                        Box(modifier = Modifier.scheduleData(schedule = schedule)) {
+                            scheduleContent(schedule)
+                        }
                     }
-                }
-                todos.filter{ t-> t.dueTime.before(uiState.currentWeek.second) && t.dueTime.after(uiState.currentWeek.first)}
-                    .sortedBy(Todo::dueTime).forEach { todo ->
-                    Box(modifier = Modifier.todoData(todo = todo)) {
-                        todoContent(todo)
+                todos.filter { t ->
+                    t.dueTime.before(uiState.currentWeek.second) && t.dueTime.after(
+                        uiState.currentWeek.first
+                    )
+                }.sortedBy(Todo::dueTime).forEach { todo ->
+                        Box(modifier = Modifier.todoData(todo = todo)) {
+                            todoContent(todo)
+                        }
                     }
-                }
             },
             modifier = modifier
                 .matchParentSize()
@@ -517,7 +531,7 @@ fun ClickableTimeSlotBox(
         add(Calendar.DAY_OF_YEAR, day)
         set(Calendar.HOUR_OF_DAY, hour)
     }.time
-    val endDate = clickedDateTime.applyTime(hour+1, 0)
+    val endDate = clickedDateTime.applyTime(hour + 1, 0)
 
     Box(modifier = Modifier
         .offset(x = boxX.dp, y = boxY.dp)
@@ -537,14 +551,19 @@ fun LongPlanStack(
     onNavigateToEditPage: (id: Int?, type: PlanType, startDate: Date?, endDate: Date?) -> Unit,
     scheduleContent: @Composable (schedule: Schedule) -> Unit = {
         ScheduleItem(
-            schedule = it, onNavigateToEditPage = onNavigateToEditPage
+            schedule = it,
+            onNavigateToEditPage = onNavigateToEditPage,
+            modifier = Modifier.background(
+                it.getColor(), RoundedCornerShape(4.dp)
+            )
         )
     }
 ) {
     val schedules = uiState.multipleDaySchedules
     val currentWeek = uiState.currentWeek
 
-    Layout(modifier = modifier.padding(vertical=5.dp).height(36.dp) ,content = {
+    Layout(modifier = modifier
+        , content = {
         schedules.sortedBy(Schedule::startTime).forEach { schedule ->
             Box(modifier = Modifier.scheduleData(schedule = schedule)) {
                 scheduleContent(schedule)
@@ -555,9 +574,16 @@ fun LongPlanStack(
         val width = (dayWidth * 7).roundToPx()
         val schedulesByDayOfWeek = IntArray(7) { 0 }
         schedules.forEach { schedule ->
-            val dayOfWeek = Calendar.getInstance().apply { time = schedule.startTime }.get(Calendar.DAY_OF_WEEK) - Calendar.SUNDAY
-            val duration = calculateDateDifference(schedule.startTime, schedule.endTime, currentWeek.first, currentWeek.second)
-            for(i: Int in dayOfWeek until dayOfWeek+duration) {
+            val dayOfWeek = Calendar.getInstance()
+                .apply { time = schedule.startTime }
+                .get(Calendar.DAY_OF_WEEK) - Calendar.SUNDAY
+            val duration = calculateDateDifference(
+                schedule.startTime,
+                schedule.endTime,
+                currentWeek.first,
+                currentWeek.second
+            )
+            for (i: Int in dayOfWeek until dayOfWeek + duration) {
                 schedulesByDayOfWeek[i]++
             }
         }
@@ -566,16 +592,12 @@ fun LongPlanStack(
         val placeableWithSchedules = measureables.map { measurable ->
             val schedule = measurable.parentData as Schedule
             val itemWidth = dayWidth * calculateDateDifference(
-                schedule.startTime,
-                schedule.endTime,
-                currentWeek.first,
-                currentWeek.second
+                schedule.startTime, schedule.endTime, currentWeek.first, currentWeek.second
             )
-            Log.d("jm", "schedule: ${schedule.title}, width: $itemWidth")
             val placeable = measurable.measure(
                 constraints.copy(
-                    minWidth = max((itemWidth-3.dp).roundToPx(),0),
-                    maxWidth = max((itemWidth-3.dp).roundToPx(),0),
+                    minWidth = max((itemWidth - 3.dp).roundToPx(), 0),
+                    maxWidth = max((itemWidth - 3.dp).roundToPx(), 0),
                     minHeight = 40,
                     maxHeight = 40,
                 )
@@ -589,17 +611,23 @@ fun LongPlanStack(
                 }
             }
             placeableWithSchedules.forEach { (placeable, schedule) ->
-                val start = if(schedule.startTime.before(currentWeek.first)) currentWeek.first else schedule.startTime
+                val start =
+                    if (schedule.startTime.before(currentWeek.first)) currentWeek.first else schedule.startTime
                 val offset = Calendar.getInstance()
                     .apply { time = start }
                     .get(Calendar.DAY_OF_WEEK) - Calendar.SUNDAY
-                val duration = calculateDateDifference(schedule.startTime, schedule.endTime, currentWeek.first, currentWeek.second)
-                val itemX = ((dayWidth * offset)+1.5.dp).roundToPx()
+                val duration = calculateDateDifference(
+                    schedule.startTime,
+                    schedule.endTime,
+                    currentWeek.first,
+                    currentWeek.second
+                )
+                val itemX = ((dayWidth * offset) + 1.5.dp).roundToPx()
                 val itemYList = itemYPositions[offset]!!
                 val itemYIndex = itemYList.indexOfFirst { !it }
                 val itemY = itemYIndex * 45
                 placeable.place(itemX, itemY)
-                for(i: Int in offset until offset+duration) {
+                for (i: Int in offset until offset + duration) {
                     itemYPositions[i]!![itemYIndex] = true
                 }
             }
@@ -608,7 +636,7 @@ fun LongPlanStack(
 
 }
 
-fun calculateDateDifference(start: Date, end: Date, weekStartDate: Date ,weekLastDate: Date): Int {
+fun calculateDateDifference(start: Date, end: Date, weekStartDate: Date, weekLastDate: Date): Int {
     val calendar = Calendar.getInstance()
     if (start.after(weekLastDate) || end.before(weekStartDate)) {
         return 0
@@ -626,7 +654,7 @@ fun calculateDateDifference(start: Date, end: Date, weekStartDate: Date ,weekLas
     val endSeconds = calendar.get(Calendar.SECOND)
     val endMilliseconds = calendar.get(Calendar.MILLISECOND)
 
-    val isEndDateAtMidnight = endHour == 0 && endMinutes == 0 && endSeconds == 0 && endMilliseconds == 0
+    val isEndDateAtMidnight = endHour==0 && endMinutes==0 && endSeconds==0 && endMilliseconds==0
     if (isEndDateAtMidnight) {
         calendar.add(Calendar.DATE, -1)
     }
@@ -651,14 +679,16 @@ fun isSameDay(date1: Date, date2: Date): Boolean {
     val cal2 = Calendar.getInstance().apply { time = date2 }
 
     // date2가 자정인지 확인
-    val isMidnight = cal2.get(Calendar.HOUR_OF_DAY) == 0 &&
-            cal2.get(Calendar.MINUTE) == 0 &&
-            cal2.get(Calendar.SECOND) == 0 &&
-            cal2.get(Calendar.MILLISECOND) == 0
+    val isMidnight =
+        cal2.get(Calendar.HOUR_OF_DAY)==0 && cal2.get(Calendar.MINUTE)==0 && cal2.get(Calendar.SECOND)==0 && cal2.get(
+            Calendar.MILLISECOND
+        )==0
 
     // 두 날짜가 같은 해, 같은 일인지 확인
-    val isSameDay = cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-            cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
+    val isSameDay =
+        cal1.get(Calendar.YEAR)==cal2.get(Calendar.YEAR) && cal1.get(Calendar.DAY_OF_YEAR)==cal2.get(
+            Calendar.DAY_OF_YEAR
+        )
 
     if (isSameDay) {
         return true
@@ -670,8 +700,9 @@ fun isSameDay(date1: Date, date2: Date): Boolean {
             time = date1
             add(Calendar.DAY_OF_YEAR, 1)
         }
-        return cal1NextDay.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-                cal1NextDay.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
+        return cal1NextDay.get(Calendar.YEAR)==cal2.get(Calendar.YEAR) && cal1NextDay.get(Calendar.DAY_OF_YEAR)==cal2.get(
+            Calendar.DAY_OF_YEAR
+        )
     }
 
     return false
@@ -731,11 +762,9 @@ fun balloonShape(
 @Preview(showBackground = true, name = "Header Preview")
 @Composable
 fun HeaderPreview() {
-    WeekHeader(
-        uiState = WeeklyUiState(),
-        dayWidth = 64.dp,
-        onNavigateToEditPage = { _, _, _, _ -> }
-    )
+    WeekHeader(uiState = WeeklyUiState(),
+               dayWidth = 64.dp,
+               onNavigateToEditPage = { _, _, _, _ -> })
 }
 
 @Preview(showBackground = true, name = "WeekSidebar Preview")
