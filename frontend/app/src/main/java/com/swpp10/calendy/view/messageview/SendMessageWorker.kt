@@ -16,6 +16,7 @@ import com.swpp10.calendy.data.maindb.message.IMessageRepository
 import com.swpp10.calendy.data.maindb.message.Message
 import com.swpp10.calendy.data.maindb.plan.IPlanRepository
 import com.swpp10.calendy.data.maindb.plan.Plan
+import com.swpp10.calendy.data.maindb.plan.PlanType
 import com.swpp10.calendy.data.maindb.plan.Schedule
 import com.swpp10.calendy.data.maindb.plan.Todo
 import com.swpp10.calendy.data.maindb.rawplan.RawPlanRepository
@@ -163,7 +164,6 @@ class SendMessageWorker(
     private suspend fun sqlExecute(
         gptQuery: String, gptMessage: Message, containsSemicolon: Boolean, userMessageId: Int
     ): List<Plan>? {
-        // TODO: Refactor Me
         Log.d("GUN Worker", "Query Start: $gptQuery")
         val startsWith = gptQuery.takeWhile { it!=' ' }.uppercase()
         val queryType = when (startsWith) {
@@ -218,18 +218,17 @@ class SendMessageWorker(
                 historyRepository.insertHistory(
                     ManagerHistory(
                         messageId = gptMessage.id,
-                        isSchedule = isSchedule,
+                        isSchedule = true,
                         revisionType = queryType,
                         currentScheduleId = currentId,
                         savedScheduleId = savedId
                     )
                 )
-
             } else {
                 historyRepository.insertHistory(
                     ManagerHistory(
                         messageId = gptMessage.id,
-                        isSchedule = isSchedule,
+                        isSchedule = false,
                         revisionType = queryType,
                         currentTodoId = currentId,
                         savedTodoId = savedId
@@ -317,7 +316,7 @@ class SendMessageWorker(
             when (queryType) {
                 QueryType.INSERT    -> {
                     // RawSqlDB에 INSERT sqlQuery 실행
-                    val rawGptQuery=gptQuery.substring(0, 12)+"raw_"+gptQuery.substring(12)
+                    val rawGptQuery = gptQuery.substring(0, 12) + "raw_" + gptQuery.substring(12)
                     calendyDatabase.execSql(rawGptQuery)
                     // RawSqlDB에서 Select All
                     val planList = rawPlanRepository.getAllPlans()
@@ -339,10 +338,36 @@ class SendMessageWorker(
                 QueryType.UPDATE    -> {
                     val originalPlanList = getAffectedPlansFromGptQuery()
 
-
-
+                    // update sqlQuery 실행
                     calendyDatabase.execSql(gptQuery)
 
+                    for (plan in originalPlanList) {
+                        val originalPlanId = plan.id
+
+                        val updatedPlan = when (plan) {
+                            is Schedule -> planRepository.getPlanById(
+                                originalPlanId,
+                                PlanType.SCHEDULE
+                            )
+
+                            is Todo     -> planRepository.getPlanById(originalPlanId, PlanType.TODO)
+                        }
+                        // execSql에 의해 validation 없이 진행되었기 때문에 필요하다.
+                        planRepository.update(updatedPlan)
+
+                        
+                        // 변경되기 전의 plan을 Saved Plan에 저장한다
+                        val savedPlanId = historyRepository.insertSavedPlanFromPlan(plan).toInt()
+
+                        // Manager가 변경한 사항을 기록
+                        insertHistory(
+                            gptMessage,
+                            isSchedule,
+                            QueryType.UPDATE,
+                            currentId = originalPlanId,
+                            savedId = savedPlanId
+                        )
+                    }
 
                     //initialize planListSize for updating message
                     planListSize = originalPlanList.size
@@ -385,13 +410,13 @@ class SendMessageWorker(
                 }
 
                 QueryType.NOT_FOUND -> {
-                    planListSize = 0;
+                    planListSize = 0
 
                 }
 
                 else                -> {
                     // if invalid request, say sorry
-                    planListSize = -1;
+                    planListSize = -1
 
                 }
 
