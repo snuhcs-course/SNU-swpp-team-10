@@ -389,7 +389,7 @@ fun NavigationGraph(
             val timeScope = entry.arguments?.getString("timeScope")
             if (timeScope!=null) {
             }
-            // TODO: Set ViewModel, and navigate to ManagerPage
+            // Set ViewModel, and navigate to ManagerPage
         }
     }
 }

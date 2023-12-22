@@ -223,15 +223,6 @@ fun ToDoItem(
                 .clickable(onClick = clickAction)
                 .weight(1f)
         ) {
-//            Canvas(
-//                modifier = Modifier
-//                    .size(30.dp)
-//                    .padding(8.dp)
-//            ) {
-//                drawCircle(
-//                    color = todo.getColor(), radius = size.minDimension / 2
-//                )
-//            }
             Column(modifier = Modifier.padding(3.dp)) {
                 Text(
                     text = todo.title,

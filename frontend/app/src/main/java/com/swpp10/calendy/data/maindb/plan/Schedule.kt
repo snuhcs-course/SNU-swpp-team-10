@@ -16,7 +16,7 @@ import java.util.Date
         parentColumns = ["id"],
         childColumns = ["category_id"],
         onDelete = ForeignKey.SET_DEFAULT
-        // TODO: Set Default가 ColumnInfo Default Value가 없어도 작동하나?
+        // Note: ColumnInfo Default Value가 없어도 Set Default가 작동하더라.
     ), ForeignKey(
         entity = RepeatGroup::class,
         parentColumns = ["id"],
