@@ -57,19 +57,15 @@ import com.swpp10.calendy.BottomNavItem.Week
 import com.swpp10.calendy.ScreenRoute.EditPlan
 import com.swpp10.calendy.data.maindb.plan.PlanType
 import com.swpp10.calendy.ui.theme.CalendyTheme
-import com.swpp10.calendy.utils.DateHelper.parseLocalTimeString
-import com.swpp10.calendy.utils.DateHelper.toLocalTimeString
 import com.swpp10.calendy.utils.getPlanType
 import com.swpp10.calendy.view.editplanview.EditPlanPage
 import com.swpp10.calendy.view.editplanview.EditPlanViewModel
 import com.swpp10.calendy.view.messagepage.MessagePageViewModel
 import com.swpp10.calendy.view.messageview.MessagePage
 import com.swpp10.calendy.view.monthlyview.MonthlyPageKT
-import com.swpp10.calendy.view.voiceAssistance.VoiceAssistancePopup
 import com.swpp10.calendy.view.todolistview.ToDoListPage
+import com.swpp10.calendy.view.voiceAssistance.VoiceAssistancePopup
 import com.swpp10.calendy.view.weeklyview.WeeklyPage
-import com.swpp10.calendy.view.weeklyview.WeeklyViewModel
-
 import java.util.Date
 
 
@@ -97,7 +93,8 @@ fun MainScreenView(onLoaded: () -> Unit) {
     val navController = rememberNavController()
     var showBottomNavigation by remember { mutableStateOf(true) }
 
-    val editPlanViewModel: EditPlanViewModel = viewModel(factory = com.swpp10.calendy.AppViewModelProvider.Factory)
+    val editPlanViewModel: EditPlanViewModel = viewModel(factory = AppViewModelProvider.Factory)
+
     fun navigateToEditPage(id: Int?, type: PlanType, startDate: Date?, endDate: Date?) {
         editPlanViewModel.initialize(id = id, type = type, startDate = startDate, endDate = endDate)
         navController.navigate(EditPlan.screenRoute)
@@ -110,21 +107,19 @@ fun MainScreenView(onLoaded: () -> Unit) {
         if (showBottomNavigation) {
             BottomNavigation(
                 navController = navController,
-            ) { planType: PlanType ->
-                navigateToEditPage(
-                    id = null, type = planType, startDate = Date(), endDate = null
-                )
-            }
+            )
         }
     }) {
         Box(Modifier.padding(it)) {
             NavigationGraph(
                 navController = navController,
-                showBottomNavigation = { shouldShow -> showBottomNavigation = shouldShow },
+                showBottomNavigation = { shouldShow ->
+                    showBottomNavigation = shouldShow
+                },
                 editPlanViewModel = editPlanViewModel,
                 navigateToEditPage = { id, type, startDate, endDate ->
                     navigateToEditPage(id, type, startDate, endDate)
-                }
+                },
             )
         }
     }
@@ -143,9 +138,7 @@ fun NavController.navigateToBottom(bottomNav: BottomNavItem) {
 }
 
 @Composable
-fun BottomNavigation(
-    navController: NavHostController, navigateToEditPageWhenPlus: (PlanType) -> Unit
-) {
+fun BottomNavigation(navController: NavHostController) {
     val items = listOf(
         Week,
         Month,
@@ -154,7 +147,7 @@ fun BottomNavigation(
         AiManager,
         //BottomNavItem.Setting
     )
-    var selectedNavItem by remember { mutableStateOf<BottomNavItem>(BottomNavItem.Month) }
+    var selectedNavItem by remember { mutableStateOf<BottomNavItem>(Month) }
     var micOn by remember { mutableStateOf(false) }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -254,13 +247,12 @@ fun BottomNavigation(
         }
     }
 
-    if(micOn) {
-        VoiceAssistancePopup (
-            viewModel = viewModel(factory = com.swpp10.calendy.AppViewModelProvider.Factory),
+    if (micOn) {
+        VoiceAssistancePopup(
+            viewModel = viewModel(factory = AppViewModelProvider.Factory),
             onDismissRequest = {
                 micOn = false
-            }
-        )
+            })
     }
 }
 
@@ -337,7 +329,7 @@ fun NavigationGraph(
         composable(AiManager.screenRoute) {
             showBottomNavigation(true)
             MessagePage(
-                messagePageViewModel = viewModel(factory = com.swpp10.calendy.AppViewModelProvider.Factory),
+                messagePageViewModel = viewModel(factory = AppViewModelProvider.Factory),
                 onNavigateToEditPage = {
                     navigateToEditPage(it.id, it.getPlanType(), null, null)
                 },
@@ -361,7 +353,7 @@ fun NavigationGraph(
         ) { entry ->
             // QueryRoute do not have a page. It just navigate to AiManager
             val messagePageViewModel: MessagePageViewModel =
-                viewModel(factory = com.swpp10.calendy.AppViewModelProvider.Factory)
+                viewModel(factory = AppViewModelProvider.Factory)
 
             val userQuery = entry.arguments?.getString("query")
             if (userQuery!=null) {
@@ -384,7 +376,7 @@ fun NavigationGraph(
             })
         ) { entry ->
             val messagePageViewModel: MessagePageViewModel =
-                viewModel(factory = com.swpp10.calendy.AppViewModelProvider.Factory)
+                viewModel(factory = AppViewModelProvider.Factory)
 
             val timeScope = entry.arguments?.getString("timeScope")
             if (timeScope!=null) {
