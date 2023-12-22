@@ -1,8 +1,8 @@
-package com.example.calendy.view.editplanview
+package com.swpp10.calendy.view.editplanview
 
-import com.example.calendy.data.dummy.DummyCategoryRepository
-import com.example.calendy.data.dummy.DummyPlanRepository
-import com.example.calendy.data.dummy.DummyRepeatGroupRepository
+import com.swpp10.calendy.data.dummy.DummyCategoryRepository
+import com.swpp10.calendy.data.dummy.DummyPlanRepository
+import com.swpp10.calendy.data.dummy.DummyRepeatGroupRepository
 import org.junit.Test
 
 class EditPlanViewModelTest {
