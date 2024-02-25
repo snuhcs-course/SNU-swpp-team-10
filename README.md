@@ -2,9 +2,9 @@
 
 <img src="https://github.com/snuhcs-course/swpp-2023-project-team-10/assets/43813975/f1f20154-d26c-499b-bf55-f17db71d9c85" width="512" height="250"/>
 
-**Calendy** is an AI integrated calendar app with weekly and monthly views and todo management.
+**Calendy** is an AI integrated calendar app with weekly and monthly views and to-do management.
 
-By talking to your AI Manager, you can add, change, delete, or get briefing on your schedule.
+By talking to AI Manager not only can you add, change, delete your schedules & to-do's, you can ask for summaries, have them automatically categorized, and much more.
 
 <img src="https://github.com/snuhcs-course/swpp-2023-project-team-10/assets/43813975/5f401b68-0c69-49ec-93ad-b2b6ff91da61" width="180" height="320" />
 <img src="https://github.com/snuhcs-course/swpp-2023-project-team-10/assets/43813975/9e5da1a7-b2e1-4edf-822e-09b7ef678057" width="180" height="320" />
